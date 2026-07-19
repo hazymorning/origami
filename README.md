@@ -32,7 +32,7 @@ You'll need to apply the custom theme for everything to look right.
 
 ### 3. Font
 
-This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Montserrat). It just always looks good, but obviously, you can use any font you like. It's best to host the font locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
+This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Montserrat). It's best to host the font locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
 
 <details>
 <summary><b>How to host the font locally</b></summary>
