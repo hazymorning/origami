@@ -1,12 +1,20 @@
-# Origami
+# ◪ Origami
 
 A calm, airy dashboard built around `paper-buttons-row`.
+
+* Handmade and designed layouts which try to use a minimal amount of clever code (not AI generated)
+* Mostly built for mobile (desktop version still WIP)
+* Simple and non-overloaded UI with a focus on simplicity
+* Supports light and dark mode (meant to switch on sunrise via your phone's settings)
 
 <br>
 
 ## About
 
-I started this back in 2022 and keep changing it constantly. I tried so many different approaches over the years—Mushroom or Bubble cards, the native cards, pretty much all there is—and always went back to the `paper-buttons-row` card. It's kind of the "slim" brother to `button-card` and is basically an HTML/CSS wrapper. It's as straightforward as possible and loads pretty much instantly (much faster than native cards, for example, in my setup). This dashboard actively avoids using things like `card-mod` and is built around the idea that layout shifts look terrible (which is why things are sometimes done a bit differently in the cards).
+This whole setup was mostly done on a couch in quiet nights over the span of the last 5 years. It is kind of relaxing for me to build these little cards on my phone. I tried so many different approaches over the years—Mushroom or Bubble cards, the native cards, pretty much all there is—and always went back to the `paper-buttons-row` card. It's as straightforward as possible and loads pretty much instantly. Since I have been happily using it now for a few years with different users, I decided to document it so others can use it as inspiration.
+
+> [!NOTE]
+> If you want to use this setup, getting a bit accustomed to the Paper Buttons Row card is really useful, especially if you want to tweak it to your use case. You can try to use AI for help, but be warned that it often generates multiple times the amount of needed code, so it's not really useful (unless you don't mind hard-to-maintain code). It definitely pays off to check how it works since it's basically just HTML/CSS, meaning there are practically no limits to what you can do and how exactly you want to customize it for your use case.
 
 ## Setup
 
