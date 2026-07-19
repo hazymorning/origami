@@ -4,7 +4,7 @@ A calm, airy dashboard built around `paper-buttons-row`.
 
 <br>
 
-## The Idea
+## About
 
 I started this back in 2022 and keep changing it constantly. I tried so many different approaches over the years—Mushroom or Bubble cards, the native cards, pretty much all there is—and always went back to the `paper-buttons-row` card. It's kind of the "slim" brother to `button-card` and is basically an HTML/CSS wrapper. It's as straightforward as possible and loads pretty much instantly (much faster than native cards, for example, in my setup). This dashboard actively avoids using things like `card-mod` and is built around the idea that layout shifts look terrible (which is why things are sometimes done a bit differently in the cards).
 
