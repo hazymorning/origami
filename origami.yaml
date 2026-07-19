@@ -1,0 +1,319 @@
+# Origami Theme
+# A simple Home Assistant theme built around the paper-button-row card.
+# Includes both a light and dark mode.
+
+Origami:
+
+  # Base
+  primary-font-family: "'Montserrat', sans-serif"
+  border-radius: '22px'
+  row-gap: '0px'
+  column-gap: '24px'
+  text-color-active: '#FFFFFF'
+
+  # Bubble
+  bubble-main-background-color: 'var(--card-background)'
+  bubble-secondary-background-color: 'var(--card-item-background)'
+  bubble-icon-background-color: 'var(--card-item-background)'
+  bubble-pop-up-main-background-color: 'var(--popup-background)'
+  bubble-border-radius: 'var(--border-radius)'
+  bubble-accent-color: 'var(--accent-color)'
+  bubble-light-color: 'var(--accent-light-on)'
+  bubble-line-background-color: 'var(--secondary-text-color)'
+  bubble-sub-button-light-background-color: 'var(--accent-color-background)'
+  bubble-select-background: 'var(--card-background)'
+  bubble-select-list-background-color: 'var(--card-background)'
+  bubble-select-main-background-color: 'var(--card-background)'
+  bubble-media-player-main-background-color: 'var(--card-background)'
+  bubble-select-list-width: '140px'
+
+  # Paper Buttons Row
+  pbs-button-color: 'var(--text-color)'
+  pbs-button-rgb-color: 'var(--text-color)'
+  pbs-button-rgb-state-color: 'var(--text-color)'
+  pbs-button-rgb-default-color: 'var(--text-color)'
+  pbs-button-rgb-fallback: 'var(--text-color)'
+  rgb-state-default-color: 'var(--text-color)'
+
+  # Fonts
+  ha-font-family-body: 'var(--primary-font-family)'
+  ha-font-family-heading: 'var(--primary-font-family)'
+  ha-font-family-code: 'var(--primary-font-family)'
+  mdc-typography-font-family: 'var(--primary-font-family)'
+  mdc-typography-button-font-family: 'var(--primary-font-family)'
+  md-ref-typeface-plain: 'var(--primary-font-family)'
+  ha-font-size-xs: '0.75rem'
+  ha-font-size-s: '0.875rem'
+  ha-font-size-m: '1rem'
+  ha-font-size-l: '1.125rem'
+  ha-line-height-condensed: '1.1'
+  ha-line-height-normal: '1.3'
+  ha-line-height-expanded: '1.6'
+  ha-heading-card-title-font-weight: '600'
+  md-list-item-label-text-weight: '600'
+  md-list-item-label-text-color: 'var(--text-color)'
+
+  # Layout
+  header-height: '60px'
+  ha-view-sections-column-gap: 'var(--column-gap)'
+  ha-view-sections-narrow-column-gap: 'var(--column-gap)'
+  ha-view-sections-row-gap: 'var(--row-gap)'
+  grid-card-gap: '12px'
+  horizontal-stack-card-gap: '12px'
+  vertical-stack-card-gap: '12px'
+  masonry-view-card-margin: '0px'
+
+  # Header
+  app-header-backdrop-filter: 'blur(12px)'
+  app-header-text-color: 'var(--text-color)'
+  app-header-edit-text-color: 'var(--text-color)'
+  app-header-selection-bar-color: 'var(--accent-color)'
+  ha-tab-active-text-color: 'var(--accent-color)'
+
+  # Background, text
+  primary-background-color: 'var(--background-color)'
+  clear-background-color: 'var(--background-color)'
+  primary-text-color: 'var(--text-color)'
+  text-primary-color: 'var(--text-color-active)'
+  ha-color-text-secondary: 'var(--text-color)'
+  disabled-color: 'var(--disabled-text-color)'
+
+  # Cards
+  card-background-color: 'var(--card-background)'
+  ha-card-background: 'var(--card-background)'
+  ha-card-box-shadow: 'var(--card-shadow)'
+  ha-card-border-radius: 'var(--border-radius)'
+  ha-card-border-width: '0px'
+  ha-badge-border-radius: '16px'
+  outline-color: 'var(--secondary-background-color)'
+
+  # Sidebar
+  sidebar-background-color: 'var(--card-item-background)'
+  sidebar-text-color: 'var(--text-color)'
+  sidebar-icon-color: 'var(--text-color)'
+  sidebar-selected-icon-color: 'var(--accent-color)'
+  divider-color: 'var(--background-color)'
+
+  # States, rest follows palette
+  state-icon-color: 'var(--text-color)'
+  state-active-color: 'var(--accent-color)'
+  state-cover-closed-color: 'var(--green-color)'
+  state-media_player-paused-color: 'var(--grey-color)'
+  state-person-not_home-color: 'var(--indigo-color)'
+  state-alarm_control_panel-disarmed-color: 'var(--green-color)'
+  history-unavailable-color: 'transparent'
+  history-unknown-color: 'var(--dark-grey-color)'
+
+  # Controls
+  control-switch-on-color: 'var(--accent-color)'
+  control-switch-off-color: 'var(--grey-color)'
+  slider-track-color: 'var(--scrollbar-thumb-color)'
+  ha-ripple-color: 'var(--card-item-background)'
+  ha-ripple-hover-color: 'var(--accent-color-background)'
+  ha-ripple-pressed-color: 'var(--accent-color-background)'
+  ha-ripple-hover-opacity: '0.1'
+  ha-ripple-pressed-opacity: '0.2'
+
+  # Inputs
+  input-ink-color: 'var(--text-color)'
+  input-label-ink-color: 'var(--text-color)'
+  input-idle-line-color: 'var(--background-color)'
+  input-hover-line-color: 'var(--primary-color)'
+  input-dropdown-icon-color: 'var(--secondary-text-color)'
+  input-disabled-fill-color: 'var(--background-color)'
+  input-disabled-ink-color: 'var(--disabled-text-color)'
+  mdc-text-field-fill-color: 'var(--background-color)'
+  mdc-text-field-label-ink-color: 'var(--secondary-text-color)'
+  mdc-text-field-idle-line-color: 'var(--input-idle-line-color)'
+  mdc-text-field-disabled-line-color: 'var(--input-disabled-line-color)'
+  mdc-text-field-disabled-ink-color: 'var(--input-disabled-ink-color)'
+  mdc-select-label-ink-color: 'var(--input-label-ink-color)'
+
+  # Material
+  mdc-theme-primary: 'var(--primary-color)'
+  mdc-theme-secondary: 'var(--accent-color)'
+  mdc-theme-surface: 'var(--card-background)'
+  mdc-theme-on-secondary: 'var(--text-color-active)'
+  mdc-theme-on-surface: 'var(--text-color)'
+  mdc-theme-text-primary-on-background: 'var(--primary-text-color)'
+  mdc-theme-text-secondary-on-background: 'var(--secondary-text-color)'
+  mdc-theme-text-hint-on-background: 'var(--secondary-text-color)'
+  mdc-theme-text-icon-on-background: 'var(--secondary-text-color)'
+
+  # Buttons
+  ha-color-fill-primary-quiet-resting: 'var(--card-background)'
+  button-color-fill-normal-hover: 'color-mix(in srgb, var(--accent-color) 26%, var(--card-background) 74%)'
+  button-color-fill-normal-active: 'color-mix(in srgb, var(--accent-color) 34%, var(--background-color) 66%)'
+  info-color: 'var(--accent-color)'
+
+  # Dialogs
+  ha-dialog-border-radius: '20px'
+  ha-dialog-surface-backdrop-filter: 'blur(18px)'
+  dialog-backdrop-filter: 'blur(18px)'
+  dialog-box-shadow: '0 10px 36px #00000088'
+  mdc-dialog-scroll-divider-color: 'var(--divider-color)'
+
+  modes:
+
+    light:
+      # Surfaces
+      background-color: '#F6F5F3'
+      background-color-2: '#ECEAE6'
+      dashboard-background: '#F2F0EB'
+      card-background: '#FFFFFF'
+      card-item-background: '#F0F3EB'
+      secondary-background-color: '#F9F8F6'
+      popup-background: '#ECEAE8'
+      backdrop-background-color: 'rgba(242, 240, 235, 0.6)'
+
+      # Text, icons
+      text-color: '#595755'
+      secondary-text-color: 'rgba(66, 64, 62, 0.5)'
+      icon-color: '#BDBBB8'
+      disabled-text-color: '#BDBBB8'
+
+      # Accent
+      primary-color: '#8DA399'
+      accent-color: '#8DA399'
+      dark-primary-color: '#4A5B63'
+      light-primary-color: '#BCC6CA'
+      accent-color-background: 'rgba(141, 163, 153, 0.2)'
+      accent-light-on: '#D6C6B0'
+      accent-light-on-background: 'rgba(214, 198, 176, 0.3)'
+
+      # Sensors
+      thermometer-accent: 'rgba(192, 108, 82, 0.85)'
+      thermometer-background: 'rgba(192, 108, 82, 0.1)'
+      temperature-accent: '#C68F66'
+      temperature-background: 'rgba(198, 143, 102, 0.12)'
+      humidity-accent: '#76A0AD'
+      humidity-background: 'rgba(118, 160, 173, 0.14)'
+
+      # Shadows, borders
+      card-shadow: '0px 4px 20px rgba(0, 0, 0, 0.06)'
+      card-shadow-color: 'rgba(0,0,0,0.15)'
+      card-item-shadow: '0 1px 2px rgba(60, 50, 40, 0.1)'
+      card-border: '1px solid rgba(120, 110, 100, 0.06)'
+      navbar-shadow: '0px -2px 8px rgba(0, 0, 0, 0.04), 0px -6px 16px rgba(0, 0, 0, 0.06), 0px -12px 32px rgba(0, 0, 0, 0.04)'
+
+      # Header
+      app-theme-color: '#F2F0EB'
+      app-header-background-color: '#F2F0EB'
+      app-header-edit-background-color: 'rgba(236, 234, 230, 0.9)'
+
+      # Misc
+      scrollbar-thumb-color: 'rgb(210,210,205)'
+      input-fill-color: 'var(--card-item-background)'
+      input-disabled-line-color: 'rgba(0,0,0,0.06)'
+      wa-color-on-normal: 'var(--text-color)'
+      gradient-background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 100%)'
+      album-cover-gradient: 'rgba(255,255,255,0.6)'
+      app-footer-background-color: 'rgba(242, 240, 235, 0.0)'
+      transparent-app-footer-background-color: 'rgba(242, 240, 235, 0.6)'
+      bubble-backdrop-background-color: 'rgba(242, 240, 235, 0.6)'
+
+      # Buttons, dialogs
+      ha-color-fill-primary-loud-hover: 'color-mix(in srgb, var(--accent-color) 90%, #344046 10%)'
+      ha-color-fill-primary-loud-active: 'color-mix(in srgb, var(--accent-color) 80%, #344046 20%)'
+      ha-dialog-surface-background: 'rgba(255, 255, 255, 0.92)'
+      mdc-dialog-scrim-color: 'rgba(0, 0, 0, 0.45)'
+
+      # RGB helpers
+      rgb-primary-color: '141, 163, 153'
+      rgb-accent-color: '141, 163, 153'
+      rgb-primary-text-color: '66, 64, 62'
+      rgb-secondary-text-color: '117, 114, 111'
+      rgb-card-background-color: '255, 255, 255'
+
+      # Primary scale, HA default is blue
+      ha-color-primary-05: '#0A1610'
+      ha-color-primary-10: '#142820'
+      ha-color-primary-20: '#1E3D30'
+      ha-color-primary-30: '#2D5A48'
+      ha-color-primary-40: '#3E7560'
+      ha-color-primary-50: '#5A9480'
+      ha-color-primary-60: '#78AD9A'
+      ha-color-primary-70: '#8DA399'
+      ha-color-primary-80: '#B5CBC0'
+      ha-color-primary-90: '#D9E8E0'
+      ha-color-primary-95: '#ECF4EF'
+
+    dark:
+      # Surfaces
+      background-color: '#161719'
+      dashboard-background: '#161719'
+      card-background: '#202124'
+      card-item-background: 'rgba(255,255,255,0.2)'
+      secondary-background-color: '#292A2D'
+      popup-background: '#161719'
+      backdrop-background-color: 'rgba(22, 23, 25, 0.6)'
+
+      # Text, icons
+      text-color: '#E1E3E6'
+      secondary-text-color: 'rgba(225, 227, 230, 0.6)'
+      icon-color: '#9BA1A6'
+      disabled-text-color: '#61656B'
+
+      # Accent
+      primary-color: '#83A794'
+      accent-color: '#83A794'
+      dark-primary-color: '#3D5C4C'
+      light-primary-color: 'var(--card-background)'
+      accent-color-background: 'rgba(131, 167, 148, 0.2)'
+      accent-light-on: '#C0A87E'
+      accent-light-on-background: 'rgba(192, 168, 126, 0.1)'
+
+      # Sensors
+      temperature-accent: '#D2A278'
+      temperature-background: 'rgba(210, 162, 120, 0.12)'
+      humidity-accent: '#8FB7C2'
+      humidity-background: 'rgba(143, 183, 194, 0.14)'
+
+      # Shadows, borders
+      card-shadow: '0 4px 8px 0 rgba(0, 0, 0, 0.9), 0 2px 4px 0 rgba(0, 0, 0, 0.8)'
+      card-shadow-color: 'rgba(0, 0, 0, 0.65)'
+      card-item-shadow: '0 2px 4px 0 rgba(0, 0, 0, 0.9), 0 1px 2px 0 rgba(0, 0, 0, 0.8)'
+      card-border: 'none'
+      navbar-shadow: '0px -6px 25px rgba(0, 0, 0, 0.6)'
+
+      # Header
+      app-theme-color: '#161719'
+      app-header-background-color: '#161719'
+      app-header-edit-background-color: 'rgba(32, 33, 36, 0.9)'
+
+      # Misc
+      scrollbar-thumb-color: 'rgb(100, 100, 100)'
+      input-fill-color: 'var(--card-background)'
+      input-disabled-line-color: 'rgba(255,255,255,0.06)'
+      wa-color-on-normal: 'var(--text-color)'
+      ha-color-form-background: 'rgba(255,255,255,0.1)'
+      album-cover-gradient: 'rgba(0,0,0,0.4)'
+      app-footer-background-color: 'rgba(22, 23, 25, 0.2)'
+      transparent-app-footer-background-color: 'rgba(22, 23, 25, 0.6)'
+      bubble-backdrop-background-color: 'rgba(22, 23, 25, 0.6)'
+
+      # Buttons, dialogs
+      ha-color-fill-primary-loud-hover: 'color-mix(in srgb, var(--accent-color) 90%, #000000 10%)'
+      ha-color-fill-primary-loud-active: 'color-mix(in srgb, var(--accent-color) 80%, #000000 20%)'
+      ha-dialog-surface-background: 'rgba(32, 33, 36, 0.92)'
+      mdc-dialog-scrim-color: 'rgba(0, 0, 0, 0.6)'
+
+      # RGB helpers
+      rgb-primary-color: '131, 167, 148'
+      rgb-accent-color: '131, 167, 148'
+      rgb-primary-text-color: '225, 227, 230'
+      rgb-secondary-text-color: '138, 143, 150'
+      rgb-card-background-color: '32, 33, 36'
+
+      # Primary color scale
+      ha-color-primary-05: '#0B120E'
+      ha-color-primary-10: '#131F18'
+      ha-color-primary-20: '#20342A'
+      ha-color-primary-30: '#2F4C3D'
+      ha-color-primary-40: '#3F6553'
+      ha-color-primary-50: '#5A8570'
+      ha-color-primary-60: '#83A794'
+      ha-color-primary-70: '#9CBAAB'
+      ha-color-primary-80: '#B9D0C4'
+      ha-color-primary-90: '#D8E7DE'
+      ha-color-primary-95: '#EBF3EF'
