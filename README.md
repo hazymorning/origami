@@ -2,7 +2,7 @@
 
 A dashboard built around `paper-buttons-row` with a calm and clean style.
 
-* Handmade and designed custom cards, built during quiet nights
+* Handmade and designed custom cards
 * Primarily for mobile (desktop version is still a WIP)
 * Clean, uncluttered UI with a focus on simplicity
 * Supports light and dark modes
@@ -11,7 +11,7 @@ A dashboard built around `paper-buttons-row` with a calm and clean style.
 
 ## About
 
-This entire setup was mostly built from my couch over the last five years. Building these little cards on my phone is kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
+This entire setup was mostly built from my couch during quiet nights over the last five years. Building these little cards on my phone is kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
 
 > [!NOTE]
 > If you want to use this setup, getting a bit accustomed to the Paper Buttons Row card is recommended. You can try using AI for help, but it will probably create a solution that uses multiple times the amount of code needed, so it really pays off to learn how the card works if you care about a somewhat maintainable dashboard. Since it essentially acts as an HTML/CSS wrapper, there are practically no limits to how you can customize it for your specific use case.
