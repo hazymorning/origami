@@ -1,19 +1,21 @@
 # Origami
 
-A calm, airy dashboard built around `paper-buttons-row`. I started this back in 2022 and keep changing it constantly.
-
-> [!NOTE]
-> This dashboard actively avoids using `card-mod` and is built around the idea that layout shifts look terrible. Jinja templates and styling injections add rendering delays. I want the dashboard to load perfectly and instantly. This is why sometimes, even though a feature could be achieved much more simply using a Jinja template, the dashboard uses alternative approaches to ensure the card is completely styled the exact second it appears.
+A calm, airy dashboard built around `paper-buttons-row`.
 
 <br>
+
+## The Idea
+
+I started this back in 2022 and keep changing it constantly. I tried so many different approaches over the years—Mushroom or Bubble cards, the native cards, pretty much all there is—and always went back to the `paper-buttons-row` card. It's kind of the "slim" brother to `button-card` and is basically an HTML/CSS wrapper. It's as straightforward as possible and loads pretty much instantly (much faster than native cards, for example, in my setup). This dashboard actively avoids using things like `card-mod` and is built around the idea that layout shifts look terrible (which is why things are sometimes done a bit differently in the cards).
 
 ## Setup
 
 ### 1. Required Cards
 
-For this dashboard, you will need to install the following wonderful card via HACS:
+For this dashboard, you will need to install the following wonderful cards via HACS:
 
-* [paper-buttons-row](https://github.com/jcwillox/lovelace-paper-buttons-row)
+* [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
+* [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) (the footer menu bar)
 
 ### 2. The Theme
 
