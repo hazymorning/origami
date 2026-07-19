@@ -1,6 +1,6 @@
 # Origami
 
-A calm, airy dashboard built around `paper-buttons-row`. I started this back in 2022 and keep changing it constantly. This whole dashboard was pretty much exclusively created on my phone from the couch, do with that information what you will.
+A calm, airy dashboard built around `paper-buttons-row`. I started this back in 2022 and keep changing it constantly.
 
 > [!NOTE]
 > This dashboard actively avoids using `card-mod` and is built around the idea that layout shifts look terrible. Jinja templates and styling injections add rendering delays. I want the dashboard to load perfectly and instantly. This is why sometimes, even though a feature could be achieved much more simply using a Jinja template, the dashboard uses alternative approaches to ensure the card is completely styled the exact second it appears.
