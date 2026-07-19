@@ -19,7 +19,7 @@ For this dashboard, you will need to install the following wonderful card via HA
 
 You'll need to apply the custom theme for everything to look right.
 
-1. Copy the Origami theme yaml file from this repository into your Home Assistant `themes` folder.
+1. Copy the `origami.yaml` file from this repository into your Home Assistant `themes` folder.
 2. Reload your themes (Developer Tools > Services > `frontend.reload_themes`).
 3. Select the Origami theme in your user profile settings.
 
