@@ -1,17 +1,11 @@
 # ◪ Origami
 
-A dashboard built around `paper-buttons-row` with a calm and clean style.
-
-* Handmade and designed custom cards
-* Primarily for mobile (desktop version is still a WIP)
-* Clean, uncluttered UI with a focus on simplicity
-* Supports light and dark modes
+A dashboard built mostly with `paper-buttons-row`. The cards are all handcrafted and are being optimized since several years now. The UI is simple but there's quite a few "non obvious" and unique features in there. More and more features will follow probably.
 
 <br>
 
 > [!NOTE]
-> If you want to use this setup, getting a bit accustomed to the Paper Buttons Row card is recommended. Since it essentially acts as an HTML/CSS wrapper, there are practically no limits to how you can customize it for your specific use case.
-You can try using AI for help, but it will probably create a solution that uses multiple times the amount of code needed, so it really pays off to learn how the card works if you care about a somewhat maintainable dashboard.
+> Setting this whole thing up requires a bit of an effort and getting a bit accustomed to the Paper Buttons Row card is recommended. Since this card essentially acts as an HTML/CSS wrapper, there are practically no limits to how you can customize it for your specific use case. If you use AI in your workflow, be warned that it will probably create a solution that uses multiple times the amount of code needed, so it really pays off to learn how the card actually works (well, if you care about a somewhat maintainable dashboard).
 <br>
 
 ## About
