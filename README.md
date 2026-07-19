@@ -2,7 +2,7 @@
 
 A dashboard built around `paper-buttons-row` with a calm and clean style.
 
-* Handmade and designed layouts, built during quiet nights
+* Handmade and designed custom cards, built during quiet nights
 * Primarily for mobile (desktop version is still a WIP)
 * Clean, uncluttered UI with a focus on simplicity
 * Supports light and dark modes
