@@ -18,6 +18,15 @@ You can try using AI for help, but it will probably create a solution that uses 
 
 This entire setup was mostly built from my couch during quiet nights over the last five years. Building these little cards on my phone is kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
 
+## Status
+
+This setup is pretty big and the documentation is actively being written. The essential foundation is ready, but a lot of the specific things like custom cards (media, TV, etc.) are still on the to-do list. 
+
+- [x] Main Dashboard Overview
+- [x] Theme Variables & Customization
+- [ ] Many more custom Paper Button Cards (Notifications, Media, etc.)
+- [ ] Different Views/Popups
+
 ## Setup
 
 ### 1. Required Cards
@@ -25,6 +34,7 @@ This entire setup was mostly built from my couch during quiet nights over the la
 For this dashboard, you will need to install the following wonderful cards via HACS:
 
 * [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
+* [Origami Weather](https://github.com/joseluis9595/origami-weather) (the weather card)
 * [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) (the footer menu bar)
 
 ### 2. Theme
