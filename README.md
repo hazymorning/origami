@@ -10,7 +10,7 @@ A dashboard built mostly with `paper-buttons-row`. The cards are all handcrafted
 
 ## About
 
-This entire setup was mostly built from my couch during quiet nights over the last five years. Building these little cards on my phone is kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
+This entire setup has been a ongoing tinkering project over the last years. It was mostly built from my couch, on my phone during quiet nights. I guess building these little cards on my phone is a kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
 
 ## Setup
 
