@@ -1,22 +1,22 @@
 # ◪ Origami
 
-A dashboard built mostly with `paper-buttons-row`. The cards are all handcrafted and are being optimized since several years now. The UI is simple but there's quite a few "non obvious" and unique features in there. More and more features will follow probably.
+A dashboard built mostly with `paper-buttons-row`. This setup is being optimized since several years now and mostly built around loading fast and being easy to use.
 
 <br>
 
 > [!NOTE]
-> Setting this whole thing up requires a bit of an effort and getting a bit accustomed to the Paper Buttons Row card is recommended. Since this card essentially acts as an HTML/CSS wrapper, there are practically no limits to how you can customize it for your specific use case. If you use AI in your workflow, be warned that it will probably create a solution that uses multiple times the amount of code needed, so it really pays off to learn how the card actually works (well, if you care about a somewhat maintainable dashboard).
+> This setup is not really beginner friendly, and many approaches are a bit unusual and basically done like that to make sure it loads fast and without any layout shifting. but it is pretty great if you like customizing things, since pretty much anything is possible regarding customization.
 <br>
 
 ## About
 
-This entire setup has been a ongoing tinkering project over the last years. It was mostly built from my couch, on my phone during quiet nights. I guess building these little cards on my phone is a kind of relaxing, but I think my thumb took some damage. I've tried many different approaches, and I've always gone back to the `paper-buttons-row` card. It's as straightforward as possible and loads almost instantly. Since I've been happily using it for a few years with different users, I decided to document it so others can use it as inspiration.
+This is my personal home assistant setup and as usual with HA it's an ongoing tinkering project. I've tried many different approaches over the years, and I've always gone back to the `paper-buttons-row` card. It's perfect. Since I've been happily using that setup for a few years with different users and think a few parts are quite good, I decided to document it so others can use it as inspiration.
 
 ## Setup
 
 ### 1. Required Cards
 
-For this dashboard, you will need to install the following wonderful cards via HACS:
+For this dashboard, you will need to install the following cards via HACS:
 
 * [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
 * [Origami Weather](https://github.com/joseluis9595/origami-weather) (the weather card)
@@ -48,6 +48,14 @@ This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Mont
    * **Resource Type:** Stylesheet
 
 </details>
+
+
+### 4. Helpers (Custom Sensors)
+
+You only need these if you want to rebuild all of this. They are mostly documented here to show the backend. Each card is documented as simple version, and also as full card which shows the sensors needed in the "advanced section" 
+
+
+
 
 ## Status
 
