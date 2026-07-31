@@ -1,6 +1,6 @@
 # ◪ Origami
 
-A dashboard built mostly with `paper-buttons-row`. It has a calm design, dynamic content and can be customized however you want. Well, it needs to if you want to use it, since my setup is different than yours. 
+A dashboard built mostly with `paper-buttons-row`. It has a calm design, dynamic content and can be customized however you want. Well, it needs to if you want to use it, since my home is different than yours. 
 
 **A few nice things about it:**
 
