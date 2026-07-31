@@ -1,95 +1,117 @@
 # ◪ Origami
 
-A dashboard built mostly with `paper-buttons-row`. It has a calm design, dynamic content and can be customized however you want. Well, it needs to if you want to use it, since my home is different than yours. 
+A Home Assistant dashboard built mostly with `paper-buttons-row`. Calm design, dynamic content, and easy to customize however you want. Well — it needs to be customized if you want to use it, since my home is different from yours.
 
 **A few nice things about it:**
 
-- Dark and light mode support, which is in sync with the sun (if you want)
+- Dark and light mode, in sync with the sun (if you want)
 - Simple and user friendly
-- UI which tries to avoid visual overload by showing content dynamically
-- Design with a chill and simple style, with pleasant colors and much "soft"
+- A UI that tries to avoid visual overload by showing content dynamically
+- A chill and simple style, with pleasant colors and lots of "soft"
 
 <br>
 
-> [!NOTE]
-> Some ways to solve things in a Home assistant dashboard add lag on initial load, where the "layout builds itself", for example jinja templates or card-mod/UIX. I don't like that. That's why everything here is built around avoiding this, which sometimes leads to unusual solutions. If you don't care for this, there's therefore often easier ways to do the same thing.
+## Contents
+
+[About](#about)<br>
+**Setup** • [Required cards](#setup)<br>
+**Cards** • [Cards](#cards)<br>
+**Reference** • [Status](#status) • <br>
+
 <br>
 
 ## About
 
-This is my personal home assistant setup and as usual with HA it's an ongoing hobby project. It's a bit ridiculous how much time was spent optimizing this, but home assistant is not necessarily about saving time I guess. At least not if you enjoy tinkering and optimizing it.
+This is my personal Home Assistant setup and, as usual with HA, an ongoing hobby project. It's a bit ridiculous how much time went into optimizing it, but Home Assistant isn't necessarily about saving time — at least not if you enjoy the tinkering.
 
-I think it was around corona times when I found `paper-buttons-row`. It's perfect. No matter which other card I ever tried since then is as flexible while being as straightforward and simple. And it loads pretty much instantly, faster than HA default cards for some mysterious reason. Since I've been happily using that setup for quite a while, I decided to document it so others can use it as inspiration.
+I think it was around corona times when I found `paper-buttons-row`. It's perfect. No other card I've tried since is as flexible while staying that straightforward and simple. And it loads pretty much instantly, faster than the HA default cards for some mysterious reason. I've been happily using this setup for quite a while now, so I decided to document it in case someone wants to use it as inspiration.
+
+<br>
 
 ## Setup
 
-### 1. Required Cards
-
-For this dashboard, you will need to install the following cards via HACS:
-
-* [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
-* [Origami Weather](https://github.com/hazymorning/origami_weather) (The weather card)
-* [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) (the footer menu bar)
-* Kiosk Mode (for hiding the header, if you want that)
-
-### 2. Theme
-
-You'll need to apply the custom theme for everything to look right.
-
-1. Copy the `origami.yaml` file from this repository into your Home Assistant `themes` folder.
-2. Do a quick restart
-3. Select the Origami theme in your user profile settings.
-
-### 3. Font
-
-This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Montserrat). It just always looks good. It's best to host the font locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
-
 <details>
-<summary><b>How to host the font locally</b></summary>
+<summary><b>1. Required cards</b></summary>
+
 <br>
 
-1. Download the Montserrat font (you'll want the web-optimized `.woff2` files).
-2. Go to your Home Assistant `config` directory.
-3. If you don't have one already, create a folder named `www`. Inside `www`, create a folder named `fonts`.
-4. Place your downloaded font files inside `/config/www/fonts/`.
-5. You will also need a simple CSS file (e.g., `montserrat.css`) in that same folder that defines the `@font-face` and points to your local files.
-6. Finally, go to **Settings > Dashboards > Resources** in Home Assistant and add the stylesheet:
-   * **URL:** `/local/fonts/montserrat.css`
-   * **Resource Type:** Stylesheet
+You'll need to install the following through [HACS](https://hacs.xyz/):
+
+- [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) — most of the cards
+- [Origami Weather](https://github.com/hazymorning/origami_weather) — the weather card
+- [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) — the footer menu bar
+- [Kiosk Mode](https://github.com/NemesisRE/kiosk-mode) — for hiding the header, if you want that
 
 </details>
 
+<details>
+<summary><b>2. Theme</b></summary>
 
-### 4. Helpers (Custom Sensors)
+<br>
 
-You only need these if you want to rebuild all of this. They are mostly documented here to show the backend. Each card is documented as simple version, and also as full card which shows the sensors needed in the "advanced section" 
+You'll need the custom theme for everything to look right.
 
+1. Copy `origami.yaml` from this repository into your Home Assistant `themes` folder.
+2. Do a quick restart.
+3. Select the Origami theme in your user profile settings.
 
+</details>
 
+<details>
+<summary><b>3. Font</b></summary>
+
+<br>
+
+This dashboard uses [Montserrat](https://fonts.google.com/specimen/Montserrat). It just always looks good. Best to host it locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
+
+1. Download Montserrat — you want the web-optimized `.woff2` files.
+2. Go to your Home Assistant `config` directory.
+3. If you don't have one yet, create a folder named `www`, and inside it a folder named `fonts`.
+4. Put the font files into `/config/www/fonts/`.
+5. Add a small CSS file (e.g. `montserrat.css`) in the same folder that defines the `@font-face` rules and points to your local files.
+6. Go to **Settings > Dashboards > Resources** and add the stylesheet:
+   - **URL:** `/local/fonts/montserrat.css`
+   - **Resource type:** Stylesheet
+
+</details>
+
+<details>
+<summary><b>4. Helpers (custom sensors)</b></summary>
+
+<br>
+
+You only need these if you want to rebuild all of this. They're mostly documented to show what happens in the background. Every card is documented in a simple version, and as a full card that shows the sensors it needs in the "advanced" section.
+
+</details>
+
+<br>
+
+## Cards
+
+These are example layouts. Take them as a starting point and change whatever you need.
+
+> [!NOTE]
+> Some ways of solving things in a Home Assistant dashboard add lag on the initial load, where you can watch the layout build itself — Jinja templates or card-mod/UIX, for example. I don't like that. So everything here is built around avoiding it, which sometimes leads to unusual solutions. If you don't care about that, there's often an easier way to do the same thing. 
+
+### Dashboard
+
+#### Header
+
+#### Weather Card
+
+#### Favorites
+
+#### Climate Overview
+
+#### Rooms
+
+<br>
 
 ## Status
 
-This setup is big and complex. The essential foundation is ready, but a lot of the specific things like custom cards (media, TV, etc.) are still on the to-do list. 
+This setup is big and it grew over time. The foundation is done, but a lot of the specific stuff — media, TV and other custom cards — is still on the to-do list.
 
-- [x] Main Dashboard Overview
-- [x] Theme Variables & Customization
-- [ ] Many more custom Paper Button Cards (Notifications, Media, etc.)
-- [ ] Different Views/Popups
-
-
-
-# Cards
-
-## Dashboard
-
-These are just example layouts which you can customize however you like and need.
-
-### Header
-
-### Weather Card
-
-### Favorites
-
-### Climate Overview
-
-### Rooms
+- [x] Main dashboard overview
+- [x] Theme variables & customization
+- [ ] More custom paper button cards (notifications, media, etc.)
+- [ ] Different views and popups 
