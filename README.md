@@ -1,16 +1,16 @@
 # ◪ Origami
 
-A dashboard built mostly with `paper-buttons-row`. This setup is being optimized since several years now and mostly built around loading fast and being easy to use.
+A dashboard built mostly with `paper-buttons-row`. It has pleasant colors, a calm design and tries to be user friendly by showing only what's needed at the moment.
 
 <br>
 
 > [!NOTE]
-> This setup is not really beginner friendly, and many approaches are a bit unusual and basically done like that to make sure it loads fast and without any layout shifting. but it is pretty great if you like customizing things, since pretty much anything is possible regarding customization.
+> Some ways to solve things in a Home assistant dashboard add a lag where the "layout builds itself" on initial load, for example jinja templates or card-mod/UIX. I don't like that. That's why everything here is built around avoiding this, which sometimes leads to unusual solutions. If you don't care for this, there's therefore often easier ways to do the same thing.
 <br>
 
 ## About
 
-This is my personal home assistant setup and as usual with HA it's an ongoing tinkering project. I've tried many different approaches over the years, and I've always gone back to the `paper-buttons-row` card. It's perfect. Since I've been happily using that setup for a few years with different users and think a few parts are quite good, I decided to document it so others can use it as inspiration.
+This is my personal home assistant setup and as usual with HA it's an ongoing tinkering project. I think it was around corona times when I found `paper-buttons-row`. It's perfect. No matter which other card I ever tried is as flexible while being as straightforward. And it loads pretty much instantly, faster than HA default cards for some weird reason. Since I've been happily using that setup for quite a while, I decided to document it so others can use it as inspiration.
 
 ## Setup
 
@@ -19,7 +19,7 @@ This is my personal home assistant setup and as usual with HA it's an ongoing ti
 For this dashboard, you will need to install the following cards via HACS:
 
 * [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
-* [Origami Weather](https://github.com/joseluis9595/origami-weather) (the weather card)
+* [Origami Weather](https://github.com/hazymorning/origami_weather) (The weather card)
 * [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) (the footer menu bar)
 
 ### 2. Theme
@@ -59,7 +59,7 @@ You only need these if you want to rebuild all of this. They are mostly document
 
 ## Status
 
-This setup is pretty big and the documentation is actively being written. The essential foundation is ready, but a lot of the specific things like custom cards (media, TV, etc.) are still on the to-do list. 
+This setup is big and complex. The essential foundation is ready, but a lot of the specific things like custom cards (media, TV, etc.) are still on the to-do list. 
 
 - [x] Main Dashboard Overview
 - [x] Theme Variables & Customization
