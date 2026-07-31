@@ -1,16 +1,25 @@
 # ◪ Origami
 
-A dashboard built mostly with `paper-buttons-row`. It has pleasant colors, a calm design and tries to be user friendly by showing only what's needed at the moment.
+A dashboard built mostly with `paper-buttons-row`. It has a calm design, dynamic content and can be customized however you want. Well, it needs to if you want to use it, since my setup is different than yours. 
+
+**A few nice things about it:**
+
+- Dark and light mode support, which is in sync with the sun (if you want)
+- Simple and user friendly
+- UI which tries to avoid visual overload by showing content dynamically
+- Design with a chill and simple style, with pleasant colors and much "soft"
 
 <br>
 
 > [!NOTE]
-> Some ways to solve things in a Home assistant dashboard add a lag where the "layout builds itself" on initial load, for example jinja templates or card-mod/UIX. I don't like that. That's why everything here is built around avoiding this, which sometimes leads to unusual solutions. If you don't care for this, there's therefore often easier ways to do the same thing.
+> Some ways to solve things in a Home assistant dashboard add lag on initial load, where the "layout builds itself", for example jinja templates or card-mod/UIX. I don't like that. That's why everything here is built around avoiding this, which sometimes leads to unusual solutions. If you don't care for this, there's therefore often easier ways to do the same thing.
 <br>
 
 ## About
 
-This is my personal home assistant setup and as usual with HA it's an ongoing tinkering project. I think it was around corona times when I found `paper-buttons-row`. It's perfect. No matter which other card I ever tried is as flexible while being as straightforward. And it loads pretty much instantly, faster than HA default cards for some weird reason. Since I've been happily using that setup for quite a while, I decided to document it so others can use it as inspiration.
+This is my personal home assistant setup and as usual with HA it's an ongoing hobby project. It's a bit ridiculous how much time was spent optimizing this, but home assistant is not necessarily about saving time I guess. At least not if you enjoy tinkering and optimizing with it.
+
+I think it was around corona times when I found `paper-buttons-row`. It's perfect. No matter which other card I ever tried since then is as flexible while being as straightforward and simple. And it loads pretty much instantly, faster than HA default cards for some mysterious reason. Since I've been happily using that setup for quite a while, I decided to document it so others can use it as inspiration.
 
 ## Setup
 
@@ -32,7 +41,7 @@ You'll need to apply the custom theme for everything to look right.
 
 ### 3. Font
 
-This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Montserrat). It's best to host the font locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
+This dashboard uses the font [Montserrat](https://fonts.google.com/specimen/Montserrat). It just always looks good. It's best to host the font locally on your Home Assistant instance, so it loads instantly and doesn't depend on external servers.
 
 <details>
 <summary><b>How to host the font locally</b></summary>
