@@ -22,9 +22,7 @@ A Home Assistant dashboard built mostly with `paper-buttons-row`. Calm design, d
 
 ## About
 
-This is my personal Home Assistant setup and, as usual with HA, an ongoing hobby project. It's a bit ridiculous how much time went into optimizing it, but Home Assistant isn't necessarily about saving time — at least not if you enjoy the tinkering.
-
-I think it was around corona times when I found `paper-buttons-row`. It's perfect. No other card I've tried since is as flexible while staying that straightforward and simple. And it loads pretty much instantly, faster than the HA default cards for some mysterious reason. I've been happily using this setup for quite a while now, so I decided to document it in case someone wants to use it as inspiration.
+This is my personal Home Assistant setup and, as usual with HA, an ongoing hobby project. I think it was around corona times when I found `paper-buttons-row`. It's perfect. No other card I've tried since is as flexible while staying that straightforward and simple. And it loads pretty much instantly, faster than the HA default cards for some mysterious reason. I've been happily using this setup for quite a while now, so I decided to document it in case someone wants to use it as inspiration.
 
 <br>
 
