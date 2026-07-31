@@ -17,7 +17,7 @@ A dashboard built mostly with `paper-buttons-row`. It has a calm design, dynamic
 
 ## About
 
-This is my personal home assistant setup and as usual with HA it's an ongoing hobby project. It's a bit ridiculous how much time was spent optimizing this, but home assistant is not necessarily about saving time I guess. At least not if you enjoy tinkering and optimizing with it.
+This is my personal home assistant setup and as usual with HA it's an ongoing hobby project. It's a bit ridiculous how much time was spent optimizing this, but home assistant is not necessarily about saving time I guess. At least not if you enjoy tinkering and optimizing it.
 
 I think it was around corona times when I found `paper-buttons-row`. It's perfect. No matter which other card I ever tried since then is as flexible while being as straightforward and simple. And it loads pretty much instantly, faster than HA default cards for some mysterious reason. Since I've been happily using that setup for quite a while, I decided to document it so others can use it as inspiration.
 
@@ -30,13 +30,14 @@ For this dashboard, you will need to install the following cards via HACS:
 * [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) (most cards)
 * [Origami Weather](https://github.com/hazymorning/origami_weather) (The weather card)
 * [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) (the footer menu bar)
+* Kiosk Mode (for hiding the header, if you want that)
 
 ### 2. Theme
 
 You'll need to apply the custom theme for everything to look right.
 
 1. Copy the `origami.yaml` file from this repository into your Home Assistant `themes` folder.
-2. Reload your themes (Developer Tools > Services > `frontend.reload_themes`).
+2. Do a quick restart
 3. Select the Origami theme in your user profile settings.
 
 ### 3. Font
@@ -74,3 +75,21 @@ This setup is big and complex. The essential foundation is ready, but a lot of t
 - [x] Theme Variables & Customization
 - [ ] Many more custom Paper Button Cards (Notifications, Media, etc.)
 - [ ] Different Views/Popups
+
+
+
+# Cards
+
+## Dashboard
+
+These are just example layouts which you can customize however you like and need.
+
+### Header
+
+### Weather Card
+
+### Favorites
+
+### Climate Overview
+
+### Rooms
