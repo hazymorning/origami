@@ -1,6 +1,6 @@
 # ◪ Origami
 
-A Home Assistant dashboard built mostly with `paper-buttons-row`. Calm design, dynamic content, and easy to customize however you want. Well — it needs to be customized if you want to use it, since my home is different from yours.
+A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row` which is endlessly customizable. Well — it needs to be customized if you want to use it, since my home is different from yours.
 
 **A few nice things about it:**
 
@@ -8,6 +8,10 @@ A Home Assistant dashboard built mostly with `paper-buttons-row`. Calm design, d
 - Simple and user friendly
 - A UI that tries to avoid visual overload by showing content dynamically
 - A chill and simple style, with pleasant colors and lots of "soft"
+- Built around no layout shifts on load (this is taken very seriously here) 
+
+> [!WARNING]
+> This is a personal dashboard which has evolved over the years. A few things might be messy while others are done in very specific ways (because I want to avoid layout shifts at all costs). I tried to clean it up quite a bit with the help of AI, though.
 
 <br>
 
@@ -22,7 +26,7 @@ A Home Assistant dashboard built mostly with `paper-buttons-row`. Calm design, d
 
 ## About
 
-This is my personal Home Assistant setup and, as usual with HA, an ongoing hobby project. I think it was around corona times when I found `paper-buttons-row`. It's perfect. No other card I've tried since is as flexible while staying that straightforward and simple. And it loads pretty much instantly, faster than the HA default cards for some mysterious reason. I've been happily using this setup for quite a while now, so I decided to document it in case someone wants to use it as inspiration.
+paper-buttons-row is simply perfect. No other card I've tried is as flexible while staying that straightforward and simple. And it loads pretty much instantly, faster than the HA default cards for some mysterious reason. I've been happily using this setup for several years now, so I decided to document it in case someone wants to use it as inspiration.
 
 <br>
 
