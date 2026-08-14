@@ -2,7 +2,10 @@
 
 A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row`, which is endlessly customizable. Well, it needs to be customized if you want to use it, since every home is different.
 
-<!-- screenshot: light + dark mode side by side -->
+
+| Dark | Light |
+| --- | --- |
+| <img width="600" alt="Image" src="https://github.com/user-attachments/assets/776c3689-e13d-4f51-b6ac-232a2c975940" /> | <img width="600" alt="Image" src="https://github.com/user-attachments/assets/71a8c97b-a800-42b4-86a7-d057d0b520ec" /> |
 
 **A few nice things about it:**
 
