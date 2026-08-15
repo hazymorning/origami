@@ -2907,7 +2907,7 @@ layout:
 The same handful of ideas repeats through every card.
 
 <details>
-<summary><b>Open the nine patterns</b></summary>
+<summary><b>Open the patterns</b></summary>
 
 <br>
 
