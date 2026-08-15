@@ -28,6 +28,9 @@ Most of this dashboard is just paper-buttons-row. No other card is that flexible
 
 Two ideas run through everything: sensors do the thinking and cards only display it, and nothing on screen is allowed to jump while loading. More on both in [Patterns](#patterns).
 
+> [!NOTE]
+> Vertical and horizontal stack cards are not being used in this dashboard because they add lag. Grid cards don't add any lag for some mysterious reason, so those are used instead.
+
 ## Setup
 
 <details>
