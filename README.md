@@ -1,6 +1,6 @@
 # ◪ Origami
 
-A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row`, which is endlessly customizable. Well, it needs to be customized if you want to use it, since every home is different.
+A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row`.
 
 | Dark | Light |
 | --- | --- |
@@ -2973,6 +2973,7 @@ No conditions in the card, no nested templates.
 
 This is behind most of the unusual choices above.
 
+- **No stack cards.** The native horizontal/vertical stack card adds lag on load. Grid cards don't do that, so those are used instead.
 - **Fixed tracks for variable content.** The header reserves 92px for the song title, whatever plays. The climate table uses fixed row heights.
 - **States swap colors, not sizes.** An active tile changes background and icon color. It never grows, so nothing around it moves.
 - **Helpers always return a value.** `?` instead of an empty string, `| default(..., true)` everywhere. An empty string collapses the element.
