@@ -1147,7 +1147,7 @@ An [Origami Weather](https://github.com/hazymorning/origami_weather) card that m
 | `sensor.climate_balcony` | Outdoor readings from an actual sensor (`temperature` attribute), more honest than the forecast. |
 
 ```yaml
-type: custom:origami-weather-beta
+type: custom:origami-weather
 weather_entity: weather.home
 sun_entity: sun.sun
 sun_moon_enabled: false
