@@ -1125,7 +1125,7 @@ An [Origami Weather](https://github.com/hazymorning/origami_weather) card that m
 
 <br>
 
-- The card renders the sky and forecast on its own. Everything else on top comes from `button_containers`, which are free-floating overlay buttons that can hold text, icons and bars.
+- The card shows differently colored backgrounds based on the temperature. You can also let the it show the sky and weather animations if you prefer that. Everything else on top comes from `button_containers`, which are overlay buttons that can hold text, icons and bars.
 - **Top left:** "Inside" plus the average indoor temperature, big.
 - **Top right:** a rounded pill with a one-word comfort description (Optimal, Warm, Humid, ...). Its color follows the indoor average through `color_thresholds`.
 - Below the pill: the average indoor humidity.
