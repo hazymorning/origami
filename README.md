@@ -1,6 +1,6 @@
 # ◪ Origami
 
-A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row`, which is endlessly customizable. Well, it needs to be customized if you want to use it, since every home is different.
+A chill Home Assistant theme, and a dashboard built mostly with `paper-buttons-row`.
 
 | Dark | Light |
 | --- | --- |
@@ -2849,7 +2849,7 @@ layout:
 The same handful of ideas repeats through every card.
 
 <details>
-<summary><b>Open the nine patterns</b></summary>
+<summary><b>Open the patterns</b></summary>
 
 <br>
 
