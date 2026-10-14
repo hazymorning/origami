@@ -1,0 +1,19 @@
+# One-off: point the V2.0 tag at the latest main. This file is never merged.
+name: Point V2.0 at main
+on:
+  pull_request:
+    types: [opened, reopened]
+permissions:
+  contents: write
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move the V2.0 tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TARGET: ee77df8a778c175d30852f435ef4b55847c1304d
+        run: |
+          gh api -X PATCH "repos/$REPO/git/refs/tags/V2.0" -f sha="$TARGET" -F force=true
+          gh api "repos/$REPO/git/refs/tags/V2.0" --jq .object.sha
