@@ -1,0 +1,22 @@
+# One-off: point the V2.0 tag and release at the latest main. This file is never merged.
+name: Point V2.0 at main
+on:
+  pull_request:
+    types: [opened, reopened]
+permissions:
+  contents: write
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move the V2.0 tag and pin the release images to it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TARGET: 08c0be6fbae96079e32439a0ef0fb9979198ada7
+        run: |
+          gh api -X PATCH "repos/$REPO/git/refs/tags/V2.0" -f sha="$TARGET" -F force=true
+          body="$(gh release view V2.0 --repo "$REPO" --json body --jq .body)"
+          body="${body//e7bd3fd15bd5a65cfe224ac81f00706c4cd163cc/V2.0}"
+          gh release edit V2.0 --repo "$REPO" --notes "$body"
+          gh api "repos/$REPO/git/refs/tags/V2.0" --jq .object.sha
