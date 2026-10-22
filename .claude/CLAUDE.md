@@ -46,3 +46,14 @@ The docs must read like plain, natural English from a native technical writer. T
 The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, the README shows only one, because more copies add nothing but noise.
 
 The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After any change to the dashboard, run `python3 .github/scripts/fold_cards.py` to copy them again. A comment above each code block names its card, and the Fold cards workflow fails while a copy is out of date.
+
+## Branches and releases
+
+`main` holds the latest release. The README on GitHub and the ZIP download come from `main`, and HACS installs the releases. `next` collects the work for the coming release.
+
+- Every change goes into `next` through its own pull request. Never push to `main` or `next` directly. A pull request into `main` is only for a fix to the current release or for the release itself.
+- Every change is tested in the user's own Home Assistant before it is merged. In the repo, changes use the example home's entities, such as `light.living_room`.
+- A change is finished only when its pull request also updates everything that describes it. That means the README, the module reference and the module's own description if a module changed, new screenshots if the look changed, and a line in the changelog. After the last change to `dashboard/dashboard.yaml`, run `fold_cards.py` and commit its output. The pull request template lists these steps.
+- A draft pull request from `next` into `main` tracks the coming release, and its title is the version, such as "Origami 3.0". Its description lists what is still planned, and the changelog's "Next release" section lists what is done. When a planned change is merged into `next`, tick it off in the draft's description.
+- A fix for the current release goes into `main` first, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then a pull request merges `main` into `next`.
+- For the release, the draft pull request is marked as ready for review and merges `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.

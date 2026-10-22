@@ -1,5 +1,22 @@
 # Changelog
 
+## Next release
+
+These changes are in the `next` branch and come with the next release.
+
+### New
+
+- The room cards are now Bubble cards with the new Room module. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server.
+- The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
+- The Button module has two new options. With `segmented`, the buttons in each group form one bar with thin lines between them. With `scroll`, the buttons stay in one row that scrolls sideways.
+
+### Upgrading
+
+1. Copy `bubble_card/modules/origami_room.yaml` to `/config/bubble_card/modules/`.
+2. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
+3. Copy `bubble_card/modules/origami_button.yaml` to `/config/bubble_card/modules/` again.
+4. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
+
 ## 2.0 · The Unfolding
 
 <img alt="The Origami dashboard and its new pop-ups on five phones" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/release-2.0-dashboard.webp">
