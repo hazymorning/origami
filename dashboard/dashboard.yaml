@@ -606,6 +606,7 @@ views:
                   origami_tiles:
                     state: Dinner
                     image: ${attr.recipe?.image}
+                    image_size: 230%
                   visibility:
                     - condition: state
                       entity: sensor.dinner
@@ -840,6 +841,7 @@ views:
                   origami_header:
                     icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
                     color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
+                    name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
                     background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
                   tap_action:
                     action: perform-action
@@ -2213,9 +2215,10 @@ views:
             hide_backdrop: false
             modules:
               - default
+              - origami_base
               - origami_popup
             origami_popup:
-              subtitle_style: text
+              value_style: text
             # Hides the scenes again when you close the pop-up
             close_action:
               action: perform-action
@@ -2248,8 +2251,9 @@ views:
                             - origami_base
                             - origami_media
                           origami_media:
-                            art_entity: media_player.living_room_tv_cast
-                            app_entity: media_player.living_room_tv
+                            layout: tv
+                            players:
+                              - media_player.living_room_tv_cast
                           hide:
                             power_button: true
                             previous_button: true
@@ -2300,6 +2304,9 @@ views:
                             - origami_media
                           origami_base:
                             group: true
+                            # Home Assistant's word for this source is the source's own name
+                            words:
+                              optical in: TV input
                           hide:
                             power_button: true
                             previous_button: true
@@ -2525,8 +2532,7 @@ views:
                           - origami_base
                           - origami_header
                         origami_header:
-                          # The dot uses the comfort color
-                          icon_color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
+                          icon_size: var(--dot-size)
                         grid_options:
                           rows: auto
                         sub_button:
@@ -2537,6 +2543,8 @@ views:
                               show_background: false
                               origami_header:
                                 name: ${attr.temperature}° / ${attr.humidity} %
+                                # The dot uses the comfort color
+                                color: ${attr.color_code ?? "transparent"}
                               tap_action:
                                 action: more-info
                       - type: conditional
@@ -2608,9 +2616,7 @@ views:
                                     entity_id: fan.living_room
                                   data:
                                     percentage: 100
-                          state_content:
-                            - state
-                            - percentage
+                          state_content: percentage
                           rows: 1.375
                       - type: custom:bubble-card
                         card_type: button
@@ -2624,6 +2630,11 @@ views:
                         origami_base:
                           group: true
                           tile: true
+                        origami_climate:
+                          icons:
+                            heating: mdi:radiator
+                            preheating: mdi:radiator
+                            'off': mdi:radiator-off
                         scrolling_effect: false
                         tap_action:
                           action: more-info
@@ -2699,6 +2710,7 @@ views:
             with_bottom_offset: true
             performance_mode: performance
             modules:
+              - origami_base
               - origami_popup
             # A blurred picture of the current program appears behind the pop-up
             styles: |-
@@ -2742,8 +2754,9 @@ views:
                       - origami_media
                       - '!default'
                     origami_media:
-                      art_entity: media_player.living_room_tv_cast
-                      app_entity: media_player.living_room_tv
+                      layout: tv
+                      players:
+                        - media_player.living_room_tv_cast
                     scrolling_effect: false
                     slider_live_update: false
                     cover_background: false
@@ -2785,8 +2798,6 @@ views:
                       segmented: true
                       icon_size: var(--icon-size-m)
                       padding: var(--ha-space-2) 0
-                      # The TV button is filled while the speaker uses its TV input
-                      active: "{{ 'TV' if (state_attr('media_player.living_room', 'source') | lower) == 'optical in' else '' }}"
                     sub_button:
                       main: []
                       bottom:
@@ -2801,6 +2812,7 @@ views:
                                   entity_id: remote.living_room_tv
                                 data:
                                   command: TV_INPUT
+                            # Filled while the speaker uses this source, because its tap selects it
                             - name: TV
                               show_name: true
                               tap_action:
@@ -3103,6 +3115,7 @@ views:
             popup_mode: fit-content
             with_bottom_offset: true
             modules:
+              - origami_base
               - origami_popup
             styles: '.bubble-pop-up-container { mask-image: none !important; }'
             # Hides the timer row again when you close the pop-up

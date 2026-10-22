@@ -1,10 +1,23 @@
 origami_popup:
-  name: Origami • Popup
-  version: "3.3.2"
+  name: "Origami • Popup"
+  version: "4.0.0"
   supported:
     - pop-up
-  description: "The Popup module styles a pop-up's header, backdrop and close button. The pop-up's sub-buttons appear below the title, as text or as chips."
+  description: "The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header with only a name, the pop-up's sub-buttons appear below the title, as text or as chips. Each sub-button can have an origami_popup key with name, icon, color for the icon, name_color for the text and background for a chip, the same keys as in Header. The backdrop is blurred, unless the pop-up sets its own backdrop_blur or uses performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view, and the other modes keep at least the space of the phone's home indicator."
   code: |-
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass) throw new Error("origami_popup needs origami_base 11 or later, listed before it");
+      const cfg = this.config.origami_popup ?? {};
+      card._orgP = {
+        chip: cfg.value_style === "chip",
+        // A header with a button, a switch or a slider keeps Bubble Card's own layout
+        title: (this.config.button_type ?? "name") === "name",
+        blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
+        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", "var(--ha-font-size-m)").join("\n")
+      };
+      return "";
+    })()}
     .bubble-pop-up {
       gap: 0px !important;
       --org-popup-pad: var(--ha-space-4);
@@ -15,25 +28,19 @@ origami_popup:
     }
     .bubble-pop-up-container {
       margin-top: 0px !important;
-      padding: var(--org-popup-pad) calc(2 * var(--ha-space-4)) !important;
+      padding-top: var(--org-popup-pad) !important;
+      padding-inline: calc(2 * var(--ha-space-4)) !important;
+    }
+    .bubble-pop-up:is(.popup-mode-fit-content, .popup-mode-centered, .popup-mode-adaptive-dialog, .is-standalone-pop-up, .editor) .bubble-pop-up-container {
+      padding-bottom: max(var(--org-popup-pad), var(--safe-area-inset-bottom, 0px)) !important;
     }
     .bubble-pop-up-container.is-scrollable {
       --bubble-pop-up-mask-top-stop: var(--org-popup-pad) !important;
       --bubble-pop-up-mask-bottom-stop: var(--org-popup-pad) !important;
     }
-    .bubble-backdrop {
+    ${card._orgP.blur ? `.bubble-backdrop {
       backdrop-filter: blur(4px) !important;
-    }
-    div.bubble-header .bubble-button-card-container,
-    .bubble-icon-container {
-      background: transparent !important;
-    }
-    .bubble-icon-container {
-      pointer-events: none;
-    }
-    .bubble-icon {
-      --mdc-icon-size: 36px;
-    }
+    }` : ""}
     .bubble-header-container {
       margin: 0px !important;
       padding: calc(2 * var(--ha-space-4)) calc(2 * var(--ha-space-4)) var(--org-header-pad-bottom) !important;
@@ -43,6 +50,34 @@ origami_popup:
     .bubble-header-container > .bubble-header-actions {
       height: var(--control-height-icon) !important;
       align-items: center !important;
+    }
+    .bubble-close-button {
+      display: flex;
+      border-radius: var(--radius-inner) !important;
+      background-color: transparent !important;
+      opacity: var(--opacity-quiet);
+      font-weight: var(--ha-font-weight-medium) !important;
+      min-width: var(--control-height-icon) !important;
+      min-height: var(--control-height-icon) !important;
+      margin-inline-end: 0px !important;
+    }
+    .bubble-close-icon {
+      --mdc-icon-size: 32px;
+    }
+    .bubble-header-action-icon svg {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    ${card._orgP.title ? `
+    div.bubble-header .bubble-button-card-container,
+    .bubble-icon-container {
+      background: transparent !important;
+    }
+    .bubble-icon-container {
+      pointer-events: none;
+    }
+    .bubble-icon {
+      --mdc-icon-size: 36px;
     }
     div.bubble-header .bubble-container {
       height: var(--control-height-icon) !important;
@@ -57,32 +92,15 @@ origami_popup:
       font-size: 24px !important;
       font-weight: var(--ha-font-weight-bold);
       line-height: var(--ha-line-height-condensed) !important;
-      margin-left: 0px !important;
+      margin-inline-start: 0px !important;
     }
-    .bubble-close-button {
-      display: flex;
-      border-radius: var(--radius-inner) !important;
-      background-color: transparent !important;
-      opacity: var(--opacity-quiet);
-      font-weight: var(--ha-font-weight-medium) !important;
-      min-width: var(--control-height-icon) !important;
-      min-height: var(--control-height-icon) !important;
-      margin-right: 0px !important;
-    }
-    .bubble-close-icon {
-      --mdc-icon-size: 32px;
-    }
-    .bubble-header-action-icon svg {
-      width: 32px !important;
-      height: 32px !important;
-    }
-    .bubble-header-container:has(.bubble-sub-button) {
+    .bubble-header-container:has(.bubble-sub-button:not(.hidden)) {
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button) .bubble-container {
+    div.bubble-header:has(.bubble-sub-button:not(.hidden)) .bubble-container {
       height: calc(var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button) .bubble-wrapper {
+    div.bubble-header:has(.bubble-sub-button:not(.hidden)) .bubble-wrapper {
       display: grid !important;
       grid-template-areas: "i n a" "i b a" !important;
       grid-template-columns: auto 1fr auto !important;
@@ -109,14 +127,15 @@ origami_popup:
       justify-content: flex-start !important;
       width: auto !important;
       inset-inline-end: 0px !important;
-      margin: 0px auto 0px 0px !important;
+      margin: 0px !important;
+      margin-inline-end: auto !important;
       padding: 0px !important;
     }
     div.bubble-header .bubble-sub-button {
       width: auto !important;
       min-width: 0px !important;
     }
-    ${this.config.origami_popup?.subtitle_style === "chip" ? `
+    ${card._orgP.chip ? `
     div.bubble-header .bubble-sub-button-container {
       gap: var(--ha-space-2) !important;
     }
@@ -124,7 +143,7 @@ origami_popup:
       height: var(--control-height-mini) !important;
       padding: 0px var(--ha-space-2) !important;
       border-radius: var(--radius-inner) !important;
-      background-color: var(--fill-subtle) !important;
+      background-color: var(--org-value-chip, var(--fill-subtle)) !important;
       box-shadow: var(--card-ring);
     }
     div.bubble-header .bubble-sub-button,
@@ -155,12 +174,15 @@ origami_popup:
     `}
     div.bubble-header .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-2xs) !important;
-      margin: 0px var(--ha-space-1) 0px 0px !important;
+      margin: 0px !important;
+      margin-inline-end: var(--ha-space-1) !important;
       opacity: var(--opacity-muted);
     }
+    ` : ""}
+    ${card._orgP.css}
   editor:
-    - name: subtitle_style
-      label: "Sub-button style"
+    - name: value_style
+      label: "Value style"
       selector:
         select:
           mode: dropdown

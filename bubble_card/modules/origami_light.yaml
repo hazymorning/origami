@@ -1,31 +1,15 @@
 origami_light:
   name: "Origami • Light"
-  version: "5.1.3"
+  version: "6.0.0"
   supported:
     - button
-  description: "The Light module styles light cards together with Base. Set rows to 1.375 on regular cards and to 1 on compact cards, including cards in pop-ups. Base sets the color. This module colors the slider, places the brightness value and sets the state line's text. In dark mode, the fill stays neutral and only the slider mark is colored, because Bubble Card keeps light text on the fill."
+  description: "The Light module colors the slider of a light card in the light's color, and it works with Base. In dark mode, the fill stays neutral and only the slider mark is colored, because Bubble Card keeps light text on the fill. Bubble Card writes the state line from state_content in Home Assistant's own words, for example state and brightness. Set rows to 1.375 on regular cards and to 1 on compact cards, including cards in pop-ups."
   code: |
     ha-card {
       --org-slider-fill: ${hass.themes?.darkMode ? "color-mix(in srgb, var(--org-color) var(--tint-strength), color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background)))" : "color-mix(in srgb, var(--org-color) var(--fill-strength), var(--ha-card-background))"};
       --org-slider-mark: var(--org-color);
     }
     .bubble-range-value {
-      right: calc(var(--tile-size) + var(--ha-space-3));
       font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-bold);
     }
-    ${(() => {
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const st = hass.states[entity];
-      const bri = st?.attributes?.brightness;
-      const w = String(hass.locale?.language ?? hass.language ?? "").startsWith("de")
-        ? { on: "An", off: "Aus", error: "Fehler" }
-        : { on: "On", off: "Off", error: "Error" };
-      const next = !st || ["unavailable", "unknown"].includes(st.state) ? w.error
-        : st.state !== "on" ? w.off
-        : bri != null ? w.on + " • " + Math.round((bri / 255) * 100) + "%"
-        : w.on;
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
