@@ -119,7 +119,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
 
-Each sub-button can have its own `origami_base` key, except on separator and sub-buttons cards. There, the Header and Tiles modules have keys of their own. These keys accept the same values as the keys of the Header and Tiles modules.
+Each sub-button can have its own `origami_base` key, which accepts the same values as the keys of the Header and Tiles modules. On separator and sub-buttons cards, Base ignores this key, and the Header and Tiles modules use keys of their own.
 
 | Key | Description |
 | --- | --- |
