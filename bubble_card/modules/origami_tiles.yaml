@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "1.0.1"
+  version: "2.0.0"
   supported:
     - sub-buttons
-  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image and name_color. Each of these accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Bubble Card's visibility conditions decide when a tile appears."
+  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image and name_color. Each of these accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
   editor:
     - name: columns
       label: "Columns"
@@ -16,87 +16,23 @@ origami_tiles:
       default: 2
   code: |
     ${(() => {
-      const S = hass.states;
-      const sb = this.config.sub_button;
-      const bottom = Array.isArray(sb) ? [] : (sb?.bottom ?? []);
-      const tiles = [
-        ...bottom.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
-        ...bottom.filter((i) => i && !Array.isArray(i.group))
-      ];
-      const now = new Date();
-      const states = (id) => S[id]?.state ?? "unknown";
-      const minutesUntil = (id) => {
-        const v = String(states(id));
-        const t = v.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-        let end;
-        if (t) {
-          end = new Date(now);
-          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
-          if (end < now) end.setDate(end.getDate() + 1);
-        } else {
-          end = new Date(v.replace(" ", "T"));
-        }
-        const m = Math.round((end - now) / 60000);
-        return Number.isNaN(m) ? "" : m;
-      };
-      const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || Number.isNaN(v))
-        ? ""
-        : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
-      const fns = card._orgTilesFns ?? (card._orgTilesFns = new Map());
-      const run = (value, ctx) => {
-        if (typeof value !== "string") return value;
-        if (/\{(\{|%)/.test(value)) return renderTemplate(value, ctx.entity);
-        if (!value.includes("${")) return value;
-        let fn = fns.get(value);
-        if (!fn) {
-          try {
-            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "return fill`" + value + "`;");
-          } catch (e) {
-            fn = () => "";
-          }
-          fns.set(value, fn);
-        }
-        try {
-          return fn(fill, hass, ctx.entity, ctx.state, ctx.attr, states, minutesUntil);
-        } catch (e) {
-          return "";
-        }
-      };
-      const pick = (option, ctx) => {
-        if (option === undefined || option === null) return "";
-        if (typeof option === "object" && !Array.isArray(option)) {
-          const key = String(ctx.state).toLowerCase();
-          const hit = Object.keys(option).find((k) => k.toLowerCase() === key);
-          return hit === undefined ? "" : run(option[hit], ctx);
-        }
-        return run(option, ctx);
-      };
-      const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
-      const q = (v) => JSON.stringify(String(v));
-      const slug = (v) => String(v).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+      const org = card._org;
+      if (org?.hass !== hass) throw new Error("origami_tiles needs origami_base 10 or later, listed before it");
+      const env = { hass, renderTemplate };
       card._orgTilesCols = Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
-      card._orgTilesCss = tiles.map((item, i) => {
-        const sel = ".bubble-sub-button.bubble-sub-button-" + (i + 1);
-        const entity = item.entity ?? this.config.entity;
-        const obj = S[entity];
-        const ctx = { entity, state: obj?.state ?? "unknown", attr: obj?.attributes ?? {} };
-        const opt = item.origami_tiles ?? {};
-        const domain = String(entity ?? "").split(".")[0];
-        const key = slug(ctx.state);
-        const dc = ctx.attr.device_class;
-        const auto = (dc ? "var(--state-" + domain + "-" + dc + "-" + key + "-color, " : "")
-          + "var(--state-" + domain + "-" + key + "-color, var(--state-" + domain + "-active-color, var(--state-active-color)))"
-          + (dc ? ")" : "");
-        const name = [pick(opt.name, ctx), run(item.name, ctx), ctx.attr.friendly_name].find(has) ?? "";
-        const state = [pick(opt.state, ctx), obj ? (hass.formatEntityState?.(obj) ?? obj.state) : ""].find(has) ?? "";
-        const color = pick(opt.color, ctx);
-        const order = pick(opt.order, ctx);
-        const image = pick(opt.image, ctx);
-        const nameColor = pick(opt.name_color, ctx);
-        const rules = [sel + " { --org-tile-auto: " + auto + "; --org-tile-name: " + q(name) + "; --org-tile-state: " + q(state) + ";" + (has(order) ? " order: " + order + ";" : "") + " }"];
-        if (has(color)) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
-        if (has(nameColor)) rules.push(sel + " .bubble-sub-button-name-container { color: " + nameColor + "; }");
-        if (has(image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + q(image) + "); background-size: var(--org-tile-image-size, 230%); background-position: center; }");
+      card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
+        const sel = ".bubble-sub-button.bubble-sub-button-" + n;
+        const o = opt ?? {};
+        const obj = hass.states[entity];
+        const name = [o.name, org.run(env, item.name, ctx), ctx.attr.friendly_name].find(org.has) ?? "";
+        const state = [o.state, obj ? (hass.formatEntityState?.(obj) ?? obj.state) : ""].find(org.has) ?? "";
+        // A tile takes the state color while its entity is on, by the same rule as Base
+        const look = org.look(hass, entity);
+        const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
+        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }"];
+        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
+        if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
+        if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: var(--org-tile-image-size, 230%); background-position: center; }");
         return rules.join("\n");
       }).join("\n");
       return "";
@@ -134,10 +70,6 @@ origami_tiles:
       background-color: var(--fill-subtle) !important;
       color: var(--primary-text-color) !important;
       transition: var(--transition-interactive) !important;
-    }
-    .bubble-sub-button.background-on {
-      --org-tile-color: var(--org-tile-auto);
-      --org-tile-chip: var(--tint);
     }
     .bubble-sub-button-icon,
     .bubble-sub-button-image {

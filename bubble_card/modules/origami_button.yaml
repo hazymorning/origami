@@ -1,9 +1,9 @@
 origami_button:
   name: "Origami • Button"
-  version: "1.1.0"
+  version: "2.0.0"
   supported:
     - sub-buttons
-  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each button that should show its name. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it. Separate several values with commas. A button whose entity is on is also highlighted. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect."
+  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each button that should show its name. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it. Separate several values with commas. A button whose entity is on is also highlighted. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect. List Base first, as on every Origami card. Its Fade in option lets the buttons fade in when they appear."
   editor:
     - name: background
       label: "Background"
@@ -72,11 +72,6 @@ origami_button:
       selector:
         boolean: {}
       default: false
-    - name: animate
-      label: "Fade in"
-      selector:
-        boolean: {}
-      default: false
     - name: press
       label: "Press feedback"
       selector:
@@ -110,7 +105,6 @@ origami_button:
         toggle: seg || cfg.active_style === "toggle",
         seg,
         scroll,
-        animate: !!cfg.animate,
         press: cfg.press ?? true,
         cols,
         pad: pad || "0",
@@ -156,15 +150,6 @@ origami_button:
       grid-template-columns: repeat(${card._orgB.cols}, minmax(0, 1fr)) !important;` : `display: flex !important;
       flex-wrap: ${card._orgB.seg || card._orgB.scroll ? "nowrap" : "wrap"} !important;
       justify-content: ${card._orgB.row} !important;`}
-      ${card._orgB.animate ? `opacity: 0;
-      transform: translateY(10px);
-      animation: origami-button-in var(--duration-slow) ease-in forwards;` : ""}
-    }
-    @keyframes origami-button-in {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane,
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(.hidden) {

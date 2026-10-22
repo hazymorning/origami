@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "9.4.3"
+  version: "10.0.0"
   supported:
     - button
     - media-player
@@ -10,7 +10,7 @@ origami_base:
     - calendar
     - sub-buttons
     - separator
-  description: "The Base module is the frame for button and media player cards. On other card types, it only styles the sub-buttons. List Base first and then the module for the device. Its options create a slim row, add a pill switch, group the sub-buttons or turn the card into a tile. The icon shows Home Assistant's state color while the entity is on, and the controls stay neutral. A sub-button is filled while its entity is on, unless it navigates, opens a URL or opens the more-info dialog. To keep a sub-button neutral, set its css_class to plain. To fill it while its entity is on, even if it navigates, set css_class to accent. The module reference in bubble_card/README.md explains every option."
+  description: "The Base module is the frame for button and media player cards, and it holds the helpers that the other modules share. List Base first on every Origami card except a pop-up, then the card's own module. On separator and sub-buttons cards, Base draws nothing, because Header, Tiles and Button draw those cards. On cover, climate, select and calendar cards, it only styles the sub-buttons. Its options create a slim row, add a pill switch, group the sub-buttons, turn the card into a tile, place the name under the icon or let the card fade in when it appears. With the name under the icon, the bottom sub-buttons form a line of small icons and values, and a sub-button without an action of its own passes the tap to the card. The icon shows Home Assistant's state color while the entity is on, and the controls stay neutral. A sub-button is filled while its entity is on, unless it navigates, opens a URL or opens the more-info dialog. To keep a sub-button neutral, set its css_class to plain. To fill it while its entity is on, even if it navigates, set css_class to accent. Each sub-button can have an origami_base key with name, icon and color. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. The module reference in bubble_card/README.md explains every option."
   editor:
     - name: compact
       label: "Compact"
@@ -37,15 +37,19 @@ origami_base:
       selector:
         boolean: {}
       default: false
+    - name: vertical
+      label: "Name under the icon (button cards)"
+      selector:
+        boolean: {}
+      default: false
+    - name: animate
+      label: "Fade in"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
-      card._orgT = !!this.config.origami_base?.toggle;
-      card._orgG = !!this.config.origami_base?.group;
-      card._orgC = !!this.config.origami_base?.compact;
-      card._orgF = !!this.config.origami_base?.tile;
-      card._orgFrame = ["button", "media-player"].includes(this.config.card_type ?? "button");
-      card._orgFlatMedia = this.config.card_type === "media-player" && !this.config.cover_background
-        && !(this.config.modules ?? []).includes("origami_speaker");
+      // Base leaves these helpers on card._org for the modules listed after it. They take hass as an argument, so no module reads an earlier render.
       const resting = {
         alarm_control_panel: ["disarmed"], alert: ["idle"], cover: ["closed"], device_tracker: ["not_home"], person: ["not_home"],
         lawn_mower: ["docked", "paused", "idle"], lock: ["locked"], media_player: ["standby", "idle", "paused"],
@@ -55,7 +59,7 @@ origami_base:
       const coloured = ["alarm_control_panel", "alert", "automation", "binary_sensor", "calendar", "camera", "climate", "cover",
         "device_tracker", "fan", "humidifier", "input_boolean", "lawn_mower", "light", "lock", "media_player", "person", "plant",
         "remote", "schedule", "script", "siren", "sun", "switch", "timer", "update", "vacuum", "valve", "water_heater"];
-      const look = (id) => {
+      const look = (hass, id) => {
         const st = hass.states[id];
         const s = String(st?.state ?? "unavailable").toLowerCase();
         const a = st?.attributes ?? {};
@@ -69,14 +73,127 @@ origami_base:
           && (d !== "climate" || !["", "off", "idle"].includes(act));
         return { on, coloured: coloured.includes(d), lit: on && coloured.includes(d), color: names.reduceRight((acc, n) => acc ? "var(" + n + ", " + acc + ")" : "var(" + n + ")", "") };
       };
-      const me = look(entity);
-      card._orgLook = look;
+      // items() lists the sub-buttons in Bubble Card's numbering. Groups come first, and a sub-buttons card has no main sub-buttons.
+      const items = (cfg) => {
+        const sb = cfg.sub_button;
+        const flat = (list) => [
+          ...list.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
+          ...list.filter((i) => i && !Array.isArray(i.group))
+        ];
+        return [
+          ...(cfg.card_type === "sub-buttons" ? [] : flat(Array.isArray(sb) ? sb : (sb?.main ?? []))),
+          ...flat(Array.isArray(sb) ? [] : (sb?.bottom ?? []))
+        ];
+      };
+      const now = new Date();
+      const minutesUntil = (v) => {
+        const t = String(v).match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        let end;
+        if (t) {
+          end = new Date(now);
+          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
+          if (end < now) end.setDate(end.getDate() + 1);
+        } else {
+          end = new Date(String(v).replace(" ", "T"));
+        }
+        const m = Math.round((end - now) / 60000);
+        return Number.isNaN(m) ? "" : m;
+      };
+      const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || Number.isNaN(v))
+        ? ""
+        : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
+      const fns = card._orgFns ?? (card._orgFns = new Map());
+      // A value is plain text, a map from the state to a value, Jinja, or JavaScript in ${ }. The env argument holds the calling module's hass and renderTemplate.
+      const run = (env, v, ctx) => {
+        if (typeof v !== "string") return v;
+        if (/\{(\{|%)/.test(v)) return env.renderTemplate(v, ctx.entity);
+        if (!v.includes("${")) return v;
+        let fn = fns.get(v);
+        if (!fn) {
+          try {
+            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "return fill`" + v + "`;");
+          } catch (e) {
+            fn = () => "";
+          }
+          fns.set(v, fn);
+        }
+        const states = (id) => env.hass.states[id]?.state ?? "unknown";
+        try {
+          return fn(fill, env.hass, ctx.entity, ctx.state, ctx.attr, states, (id) => minutesUntil(states(id)));
+        } catch (e) {
+          return "";
+        }
+      };
+      const value = (env, option, ctx) => {
+        if (option === undefined || option === null) return "";
+        if (typeof option === "object" && !Array.isArray(option)) {
+          const key = String(ctx.state).toLowerCase();
+          const hit = Object.keys(option).find((k) => k.toLowerCase() === key);
+          return hit === undefined ? "" : run(env, option[hit], ctx);
+        }
+        return run(env, option, ctx);
+      };
+      const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
+      // Bubble Card cleans the CSS text, so every character that it could change is escaped
+      const str = (v) => '"' + String(v).trim().replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"';
+      card._org = {
+        // A module checks this to know that Base ran before it in the same render
+        hass,
+        look,
+        items,
+        run,
+        value,
+        has,
+        str,
+        // subs() returns each sub-button with its number, its entity and the values of its own key, such as origami_header
+        subs: (env, cfg, key) => items(cfg).map((item, i) => {
+          const entity = item.entity ?? cfg.entity;
+          const st = env.hass.states[entity];
+          const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
+          const raw = item[key];
+          const opt = raw && typeof raw === "object" ? Object.fromEntries(Object.keys(raw).map((k) => [k, value(env, raw[k], ctx)])) : null;
+          return { n: i + 1, item, entity, ctx, opt };
+        }),
+        // text() returns the rules that show a text in a sub-button instead of its own name or state
+        text: (sel, item, text, size) => [
+          // Bubble Card hides a sub-button that has nothing of its own to show
+          ...(item.visibility ? [] : [sel + ".hidden:not([style*='display: none']) { display: flex !important; }"]),
+          sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }",
+          sel + " .bubble-sub-button-name-container::before { content: " + str(text) + "; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: " + size + "; }"
+        ],
+        icon: (el, icon) => {
+          if (el && el.getAttribute("icon") !== String(icon)) el.setAttribute("icon", String(icon));
+        }
+      };
+      card._orgV = !!this.config.origami_base?.vertical && (this.config.card_type ?? "button") === "button";
+      card._orgT = !!this.config.origami_base?.toggle && !card._orgV;
+      card._orgG = !!this.config.origami_base?.group && !card._orgV;
+      card._orgC = !!this.config.origami_base?.compact;
+      card._orgF = !!this.config.origami_base?.tile;
+      card._orgA = !!this.config.origami_base?.animate;
+      card._orgFrame = ["button", "media-player"].includes(this.config.card_type ?? "button");
+      card._orgFlatMedia = this.config.card_type === "media-player" && !this.config.cover_background
+        && !(this.config.modules ?? []).includes("origami_speaker");
+      // Header, Tiles and Button draw separator and sub-buttons cards themselves, so Base only gives them its helpers and Fade in
+      card._orgBare = ["separator", "sub-buttons"].includes(this.config.card_type);
+      const me = look(hass, entity);
       card._orgOn = me.on;
       card._orgLit = me.lit;
       card._orgColor = me.color;
       card._orgDark = !!hass.themes?.darkMode;
       return "";
     })()}
+    ${card._orgA ? `
+    ha-card {
+      animation: origami-in var(--duration-slow) ease-in;
+    }
+    @keyframes origami-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }` : ""}
+    ${card._orgBare ? "" : `
     ha-card {
       --bubble-border: var(--border-width) solid var(--border-color);
       --bubble-sub-slider-height: var(--control-height-mini);
@@ -106,6 +223,7 @@ origami_base:
       ${card._orgC ? "--org-toggle-knob: var(--icon-size-s);" : ""}
       ${card._orgC ? "--org-toggle-gap: calc((var(--org-row-height) - var(--org-toggle-h)) / 2);" : ""}
       ${card._orgC ? "--org-text-max: 100%;" : ""}
+      ${card._orgV ? "--org-row-height: auto; --org-tile-inset: 0px; --org-state-display: none;" : ""}
     }
     .bubble-sub-button-icon {
       --mdc-icon-size: var(--org-icon-size, var(--icon-size-m));
@@ -199,6 +317,28 @@ origami_base:
       overflow: hidden !important;
       text-overflow: ellipsis;
     }
+    ${card._orgV ? `
+    ha-card .bubble-container {
+      height: auto !important;
+    }
+    ha-card .bubble-wrapper {
+      position: relative !important;
+      display: grid !important;
+      grid-template: "icon more" "name name" "info info" / minmax(0, 1fr) minmax(var(--control-height-icon), auto);
+      box-sizing: border-box;
+      padding: var(--ha-space-4);
+    }
+    ha-card .bubble-content-container {
+      display: contents !important;
+    }
+    ha-card .bubble-icon-container {
+      grid-area: icon;
+    }
+    ha-card .bubble-name-container {
+      grid-area: name;
+      margin: var(--ha-space-5) 0 0 !important;
+      line-height: var(--ha-line-height-normal);
+    }` : ""}
     ` : ""}
     ha-card .bubble-sub-button {
       color: var(--primary-text-color);
@@ -251,7 +391,55 @@ origami_base:
       height: var(--control-height-mini) !important;
       min-height: var(--control-height-mini) !important;
     }
-    ${card._orgT ? `
+    ${card._orgV ? `
+    ha-card .bubble-sub-button-container {
+      grid-area: more;
+      inset-inline-end: 0 !important;
+      align-self: center !important;
+      justify-content: center !important;
+    }
+    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) {
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+      background: none !important;
+      transition: var(--transition-interactive) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-l);
+      opacity: var(--opacity-quiet);
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      grid-area: info;
+      position: static !important;
+      flex-wrap: wrap !important;
+      gap: var(--ha-space-2) var(--ha-space-1) !important;
+      width: auto !important;
+      min-height: calc(var(--ha-font-size-s) * var(--ha-line-height-normal));
+      margin: var(--ha-space-2) 0 0 !important;
+    }
+    ha-card .bubble-sub-button-alignment-lane,
+    ha-card .bubble-sub-button-group {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+      color: var(--secondary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--dot-size);
+      margin-block: 0 2px !important;
+      margin-inline: 0 var(--ha-space-1) !important;
+    }
+    ha-card .bubble-icon-container:not(.bubble-action-enabled),
+    ha-card .bubble-sub-button-container,
+    ha-card .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-button.bubble-action-enabled,
+    ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
+      pointer-events: auto;
+    }` : card._orgT ? `
     .bubble-sub-button-container {
       margin-right: var(--org-toggle-gap, calc(var(--ha-space-4) + var(--ha-space-2))) !important;
       inset-inline-end: 0 !important;
@@ -352,21 +540,28 @@ origami_base:
     }
     ` : ""}
     ${(() => {
-      const look = card._orgLook;
-      if (card._orgT || !look) return "";
-      const auto = !(this.config.modules ?? []).some((m) => m === "origami_fan" || m === "origami_climate");
-      const ids = [entity];
-      const walk = (list) => (Array.isArray(list) ? list : []).forEach((b) => {
-        if (!b || typeof b !== "object") return;
-        if (Array.isArray(b.group)) walk(b.group);
-        if (typeof b.entity === "string" && /^[a-z0-9_]+\.[a-z0-9_]+$/.test(b.entity) && !ids.includes(b.entity)) ids.push(b.entity);
+      const org = card._org;
+      const rules = [];
+      org.subs({ hass, renderTemplate }, this.config, "origami_base").forEach(({ n, item, entity, opt }) => {
+        const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
+        // Under the icon, a sub-button without an action of its own passes the tap to the card
+        const select = item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(entity ?? "").split(".")[0]) || item.select_attribute));
+        if (card._orgV && !select && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push(sel + " { pointer-events: none !important; }");
+        if (!opt) return;
+        if (org.has(opt.name)) rules.push(...org.text(sel, item, opt.name, "var(--ha-font-size-s)"));
+        if (org.has(opt.color)) rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + opt.color + " !important; }");
+        if (org.has(opt.icon)) org.icon(card.querySelector(".bubble-sub-button-" + n + " .bubble-sub-button-icon"), opt.icon);
       });
-      const sb = this.config.sub_button;
-      if (Array.isArray(sb)) walk(sb); else if (sb && typeof sb === "object") { walk(sb.main); walk(sb.bottom); }
+      return rules.join("\n");
+    })()}
+    ${(() => {
+      if (card._orgT) return "";
+      const auto = !card._orgV && !(this.config.modules ?? []).some((m) => m === "origami_fan" || m === "origami_climate");
+      const ids = [...new Set([entity, ...card._org.items(this.config).map((b) => b.entity)])].filter((id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id ?? ""));
       const keep = ':not(.is-select):not(.readout):not(.plain):not([class*="bubble-sub-button-slider-"])';
       const link = ':not([data-tap-action*="navigate"]):not([data-tap-action*="more-info"]):not([data-tap-action*="url_path"])';
       const sel = [];
-      ids.filter((id) => look(id).lit).forEach((id) => {
+      ids.filter((id) => card._org.look(hass, id).lit).forEach((id) => {
         const own = ['[data-entity="' + id + '"]'].concat(id === entity ? [':not([data-entity])', '[data-entity=""]'] : []);
         own.forEach((o) => {
           if (auto) sel.push("ha-card .bubble-sub-button:is(.background-on, .background-off)" + o + keep + link);
@@ -391,3 +586,4 @@ origami_base:
       if (el.innerText !== next) el.innerText = next;
       return "";
     })()}
+    `}

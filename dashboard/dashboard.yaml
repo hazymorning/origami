@@ -525,6 +525,7 @@ views:
             card_type: separator
             name: Favorites
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-m)
@@ -545,6 +546,7 @@ views:
           - type: custom:bubble-card
             card_type: sub-buttons
             modules:
+              - origami_base
               - origami_tiles
             grid_options:
               columns: full
@@ -809,6 +811,7 @@ views:
             card_type: separator
             name: Rooms
             modules:
+              - origami_base
               - origami_header
             origami_header:
               value_style: chip
@@ -1332,7 +1335,10 @@ views:
                 name: Living
                 icon: mdi:sofa
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1346,20 +1352,20 @@ views:
                   bottom:
                     - entity: sensor.climate_living_room
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.living_room_balcony_door
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_living_room
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.temperature}° |
                     - entity: sensor.climate_living_room
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.humidity}%
               - type: custom:bubble-card
                 card_type: button
@@ -1368,7 +1374,10 @@ views:
                 name: Bedroom
                 icon: mdi:bed
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1382,20 +1391,20 @@ views:
                   bottom:
                     - entity: sensor.climate_bedroom
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.bedroom_window
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_bedroom
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.temperature}° |
                     - entity: sensor.climate_bedroom
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.humidity}%
               - type: custom:bubble-card
                 card_type: button
@@ -1404,7 +1413,10 @@ views:
                 name: Office
                 icon: mdi:chair-rolling
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1418,15 +1430,15 @@ views:
                   bottom:
                     - entity: sensor.climate_office
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: sensor.climate_office
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.temperature}° |
                     - entity: sensor.climate_office
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.humidity}%
               - type: custom:bubble-card
                 card_type: button
@@ -1435,7 +1447,10 @@ views:
                 name: Bath
                 icon: mdi:bathtub
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1449,20 +1464,20 @@ views:
                   bottom:
                     - entity: sensor.climate_bathroom
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.bathroom_window
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_bathroom
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.temperature}° |
                     - entity: sensor.climate_bathroom
                       show_icon: false
-                      origami_room:
+                      origami_base:
                         name: ${attr.humidity}%
               - type: conditional
                 conditions:
@@ -1477,8 +1492,10 @@ views:
                   name: Kitchen
                   icon: mdi:chef-hat
                   modules:
-                    - origami_room
-                  origami_room:
+                    - origami_base
+                  origami_base:
+                    tile: true
+                    vertical: true
                     animate: true
                   button_action:
                     tap_action:
@@ -1493,20 +1510,20 @@ views:
                     bottom:
                       - entity: sensor.climate_kitchen
                         icon: mdi:circle
-                        origami_room:
-                          color: ${attr.color_code}
+                        origami_base:
+                          color: ${attr.color_code ?? "transparent"}
                       - entity: binary_sensor.kitchen_window
                         icon: mdi:window-closed-variant
-                        origami_room:
+                        origami_base:
                           icon:
                             'on': mdi:window-open-variant
                       - entity: sensor.climate_kitchen
                         show_icon: false
-                        origami_room:
+                        origami_base:
                           name: ${attr.temperature}° |
                       - entity: sensor.climate_kitchen
                         show_icon: false
-                        origami_room:
+                        origami_base:
                           name: ${attr.humidity}%
               - type: conditional
                 conditions:
@@ -1521,8 +1538,10 @@ views:
                   name: WC
                   icon: mdi:toilet
                   modules:
-                    - origami_room
-                  origami_room:
+                    - origami_base
+                  origami_base:
+                    tile: true
+                    vertical: true
                     animate: true
                   button_action:
                     tap_action:
@@ -1537,26 +1556,27 @@ views:
                     bottom:
                       - entity: sensor.climate_small_bathroom
                         icon: mdi:circle
-                        origami_room:
-                          color: ${attr.color_code}
+                        origami_base:
+                          color: ${attr.color_code ?? "transparent"}
                       - entity: binary_sensor.small_bathroom_window
                         icon: mdi:window-closed-variant
-                        origami_room:
+                        origami_base:
                           icon:
                             'on': mdi:window-open-variant
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
-                        origami_room:
+                        origami_base:
                           name: ${attr.temperature}° |
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
-                        origami_room:
+                        origami_base:
                           name: ${attr.humidity}%
 
           # More or fewer rooms
           - type: custom:bubble-card
             card_type: separator
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-l)
@@ -2386,6 +2406,7 @@ views:
                         card_type: separator
                         name: Lights
                         modules:
+                          - origami_base
                           - origami_header
                         origami_header:
                           icon_size: var(--icon-size-s)
@@ -2449,10 +2470,12 @@ views:
                           type: custom:bubble-card
                           card_type: sub-buttons
                           modules:
+                            - origami_base
                             - origami_button
+                          origami_base:
+                            animate: true
                           origami_button:
                             columns: 2
-                            animate: true
                             padding: var(--ha-space-1) 0 0 0
                             # The scene that was turned on last is highlighted
                             active: "{{ states('sensor.living_room_scene') }}"
@@ -2499,6 +2522,7 @@ views:
                         card_type: separator
                         name: Climate
                         modules:
+                          - origami_base
                           - origami_header
                         origami_header:
                           # The dot uses the comfort color
@@ -2639,6 +2663,7 @@ views:
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       background: false
@@ -2754,6 +2779,7 @@ views:
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       segmented: true
@@ -2850,6 +2876,7 @@ views:
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       scroll: true
@@ -2923,6 +2950,7 @@ views:
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       background: false

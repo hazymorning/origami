@@ -867,6 +867,7 @@ type: custom:bubble-card
 card_type: separator
 name: Favorites
 modules:
+  - origami_base
   - origami_header
 origami_header:
   icon_size: var(--icon-size-m)
@@ -886,12 +887,13 @@ sub_button:
 
 The second card contains the tiles.
 
-<!-- dashboard.yaml modules.0=origami_tiles -->
+<!-- dashboard.yaml modules.1=origami_tiles -->
 
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
+  - origami_base
   - origami_tiles
 grid_options:
   columns: full
@@ -1058,7 +1060,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-- Each room card is a Bubble card with the [Room module](bubble_card/README.md#room). Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the details for the room's light.
+- Each room card is a Bubble card with the [Base module](bubble_card/README.md#base), whose [`vertical` option](bubble_card/README.md#name-under-the-icon) places the name under the icon. Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the details for the room's light.
 - The icon is colored while the room's light is on.
 - Below the name, a colored dot shows the room's temperature, from blue when it is cold to red when it is hot. A window icon follows if the room has a window contact. The temperature and humidity come last.
 - The rooms header shows the average temperature and the number of open windows. Tap one of these values or the arrow to open or close the climate table.
@@ -1086,7 +1088,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). The room cards also need the [Room module](bubble_card/README.md#room). The rooms header is the first card.
+The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). All of them also need the [Base module](bubble_card/README.md#base). The rooms header and **All rooms** also need the [Header module](bubble_card/README.md#header). The rooms header is the first card.
 
 <!-- dashboard.yaml card_type=separator name=Rooms -->
 
@@ -1095,6 +1097,7 @@ type: custom:bubble-card
 card_type: separator
 name: Rooms
 modules:
+  - origami_base
   - origami_header
 origami_header:
   value_style: chip
@@ -1156,7 +1159,10 @@ entity: light.living_room
 name: Living
 icon: mdi:sofa
 modules:
-  - origami_room
+  - origami_base
+origami_base:
+  tile: true
+  vertical: true
 button_action:
   tap_action:
     action: navigate
@@ -1170,20 +1176,20 @@ sub_button:
   bottom:
     - entity: sensor.climate_living_room
       icon: mdi:circle
-      origami_room:
-        color: ${attr.color_code}
+      origami_base:
+        color: ${attr.color_code ?? "transparent"}
     - entity: binary_sensor.living_room_balcony_door
       icon: mdi:window-closed-variant
-      origami_room:
+      origami_base:
         icon:
           'on': mdi:window-open-variant
     - entity: sensor.climate_living_room
       show_icon: false
-      origami_room:
+      origami_base:
         name: ${attr.temperature}° |
     - entity: sensor.climate_living_room
       show_icon: false
-      origami_room:
+      origami_base:
         name: ${attr.humidity}%
 ```
 
@@ -1195,6 +1201,7 @@ sub_button:
 type: custom:bubble-card
 card_type: separator
 modules:
+  - origami_base
   - origami_header
 origami_header:
   icon_size: var(--icon-size-l)
@@ -2626,6 +2633,7 @@ cards:
             card_type: separator
             name: Lights
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-s)
@@ -2689,10 +2697,12 @@ cards:
               type: custom:bubble-card
               card_type: sub-buttons
               modules:
+                - origami_base
                 - origami_button
+              origami_base:
+                animate: true
               origami_button:
                 columns: 2
-                animate: true
                 padding: var(--ha-space-1) 0 0 0
                 # The scene that was turned on last is highlighted
                 active: "{{ states('sensor.living_room_scene') }}"
@@ -2739,6 +2749,7 @@ cards:
             card_type: separator
             name: Climate
             modules:
+              - origami_base
               - origami_header
             origami_header:
               # The dot uses the comfort color
@@ -2879,6 +2890,7 @@ cards:
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
+          - origami_base
           - origami_button
         origami_button:
           background: false
@@ -3045,6 +3057,7 @@ cards:
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
+          - origami_base
           - origami_button
         origami_button:
           segmented: true
@@ -3141,6 +3154,7 @@ cards:
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
+          - origami_base
           - origami_button
         origami_button:
           scroll: true
@@ -3214,6 +3228,7 @@ cards:
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
+          - origami_base
           - origami_button
         origami_button:
           background: false
@@ -4169,7 +4184,7 @@ origami_tiles:
 - State changes affect colors, but never sizes.
 - The room helpers return `?` instead of an empty value.
 - Elements that appear and disappear either take no space while they are hidden or keep their space and scale in and out.
-- Templates run in the browser where possible. The `${ }` templates in the Header, Tiles and Room modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
+- Templates run in the browser where possible. The `${ }` templates in the Base, Header and Tiles modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
 - The font loads from Home Assistant itself. A font that loads late makes all text redraw.
 - The main view uses grid cards instead of stack cards where it needs a wrapper.
 
