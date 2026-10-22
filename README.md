@@ -2915,10 +2915,10 @@ The TV pop-up is a remote control for the TV. It opens from **TV** in the naviga
 
 - The top card shows the TV, its current program and its power button. A separate speaker plays the TV's sound, and the card's slider sets the speaker's volume. A blurred picture of the current program appears behind the pop-up.
 - The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input, and it is filled while the speaker uses that input.
-- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number.
+- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number, and a tap on the icon turns the sound back on.
 - The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. Each button's `css_class` is the ID of its app, which the TV reports in its `app_id` attribute.
 - The remote has a back button, a home button and a round pad with an OK button.
-- All cards in the pop-up are Bubble cards. The row with the input and volume buttons and the row of apps are sub-buttons cards with the [Button](bubble_card/README.md#button) module. Its `segmented` option joins each group of buttons into one bar, and its `scroll` option lets the apps scroll. The remote is a sub-buttons card whose `styles` place the buttons in a grid and draw the round pad.
+- Every card inside the pop-up's vertical stack is a Bubble card. The row with the input and volume buttons, the row of apps and the remote are sub-buttons cards with the [Button](bubble_card/README.md#button) module. Its `segmented` option joins each group of buttons into one bar, and its `scroll` option lets the apps scroll. The remote's own `styles` place its buttons in a grid and draw the round pad.
 
 The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons need your TV's source names and app IDs.
 
@@ -3098,7 +3098,7 @@ cards:
                     data:
                       speaker: media_player.living_room
                       step: -0.1
-                # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes the speaker.
+                # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes or unmutes the speaker.
                 - name: >-
                     {% set s = 'media_player.living_room' %}{{ '–' if states(s) in ['unavailable', 'unknown', 'off']
                     else '' if state_attr(s, 'is_volume_muted')

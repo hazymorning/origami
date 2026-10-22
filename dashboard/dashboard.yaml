@@ -2807,7 +2807,7 @@ views:
                                 data:
                                   speaker: media_player.living_room
                                   step: -0.1
-                            # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes the speaker.
+                            # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes or unmutes the speaker.
                             - name: >-
                                 {% set s = 'media_player.living_room' %}{{ '–' if states(s) in ['unavailable', 'unknown', 'off']
                                 else '' if state_attr(s, 'is_volume_muted')

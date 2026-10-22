@@ -3,7 +3,7 @@ origami_button:
   version: "1.1.0"
   supported:
     - sub-buttons
-  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each one. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it. Separate several values with commas. A button whose entity is on is also highlighted. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect."
+  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each button that should show its name. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it. Separate several values with commas. A button whose entity is on is also highlighted. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect."
   editor:
     - name: background
       label: "Background"
@@ -117,7 +117,7 @@ origami_button:
         size: size || "var(--icon-size-2xs)",
         row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
         rev: { start: "flex-end", center: "center", end: "flex-start" }[align],
-        // on() lists the selectors of the active buttons, each with every ending it is given
+        // on() adds each suffix it receives to every active button's selector and joins the results into one list
         on: (...ends) => sel.flatMap((s) => ends.map((e) => s + e)).join(",\n    ")
       };
       return "";
