@@ -47,7 +47,7 @@ origami_speaker:
       const env = { hass, renderTemplate };
       const st = hass.states[entity];
       const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
-      const m = org.media(hass, entity, { players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: org.value(env, cfg.art, ctx), inputs: cfg.inputs, ignore: cfg.ignore_art });
+      const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
       const name = org.name(hass, entity, this.config.name);
       const pick = String(org.value(env, cfg.selected, ctx) ?? "").trim();
       const chosen = String(hass.states[pick]?.state ?? pick);
@@ -69,7 +69,7 @@ origami_speaker:
       const rtl = !!hass.translationMetadata?.translations?.[hass.language]?.isRTL;
       // Bubble Card hands the state line to a module whose code contains this exact assignment
       const next = s.dead ? org.word(hass, st)
-        : member ? (rtl ? "← " : "→ ") + org.name(hass, m.leader)
+        : member ? (rtl ? "← " : "→ ") + (org.rename(org.name(hass, m.leader)) ?? org.name(hass, m.leader))
         : m.input ? org.word(hass, m.show, "source")
         : m.playing ? (line || org.word(hass, m.show))
         : org.word(hass, m.show);
