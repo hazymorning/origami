@@ -6,7 +6,12 @@ These changes are in the `next` branch and come with the next release.
 
 ### New
 
-- The room cards are Bubble cards with the new Room module. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server.
+- The room cards are now Bubble cards with the new Room module. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server.
+
+### Upgrading
+
+1. Copy `bubble_card/modules/origami_room.yaml` to `/config/bubble_card/modules/`.
+2. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
 
 ## 2.0 · The Unfolding
 

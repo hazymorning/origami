@@ -1058,7 +1058,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-- Each room card is a Bubble card with the [Room module](bubble_card/README.md#room). Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the more-info dialog of the room's light.
+- Each room card is a Bubble card with the [Room module](bubble_card/README.md#room). Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the details for the room's light.
 - The icon is colored while the room's light is on.
 - Below the name, a colored dot shows the room's temperature, from blue when it is cold to red when it is hot. A window icon follows if the room has a window contact. The temperature and humidity come last.
 - The rooms header shows the average temperature and the number of open windows. Tap one of these values or the arrow to open or close the climate table.
@@ -1073,7 +1073,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 | Entity | Purpose |
 | --- | --- |
-| `light.<room>` | The icon color |
+| `light.<room>` | The icon color, and the details that open when you hold the card |
 | `sensor.climate_<room>` | The dot color, temperature and humidity, from the [helpers](#helpers) |
 | `binary_sensor.<room>_window` | The window icon. In the living room, this is a balcony door. |
 | `sensor.climate_home` | The average temperature and the open windows in the header |
@@ -4168,7 +4168,7 @@ These techniques appear in several places in the dashboard. The first three are 
 
 <br>
 
-The favorites, the section headers and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
+The favorites, the section headers, the room cards and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
 
 ```yaml
 type: custom:bubble-card
@@ -4316,30 +4316,29 @@ buttons:
 
 <br>
 
-Give the row `position: relative`. An invisible button covers the whole row and receives every tap. All other buttons get `pointer-events: none`.
+Give the row `position: relative`. An invisible first button with `position: absolute` and `inset: 0px` covers the whole row and receives every tap that no other button takes. Buttons without a tap action of their own get `pointer-events: none`, so a tap on them reaches the invisible button. The server card in the menu works this way, and its CPU and RAM values keep their own tap actions.
 
 ```yaml
 type: custom:paper-buttons-row
 styles:
   position: relative
-base_config:
-  styles:
-    button:
-      pointer-events: none
 buttons:
-  - entity: light.living_room
-    layout: name
-    name: false
+  - layout: name
+    name: ' '
     tap_action:
       action: navigate
-      navigation_path: '#popup_living_room'
+      navigation_path: '#popup_server'
     styles:
       button:
         position: absolute
         inset: 0px
-        z-index: 3
-        pointer-events: all
-        border-radius: var(--ha-card-border-radius)
+  - layout: icon
+    icon: mdi:check-bold
+    tap_action:
+      action: none
+    styles:
+      button:
+        pointer-events: none
 ```
 
 </details>
@@ -4495,7 +4494,7 @@ Instead of copying the font files, you can add `https://fonts.googleapis.com/css
 Origami was built by hand over many years. Many of its details have reasons that the YAML alone does not show, so an AI assistant that guesses instead of reading usually gets them wrong. The repository is also large, and adapting it to your home takes time, even with AI.
 
 - Use the most capable model that you have access to, and turn on extended thinking if your app offers it.
-- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section.
+- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section. For Bubble cards, such as the room cards, it should also read the [module reference](bubble_card/README.md).
 - Ask it to follow the order in [How Origami is built](#how-origami-is-built). Otherwise, it often writes a new custom card or uses card-mod, because that is easier than learning how Bubble Card and the modules work.
 - Give it your real entity IDs. The assistant cannot see your Home Assistant, so it invents any ID that you do not give it.
 - Ask for the changed cards only, and save a copy of your configuration before you paste anything.

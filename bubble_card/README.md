@@ -50,13 +50,13 @@ Give button cards `rows: 1.375` and compact cards `rows: 1`, including cards in 
 
 Color mostly shows that a device is on. The Base module gives the icon Home Assistant's state color for the entity. On a tile, the area behind the icon uses the theme's `tint`, which mixes the same color into the card background. On a regular card, Base mixes the color into the gray fill behind the icon. Lights are amber, heating is deep orange, media is light blue, fans are cyan and vacuums are teal. Switches and all other entities without a color of their own are green.
 
-Base only colors entities whose domain has a state color in Home Assistant. The Tiles module colors every tile whose entity is on, and the Room module colors its icon while the card's entity is on. The Light module also colors its slider, and the Button module's `lamp` style tints the active button.
+Base only colors entities whose domain has a state color in Home Assistant. The Tiles module colors every tile whose entity is on, and the Room module colors a room card's icon while its entity is on. The Light module also colors its slider, and the Button module's `lamp` style tints the active button.
 
 Controls stay neutral. An active control uses `fill-active`, which is the text color used as a fill. This fill is dark in light mode and light in dark mode, like Home Assistant's switches when they are on.
 
 - A sub-button with `show_background: true` is filled while its entity, or the card's entity, is on and has a state color.
 - Sub-buttons that navigate, open the more-info dialog or open a URL stay neutral, unless they have `css_class: accent`.
-- A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral.
+- A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a room card, such a sub-button passes the tap to the card instead.
 - The Fan module fills its power button and the button for the current speed. Thermostat buttons stay neutral.
 
 </details>
@@ -662,12 +662,14 @@ More tile examples are in the Favorites section of [`dashboard.yaml`](../dashboa
 
 The Room module turns a button card into a room card. The icon is at the top left, and the name is below it. The bottom sub-buttons form a line of small icons and values under the name, and the main sub-buttons are at the top right. The room cards in the dashboard use this module.
 
+<img width="800" alt="The rooms header and four room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/rooms.webp">
+
 <details>
 <summary>Options and example</summary>
 
 <br>
 
-A tap anywhere on the card runs the button action, and a hold runs the hold action. A sub-button without a tap, hold or double tap action of its own lets the tap through to the card. On other Bubble cards, such a sub-button opens the more-info dialog. Dropdowns and sliders keep working.
+A tap anywhere on the card runs the button action, and a hold runs the hold action. On a card with `button_type: name` and no `tap_action` of its own, this includes a tap on the icon. Otherwise, the icon keeps its own tap action. A sub-button without a tap, hold or double tap action of its own lets the tap through to the card. On other Bubble cards, such a sub-button opens the more-info dialog. Dropdowns and sliders keep working.
 
 The icon has the card background and a shadow. While the card's entity is on, the icon shows the entity's state color, and the area behind it uses the theme's `tint`. The card sets its own height, so it needs no `rows`.
 
@@ -679,7 +681,7 @@ Each sub-button can have its own `origami_room` key. These keys accept the same 
 
 | Key | Description |
 | --- | --- |
-| `name` | The sub-button shows this text instead of its own content. |
+| `name` | The sub-button shows this text instead of its own name or state. The icon stays unless `show_icon` is `false`. |
 | `icon` | The sub-button shows this icon. |
 | `color` | The sub-button's icon has this color. |
 
