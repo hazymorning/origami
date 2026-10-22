@@ -413,7 +413,7 @@ The Media options go under `origami_media:`.
 | `collapse` | `false` | The slider at the bottom is hidden while the speaker plays nothing and uses no input. With the TV layout, it is hidden while the TV is off. |
 | `solid_controls` | `false` | Bubble Card's play and pause button is filled while media plays, and its power button is filled while the player is on. This option has no effect on sub-buttons. |
 | `leader` | | The group leader's entity ID, for integrations that do not report `group_members`. It accepts a template. |
-| `art` | | The cover's address, for integrations that report no picture. It accepts a template. |
+| `art` | | The cover's address, for integrations that report no picture. It accepts a template, in which `entity` is the speaker whose music the card shows. For a group member, that is the group leader. |
 | `inputs` | | More source names that count as inputs. Bluetooth, optical, HDMI, line in and similar names count already. |
 | `icons` | | A map from a state or an input to an icon, such as `playing`, `paused`, `off`, `bluetooth`, `tv` or `line` |
 
@@ -532,7 +532,7 @@ The sub-button with `css_class: readout` shows the volume in Home Assistant's fo
 | `selected` | An `input_select`, a `select` or a template. The row whose entity ID or name matches its state gets a stronger fill, such as `input_select.selected_speaker` from the [package](../packages/origami.yaml). |
 | `players` | Other media players for the same speaker, such as a Music Assistant player. The first one that plays gives the title, the artist and the picture. |
 | `leader` | The group leader's entity ID, for integrations that do not report `group_members`. It accepts a template. |
-| `art` | The cover's address, for integrations that report no picture. It accepts a template. |
+| `art` | The cover's address, for integrations that report no picture. It accepts a template, in which `entity` is the speaker whose music the row shows. For a group member, that is the group leader. |
 | `ignore_art` | Texts in the addresses of pictures that never show, as a list or as one text with commas |
 | `inputs` | More source names that count as inputs |
 | `icons` | A map from a state or an input to an icon, as in the Media module |
@@ -545,7 +545,7 @@ origami_speaker:
     - placeholder
 ```
 
-Groups come from Home Assistant's `group_members` attribute, as in the Media module. Tapping a row does not select the speaker. Give each row a tap action that sets your speaker selection.
+Groups come from Home Assistant's `group_members` attribute, as in the Media module. A member's row shows its leader's name, and Base's `words` option can shorten it, such as `Living room: Living`. Tapping a row does not select the speaker. Give each row a tap action that sets your speaker selection.
 
 </details>
 
@@ -835,6 +835,7 @@ Base puts its helpers on `card._org`, so a module that is listed after Base can 
 | `media(hass, id, options)` | A media player's group, music, input, cover and app, as Media and Speaker Select show them |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size)` and `icon(element, icon)` | The rules that show a text or an icon in a sub-button. Without an icon, `icon()` gives the element its own icon back. |
 | `title(element, text, scroll)` and `write(element, text)` | Writers for lines that Bubble Card does not hand over, such as `.bubble-title` |
+| `rename(text)` | The card's own word for a text from its `words` option, or `null` |
 | `str(value)` | A CSS string that Bubble Card's cleaner leaves as it is |
 
 Bubble Card hands the state line to a module whose code contains `card.querySelector('.bubble-state').innerText =` word for word. It then keeps the line on screen and stops writing it. So a module that writes the state line uses this exact assignment in its own code and takes the text from `word()` or `state()`. A module that fills its sub-buttons itself sets `data-org-fill="own"` on the card, and a module that draws the background of a media card itself sets `data-org-bg="own"`. Base then leaves these parts alone, without knowing the module's name.

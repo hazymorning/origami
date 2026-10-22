@@ -55,7 +55,7 @@ origami_media:
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];
       const ctx = { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} };
-      const m = org.media(hass, entity, { players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: org.value(env, cfg.art, ctx), inputs: cfg.inputs });
+      const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs });
       const tv = cfg.layout === "tv";
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
       const answers = (e) => e && !["unavailable", "unknown"].includes(e.state);

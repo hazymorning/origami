@@ -167,12 +167,18 @@ origami_base:
         }
       };
       const words = cfgB.words && typeof cfgB.words === "object" ? cfgB.words : {};
+      // rename() gives a text the card's own word for it, such as a shorter name for a speaker
+      const rename = (text) => {
+        const key = String(text ?? "").toLowerCase();
+        const own = Object.keys(words).find((k) => (alias[k.toLowerCase()] ?? k.toLowerCase()) === key);
+        return own === undefined ? null : String(words[own]);
+      };
       const word = (hass, st, attr, val) => {
         const raw = val ?? (attr ? st?.attributes?.[attr] : st ? st.state : "unavailable");
         if (raw === undefined || raw === null || raw === "") return "";
         const key = String(raw).toLowerCase();
-        const own = Object.keys(words).find((k) => (alias[k.toLowerCase()] ?? k.toLowerCase()) === key);
-        if (own !== undefined) return String(words[own]);
+        const own = rename(raw);
+        if (own !== null) return own;
         const domain = String(st?.entity_id ?? "").split(".")[0];
         const lang = String(hass.locale?.language ?? hass.language ?? "").split("-")[0];
         const brief = short[lang]?.[domain + "." + (attr ?? "state") + "." + key];
@@ -239,16 +245,18 @@ origami_base:
         const player = twins.find((p) => busy.includes(p.state)) ?? show;
         const source = String(show?.attributes?.source ?? "").trim();
         const src = source.toLowerCase();
-        const own = list(o.inputs);
+        const extra = list(o.inputs);
         const off = !show || ["off", "standby", "unavailable", "unknown"].includes(show.state);
-        const input = off ? null : inputs.bluetooth.includes(src) ? "bluetooth" : inputs.tv.includes(src) ? "tv" : inputs.line.includes(src) || own.includes(src) ? "line" : null;
+        const input = off ? null : inputs.bluetooth.includes(src) ? "bluetooth" : inputs.tv.includes(src) ? "tv" : inputs.line.includes(src) || extra.includes(src) ? "line" : null;
         const pa = player?.attributes ?? {};
         const title0 = String(pa.media_title ?? "").trim();
         // A title that is a stream address or the source's own name says nothing about the music
         const title = /^[a-z][a-z0-9+.-]*:\/\//i.test(title0) || title0.toLowerCase() === src ? "" : title0;
         const artist = String(pa.media_artist ?? "").trim();
         const live = busy.includes(player?.state) || player?.state === "on";
-        const raw = picture(o.art, []) ?? picture(pa.entity_picture, list(o.ignore));
+        // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
+        const cover = o.env ? value(o.env, o.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} }) : o.art;
+        const raw = picture(cover, []) ?? picture(pa.entity_picture, list(o.ignore));
         if (raw && input) stale.set(plain(raw), title);
         const art = raw && !input && live && (title || artist || pa.media_album_name) && stale.get(plain(raw)) !== title ? raw : null;
         const readable = (v) => typeof v === "string" && v && !(v.includes(".") && !v.includes(" ")) ? v : null;
@@ -276,6 +284,7 @@ origami_base:
         str,
         num,
         word,
+        rename,
         links,
         act,
         matches,
