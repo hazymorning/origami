@@ -1,97 +1,98 @@
 origami_media:
   name: "Origami • Media"
-  version: "4.5.4"
+  version: "5.0.0"
   supported:
     - media-player
-  description: "The Media module styles media player cards together with Base. Turn on Compact for slim rows. With an artwork entity or an app entity, the card is in TV mode. Without either, the card is in speaker mode. In TV mode, the card's entity decides whether the TV is on, and the app entity takes over when that entity is unavailable. The artwork entity adds the title, the app and a picture while it is playing. Cards with a slider at the bottom need rows set to 2.2. When the Base option for filled play and power buttons is on, the play button is filled while media is playing, and the power button is filled while the player is on."
+  description: "The Media module styles media player cards together with Base. With the speaker layout, the card shows the title and the artist while music plays, the input while the speaker uses one, and the cover in the icon. With the TV layout, the state line shows the title, the app or the state, and the card's entity decides whether the TV is on. Players lists other media players for the same device, such as a Cast or Music Assistant player, and the first one that plays gives the title, the artist and the picture. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID, and Picture gives the cover's address. Inputs adds source names that count as inputs. Icons replaces the icon for a state or an input, such as playing, off, bluetooth or tv. The words come from Home Assistant, and Base's words option shortens any of them. With Hide the slider when inactive, the card shrinks to its first row while nothing plays. With Filled play and power buttons, the play button is filled while media plays, and the power button is filled while the player is on. Cards with a slider at the bottom need rows set to 2.2."
   editor:
-    - name: compact
-      label: Compact
+    - name: layout
+      label: "Layout"
       selector:
-        boolean: {}
+        select:
+          mode: dropdown
+          options:
+            - label: Speaker
+              value: speaker
+            - label: TV
+              value: tv
+      default: speaker
+    - name: players
+      label: "Players (other media players for the same device)"
+      selector:
+        entity:
+          domain: media_player
+          multiple: true
     - name: collapse
       label: "Hide the slider when inactive"
       selector:
         boolean: {}
-    - name: art_entity
-      label: "Artwork entity (optional, enables TV mode)"
+    - name: solid_controls
+      label: "Filled play and power buttons"
       selector:
-        entity:
-          domain: media_player
-    - name: app_entity
-      label: "App entity (optional, enables TV mode)"
+        boolean: {}
+    - name: leader
+      label: "Leader (for groups without group_members)"
       selector:
-        entity:
-          domain: media_player
+        template: {}
+    - name: art
+      label: "Picture (the cover's address, if the player has none)"
+      selector:
+        template: {}
+    - name: inputs
+      label: "Inputs (more source names that count as inputs)"
+      selector:
+        text:
+          multiple: true
+    - name: icons
+      label: "Icons (a map from a state or an input to an icon)"
+      selector:
+        object: {}
   code: |
     ${(() => {
-      const s = hass.states;
+      const org = card._org;
+      if (org?.hass !== hass) throw new Error("origami_media needs origami_base 11 or later, listed before it");
       const cfg = this.config.origami_media ?? {};
-      const ent = s[entity] ?? {};
-      const artEnt = cfg.art_entity ? (s[cfg.art_entity] ?? null) : null;
-      const appEnt = cfg.app_entity ? (s[cfg.app_entity] ?? null) : null;
-      const tvMode = !!(cfg.art_entity || cfg.app_entity);
-      const live = (e) => e && e.state && !["unavailable", "unknown"].includes(e.state) ? e.state : null;
-      const entSt = live(ent);
-      const appSt = live(appEnt);
-      const artSt = live(artEnt);
-      const castActive = ["playing", "paused", "buffering"].includes(artSt);
-      const power = entSt ? !["off", "standby"].includes(entSt)
-        : appSt ? appSt !== "off"
-        : artSt ? castActive
-        : null;
-      const masterId = s["sensor.linkplay_master"]?.state;
-      const base = !tvMode && ent.attributes?.group_role === "slave" && masterId ? (s[masterId] ?? ent) : ent;
-      const lpArt = s["sensor.linkplay_" + ((entity ?? "").split(".")[1] ?? "")]?.attributes?.entity_picture;
-      const tvArt = power !== true ? null
-        : [castActive ? artEnt : null, appSt ? appEnt : null, entSt ? ent : null]
-          .map((e) => e?.attributes?.entity_picture)
-          .find((p) => typeof p === "string" && p.length > 0);
-      const art = tvMode ? tvArt : lpArt;
-      // Speakers name their TV input "Optical In", "optical-in" or "optical"
-      const source = (e) => String(e?.attributes?.source ?? "").toLowerCase().replace(/^optical[\s-]in$/, "optical");
-      const src = source(base);
-      card._orgMC = !!cfg.compact;
+      const env = { hass, renderTemplate };
+      const ent = hass.states[entity];
+      const ctx = { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} };
+      const m = org.media(hass, entity, { players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: org.value(env, cfg.art, ctx), inputs: cfg.inputs });
+      const tv = cfg.layout === "tv";
+      // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
+      const answers = (e) => e && !["unavailable", "unknown"].includes(e.state);
+      const twins = [].concat(cfg.players ?? []).map((p) => hass.states[p]).filter(answers);
+      const power = answers(ent) ? !["off", "standby"].includes(ent.state) : twins.length ? twins.some((p) => !["off", "standby"].includes(p.state)) : null;
       card._orgM = {
-        de: String(hass.locale?.language ?? hass.language ?? "").startsWith("de"),
-        ent,
-        base,
-        src,
-        tvMode,
-        artEnt,
-        appEnt,
-        entSt,
-        appSt,
-        artSt,
-        castActive,
+        tv,
+        m,
         power,
+        on: tv ? power === true : ["playing", "on"].includes(m.show?.state) || m.input !== null,
+        playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
+        art: m.art && (!tv || power) ? 'url(' + org.str(m.art) + ')' : "none",
         collapse: !!cfg.collapse,
-        solid: !!(this.config.origami_base?.solid_controls ?? cfg.solid_controls),
-        entSrc: source(ent),
-        art: typeof art === "string" ? 'url("' + art + '")' : "none",
-        on: tvMode ? power === true : (["playing", "on"].includes(base.state) || ["bluetooth", "optical"].includes(src)),
-        playing: ["playing", "buffering"].includes(tvMode ? (entSt ?? appSt ?? "") : (base.state ?? "")),
-        physical: ["bluetooth", "optical", "optical-in", "line in", "line-in", "hdmi", "coaxial", "tv", "aux", "phono"].includes(src)
+        solid: !!cfg.solid_controls,
+        rest: tv ? !power : !ent || ["off", "standby", "idle", "unavailable", "unknown"].includes(ent.state)
       };
+      const c = card._orgM;
+      // Bubble Card hands the state line to a module whose code contains this exact assignment
+      const line = tv
+        ? (power === null ? org.word(hass, ent ?? null, null, ent?.state ?? "unavailable")
+          : !power ? org.word(hass, ent, null, "off")
+          : m.title || (m.app ? org.word(hass, m.appEntity, "app_name", m.app) : "") || org.word(hass, m.player ?? ent, null, m.player?.state === "paused" ? "paused" : "on"))
+        : m.input ? org.word(hass, m.show, "source") : org.word(hass, m.show);
+      if (card.querySelector('.bubble-state') && card.querySelector('.bubble-state').innerText !== line) card.querySelector('.bubble-state').innerText = line;
+      if (!tv) {
+        org.icon(icon, m.icon(cfg.icons));
+        const scroll = this.config.scrolling_effect !== false;
+        org.title(card.querySelector(".bubble-title"), !m.input && m.show?.state === "playing" && m.title ? m.title : org.name(hass, entity, this.config.name), scroll);
+        org.title(card.querySelector(".bubble-artist"), m.input ? org.word(hass, m.show, "source")
+          : m.show?.state === "playing" && m.artist ? m.artist : org.word(hass, m.show), scroll);
+      }
       return "";
     })()}
     ha-card {
       --org-color: var(--state-media_player-active-color);
       --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-tile-bg, var(--org-inset))"};
       --org-chip-ink: ${card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)"};
-      ${card._orgMC ? "--org-row-height: var(--control-height);" : ""}
-      ${card._orgMC ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._orgMC ? "--org-tile-radius: calc(var(--radius-small) + 2px);" : ""}
-      ${card._orgMC ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
-      ${card._orgMC ? "--org-icon-size: var(--icon-size-xs);" : ""}
-      ${card._orgMC ? "--org-name-size: var(--ha-font-size-m);" : ""}
-      ${card._orgMC ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
-      ${card._orgMC ? "--org-state-display: none;" : ""}
-      ${card._orgMC ? "--org-text-max: 100%;" : ""}
-      ${card._orgMC ? "--org-toggle-w: var(--tile-size);" : ""}
-      ${card._orgMC ? "--org-toggle-h: var(--icon-size-l);" : ""}
-      ${card._orgMC ? "--org-toggle-knob: var(--icon-size-s);" : ""}
-      ${card._orgMC ? "--org-toggle-gap: calc((var(--org-row-height) - var(--org-toggle-h)) / 2);" : ""}
     }
     ${card._orgM.collapse && !card._orgM.on ? `
     .bubble-container,
@@ -108,7 +109,7 @@ origami_media:
     ` : ""}
     .bubble-icon-container {
       position: relative;
-      pointer-events: none;
+      ${this.config.tap_action ? "" : "pointer-events: none;"}
     }
     .bubble-icon-container,
     .bubble-main-icon-container {
@@ -132,24 +133,18 @@ origami_media:
     .bubble-media-player .bubble-entity-picture {
       display: none !important;
     }
+    ${card._orgM.rest ? ".bubble-entity-picture { display: none !important; }" : ""}
     .bubble-main-icon-container .bubble-icon {
       color: var(--org-chip-ink) !important;
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
-      opacity: ${(() => {
-        if (card._orgM.tvMode) return card._orgM.art !== "none" ? 0 : 1;
-        const a = card._orgM.ent.attributes ?? {};
-        const dlna = hass.states[entity + "_dlna"]?.attributes ?? {};
-        if (card._orgM.entSrc === "optical" || a.entity_picture) return 1;
-        if (dlna.entity_picture && dlna.source?.toLowerCase() === "dlna") return 0;
-        return 1;
-      })()} !important;
+      opacity: ${card._orgM.art !== "none" ? 0 : 1} !important;
     }
     .bubble-name,
     .bubble-title,
     .bubble-state,
     .bubble-artist {
       display: block !important;
-      max-width: var(--org-text-max, 150px) !important;
+      max-width: var(--org-text-max, 100%) !important;
       margin: 0 !important;
       line-height: var(--ha-line-height-normal);
       white-space: nowrap !important;
@@ -163,7 +158,7 @@ origami_media:
     .bubble-sub-button-container {
       gap: var(--ha-space-2) !important;
       padding: 0;
-      margin-right: var(--ha-space-4);
+      margin-inline-end: var(--ha-space-4);
     }
     .bubble-sub-button,
     .bubble-media-button {
@@ -196,118 +191,4 @@ origami_media:
       --icon-primary-color: var(--text-color-active) !important;
     }
     ` : ""}
-    ${(card._orgM.tvMode ? !card._orgM.on : ["off", "standby", "idle", "unavailable", "unknown"].includes(hass.states[entity]?.state)) ? ".bubble-entity-picture { display: none !important; }" : ""}
-    ${card._orgM.tvMode ? ".bubble-artist { display: none !important; }" : ""}
-    ${(() => {
-      if (card._orgM.tvMode) return "";
-      const m = card._orgM;
-      const next = m.entSrc === "bluetooth" ? "mdi:speaker-bluetooth"
-        : m.entSrc === "optical" ? "mdi:television-speaker"
-        : ["off", "standby", "unavailable", "unknown"].includes(m.ent.state) ? "mdi:speaker-off"
-        : m.ent.state === "playing" ? "mdi:speaker-pause"
-        : "mdi:speaker";
-      if (icon.getAttribute("icon") !== next) icon.setAttribute("icon", next);
-      return "";
-    })()}
-    ${(() => {
-      if (card._orgM.tvMode) return "";
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const m = card._orgM;
-      const map = m.de ? {
-        playing: "Wiedergabe", paused: "Aus", idle: "Aus", off: "Aus",
-        standby: "Aus", unavailable: "Fehler", unknown: "Fehler"
-      } : {
-        playing: "Playing", paused: "Off", idle: "Off", off: "Off",
-        standby: "Off", unavailable: "Error", unknown: "Error"
-      };
-      const next = m.entSrc === "optical" ? (m.de ? "TV-Eingang" : "TV input")
-        : m.entSrc === "bluetooth" ? "Bluetooth"
-        : map[m.ent.state] ?? m.ent.state ?? "";
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
-    ${(() => {
-      if (card._orgM.tvMode) return "";
-      const el = card.querySelector(".bubble-title");
-      if (!el) return "";
-      const m = card._orgM;
-      const names = {
-        Wohnzimmer: "Wohnzi", Potterbox: "Potti", Mandaloffice: "Anlage",
-        Hedwig: "Hedwig", Mandalotsen: "Lotsen", Gandalf: "Gandalf"
-      };
-      const fn = m.ent.attributes?.friendly_name;
-      const short = names[fn] ?? fn ?? (m.de ? "Lautsprecher" : "Speaker");
-      const title = m.base.attributes?.media_title ?? "";
-      const next = !m.physical && m.base.state === "playing" && title && !title.includes("flow/")
-        ? title
-        : short;
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
-    ${(() => {
-      if (card._orgM.tvMode) return "";
-      const el = card.querySelector(".bubble-artist");
-      if (!el) return "";
-      const m = card._orgM;
-      const a = m.base.attributes ?? {};
-      const map = m.de ? {
-        playing: "Wiedergabe", paused: "Pausiert", buffering: "Puffert", on: "An",
-        off: "Aus", idle: "Inaktiv", standby: "Standby", unavailable: "Nicht verfügbar"
-      } : {
-        playing: "Playing", paused: "Paused", buffering: "Buffering", on: "On",
-        off: "Off", idle: "Idle", standby: "Standby", unavailable: "Unavailable"
-      };
-      const next = m.physical ? (a.source ?? "External Input")
-        : m.base.state === "playing" && a.media_artist ? a.media_artist
-        : map[m.base.state] ?? m.base.state ?? "";
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
-    ${(() => {
-      if (!card._orgM.tvMode) return "";
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const m = card._orgM;
-      const appMap = {
-        "Prime Video": "Prime",
-        "com.amazon.amazonvideo.livingroom": "Prime",
-        "Netflix": "Netflix",
-        "Google Cast": "Cast",
-        "Play Store": "Play Store",
-        "Android TV Launcher": "Launcher",
-        "com.liskovsoft.smarttubetv.beta": "YouTube",
-        "de.prosiebensat1digital.seventv": "Joyn",
-        "org.dtvkit.inputsource": "TV",
-        "com.droidlogic.tvinput": "TV",
-        "com.android.vending:background": "Play Store",
-        "com.android.systemui": "System",
-        "com.google.android.gms": "System",
-        "com.google.android.gms.unstable": "System",
-        "com.google.android.gms.persistent": "System",
-        "com.google.process.gapps": "System",
-        "com.google.process.gservices": "System",
-        "com.google.android.katniss:search": "Search",
-        "com.google.android.katniss:interactor": "Assistant"
-      };
-      const readable = (app) => {
-        if (typeof app !== "string" || !app) return null;
-        const mapped = appMap[app];
-        if (mapped) return mapped === "System" ? null : mapped;
-        return app.includes(".") && !app.includes(" ") ? null : app;
-      };
-      const appOf = (e) => readable(e?.attributes?.app_name) ?? readable(e?.attributes?.app_id);
-      const castTitle = m.castActive ? m.artEnt?.attributes?.media_title : null;
-      const w = m.de
-        ? { on: "An", off: "Aus", error: "Fehler", paused: "Pause" }
-        : { on: "On", off: "Off", error: "Error", paused: "Paused" };
-      const next = m.power === null ? w.error
-        : !m.power ? w.off
-        : (typeof castTitle === "string" && castTitle ? castTitle : null)
-        ?? (m.castActive ? appOf(m.artEnt) : null)
-        ?? (m.appSt ? appOf(m.appEnt) : null)
-        ?? (m.entSt ? appOf(m.ent) : null)
-        ?? (m.artSt === "paused" || m.appSt === "paused" ? w.paused : w.on);
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
+    ${card._orgM.tv ? ".bubble-artist { display: none !important; }" : ""}

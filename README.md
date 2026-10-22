@@ -953,6 +953,7 @@ sub_button:
       origami_tiles:
         state: Dinner
         image: ${attr.recipe?.image}
+        image_size: 230%
       visibility:
         - condition: state
           entity: sensor.dinner
@@ -1126,6 +1127,7 @@ sub_button:
       origami_header:
         icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
         color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
+        name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
         background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
       tap_action:
         action: perform-action
@@ -2440,9 +2442,10 @@ shadow_opacity: '12'
 hide_backdrop: false
 modules:
   - default
+  - origami_base
   - origami_popup
 origami_popup:
-  subtitle_style: text
+  value_style: text
 # Hides the scenes again when you close the pop-up
 close_action:
   action: perform-action
@@ -2475,8 +2478,9 @@ cards:
                 - origami_base
                 - origami_media
               origami_media:
-                art_entity: media_player.living_room_tv_cast
-                app_entity: media_player.living_room_tv
+                layout: tv
+                players:
+                  - media_player.living_room_tv_cast
               hide:
                 power_button: true
                 previous_button: true
@@ -2527,6 +2531,9 @@ cards:
                 - origami_media
               origami_base:
                 group: true
+                # Home Assistant's word for this source is the source's own name
+                words:
+                  optical in: TV input
               hide:
                 power_button: true
                 previous_button: true
@@ -2752,8 +2759,7 @@ cards:
               - origami_base
               - origami_header
             origami_header:
-              # The dot uses the comfort color
-              icon_color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
+              icon_size: var(--dot-size)
             grid_options:
               rows: auto
             sub_button:
@@ -2764,6 +2770,8 @@ cards:
                   show_background: false
                   origami_header:
                     name: ${attr.temperature}° / ${attr.humidity} %
+                    # The dot uses the comfort color
+                    color: ${attr.color_code ?? "transparent"}
                   tap_action:
                     action: more-info
           - type: conditional
@@ -2835,9 +2843,7 @@ cards:
                         entity_id: fan.living_room
                       data:
                         percentage: 100
-              state_content:
-                - state
-                - percentage
+              state_content: percentage
               rows: 1.375
           - type: custom:bubble-card
             card_type: button
@@ -2851,6 +2857,11 @@ cards:
             origami_base:
               group: true
               tile: true
+            origami_climate:
+              icons:
+                heating: mdi:radiator
+                preheating: mdi:radiator
+                'off': mdi:radiator-off
             scrolling_effect: false
             tap_action:
               action: more-info
@@ -2926,7 +2937,7 @@ The TV pop-up is a remote control for the TV. It opens from **TV** in the naviga
 <br>
 
 - The top card shows the TV, its current program and its power button. A separate speaker plays the TV's sound, and the card's slider sets the speaker's volume. A blurred picture of the current program appears behind the pop-up.
-- The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input, and it is filled while the speaker uses that input.
+- The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input. Its tap selects that source, so it is filled while the speaker uses that input.
 - The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number, and a tap on the icon turns the sound back on.
 - The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. Each button's `css_class` is the ID of its app, which the TV reports in its `app_id` attribute.
 - The remote has a back button, a home button and a round pad with an OK button.
@@ -2977,6 +2988,7 @@ popup_mode: adaptive-dialog
 with_bottom_offset: true
 performance_mode: performance
 modules:
+  - origami_base
   - origami_popup
 # A blurred picture of the current program appears behind the pop-up
 styles: |-
@@ -3020,8 +3032,9 @@ cards:
           - origami_media
           - '!default'
         origami_media:
-          art_entity: media_player.living_room_tv_cast
-          app_entity: media_player.living_room_tv
+          layout: tv
+          players:
+            - media_player.living_room_tv_cast
         scrolling_effect: false
         slider_live_update: false
         cover_background: false
@@ -3063,8 +3076,6 @@ cards:
           segmented: true
           icon_size: var(--icon-size-m)
           padding: var(--ha-space-2) 0
-          # The TV button is filled while the speaker uses its TV input
-          active: "{{ 'TV' if (state_attr('media_player.living_room', 'source') | lower) == 'optical in' else '' }}"
         sub_button:
           main: []
           bottom:
@@ -3079,6 +3090,7 @@ cards:
                       entity_id: remote.living_room_tv
                     data:
                       command: TV_INPUT
+                # Filled while the speaker uses this source, because its tap selects it
                 - name: TV
                   show_name: true
                   tap_action:
@@ -3428,6 +3440,7 @@ hide_backdrop: false
 popup_mode: fit-content
 with_bottom_offset: true
 modules:
+  - origami_base
   - origami_popup
 styles: '.bubble-pop-up-container { mask-image: none !important; }'
 # Hides the timer row again when you close the pop-up
@@ -4089,7 +4102,7 @@ These techniques appear in several places in the dashboard. The first three are 
 
 <br>
 
-The favorites, the section headers, the room cards and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
+The favorites, the section headers, the room cards and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light colors the slider. Bubble Card itself writes the state and the brightness into the state line, in Home Assistant's words. These are the card's first lines.
 
 ```yaml
 type: custom:bubble-card
@@ -4103,6 +4116,9 @@ modules:
   - origami_light
 origami_base:
   tile: true
+state_content:
+  - state
+  - brightness
 ```
 
 The [module reference](bubble_card/README.md) explains every module and its options.
@@ -4184,7 +4200,7 @@ origami_tiles:
 - State changes affect colors, but never sizes.
 - The room helpers return `?` instead of an empty value.
 - Elements that appear and disappear either take no space while they are hidden or keep their space and scale in and out.
-- Templates run in the browser where possible. The `${ }` templates in the Base, Header and Tiles modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
+- Templates run in the browser where possible. The `${ }` templates in the Origami modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
 - The font loads from Home Assistant itself. A font that loads late makes all text redraw.
 - The main view uses grid cards instead of stack cards where it needs a wrapper.
 
@@ -4379,7 +4395,7 @@ In a browser, open `/local/fonts/montserrat.css` on your Home Assistant server, 
 
 <br>
 
-The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with the Header or Tiles module also looks plain while `origami_base` is not the first entry under its `modules`.
+The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with an Origami module also looks plain while `origami_base` is not the first entry under its `modules`.
 
 </details>
 

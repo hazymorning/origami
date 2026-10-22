@@ -1,6 +1,6 @@
 origami_slider:
-  name: Origami • Slider
-  version: "1.3.1"
+  name: "Origami • Slider"
+  version: "1.4.0"
   supported:
     - button
   description: "The Slider module turns a slider button into a standalone slider. List Base first, then Slider. The module hides the icon, name and state, so the card itself is the track. Set rows to 1."
@@ -37,10 +37,12 @@ origami_slider:
       border-radius: var(--radius-small) !important;
     }
     .bubble-range-fill {
-      border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
+      border-radius: 4px !important;
+      border-start-start-radius: var(--radius-small) !important;
+      border-end-start-radius: var(--radius-small) !important;
     }
     .bubble-range-value {
-      right: var(--ha-space-2) !important;
+      inset-inline-end: var(--ha-space-2) !important;
       opacity: 1 !important;
       display: block !important;
       font-size: var(--ha-font-size-s);

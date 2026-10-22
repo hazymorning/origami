@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "2.0.0"
+  version: "3.0.0"
   supported:
     - separator
-  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color and background. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. List Base before Header, because Header uses Base's helpers. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
+  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color for the icon, name_color for the text and background for a chip. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }, and they work the same as in Popup. List Base before Header, because Header uses Base's helpers. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
   editor:
     - name: value_style
       label: "Value style"
@@ -37,7 +37,7 @@ origami_header:
       label: "Icon size"
       selector:
         text: {}
-      default: "var(--dot-size, 12px)"
+      default: "var(--icon-size-xs)"
     - name: value_max_width
       label: "Value max width (for example 50%)"
       selector:
@@ -52,33 +52,25 @@ origami_header:
         this._orgHAutoRows = true;
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
+      const org = card._org;
+      if (org?.hass !== hass) throw new Error("origami_header needs origami_base 11 or later, listed before it");
+      const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
-      const raw = cfg.icon_color ? renderTemplate(cfg.icon_color) : "";
+      const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
       card._orgH = {
         weight: cfg.weight === "regular" ? "var(--ha-font-weight-normal)" : cfg.weight === "medium" ? "var(--ha-font-weight-medium)" : "var(--ha-font-weight-bold)",
         color: String(raw ?? "").trim() || "currentcolor",
-        size: size || "var(--dot-size, 12px)",
+        size: size || "var(--icon-size-xs)",
         max,
         chip: cfg.value_style === "chip"
       };
-      const org = card._org;
-      if (org?.hass !== hass) throw new Error("origami_header needs origami_base 10 or later, listed before it");
-      const rules = [];
-      org.subs({ hass, renderTemplate }, this.config, "origami_header").forEach(({ n, item, opt }) => {
-        if (!opt) return;
-        const sel = "ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + n;
-        if (org.has(opt.name)) {
-          rules.push(...org.text(sel, item, opt.name, "var(--ha-font-size-m)"));
-          if (!card._orgH.chip) rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
-        }
-        if (org.has(opt.color)) {
-          rules.push(sel + " { color: " + opt.color + " !important; }");
-          rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + opt.color + " !important; }");
-        }
-        if (org.has(opt.background)) rules.push(sel + " { --org-header-chip: " + opt.background + "; }");
-        if (org.has(opt.icon)) org.icon(card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-icon"), opt.icon);
+      const scope = "ha-card .bubble-sub-button-container";
+      const rules = org.values(env, this.config, "origami_header", scope, "var(--ha-font-size-m)");
+      // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state
+      if (!card._orgH.chip) org.subs(env, this.config, "origami_header").forEach(({ n, opt }) => {
+        if (org.has(opt?.name)) rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + n + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
       });
       card._orgHCss = rules.join("\n");
       return "";
@@ -129,7 +121,8 @@ origami_header:
       justify-content: flex-end !important;
       gap: var(--ha-space-3) !important;
       height: auto !important;
-      margin: 0 0 0 var(--ha-space-3) !important;
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-3) !important;
       padding: 0 !important;
       background: none !important;
     }
@@ -160,7 +153,8 @@ origami_header:
       flex-shrink: 0;
       font-weight: var(--ha-font-weight-normal) !important;
       --mdc-icon-size: var(--org-header-icon-size) !important;
-      margin: -2px var(--ha-space-1) 0 0 !important;
+      margin-block: -2px 0 !important;
+      margin-inline: 0 var(--ha-space-1) !important;
       color: var(--org-header-icon-color) !important;
       opacity: 1 !important;
     }
@@ -168,14 +162,15 @@ origami_header:
       margin: 0 !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
-      margin: -2px 0 0 0 !important;
+      margin: -2px 0 0 !important;
     }
     ${card._orgH.max ? `
     ha-card .bubble-sub-button-container {
       flex: 0 1 auto !important;
       min-width: 0 !important;
       max-width: ${card._orgH.max} !important;
-      margin: 0 0 0 auto !important;
+      margin: 0 !important;
+      margin-inline-start: auto !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button {
       min-width: 0 !important;
@@ -201,7 +196,7 @@ origami_header:
       min-height: var(--control-height-mini) !important;
       padding: 0 var(--ha-space-3) !important;
       border-radius: var(--radius-inner) !important;
-      background-color: var(--org-header-chip, var(--fill-subtle)) !important;
+      background-color: var(--org-value-chip, var(--fill-subtle)) !important;
       color: var(--primary-text-color) !important;
       font-variant-numeric: tabular-nums;
     }

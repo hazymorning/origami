@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "2.0.0"
+  version: "3.0.0"
   supported:
     - sub-buttons
-  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image and name_color. Each of these accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
+  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image, image_size and name_color. Without state, a tile shows its entity's state, or the sub-button's attribute, in Home Assistant's own words. A tile whose entity is unavailable is dimmed. Each of these accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
   editor:
     - name: columns
       label: "Columns"
@@ -22,17 +22,19 @@ origami_tiles:
       card._orgTilesCols = Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
         const sel = ".bubble-sub-button.bubble-sub-button-" + n;
+        const rules0 = [];
         const o = opt ?? {};
         const obj = hass.states[entity];
         const name = [o.name, org.run(env, item.name, ctx), ctx.attr.friendly_name].find(org.has) ?? "";
-        const state = [o.state, obj ? (hass.formatEntityState?.(obj) ?? obj.state) : ""].find(org.has) ?? "";
+        const state = [o.state, obj ? org.word(hass, obj, item.attribute || null) : ""].find(org.has) ?? "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
+        if (entity && !look.available) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
-        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }"];
+        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
         if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
-        if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: var(--org-tile-image-size, 230%); background-position: center; }");
+        if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
       return "";
@@ -82,7 +84,8 @@ origami_tiles:
       width: var(--tile-size) !important;
       min-width: var(--tile-size) !important;
       height: var(--tile-size) !important;
-      margin: 0 var(--ha-space-3) 0 0 !important;
+      margin: 0 !important;
+      margin-inline-end: var(--ha-space-3) !important;
       border-radius: var(--radius-inner) !important;
       box-shadow: var(--ha-card-box-shadow);
       transition: var(--transition-interactive);
@@ -119,7 +122,7 @@ origami_tiles:
     }
     .bubble-sub-button-name-container::after {
       content: var(--org-tile-state, "");
-      max-width: min(var(--org-tile-state-max, 80px), 100%);
+      max-width: min(var(--org-tile-state-max, 100%), 100%);
       margin-top: calc(var(--ha-space-1) - 2px);
       font-size: var(--ha-font-size-s);
       color: var(--secondary-text-color);
