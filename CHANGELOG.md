@@ -1,5 +1,13 @@
 # Changelog
 
+## Next release
+
+These changes are in the `next` branch and come with the next release.
+
+### New
+
+- The room cards are Bubble cards with the new Room module. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server.
+
 ## 2.0 · The Unfolding
 
 <img alt="The Origami dashboard and its new pop-ups on five phones" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/release-2.0-dashboard.webp">
