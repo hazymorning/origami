@@ -1,0 +1,284 @@
+origami_room:
+  name: "Origami • Room"
+  version: "1.0.0"
+  supported:
+    - button
+  description: "The Room module turns a button card into a room card. The icon is at the top left, and it shows the state color while the card's entity is on. The name is below the icon. The bottom sub-buttons show small icons and values under the name, and the main sub-buttons are at the top right. A tap anywhere on the card runs the button action. With button_type name and no tap_action of the card's own, this includes a tap on the icon. Unlike on other Bubble cards, a sub-button without its own tap, hold or double tap action does not open the more-info dialog, so the tap reaches the card. Dropdowns and sliders keep working. Each sub-button can have an origami_room key with name, icon and color. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. With Fade in turned on, the card fades in from below when it appears. The module works without Base, and the card sets its own height, so it needs no rows option."
+  editor:
+    - name: animate
+      label: "Fade in"
+      selector:
+        boolean: {}
+      default: false
+  code: |
+    ${(() => {
+      const S = hass.states;
+      const sb = this.config.sub_button;
+      const flat = (list) => [
+        ...list.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
+        ...list.filter((i) => i && !Array.isArray(i.group))
+      ];
+      const items = [
+        ...flat(Array.isArray(sb) ? sb : (sb?.main ?? [])),
+        ...flat(Array.isArray(sb) ? [] : (sb?.bottom ?? []))
+      ];
+      const now = new Date();
+      const states = (id) => S[id]?.state ?? "unknown";
+      const minutesUntil = (id) => {
+        const v = String(states(id));
+        const t = v.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        let end;
+        if (t) {
+          end = new Date(now);
+          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
+          if (end < now) end.setDate(end.getDate() + 1);
+        } else {
+          end = new Date(v.replace(" ", "T"));
+        }
+        const m = Math.round((end - now) / 60000);
+        return Number.isNaN(m) ? "" : m;
+      };
+      const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || Number.isNaN(v))
+        ? ""
+        : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
+      const fns = card._orgRFns ?? (card._orgRFns = new Map());
+      const run = (value, ctx) => {
+        if (typeof value !== "string") return value;
+        if (/\{(\{|%)/.test(value)) return renderTemplate(value, ctx.entity);
+        if (!value.includes("${")) return value;
+        let fn = fns.get(value);
+        if (!fn) {
+          try {
+            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "return fill`" + value + "`;");
+          } catch (e) {
+            fn = () => "";
+          }
+          fns.set(value, fn);
+        }
+        try {
+          return fn(fill, hass, ctx.entity, ctx.state, ctx.attr, states, minutesUntil);
+        } catch (e) {
+          return "";
+        }
+      };
+      const pick = (option, ctx) => {
+        if (option === undefined || option === null) return "";
+        if (typeof option === "object" && !Array.isArray(option)) {
+          const key = String(ctx.state).toLowerCase();
+          const hit = Object.keys(option).find((k) => k.toLowerCase() === key);
+          return hit === undefined ? "" : run(option[hit], ctx);
+        }
+        return run(option, ctx);
+      };
+      const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
+      // Bubble Card cleans the CSS text, so every character that it could change is escaped
+      const q = (v) => '"' + String(v).trim().replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"';
+      // The icon color follows the card's own entity. A group uses the domain of its first member, as in Base.
+      const own = S[entity];
+      let domain = String(entity ?? "").split(".")[0];
+      if (domain === "group") domain = String(own?.attributes?.entity_id?.[0] ?? "group.").split(".")[0];
+      const key = String(own?.state ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+      const dc = own?.attributes?.device_class;
+      const names = ["--state-" + domain + "-" + key + "-color", "--state-" + domain + "-active-color", "--state-active-color"];
+      if (dc) names.unshift("--state-" + domain + "-" + dc + "-" + key + "-color");
+      const color = names.reduceRight((acc, n) => acc ? "var(" + n + ", " + acc + ")" : "var(" + n + ")", "");
+      const rules = [];
+      card._orgRIcons = [];
+      items.forEach((item, i) => {
+        const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + (i + 1);
+        const entity = item.entity ?? this.config.entity;
+        const dropdown = ["input_select", "select"].includes(String(entity ?? "").split(".")[0]) || item.select_attribute;
+        const type = item.sub_button_type ?? (dropdown ? "select" : "default");
+        // A sub-button without an action of its own lets the tap through to the card
+        if (type === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push(sel + " { pointer-events: none !important; }");
+        const opt = item.origami_room;
+        if (!opt) return;
+        const obj = S[entity];
+        const ctx = { entity, state: obj?.state ?? "unknown", attr: obj?.attributes ?? {} };
+        const name = pick(opt.name, ctx);
+        const icon = pick(opt.icon, ctx);
+        const iconColor = pick(opt.color, ctx);
+        if (has(name)) {
+          // Bubble Card hides a sub-button that has nothing of its own to show
+          if (!item.visibility) rules.push(sel + ".hidden:not([style*='display: none']) { display: flex !important; }");
+          rules.push(sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }");
+          rules.push(sel + " .bubble-sub-button-name-container::before { content: " + q(name) + "; font-size: var(--ha-font-size-s); }");
+        }
+        if (has(iconColor)) rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + iconColor + " !important; }");
+        if (has(icon)) card._orgRIcons.push([i + 1, String(icon)]);
+      });
+      card._orgR = {
+        color,
+        animate: !!this.config.origami_room?.animate,
+        css: rules.join("\n")
+      };
+      return "";
+    })()}
+    ha-card {
+      --org-room-color: ${card._orgR.color};
+      ${card._orgR.animate ? "animation: origami-room-in var(--duration-slow) ease-in;" : ""}
+    }
+    @keyframes origami-room-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }
+    ha-card .bubble-container {
+      height: auto !important;
+      border: none !important;
+      border-radius: var(--ha-card-border-radius) !important;
+      background-color: var(--tile-background, var(--fill-subtle)) !important;
+      box-shadow: none !important;
+    }
+    ha-card .bubble-background {
+      border-radius: var(--ha-card-border-radius) !important;
+      background: none !important;
+    }
+    ha-card .bubble-wrapper {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(var(--control-height-icon), auto);
+      grid-template-areas: "icon more" "name name" "info info";
+      align-items: center !important;
+      box-sizing: border-box;
+      height: auto !important;
+      padding: var(--ha-space-4);
+      transition: none !important;
+    }
+    ha-card .bubble-content-container {
+      display: contents !important;
+    }
+    ha-card .bubble-icon-container {
+      grid-area: icon;
+      --mdc-icon-size: var(--icon-size-m) !important;
+      width: var(--tile-size) !important;
+      min-width: var(--tile-size) !important;
+      height: var(--tile-size) !important;
+      min-height: var(--tile-size) !important;
+      margin: 0 !important;
+      border-radius: var(--radius-inner) !important;
+      background-color: var(--tile-chip-background, var(--ha-card-background)) !important;
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow));
+      color: var(--primary-text-color) !important;
+      transition: var(--transition-interactive);
+    }
+    ha-card.is-on .bubble-icon-container {
+      color: var(--org-room-color) !important;
+      background-color: var(--tint) !important;
+    }
+    ha-card .bubble-main-icon {
+      color: inherit !important;
+      opacity: 1 !important;
+      transition: none !important;
+    }
+    ha-card .bubble-name-container {
+      grid-area: name;
+      margin: var(--ha-space-5) 0 0 !important;
+      line-height: var(--ha-line-height-normal);
+    }
+    ha-card .bubble-name {
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-bold);
+      -webkit-line-clamp: 1 !important;
+    }
+    ha-card .bubble-state {
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--secondary-text-color);
+      opacity: 1;
+    }
+    ha-card .bubble-sub-button-container {
+      grid-area: more;
+      inset-inline-end: 0 !important;
+      align-self: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      transition: var(--transition-interactive) !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: none !important;
+      color: var(--primary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-l);
+      margin: 0 !important;
+      opacity: var(--opacity-quiet);
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      grid-area: info;
+      position: static !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center;
+      justify-content: flex-start !important;
+      gap: var(--ha-space-2) var(--ha-space-1) !important;
+      width: auto !important;
+      min-height: calc(var(--ha-font-size-s) * var(--ha-line-height-normal));
+      margin: var(--ha-space-2) 0 0 !important;
+      line-height: var(--ha-line-height-normal);
+    }
+    ha-card .bubble-sub-button-alignment-lane,
+    ha-card .bubble-sub-button-group {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+      border-radius: var(--radius-small) !important;
+      background: none !important;
+      color: var(--secondary-text-color) !important;
+      font-size: var(--ha-font-size-s) !important;
+      font-weight: var(--ha-font-weight-medium);
+      transition: var(--transition-interactive) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-name-container {
+      overflow: visible !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-name-container:empty {
+      display: none;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--dot-size);
+      margin-block: 0 2px !important;
+      margin-inline: 0 var(--ha-space-1) !important;
+      color: var(--primary-text-color);
+      opacity: 1 !important;
+    }
+    ha-card .bubble-sub-button .bubble-sub-button-image {
+      position: static !important;
+      width: var(--mdc-icon-size) !important;
+      height: var(--mdc-icon-size) !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+    }
+    ha-card .bubble-icon-container:not(.bubble-action-enabled),
+    ha-card .bubble-sub-button-container,
+    ha-card .bubble-sub-button {
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-button.bubble-action-enabled,
+    ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
+      pointer-events: auto;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled::after {
+      content: "";
+      position: absolute;
+      inset: calc(-1 * var(--ha-space-2));
+    }
+    ${card._orgR.css}
+    ${(() => {
+      (card._orgRIcons ?? []).forEach(([n, icon]) => {
+        const el = card.querySelector(".bubble-sub-button-" + n + " .bubble-sub-button-icon");
+        if (el && el.getAttribute("icon") !== icon) el.setAttribute("icon", icon);
+      });
+      return "";
+    })()}

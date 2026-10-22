@@ -104,8 +104,8 @@ Open each repository in HACS. If HACS asks you to add the repository, select **A
 | Repository | Used for | Link |
 | --- | --- | --- |
 | [Origami](https://github.com/hazymorning/origami) | The theme | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme) |
-| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the room cards, the climate table and the buttons in the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
-| [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
+| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the climate table and the buttons in the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
+| [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers, the room cards and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
 | [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) | Loading the Bubble Card modules | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration) |
 | [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
 | [Origami Notifications](https://github.com/hazymorning/origami_notifications) | The notifications next to the greeting | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_notifications&category=plugin) |
@@ -1058,7 +1058,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-- Each room card is a single Paper Buttons Row. Tap anywhere on the card to open the room's [pop-up](#room).
+- Each room card is a Bubble card with the [Room module](bubble_card/README.md#room). Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the details for the room's light.
 - The icon is colored while the room's light is on.
 - Below the name, a colored dot shows the room's temperature, from blue when it is cold to red when it is hot. A window icon follows if the room has a window contact. The temperature and humidity come last.
 - The rooms header shows the average temperature and the number of open windows. Tap one of these values or the arrow to open or close the climate table.
@@ -1073,7 +1073,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 | Entity | Purpose |
 | --- | --- |
-| `light.<room>` | The icon color |
+| `light.<room>` | The icon color, and the details that open when you hold the card |
 | `sensor.climate_<room>` | The dot color, temperature and humidity, from the [helpers](#helpers) |
 | `binary_sensor.<room>_window` | The window icon. In the living room, this is a balcony door. |
 | `sensor.climate_home` | The average temperature and the open windows in the header |
@@ -1086,7 +1086,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-The rooms header and **All rooms** are Bubble cards, and each room card is a Paper Buttons Row. All of them read [helpers](#helpers). The rooms header is the first card.
+The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). The room cards also need the [Room module](bubble_card/README.md#room). The rooms header is the first card.
 
 <!-- dashboard.yaml card_type=separator name=Rooms -->
 
@@ -1146,130 +1146,45 @@ sub_button:
 
 The living room's card follows. The dashboard puts the room cards in a grid card with two columns.
 
-<!-- dashboard.yaml base_config.tap_action.navigation_path=#popup_living_room -->
+<!-- dashboard.yaml button_action.tap_action.navigation_path=#popup_living_room -->
 
 ```yaml
-type: custom:paper-buttons-row
-styles:
-  position: relative
-  display: flex
-  flex-wrap: wrap
-  justify-content: flex-start
-  align-items: center
-  padding: var(--ha-space-4)
-  background-color: var(--fill-subtle)
-  border-radius: var(--ha-card-border-radius)
-base_config:
-  layout: icon
-  active: []
+type: custom:bubble-card
+card_type: button
+button_type: name
+entity: light.living_room
+name: Living
+icon: mdi:sofa
+modules:
+  - origami_room
+button_action:
   tap_action:
     action: navigate
     navigation_path: '#popup_living_room'
-  styles:
-    button:
-      padding: 0px
-      margin-bottom: var(--ha-space-3)
-      justify-content: flex-start
-      pointer-events: none
-    name:
-      padding: 0px
-      font-size: var(--ha-font-size-m)
-      font-weight: var(--ha-font-weight-bold)
-      white-space: nowrap
-    state:
-      padding: 0px
-      font-size: var(--ha-font-size-s)
-      font-weight: var(--ha-font-weight-medium)
-      color: var(--secondary-text-color)
-buttons:
-  # Invisible overlay that catches the tap for the whole card
-  - entity: light.living_room
-    layout: name
-    name: false
-    styles:
-      button:
-        z-index: 3
-        pointer-events: all
-        position: absolute
-        top: 0px
-        left: 0px
-        width: 100%
-        height: 100%
-        border-radius: var(--ha-card-border-radius)
-  # Icon, colored while the room's lights are on
-  - entity: light.living_room
-    icon: mdi:sofa
-    state_styles:
-      'on':
-        icon:
-          background-color: var(--tint)
-          color: var(--state-light-active-color)
-    styles:
-      button:
-        width: calc(100% - var(--control-height-icon))
-      icon:
-        --mdc-icon-size: var(--icon-size-m)
-        width: var(--tile-size)
-        height: var(--tile-size)
-        display: flex
-        justify-content: center
-        align-items: center
-        border-radius: var(--radius-inner)
-        background-color: var(--ha-card-background)
-        box-shadow: var(--ha-card-box-shadow)
-        transition: var(--transition-interactive)
-  - icon: mdi:chevron-right
-    styles:
-      button:
-        width: var(--control-height-icon)
-        justify-content: center
-      icon:
-        --mdc-icon-size: var(--icon-size-l)
-        opacity: var(--opacity-quiet)
-  - name: Living
-    layout: name
-    styles:
-      button:
-        width: 100%
-        margin: var(--ha-space-2) 0px 0px 0px
+  hold_action:
+    action: more-info
+sub_button:
+  main:
+    - icon: mdi:chevron-right
   # Comfort dot, window, temperature and humidity
-  - layout: icon
-    icon: mdi:circle
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-      icon:
-        --mdc-icon-size: var(--dot-size)
-        margin: -3px 0px 0px 0px
-        color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
-  - entity: binary_sensor.living_room_balcony_door
-    layout: icon
-    icon: mdi:window-closed-variant
-    state_icons:
-      'on': mdi:window-open-variant
-      'off': mdi:window-closed-variant
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-      icon:
-        --mdc-icon-size: var(--dot-size)
-        margin: -3px 0px 0px 0px
-  - entity: sensor.climate_living_room
-    layout: state
-    state:
-      attribute: temperature
-      postfix: ° |
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-  - entity: sensor.climate_living_room
-    layout: state
-    state:
-      attribute: humidity
-      postfix: '%'
-    styles:
-      button:
-        margin: var(--ha-space-2) 0px 0px 0px
+  bottom:
+    - entity: sensor.climate_living_room
+      icon: mdi:circle
+      origami_room:
+        color: ${attr.color_code}
+    - entity: binary_sensor.living_room_balcony_door
+      icon: mdi:window-closed-variant
+      origami_room:
+        icon:
+          'on': mdi:window-open-variant
+    - entity: sensor.climate_living_room
+      show_icon: false
+      origami_room:
+        name: ${attr.temperature}° |
+    - entity: sensor.climate_living_room
+      show_icon: false
+      origami_room:
+        name: ${attr.humidity}%
 ```
 
 **All rooms** is the last card. It turns `input_boolean.all_rooms` on and off, and the rooms after the fourth are conditional cards that appear while this toggle is on.
@@ -4253,7 +4168,7 @@ These techniques appear in several places in the dashboard. The first three are 
 
 <br>
 
-The favorites, the section headers and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
+The favorites, the section headers, the room cards and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
 
 ```yaml
 type: custom:bubble-card
@@ -4348,7 +4263,7 @@ origami_tiles:
 - State changes affect colors, but never sizes.
 - The room helpers return `?` instead of an empty value.
 - Elements that appear and disappear either take no space while they are hidden or keep their space and scale in and out.
-- Templates run in the browser where possible. The `${ }` templates in the Header and Tiles modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
+- Templates run in the browser where possible. The `${ }` templates in the Header, Tiles and Room modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
 - The font loads from Home Assistant itself. A font that loads late makes all text redraw.
 - The main view uses grid cards instead of stack cards where it needs a wrapper.
 
@@ -4382,7 +4297,7 @@ The group badge on the cover scales with this variable.
 
 <br>
 
-Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the climate table. The room cards, the climate table and the server card are each a single Paper Buttons Row.
+Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the climate table. The climate table and the server card are each a single Paper Buttons Row.
 
 ```yaml
 type: custom:paper-buttons-row
@@ -4401,30 +4316,29 @@ buttons:
 
 <br>
 
-Give the row `position: relative`. An invisible button covers the whole row and receives every tap. All other buttons get `pointer-events: none`.
+Give the row `position: relative`. An invisible first button with `position: absolute` and `inset: 0px` covers the whole row and receives every tap that no other button takes. Buttons without a tap action of their own get `pointer-events: none`, so a tap on them reaches the invisible button. The server card in the menu works this way, and its CPU and RAM values keep their own tap actions.
 
 ```yaml
 type: custom:paper-buttons-row
 styles:
   position: relative
-base_config:
-  styles:
-    button:
-      pointer-events: none
 buttons:
-  - entity: light.living_room
-    layout: name
-    name: false
+  - layout: name
+    name: ' '
     tap_action:
       action: navigate
-      navigation_path: '#popup_living_room'
+      navigation_path: '#popup_server'
     styles:
       button:
         position: absolute
         inset: 0px
-        z-index: 3
-        pointer-events: all
-        border-radius: var(--ha-card-border-radius)
+  - layout: icon
+    icon: mdi:check-bold
+    tap_action:
+      action: none
+    styles:
+      button:
+        pointer-events: none
 ```
 
 </details>
@@ -4468,7 +4382,7 @@ To change a color, add `state-<domain>-active-color` to your copy of the theme. 
 
 <br>
 
-The name Origami comes from Paper Buttons Row, because origami is folded paper. Paper Buttons Row has its own color variables, `pbs-button-*`, and the theme sets them to the text color. Entity buttons that are on still use their state color. To turn this off, set `active: []`, as in the room cards. The `rgb` variables need a triplet such as `var(--rgb-primary-text-color)`, because a hex value breaks the color.
+The name Origami comes from Paper Buttons Row, because origami is folded paper. Paper Buttons Row has its own color variables, `pbs-button-*`, and the theme sets them to the text color. Entity buttons that are on still use their state color. To turn this off, set `active: []` in the row's `base_config`. The `rgb` variables need a triplet such as `var(--rgb-primary-text-color)`, because a hex value breaks the color.
 
 </details>
 
@@ -4580,7 +4494,7 @@ Instead of copying the font files, you can add `https://fonts.googleapis.com/css
 Origami was built by hand over many years. Many of its details have reasons that the YAML alone does not show, so an AI assistant that guesses instead of reading usually gets them wrong. The repository is also large, and adapting it to your home takes time, even with AI.
 
 - Use the most capable model that you have access to, and turn on extended thinking if your app offers it.
-- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section.
+- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section. For Bubble cards, such as the room cards, it should also read the [module reference](bubble_card/README.md).
 - Ask it to follow the order in [How Origami is built](#how-origami-is-built). Otherwise, it often writes a new custom card or uses card-mod, because that is easier than learning how Bubble Card and the modules work.
 - Give it your real entity IDs. The assistant cannot see your Home Assistant, so it invents any ID that you do not give it.
 - Ask for the changed cards only, and save a copy of your configuration before you paste anything.

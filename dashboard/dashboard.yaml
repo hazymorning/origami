@@ -1325,742 +1325,233 @@ views:
             square: false
             columns: 2
             cards:
-              - type: custom:paper-buttons-row
-                styles:
-                  position: relative
-                  display: flex
-                  flex-wrap: wrap
-                  justify-content: flex-start
-                  align-items: center
-                  padding: var(--ha-space-4)
-                  background-color: var(--fill-subtle)
-                  border-radius: var(--ha-card-border-radius)
-                base_config:
-                  layout: icon
-                  active: []
+              - type: custom:bubble-card
+                card_type: button
+                button_type: name
+                entity: light.living_room
+                name: Living
+                icon: mdi:sofa
+                modules:
+                  - origami_room
+                button_action:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_living_room'
-                  styles:
-                    button:
-                      padding: 0px
-                      margin-bottom: var(--ha-space-3)
-                      justify-content: flex-start
-                      pointer-events: none
-                    name:
-                      padding: 0px
-                      font-size: var(--ha-font-size-m)
-                      font-weight: var(--ha-font-weight-bold)
-                      white-space: nowrap
-                    state:
-                      padding: 0px
-                      font-size: var(--ha-font-size-s)
-                      font-weight: var(--ha-font-weight-medium)
-                      color: var(--secondary-text-color)
-                buttons:
-                  # Invisible overlay that catches the tap for the whole card
-                  - entity: light.living_room
-                    layout: name
-                    name: false
-                    styles:
-                      button:
-                        z-index: 3
-                        pointer-events: all
-                        position: absolute
-                        top: 0px
-                        left: 0px
-                        width: 100%
-                        height: 100%
-                        border-radius: var(--ha-card-border-radius)
-                  # Icon, colored while the room's lights are on
-                  - entity: light.living_room
-                    icon: mdi:sofa
-                    state_styles:
-                      'on':
-                        icon:
-                          background-color: var(--tint)
-                          color: var(--state-light-active-color)
-                    styles:
-                      button:
-                        width: calc(100% - var(--control-height-icon))
-                      icon:
-                        --mdc-icon-size: var(--icon-size-m)
-                        width: var(--tile-size)
-                        height: var(--tile-size)
-                        display: flex
-                        justify-content: center
-                        align-items: center
-                        border-radius: var(--radius-inner)
-                        background-color: var(--ha-card-background)
-                        box-shadow: var(--ha-card-box-shadow)
-                        transition: var(--transition-interactive)
-                  - icon: mdi:chevron-right
-                    styles:
-                      button:
-                        width: var(--control-height-icon)
-                        justify-content: center
-                      icon:
-                        --mdc-icon-size: var(--icon-size-l)
-                        opacity: var(--opacity-quiet)
-                  - name: Living
-                    layout: name
-                    styles:
-                      button:
-                        width: 100%
-                        margin: var(--ha-space-2) 0px 0px 0px
+                  hold_action:
+                    action: more-info
+                sub_button:
+                  main:
+                    - icon: mdi:chevron-right
                   # Comfort dot, window, temperature and humidity
-                  - layout: icon
-                    icon: mdi:circle
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                        color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
-                  - entity: binary_sensor.living_room_balcony_door
-                    layout: icon
-                    icon: mdi:window-closed-variant
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                  - entity: sensor.climate_living_room
-                    layout: state
-                    state:
-                      attribute: temperature
-                      postfix: ° |
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                  - entity: sensor.climate_living_room
-                    layout: state
-                    state:
-                      attribute: humidity
-                      postfix: '%'
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) 0px 0px 0px
-              - type: custom:paper-buttons-row
-                styles:
-                  position: relative
-                  display: flex
-                  flex-wrap: wrap
-                  justify-content: flex-start
-                  align-items: center
-                  padding: var(--ha-space-4)
-                  background-color: var(--fill-subtle)
-                  border-radius: var(--ha-card-border-radius)
-                base_config:
-                  layout: icon
-                  active: []
+                  bottom:
+                    - entity: sensor.climate_living_room
+                      icon: mdi:circle
+                      origami_room:
+                        color: ${attr.color_code}
+                    - entity: binary_sensor.living_room_balcony_door
+                      icon: mdi:window-closed-variant
+                      origami_room:
+                        icon:
+                          'on': mdi:window-open-variant
+                    - entity: sensor.climate_living_room
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.temperature}° |
+                    - entity: sensor.climate_living_room
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.humidity}%
+              - type: custom:bubble-card
+                card_type: button
+                button_type: name
+                entity: light.bedroom
+                name: Bedroom
+                icon: mdi:bed
+                modules:
+                  - origami_room
+                button_action:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_bedroom'
-                  styles:
-                    button:
-                      padding: 0px
-                      margin-bottom: var(--ha-space-3)
-                      justify-content: flex-start
-                      pointer-events: none
-                    name:
-                      padding: 0px
-                      font-size: var(--ha-font-size-m)
-                      font-weight: var(--ha-font-weight-bold)
-                      white-space: nowrap
-                    state:
-                      padding: 0px
-                      font-size: var(--ha-font-size-s)
-                      font-weight: var(--ha-font-weight-medium)
-                      color: var(--secondary-text-color)
-                buttons:
-                  # Invisible overlay that catches the tap for the whole card
-                  - entity: light.bedroom
-                    layout: name
-                    name: false
-                    styles:
-                      button:
-                        z-index: 3
-                        pointer-events: all
-                        position: absolute
-                        top: 0px
-                        left: 0px
-                        width: 100%
-                        height: 100%
-                        border-radius: var(--ha-card-border-radius)
-                  # Icon, colored while the room's lights are on
-                  - entity: light.bedroom
-                    icon: mdi:bed
-                    state_styles:
-                      'on':
-                        icon:
-                          background-color: var(--tint)
-                          color: var(--state-light-active-color)
-                    styles:
-                      button:
-                        width: calc(100% - var(--control-height-icon))
-                      icon:
-                        --mdc-icon-size: var(--icon-size-m)
-                        width: var(--tile-size)
-                        height: var(--tile-size)
-                        display: flex
-                        justify-content: center
-                        align-items: center
-                        border-radius: var(--radius-inner)
-                        background-color: var(--ha-card-background)
-                        box-shadow: var(--ha-card-box-shadow)
-                        transition: var(--transition-interactive)
-                  - icon: mdi:chevron-right
-                    styles:
-                      button:
-                        width: var(--control-height-icon)
-                        justify-content: center
-                      icon:
-                        --mdc-icon-size: var(--icon-size-l)
-                        opacity: var(--opacity-quiet)
-                  - name: Bedroom
-                    layout: name
-                    styles:
-                      button:
-                        width: 100%
-                        margin: var(--ha-space-2) 0px 0px 0px
+                  hold_action:
+                    action: more-info
+                sub_button:
+                  main:
+                    - icon: mdi:chevron-right
                   # Comfort dot, window, temperature and humidity
-                  - layout: icon
-                    icon: mdi:circle
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                        color: '{{ state_attr("sensor.climate_bedroom", "color_code") }}'
-                  - entity: binary_sensor.bedroom_window
-                    layout: icon
-                    icon: mdi:window-closed-variant
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                  - entity: sensor.climate_bedroom
-                    layout: state
-                    state:
-                      attribute: temperature
-                      postfix: ° |
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                  - entity: sensor.climate_bedroom
-                    layout: state
-                    state:
-                      attribute: humidity
-                      postfix: '%'
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) 0px 0px 0px
-              - type: custom:paper-buttons-row
-                styles:
-                  position: relative
-                  display: flex
-                  flex-wrap: wrap
-                  justify-content: flex-start
-                  align-items: center
-                  padding: var(--ha-space-4)
-                  background-color: var(--fill-subtle)
-                  border-radius: var(--ha-card-border-radius)
-                base_config:
-                  layout: icon
-                  active: []
+                  bottom:
+                    - entity: sensor.climate_bedroom
+                      icon: mdi:circle
+                      origami_room:
+                        color: ${attr.color_code}
+                    - entity: binary_sensor.bedroom_window
+                      icon: mdi:window-closed-variant
+                      origami_room:
+                        icon:
+                          'on': mdi:window-open-variant
+                    - entity: sensor.climate_bedroom
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.temperature}° |
+                    - entity: sensor.climate_bedroom
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.humidity}%
+              - type: custom:bubble-card
+                card_type: button
+                button_type: name
+                entity: light.office
+                name: Office
+                icon: mdi:chair-rolling
+                modules:
+                  - origami_room
+                button_action:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_office'
-                  styles:
-                    button:
-                      padding: 0px
-                      margin-bottom: var(--ha-space-3)
-                      justify-content: flex-start
-                      pointer-events: none
-                    name:
-                      padding: 0px
-                      font-size: var(--ha-font-size-m)
-                      font-weight: var(--ha-font-weight-bold)
-                      white-space: nowrap
-                    state:
-                      padding: 0px
-                      font-size: var(--ha-font-size-s)
-                      font-weight: var(--ha-font-weight-medium)
-                      color: var(--secondary-text-color)
-                buttons:
-                  # Invisible overlay that catches the tap for the whole card
-                  - entity: light.office
-                    layout: name
-                    name: false
-                    styles:
-                      button:
-                        z-index: 3
-                        pointer-events: all
-                        position: absolute
-                        top: 0px
-                        left: 0px
-                        width: 100%
-                        height: 100%
-                        border-radius: var(--ha-card-border-radius)
-                  # Icon, colored while the room's lights are on
-                  - entity: light.office
-                    icon: mdi:chair-rolling
-                    state_styles:
-                      'on':
-                        icon:
-                          background-color: var(--tint)
-                          color: var(--state-light-active-color)
-                    styles:
-                      button:
-                        width: calc(100% - var(--control-height-icon))
-                      icon:
-                        --mdc-icon-size: var(--icon-size-m)
-                        width: var(--tile-size)
-                        height: var(--tile-size)
-                        display: flex
-                        justify-content: center
-                        align-items: center
-                        border-radius: var(--radius-inner)
-                        background-color: var(--ha-card-background)
-                        box-shadow: var(--ha-card-box-shadow)
-                        transition: var(--transition-interactive)
-                  - icon: mdi:chevron-right
-                    styles:
-                      button:
-                        width: var(--control-height-icon)
-                        justify-content: center
-                      icon:
-                        --mdc-icon-size: var(--icon-size-l)
-                        opacity: var(--opacity-quiet)
-                  - name: Office
-                    layout: name
-                    styles:
-                      button:
-                        width: 100%
-                        margin: var(--ha-space-2) 0px 0px 0px
+                  hold_action:
+                    action: more-info
+                sub_button:
+                  main:
+                    - icon: mdi:chevron-right
                   # Comfort dot, window, temperature and humidity
-                  - layout: icon
-                    icon: mdi:circle
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                        color: '{{ state_attr("sensor.climate_office", "color_code") }}'
-                  - entity: sensor.climate_office
-                    layout: state
-                    state:
-                      attribute: temperature
-                      postfix: ° |
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                  - entity: sensor.climate_office
-                    layout: state
-                    state:
-                      attribute: humidity
-                      postfix: '%'
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) 0px 0px 0px
-              - type: custom:paper-buttons-row
-                styles:
-                  position: relative
-                  display: flex
-                  flex-wrap: wrap
-                  justify-content: flex-start
-                  align-items: center
-                  padding: var(--ha-space-4)
-                  background-color: var(--fill-subtle)
-                  border-radius: var(--ha-card-border-radius)
-                base_config:
-                  layout: icon
-                  active: []
+                  bottom:
+                    - entity: sensor.climate_office
+                      icon: mdi:circle
+                      origami_room:
+                        color: ${attr.color_code}
+                    - entity: sensor.climate_office
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.temperature}° |
+                    - entity: sensor.climate_office
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.humidity}%
+              - type: custom:bubble-card
+                card_type: button
+                button_type: name
+                entity: light.bathroom
+                name: Bath
+                icon: mdi:bathtub
+                modules:
+                  - origami_room
+                button_action:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_bathroom'
-                  styles:
-                    button:
-                      padding: 0px
-                      margin-bottom: var(--ha-space-3)
-                      justify-content: flex-start
-                      pointer-events: none
-                    name:
-                      padding: 0px
-                      font-size: var(--ha-font-size-m)
-                      font-weight: var(--ha-font-weight-bold)
-                      white-space: nowrap
-                    state:
-                      padding: 0px
-                      font-size: var(--ha-font-size-s)
-                      font-weight: var(--ha-font-weight-medium)
-                      color: var(--secondary-text-color)
-                buttons:
-                  # Invisible overlay that catches the tap for the whole card
-                  - entity: light.bathroom
-                    layout: name
-                    name: false
-                    styles:
-                      button:
-                        z-index: 3
-                        pointer-events: all
-                        position: absolute
-                        top: 0px
-                        left: 0px
-                        width: 100%
-                        height: 100%
-                        border-radius: var(--ha-card-border-radius)
-                  # Icon, colored while the room's lights are on
-                  - entity: light.bathroom
-                    icon: mdi:bathtub
-                    state_styles:
-                      'on':
-                        icon:
-                          background-color: var(--tint)
-                          color: var(--state-light-active-color)
-                    styles:
-                      button:
-                        width: calc(100% - var(--control-height-icon))
-                      icon:
-                        --mdc-icon-size: var(--icon-size-m)
-                        width: var(--tile-size)
-                        height: var(--tile-size)
-                        display: flex
-                        justify-content: center
-                        align-items: center
-                        border-radius: var(--radius-inner)
-                        background-color: var(--ha-card-background)
-                        box-shadow: var(--ha-card-box-shadow)
-                        transition: var(--transition-interactive)
-                  - icon: mdi:chevron-right
-                    styles:
-                      button:
-                        width: var(--control-height-icon)
-                        justify-content: center
-                      icon:
-                        --mdc-icon-size: var(--icon-size-l)
-                        opacity: var(--opacity-quiet)
-                  - name: Bath
-                    layout: name
-                    styles:
-                      button:
-                        width: 100%
-                        margin: var(--ha-space-2) 0px 0px 0px
+                  hold_action:
+                    action: more-info
+                sub_button:
+                  main:
+                    - icon: mdi:chevron-right
                   # Comfort dot, window, temperature and humidity
-                  - layout: icon
-                    icon: mdi:circle
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                        color: '{{ state_attr("sensor.climate_bathroom", "color_code") }}'
-                  - entity: binary_sensor.bathroom_window
-                    layout: icon
-                    icon: mdi:window-closed-variant
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                      icon:
-                        --mdc-icon-size: var(--dot-size)
-                        margin: -3px 0px 0px 0px
-                  - entity: sensor.climate_bathroom
-                    layout: state
-                    state:
-                      attribute: temperature
-                      postfix: ° |
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                  - entity: sensor.climate_bathroom
-                    layout: state
-                    state:
-                      attribute: humidity
-                      postfix: '%'
-                    styles:
-                      button:
-                        margin: var(--ha-space-2) 0px 0px 0px
+                  bottom:
+                    - entity: sensor.climate_bathroom
+                      icon: mdi:circle
+                      origami_room:
+                        color: ${attr.color_code}
+                    - entity: binary_sensor.bathroom_window
+                      icon: mdi:window-closed-variant
+                      origami_room:
+                        icon:
+                          'on': mdi:window-open-variant
+                    - entity: sensor.climate_bathroom
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.temperature}° |
+                    - entity: sensor.climate_bathroom
+                      show_icon: false
+                      origami_room:
+                        name: ${attr.humidity}%
               - type: conditional
                 conditions:
                   - condition: state
                     entity: input_boolean.all_rooms
                     state: 'on'
                 card:
-                  type: custom:paper-buttons-row
-                  extra_styles: |
-                    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) } }
-                  styles:
-                    position: relative
-                    display: flex
-                    flex-wrap: wrap
-                    opacity: 0
-                    transform: translateY(10px)
-                    animation: fadeInUp var(--duration-slow) ease-in forwards
-                    justify-content: flex-start
-                    align-items: center
-                    padding: var(--ha-space-4)
-                    background-color: var(--fill-subtle)
-                    border-radius: var(--ha-card-border-radius)
-                  base_config:
-                    layout: icon
-                    active: []
+                  type: custom:bubble-card
+                  card_type: button
+                  button_type: name
+                  entity: light.kitchen
+                  name: Kitchen
+                  icon: mdi:chef-hat
+                  modules:
+                    - origami_room
+                  origami_room:
+                    animate: true
+                  button_action:
                     tap_action:
                       action: navigate
                       navigation_path: '#popup_kitchen'
-                    styles:
-                      button:
-                        padding: 0px
-                        margin-bottom: var(--ha-space-3)
-                        justify-content: flex-start
-                        pointer-events: none
-                      name:
-                        padding: 0px
-                        font-size: var(--ha-font-size-m)
-                        font-weight: var(--ha-font-weight-bold)
-                        white-space: nowrap
-                      state:
-                        padding: 0px
-                        font-size: var(--ha-font-size-s)
-                        font-weight: var(--ha-font-weight-medium)
-                        color: var(--secondary-text-color)
-                  buttons:
-                    # Invisible overlay that catches the tap for the whole card
-                    - entity: light.kitchen
-                      layout: name
-                      name: false
-                      styles:
-                        button:
-                          z-index: 3
-                          pointer-events: all
-                          position: absolute
-                          top: 0px
-                          left: 0px
-                          width: 100%
-                          height: 100%
-                          border-radius: var(--ha-card-border-radius)
-                    # Icon, colored while the room's lights are on
-                    - entity: light.kitchen
-                      icon: mdi:chef-hat
-                      state_styles:
-                        'on':
-                          icon:
-                            background-color: var(--tint)
-                            color: var(--state-light-active-color)
-                      styles:
-                        button:
-                          width: calc(100% - var(--control-height-icon))
-                        icon:
-                          --mdc-icon-size: var(--icon-size-m)
-                          width: var(--tile-size)
-                          height: var(--tile-size)
-                          display: flex
-                          justify-content: center
-                          align-items: center
-                          border-radius: var(--radius-inner)
-                          background-color: var(--ha-card-background)
-                          box-shadow: var(--ha-card-box-shadow)
-                          transition: var(--transition-interactive)
-                    - icon: mdi:chevron-right
-                      styles:
-                        button:
-                          width: var(--control-height-icon)
-                          justify-content: center
-                        icon:
-                          --mdc-icon-size: var(--icon-size-l)
-                          opacity: var(--opacity-quiet)
-                    - name: Kitchen
-                      layout: name
-                      styles:
-                        button:
-                          width: 100%
-                          margin: var(--ha-space-2) 0px 0px 0px
+                    hold_action:
+                      action: more-info
+                  sub_button:
+                    main:
+                      - icon: mdi:chevron-right
                     # Comfort dot, window, temperature and humidity
-                    - layout: icon
-                      icon: mdi:circle
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                        icon:
-                          --mdc-icon-size: var(--dot-size)
-                          margin: -3px 0px 0px 0px
-                          color: '{{ state_attr("sensor.climate_kitchen", "color_code") }}'
-                    - entity: binary_sensor.kitchen_window
-                      layout: icon
-                      icon: mdi:window-closed-variant
-                      state_icons:
-                        'on': mdi:window-open-variant
-                        'off': mdi:window-closed-variant
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                        icon:
-                          --mdc-icon-size: var(--dot-size)
-                          margin: -3px 0px 0px 0px
-                    - entity: sensor.climate_kitchen
-                      layout: state
-                      state:
-                        attribute: temperature
-                        postfix: ° |
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                    - entity: sensor.climate_kitchen
-                      layout: state
-                      state:
-                        attribute: humidity
-                        postfix: '%'
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) 0px 0px 0px
+                    bottom:
+                      - entity: sensor.climate_kitchen
+                        icon: mdi:circle
+                        origami_room:
+                          color: ${attr.color_code}
+                      - entity: binary_sensor.kitchen_window
+                        icon: mdi:window-closed-variant
+                        origami_room:
+                          icon:
+                            'on': mdi:window-open-variant
+                      - entity: sensor.climate_kitchen
+                        show_icon: false
+                        origami_room:
+                          name: ${attr.temperature}° |
+                      - entity: sensor.climate_kitchen
+                        show_icon: false
+                        origami_room:
+                          name: ${attr.humidity}%
               - type: conditional
                 conditions:
                   - condition: state
                     entity: input_boolean.all_rooms
                     state: 'on'
                 card:
-                  type: custom:paper-buttons-row
-                  extra_styles: |
-                    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) } }
-                  styles:
-                    position: relative
-                    display: flex
-                    flex-wrap: wrap
-                    opacity: 0
-                    transform: translateY(10px)
-                    animation: fadeInUp var(--duration-slow) ease-in forwards
-                    justify-content: flex-start
-                    align-items: center
-                    padding: var(--ha-space-4)
-                    background-color: var(--fill-subtle)
-                    border-radius: var(--ha-card-border-radius)
-                  base_config:
-                    layout: icon
-                    active: []
+                  type: custom:bubble-card
+                  card_type: button
+                  button_type: name
+                  entity: light.small_bathroom
+                  name: WC
+                  icon: mdi:toilet
+                  modules:
+                    - origami_room
+                  origami_room:
+                    animate: true
+                  button_action:
                     tap_action:
                       action: navigate
                       navigation_path: '#popup_small_bathroom'
-                    styles:
-                      button:
-                        padding: 0px
-                        margin-bottom: var(--ha-space-3)
-                        justify-content: flex-start
-                        pointer-events: none
-                      name:
-                        padding: 0px
-                        font-size: var(--ha-font-size-m)
-                        font-weight: var(--ha-font-weight-bold)
-                        white-space: nowrap
-                      state:
-                        padding: 0px
-                        font-size: var(--ha-font-size-s)
-                        font-weight: var(--ha-font-weight-medium)
-                        color: var(--secondary-text-color)
-                  buttons:
-                    # Invisible overlay that catches the tap for the whole card
-                    - entity: light.small_bathroom
-                      layout: name
-                      name: false
-                      styles:
-                        button:
-                          z-index: 3
-                          pointer-events: all
-                          position: absolute
-                          top: 0px
-                          left: 0px
-                          width: 100%
-                          height: 100%
-                          border-radius: var(--ha-card-border-radius)
-                    # Icon, colored while the room's lights are on
-                    - entity: light.small_bathroom
-                      icon: mdi:toilet
-                      state_styles:
-                        'on':
-                          icon:
-                            background-color: var(--tint)
-                            color: var(--state-light-active-color)
-                      styles:
-                        button:
-                          width: calc(100% - var(--control-height-icon))
-                        icon:
-                          --mdc-icon-size: var(--icon-size-m)
-                          width: var(--tile-size)
-                          height: var(--tile-size)
-                          display: flex
-                          justify-content: center
-                          align-items: center
-                          border-radius: var(--radius-inner)
-                          background-color: var(--ha-card-background)
-                          box-shadow: var(--ha-card-box-shadow)
-                          transition: var(--transition-interactive)
-                    - icon: mdi:chevron-right
-                      styles:
-                        button:
-                          width: var(--control-height-icon)
-                          justify-content: center
-                        icon:
-                          --mdc-icon-size: var(--icon-size-l)
-                          opacity: var(--opacity-quiet)
-                    - name: WC
-                      layout: name
-                      styles:
-                        button:
-                          width: 100%
-                          margin: var(--ha-space-2) 0px 0px 0px
+                    hold_action:
+                      action: more-info
+                  sub_button:
+                    main:
+                      - icon: mdi:chevron-right
                     # Comfort dot, window, temperature and humidity
-                    - layout: icon
-                      icon: mdi:circle
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                        icon:
-                          --mdc-icon-size: var(--dot-size)
-                          margin: -3px 0px 0px 0px
-                          color: '{{ state_attr("sensor.climate_small_bathroom", "color_code") }}'
-                    - entity: binary_sensor.small_bathroom_window
-                      layout: icon
-                      icon: mdi:window-closed-variant
-                      state_icons:
-                        'on': mdi:window-open-variant
-                        'off': mdi:window-closed-variant
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-                        icon:
-                          --mdc-icon-size: var(--dot-size)
-                          margin: -3px 0px 0px 0px
-                    - entity: sensor.climate_small_bathroom
-                      layout: state
-                      state:
-                        attribute: temperature
-                        postfix: ° |
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-                    - entity: sensor.climate_small_bathroom
-                      layout: state
-                      state:
-                        attribute: humidity
-                        postfix: '%'
-                      styles:
-                        button:
-                          margin: var(--ha-space-2) 0px 0px 0px
+                    bottom:
+                      - entity: sensor.climate_small_bathroom
+                        icon: mdi:circle
+                        origami_room:
+                          color: ${attr.color_code}
+                      - entity: binary_sensor.small_bathroom_window
+                        icon: mdi:window-closed-variant
+                        origami_room:
+                          icon:
+                            'on': mdi:window-open-variant
+                      - entity: sensor.climate_small_bathroom
+                        show_icon: false
+                        origami_room:
+                          name: ${attr.temperature}° |
+                      - entity: sensor.climate_small_bathroom
+                        show_icon: false
+                        origami_room:
+                          name: ${attr.humidity}%
 
           # More or fewer rooms
           - type: custom:bubble-card
