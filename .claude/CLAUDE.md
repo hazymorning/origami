@@ -46,3 +46,13 @@ The docs must read like plain, natural English from a native technical writer. T
 The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, the README shows only one, because more copies add nothing but noise.
 
 The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After any change to the dashboard, run `python3 .github/scripts/fold_cards.py` to copy them again. A comment above each code block names its card, and the Fold cards workflow fails while a copy is out of date.
+
+## Branches and releases
+
+`main` holds the latest release. The README on GitHub and the ZIP download come from `main`, and HACS installs the releases. `next` collects the work for the coming release.
+
+- Every change goes into `next` through its own pull request. Never push to `main` or `next` directly. A pull request into `main` is only for a fix to the current release or for the release itself.
+- Changes come from the user's own setup, where they were tested first. In the repo, they use the example home's entities, such as `light.living_room`.
+- A change is finished only when everything that describes it is in the same pull request. That means `dashboard/dashboard.yaml`, the README, the module reference, a line under "Next release" in the changelog and a run of `fold_cards.py`. The pull request template lists these steps.
+- A fix for the current release goes into `main` first. Then a pull request merges `main` into `next`.
+- For a release, a pull request merges `next` into `main` with a merge commit, never with a squash. The "Next release" section of the changelog becomes the release's own section, and the release gets a tag such as `V3.0`.
