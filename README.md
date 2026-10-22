@@ -3090,7 +3090,7 @@ cards:
                       entity_id: remote.living_room_tv
                     data:
                       command: TV_INPUT
-                # Filled while the speaker uses this source, because its tap selects it
+                # The button is filled while the speaker uses this source, because its tap selects it
                 - name: TV
                   show_name: true
                   tap_action:
@@ -4395,7 +4395,7 @@ In a browser, open `/local/fonts/montserrat.css` on your Home Assistant server, 
 
 <br>
 
-The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with an Origami module also looks plain while `origami_base` is not the first entry under its `modules`.
+The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with an Origami module also looks plain while `origami_base` is missing from its `modules` or comes after the card's other Origami modules.
 
 </details>
 

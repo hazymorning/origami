@@ -2812,7 +2812,7 @@ views:
                                   entity_id: remote.living_room_tv
                                 data:
                                   command: TV_INPUT
-                            # Filled while the speaker uses this source, because its tap selects it
+                            # The button is filled while the speaker uses this source, because its tap selects it
                             - name: TV
                               show_name: true
                               tap_action:

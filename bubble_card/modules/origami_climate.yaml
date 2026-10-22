@@ -3,7 +3,7 @@ origami_climate:
   version: "3.0.0"
   supported:
     - button
-  description: "The Climate module shows what a thermostat is doing, and it works with Base. While the thermostat heats, cools, dries or runs its fan, the icon and the state line show that action. Otherwise, they show the thermostat's mode, and the icon is muted while it is off. Without hvac_action, the card follows the mode alone. The words come from Home Assistant, with shorter German words for the actions. Set state_content to an empty list, and the module writes the state line. A sub-button with css_class set to readout shows the target temperature, or the range for thermostats with a low and a high target. The Icons option is a map from an action or a state, such as heating or off, to an icon."
+  description: "The Climate module shows what a thermostat is doing, and it works with Base. While the thermostat heats, cools, dries or runs its fan, the icon and the state line show that action. At other times, the state line shows Home Assistant's word for the action, such as Idle, or the mode, and the icon is the card's own icon, muted while the thermostat is off. Without hvac_action, the card follows the mode alone. The words come from Home Assistant, with shorter German words for the actions. Set state_content to an empty list, and the module writes the state line. A sub-button with css_class set to readout shows the target temperature, or the range for thermostats with a low and a high target. The Icons option is a map from an action or a state, such as heating or off, to an icon."
   editor:
     - name: icons
       label: "Icons (a map from an action or a state to an icon)"
@@ -12,7 +12,7 @@ origami_climate:
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass) throw new Error("origami_climate needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_climate needs origami_base 11 or later, listed before it");
       // The thermostat's plus and minus buttons stay neutral while it works
       if (card.dataset.orgFill !== "own") card.dataset.orgFill = "own";
       const st = hass.states[entity];
@@ -20,7 +20,7 @@ origami_climate:
       const look = org.look(hass, entity);
       const act = String(a.hvac_action ?? "").toLowerCase();
       // Home Assistant's icons for the actions
-      const icons = { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt", ...(this.config.origami_climate?.icons ?? {}) };
+      const icons = { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt", ...org.rekey(this.config.origami_climate?.icons) };
       const working = look.on && act !== "" && !["idle", "off"].includes(act);
       const off = look.available && (st.state === "off" || act === "off");
       const key = !look.available ? "unavailable" : working ? act : off ? "off" : act || st.state;
