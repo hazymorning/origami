@@ -817,7 +817,7 @@ button_containers:
 
 ### Favorites
 
-The favorites are tiles for devices and tasks that are relevant at the moment. Most tiles appear only at certain times or in certain states. The tiles use Bubble Card with the [Header](bubble_card/README.md#header) and [Tiles](bubble_card/README.md#tiles) modules.
+The favorites are tiles for devices and tasks that are relevant at the moment. Most tiles appear only at certain times or in certain states. The tiles use Bubble Card with the [Base](bubble_card/README.md#base), [Header](bubble_card/README.md#header) and [Tiles](bubble_card/README.md#tiles) modules.
 
 <img width="800" alt="Six favorite tiles in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/favorites.webp">
 
@@ -4379,7 +4379,7 @@ In a browser, open `/local/fonts/montserrat.css` on your Home Assistant server, 
 
 <br>
 
-The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page.
+The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with the Header or Tiles module also looks plain while `origami_base` is not the first entry under its `modules`.
 
 </details>
 

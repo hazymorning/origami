@@ -24,11 +24,11 @@ Open any Bubble card in the editor and go to **Modules**, then **My Modules**, t
 
 ## How the modules work together
 
-List Base first on every Origami card except a pop-up, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share, such as the templates in values and the color rule. On separator and sub-buttons cards, Base draws nothing, because Header, Tiles and Button draw those cards. Only Popup and Button work without Base, and without Base the buttons cannot fade in.
+List Base first on every Origami card except a pop-up, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share, such as the code that reads templates in values and the color rule. On separator and sub-buttons cards, Base adds only its `animate` option, because Header, Tiles and Button draw those cards. Only Popup and Button work without Base, and without Base the buttons cannot fade in.
 
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
-| [Base](#base) | `origami_base` | every type except pop-up | The frame, text styles, color and shared options, and the helpers that the other modules use. On cover, climate, select and calendar cards, Base only styles the sub-buttons. |
+| [Base](#base) | `origami_base` | button, media player, cover, climate, select, calendar, separator, sub-buttons | Base draws the frame, text styles and color, and it holds the shared options and the helpers that the other modules use. On cover, climate, select and calendar cards, Base only styles the sub-buttons. |
 | [Light](#light) | `origami_light` | button | Lights |
 | [Fan](#fan) | `origami_fan` | button | Fans with speed buttons |
 | [Climate](#climate) | `origami_climate` | button | Thermostats |
@@ -53,9 +53,9 @@ Base only colors entities whose domain has a state color in Home Assistant, and 
 
 Controls stay neutral. An active control uses `fill-active`, which is the text color used as a fill. This fill is dark in light mode and light in dark mode, like Home Assistant's switches when they are on.
 
-- A sub-button with `show_background: true` is filled while its entity, or the card's entity, is on and has a state color.
+- A sub-button with `show_background: true` is filled while its entity, or the card's entity, is on and has a state color. On a card with Base's `vertical` option, the sub-buttons have no fill.
 - Sub-buttons that navigate, open the more-info dialog or open a URL stay neutral, unless they have `css_class: accent`.
-- A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, such a sub-button passes the tap to the card instead.
+- A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - The Fan module fills its power button and the button for the current speed. Thermostat buttons stay neutral.
 
 </details>
@@ -114,12 +114,12 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `group` | `false` | The sub-buttons appear as small buttons in a tray. |
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
 | `solid_controls` | `false` | On media cards that use the Media module, Bubble Card's play and pause button is filled while media is playing, and its power button is filled while the player is on. This option has no effect on sub-buttons. |
-| `vertical` | `false` | The name is under the icon, as on the room cards. The section [Name under the icon](#name-under-the-icon) explains this layout. This option works on button cards and turns off `toggle` and `group`. |
+| `vertical` | `false` | The name is under the icon, as on the room cards. The section [Name under the icon](#name-under-the-icon) explains this layout. Base hides the state line, and the sub-buttons have no fill. This option works on button cards and turns off `toggle` and `group`. |
 | `animate` | `false` | The card fades in from below when it appears. |
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
 
-Each sub-button can have its own `origami_base` key. These keys accept the same values as the keys of the Header and Tiles modules.
+Each sub-button can have its own `origami_base` key, except on separator and sub-buttons cards. There, the Header and Tiles modules have keys of their own. These keys accept the same values as the keys of the Header and Tiles modules.
 
 | Key | Description |
 | --- | --- |
@@ -222,7 +222,7 @@ sub_button:
         name: ${attr.humidity}%
 ```
 
-The chevron is the only main sub-button. The bottom sub-buttons are the comfort dot, the window icon, the temperature and the humidity. A sub-button that shows only text needs `show_icon: false`. The temperature and the humidity are two sub-buttons, so that each one can move to its own line on a narrow phone. With `button_type: name`, the card has no state line. While the climate sensor has no `color_code`, the dot is transparent.
+The chevron is the only main sub-button. The bottom sub-buttons are the comfort dot, the window icon, the temperature and the humidity. A sub-button that shows only text needs `show_icon: false`. The temperature and the humidity are two sub-buttons, so that each one can move to its own line on a narrow phone. Base hides the state line on a card with `vertical`. While the climate sensor has no `color_code`, the dot is transparent.
 
 ### Light
 
@@ -766,6 +766,6 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 ## Your own modules
 
-A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Base shows how a module reads the theme's tokens and writes the state line, and Tiles shows how a module turns a sub-buttons card into a grid of tiles. Base also puts its helpers on `card._org`, so a module that is listed after Base can use the same templates, the same text and icon writers and the same color rule. Tiles and Header show how a module uses them.
+A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Base shows how a module reads the theme's tokens and writes the state line, and Tiles shows how a module turns a sub-buttons card into a grid of tiles. Base also puts its helpers on `card._org`, so a module that is listed after Base can use the same code that reads templates, the same text and icon writers and the same color rule. Tiles and Header show how a module uses them.
 
 Anyone can share a module in the Module Store. A module that is posted in the [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) category of Bubble Card's discussions appears in the store. The Origami modules will move to the Module Store later.
