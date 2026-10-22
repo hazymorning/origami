@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "1.0.1"
+  version: "1.0.2"
   supported:
     - sub-buttons
   description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image and name_color. Each of these accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Bubble Card's visibility conditions decide when a tile appears."
@@ -72,7 +72,8 @@ origami_tiles:
         return run(option, ctx);
       };
       const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
-      const q = (v) => JSON.stringify(String(v));
+      // Bubble Card cleans the CSS text, so every character that it could change is escaped
+      const q = (v) => '"' + String(v).replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"';
       const slug = (v) => String(v).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
       card._orgTilesCols = Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
       card._orgTilesCss = tiles.map((item, i) => {

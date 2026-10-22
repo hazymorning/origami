@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "1.4.1"
+  version: "1.4.2"
   supported:
     - separator
   description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color and background. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
@@ -122,7 +122,8 @@ origami_header:
         return run(option, ctx);
       };
       const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
-      const q = (v) => JSON.stringify(String(v));
+      // Bubble Card cleans the CSS text, so every character that it could change is escaped
+      const q = (v) => '"' + String(v).replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"';
       const rules = [];
       card._orgHIcons = [];
       items.forEach((item, i) => {

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.1
+
+### Bug fixes
+
+- The Header and Tiles modules now show values exactly as they are. Before, Bubble Card's style cleaner removed the space after a comma or a semicolon, so "Mon, 12:00" became "Mon,12:00", and a value with braces disappeared.
+- On iPhones, the menu now starts below the status bar instead of behind it.
+- The Media module now treats a speaker's "Optical In" source as its TV input, like "optical". The speaker card then shows TV input and the TV speaker icon instead of the playing state.
+
+### Upgrading
+
+1. Copy `origami_header.yaml`, `origami_tiles.yaml` and `origami_media.yaml` from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
+2. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
+
 ## 2.0 · The Unfolding
 
 <img alt="The Origami dashboard and its new pop-ups on five phones" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/release-2.0-dashboard.webp">
