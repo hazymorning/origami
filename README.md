@@ -104,7 +104,7 @@ Open each repository in HACS. If HACS asks you to add the repository, select **A
 | Repository | Used for | Link |
 | --- | --- | --- |
 | [Origami](https://github.com/hazymorning/origami) | The theme | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme) |
-| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the climate table and the buttons in the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
+| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the climate table and the fan pop-up | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
 | [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers, the room cards and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
 | [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) | Loading the Bubble Card modules | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration) |
 | [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
@@ -2915,11 +2915,12 @@ The TV pop-up is a remote control for the TV. It opens from **TV** in the naviga
 
 - The top card shows the TV, its current program and its power button. A separate speaker plays the TV's sound, and the card's slider sets the speaker's volume. A blurred picture of the current program appears behind the pop-up.
 - The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input, and it is filled while the speaker uses that input.
-- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker.
-- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`.
-- The remote has a back button, a home button and a round pad with an OK button. Hold an arrow button to repeat its command.
+- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number, and a tap on the icon turns the sound back on.
+- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. Each button's `css_class` is the ID of its app, which the TV reports in its `app_id` attribute.
+- The remote has a back button, a home button and a round pad with an OK button.
+- Every card inside the pop-up's vertical stack is a Bubble card. The row with the input and volume buttons, the row of apps and the remote are sub-buttons cards with the [Button](bubble_card/README.md#button) module. Its `segmented` option joins each group of buttons into one bar, and its `scroll` option lets the apps scroll. The remote's own `styles` place its buttons in a grid and draw the round pad.
 
-The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons need your TV's source names.
+The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons need your TV's source names and app IDs.
 
 </details>
 
@@ -2945,7 +2946,7 @@ In this example, the speaker's TV input is called `Optical In`. If you do not ha
 
 <br>
 
-This pop-up needs Bubble Card, Paper Buttons Row and `script.volume` from the [package](packages/origami.yaml).
+This pop-up needs Bubble Card and `script.volume` from the [package](packages/origami.yaml).
 
 <!-- dashboard.yaml hash=#popup_tv -->
 
@@ -3040,406 +3041,311 @@ cards:
         rows: '2.2'
         state_content: state
 
-      # Input, TV sound through the speaker, and the volume in steps
-      - type: custom:paper-buttons-row
-        extra_styles: >-
-          paper-button:active { background-color: var(--fill-strong) !important }
-          paper-button[data-state="optical in" i], paper-button[data-state="optical in" i] + paper-button { background-image: none !important }
-        styles:
-          align-items: stretch
-          margin: var(--ha-space-2) 0px
-          padding: 0px
-          background-color: transparent
-          box-shadow: none
-          --pbs-button-bg-color: var(--fill-subtle)
-        base_config:
-          layout: icon
-          tap_action:
-            action: call-service
-            service: script.volume
-          styles:
-            button:
-              flex: 1
-              height: var(--control-height)
-              padding: 0px
-              border-radius: 0px
-              box-shadow: none
-              background-image: linear-gradient(var(--fill-loud), var(--fill-loud))
-              background-repeat: no-repeat
-              background-size: 2px 50%
-              background-position: left center
-              transition: var(--transition-interactive)
-            icon:
-              --mdc-icon-size: var(--icon-size-m)
-              margin-right: 0px
-              opacity: var(--opacity-strong)
-        buttons:
-          - icon: mdi:import
-            tooltip: Input
-            tap_action:
-              service: remote.send_command
-              target:
-                entity_id: remote.living_room_tv
-              service_data:
-                command: TV_INPUT
-            styles:
-              button:
-                border-radius: var(--radius-inner) 0px 0px var(--radius-inner)
-                background-image: none
-          # The button is filled while the speaker plays the TV's sound, like the active buttons in the fan pop-up
-          - layout: name
-            name: TV
-            tooltip: TV sound through the speaker
-            state:
-              entity: media_player.living_room
-              attribute: source
-            active:
-              - optical in
-            state_styles:
-              optical in:
-                button:
-                  background-color: var(--fill-subtle)
-                name:
-                  color: var(--ha-card-background)
-                  background-color: var(--fill-active)
-                  opacity: 1
-            tap_action:
-              service: media_player.select_source
-              target:
-                entity_id: media_player.living_room
-              service_data:
-                source: Optical In
-            styles:
-              button:
-                box-sizing: border-box
-                padding: var(--ha-space-1)
-                margin-right: var(--ha-space-3)
-                border-radius: 0px var(--radius-inner) var(--radius-inner) 0px
-              name:
-                display: flex
-                align-items: center
-                justify-content: center
-                box-sizing: border-box
-                width: 100%
-                height: 100%
-                padding: 0px
-                border-radius: calc(var(--radius-inner) - var(--ha-space-1))
-                font-size: var(--ha-font-size-l)
-                font-weight: var(--ha-font-weight-bold)
-                transition: var(--transition-interactive)
-          # A tap changes the volume by 1%, a double tap by 5% and holding by 10%
-          - icon: mdi:minus
-            tooltip: Quieter
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                step: -0.01
-            double_tap_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: -0.05
-            hold_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: -0.1
-            styles:
-              button:
-                border-radius: var(--radius-inner) 0px 0px var(--radius-inner)
-                background-image: none
-          # Shows the volume, or a muted icon while the speaker is muted. A tap mutes the speaker.
-          - layout: state|icon
-            icon: mdi:volume-off
-            tooltip: Mute
-            state: >-
-              {% set s = 'media_player.living_room' %}{{ 'off' if states(s) in ['unavailable', 'unknown', 'off']
-              else 'muted' if state_attr(s, 'is_volume_muted')
-              else ((state_attr(s, 'volume_level') | float(0)) * 100) | round(0) | int }}
-            state_text:
-              'off': –
-              muted: ' '
-            state_styles:
-              muted:
-                state:
-                  transform: scale(0)
-                icon:
-                  transform: scale(1)
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                mute: true
-            hold_action:
-              action: more-info
-              entity: media_player.living_room
-            styles:
-              button:
-                position: relative
-              state:
-                padding: 0px
-                font-size: var(--ha-font-size-l)
-                font-weight: var(--ha-font-weight-bold)
-                font-variant-numeric: tabular-nums
-                transition: transform var(--duration-normal) ease
-              icon:
-                --mdc-icon-size: var(--icon-size-s)
-                position: absolute
-                transform: scale(0)
-                transition: transform var(--duration-normal) ease
-          - icon: mdi:plus
-            tooltip: Louder
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                step: 0.01
-            double_tap_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: 0.05
-            hold_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: 0.1
-            styles:
-              button:
-                border-radius: 0px var(--radius-inner) var(--radius-inner) 0px
+      # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_button
+        origami_button:
+          segmented: true
+          icon_size: var(--icon-size-m)
+          padding: var(--ha-space-2) 0
+          # The TV button is filled while the speaker uses its TV input
+          active: "{{ 'TV' if (state_attr('media_player.living_room', 'source') | lower) == 'optical in' else '' }}"
+        sub_button:
+          main: []
+          bottom:
+            - name: Sources
+              group:
+                - name: Input
+                  icon: mdi:import
+                  tap_action:
+                    action: perform-action
+                    perform_action: remote.send_command
+                    target:
+                      entity_id: remote.living_room_tv
+                    data:
+                      command: TV_INPUT
+                - name: TV
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.select_source
+                    target:
+                      entity_id: media_player.living_room
+                    data:
+                      source: Optical In
+            # A tap changes the volume by 1%, a double tap by 5% and holding by 10%
+            - name: Volume
+              group:
+                - name: Quieter
+                  icon: mdi:minus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.1
+                # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes or unmutes the speaker.
+                - name: >-
+                    {% set s = 'media_player.living_room' %}{{ '–' if states(s) in ['unavailable', 'unknown', 'off']
+                    else '' if state_attr(s, 'is_volume_muted')
+                    else ((state_attr(s, 'volume_level') | float(0)) * 100) | round(0) | int }}
+                  icon: >-
+                    {% set s = 'media_player.living_room' %}{{ 'mdi:volume-off' if states(s) not in ['unavailable', 'unknown', 'off']
+                    and state_attr(s, 'is_volume_muted') else '' }}
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      mute: true
+                  hold_action:
+                    action: more-info
+                    entity: media_player.living_room
+                - name: Louder
+                  icon: mdi:plus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.1
 
-      # The app buttons scroll sideways. The running app's button is filled.
-      - type: custom:paper-buttons-row
-        extra_styles: >-
-          paper-button.button-active { background-color: var(--fill-active) !important; box-shadow: none !important }
-          paper-button.button-active span { color: var(--ha-card-background) !important; opacity: 1 !important }
-        styles:
-          justify-content: start
-          gap: var(--ha-space-2)
-          margin: calc(var(--scroller-bleed) * -1)
-          padding: var(--scroller-padding)
-          overflow-x: scroll
-          overscroll-behavior-x: contain
-          scroll-snap-type: x mandatory
-          scrollbar-width: none
-          mask-image: var(--scroller-mask)
-        base_config:
-          layout: name
-          state:
-            entity: media_player.living_room_tv
-            attribute: app_id
-          tap_action:
-            action: call-service
-            service: media_player.select_source
-            target:
-              entity_id: media_player.living_room_tv
-          styles:
-            button:
-              scroll-snap-align: start
-              scroll-margin-left: var(--scroller-bleed)
-              padding: calc(var(--control-padding-x) / 1.4) var(--control-padding-x)
-              border-radius: var(--ha-card-border-radius)
-              background-color: var(--fill-subtle)
-              box-shadow: var(--card-ring)
-              transition: var(--transition-interactive)
-            name:
-              padding: 0px
-              font-size: var(--ha-font-size-m)
-              font-weight: var(--ha-font-weight-normal)
-              white-space: nowrap
-        buttons:
-          - name: Netflix
-            active:
-              - com.netflix.ninja
-            tap_action:
-              service_data:
-                source: Netflix
-          - name: YouTube
-            active:
-              - com.google.android.youtube.tv
-            tap_action:
-              service_data:
-                source: YouTube
-          - name: Prime Video
-            active:
-              - com.amazon.amazonvideo.livingroom
-            tap_action:
-              service_data:
-                source: Prime Video
-          - name: Disney+
-            active:
-              - com.disney.disneyplus
-            tap_action:
-              service_data:
-                source: Disney+
-          - name: Spotify
-            active:
-              - com.spotify.tv.android
-            tap_action:
-              service_data:
-                source: Spotify
-          - name: Plex
-            active:
-              - com.plexapp.android
-            tap_action:
-              service_data:
-                source: Plex
+      # The app buttons scroll sideways. Each button's css_class is its app's ID, so the running app's button is filled.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_button
+        origami_button:
+          scroll: true
+          active_style: toggle
+          active: "{{ state_attr('media_player.living_room_tv', 'app_id') }}"
+        sub_button:
+          main: []
+          bottom:
+            - name: Netflix
+              css_class: com.netflix.ninja
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Netflix
+            - name: YouTube
+              css_class: com.google.android.youtube.tv
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: YouTube
+            - name: Prime Video
+              css_class: com.amazon.amazonvideo.livingroom
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Prime Video
+            - name: Disney+
+              css_class: com.disney.disneyplus
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Disney+
+            - name: Spotify
+              css_class: com.spotify.tv.android
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Spotify
+            - name: Plex
+              css_class: com.plexapp.android
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Plex
 
-      # The remote has back and home buttons and a round pad. Holding an arrow repeats its command.
-      - type: custom:paper-buttons-row
-        extra_styles: 'paper-button:active { transform: scale(var(--press-scale)) }'
-        styles:
-          display: grid
-          grid-template-columns: 1fr var(--control-height-lg) var(--control-height-lg) var(--control-height-lg) 1fr
-          grid-template-rows: repeat(3, var(--control-height-lg))
-          grid-template-areas: '"back . up . home" ". left ok right ." ". . down . ."'
-          gap: var(--ha-space-2)
-          margin-top: var(--ha-space-2)
-          align-items: center
-          justify-items: center
-        base_config:
-          layout: icon
-          tap_action:
-            action: call-service
-            service: remote.send_command
-            target:
-              entity_id: remote.living_room_tv
-          hold_action:
-            action: call-service
-            service: remote.send_command
-            target:
-              entity_id: remote.living_room_tv
-            repeat: 300
-          styles:
-            button:
-              width: var(--control-height)
-              height: var(--control-height)
-              padding: 0px
-              border-radius: var(--radius-inner)
-              background-color: transparent
-              box-shadow: none
-            icon:
-              --mdc-icon-size: var(--icon-size-l)
-              margin-right: 0px
-              opacity: var(--opacity-strong)
-            name:
-              padding: 0px
-        buttons:
-          # The round pad behind the arrows
-          - layout: name
-            name: ' '
-            tooltip: false
-            tap_action:
-              action: none
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-row: 1 / 4
-                grid-column: 2 / 5
-                width: calc(var(--control-height-lg) * 3 + var(--ha-space-2) * 2)
-                height: calc(var(--control-height-lg) * 3 + var(--ha-space-2) * 2)
-                border-radius: var(--radius-circle)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-                pointer-events: none
-          - icon: mdi:arrow-left
-            tooltip: Back
-            tap_action:
-              service_data:
-                command: BACK
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: back
-                justify-self: start
-                width: var(--control-height-sm)
-                height: var(--control-height-sm)
-                border-radius: var(--ha-card-border-radius)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-              icon:
-                --mdc-icon-size: var(--icon-size-m)
-          - icon: mdi:home
-            tooltip: Home
-            tap_action:
-              service_data:
-                command: HOME
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: home
-                justify-self: end
-                width: var(--control-height-sm)
-                height: var(--control-height-sm)
-                border-radius: var(--ha-card-border-radius)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-              icon:
-                --mdc-icon-size: var(--icon-size-m)
-          - icon: mdi:chevron-up
-            tap_action:
-              service_data:
-                command: DPAD_UP
-            hold_action:
-              service_data:
-                command: DPAD_UP
-            styles:
-              button:
-                grid-area: up
-          - icon: mdi:chevron-left
-            tap_action:
-              service_data:
-                command: DPAD_LEFT
-            hold_action:
-              service_data:
-                command: DPAD_LEFT
-            styles:
-              button:
-                grid-area: left
-          - layout: name
-            name: OK
-            tap_action:
-              service_data:
-                command: DPAD_CENTER
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: ok
-                width: var(--control-height-lg)
-                height: var(--control-height-lg)
-                border-radius: var(--radius-circle)
-                background-color: var(--ha-card-background)
-                box-shadow: var(--ha-card-box-shadow)
-              name:
-                font-size: var(--ha-font-size-m)
-                font-weight: var(--ha-font-weight-bold)
-                opacity: var(--opacity-muted)
-          - icon: mdi:chevron-right
-            tap_action:
-              service_data:
-                command: DPAD_RIGHT
-            hold_action:
-              service_data:
-                command: DPAD_RIGHT
-            styles:
-              button:
-                grid-area: right
-          - icon: mdi:chevron-down
-            tap_action:
-              service_data:
-                command: DPAD_DOWN
-            hold_action:
-              service_data:
-                command: DPAD_DOWN
-            styles:
-              button:
-                grid-area: down
+      # The remote has back and home buttons and a round pad with an OK button
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          icon_size: var(--icon-size-l)
+          padding: var(--ha-space-2) 0 0
+        # The styles place the buttons by their css_class, draw the round pad and set the button sizes. They exist only on this card.
+        styles: |-
+          ha-card .bubble-sub-button-bottom-container {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) repeat(3, var(--control-height-lg)) minmax(0, 1fr);
+            grid-template-rows: repeat(3, var(--control-height-lg));
+            grid-template-areas: "back . up . home" ". left ok right ." ". . down . .";
+            place-items: center;
+          }
+          ha-card .bubble-sub-button-bottom-container::before {
+            content: "";
+            grid-area: 1 / 2 / 4 / 5;
+            place-self: stretch;
+            border-radius: var(--radius-circle);
+            background-color: var(--fill-subtle);
+            box-shadow: var(--card-ring);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+            width: var(--control-height) !important;
+            height: var(--control-height) !important;
+            padding: 0 !important;
+            color: var(--primary-text-color) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+            opacity: var(--opacity-strong) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.back, .home) {
+            width: var(--control-height-sm) !important;
+            height: var(--control-height-sm) !important;
+            border-radius: var(--ha-card-border-radius) !important;
+            background-color: var(--fill-subtle) !important;
+            box-shadow: var(--card-ring) !important;
+            --org-btn-icon-size: var(--icon-size-m);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok {
+            width: var(--control-height-lg) !important;
+            height: var(--control-height-lg) !important;
+            border-radius: var(--radius-circle) !important;
+            background-color: var(--ha-card-background) !important;
+            box-shadow: var(--ha-card-box-shadow) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok .bubble-sub-button-name-container {
+            font-size: var(--ha-font-size-m) !important;
+            font-weight: var(--ha-font-weight-bold) !important;
+            opacity: var(--opacity-muted) !important;
+          }
+          .back { grid-area: back; justify-self: start; }
+          .home { grid-area: home; justify-self: end; }
+          .up { grid-area: up; }
+          .left { grid-area: left; }
+          .ok { grid-area: ok; }
+          .right { grid-area: right; }
+          .down { grid-area: down; }
+        sub_button:
+          main: []
+          bottom:
+            - name: Back
+              css_class: back
+              icon: mdi:arrow-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: BACK
+            - name: Home
+              css_class: home
+              icon: mdi:home
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: HOME
+            - name: Up
+              css_class: up
+              icon: mdi:chevron-up
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_UP
+            - name: Left
+              css_class: left
+              icon: mdi:chevron-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_LEFT
+            - name: OK
+              css_class: ok
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_CENTER
+            - name: Right
+              css_class: right
+              icon: mdi:chevron-right
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_RIGHT
+            - name: Down
+              css_class: down
+              icon: mdi:chevron-down
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_DOWN
 ```
 
 </details>
@@ -4494,7 +4400,7 @@ Instead of copying the font files, you can add `https://fonts.googleapis.com/css
 Origami was built by hand over many years. Many of its details have reasons that the YAML alone does not show, so an AI assistant that guesses instead of reading usually gets them wrong. The repository is also large, and adapting it to your home takes time, even with AI.
 
 - Use the most capable model that you have access to, and turn on extended thinking if your app offers it.
-- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section. For Bubble cards, such as the room cards, it should also read the [module reference](bubble_card/README.md).
+- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section. For Bubble cards, such as the room cards and the TV pop-up, it should also read the [module reference](bubble_card/README.md).
 - Ask it to follow the order in [How Origami is built](#how-origami-is-built). Otherwise, it often writes a new custom card or uses card-mod, because that is easier than learning how Bubble Card and the modules work.
 - Give it your real entity IDs. The assistant cannot see your Home Assistant, so it invents any ID that you do not give it.
 - Ask for the changed cards only, and save a copy of your configuration before you paste anything.

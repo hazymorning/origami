@@ -35,7 +35,7 @@ On button and media player cards, list Base first and then the module for the de
 | [Media](#media) | `origami_media` | media player | Speakers and TVs |
 | [Speaker Select](#speaker-select) | `origami_speaker` | media player | Speaker rows in a music pop-up |
 | [Slider](#slider) | `origami_slider` | button with a slider | A standalone slider |
-| [Button](#button) | `origami_button` | sub-buttons | Rows and grids of buttons |
+| [Button](#button) | `origami_button` | sub-buttons | Rows and grids of buttons, segmented bars and rows that scroll sideways |
 | [Header](#header) | `origami_header` | separator | Section headers with values |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Grids of tiles |
 | [Room](#room) | `origami_room` | button | Room cards |
@@ -479,7 +479,7 @@ Use `slider_value_position: hidden` to hide the number.
 
 ### Button
 
-The Button module creates rows and grids of buttons on a sub-buttons card. Put every button into `sub_button: bottom` with `show_name: true`.
+The Button module creates rows and grids of buttons on a sub-buttons card. Put every button into `sub_button: bottom`, and add `show_name: true` to each button that should show its name. The module can also join buttons into segmented bars or let a row scroll sideways, as in the [TV pop-up](../README.md#tv).
 
 <img width="800" alt="Scenes with the active scene highlighted, two toggles and a plain text button" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-button.webp">
 
@@ -499,7 +499,9 @@ The Button module creates rows and grids of buttons on a sub-buttons card. Put e
 | `icon_size` | `var(--icon-size-2xs)` | The icon size |
 | `padding` | `0` | The space around the buttons |
 | `animate` | `false` | The buttons fade in from below. |
-| `press` | `true` | The buttons shrink a little when you press them. |
+| `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
+| `segmented` | `false` | The buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. |
+| `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
 
 ```yaml
 type: custom:bubble-card
@@ -531,7 +533,9 @@ sub_button:
     # Night and Dinner work the same way
 ```
 
-`sensor.living_room_scene` contains the active scene's name, such as `evening`. The names are compared in lower case with hyphens instead of spaces, so `Late` matches `late`.
+`sensor.living_room_scene` contains the active scene's name, such as `evening`. Bubble Card turns each button's name and `css_class` into a class name, and the module turns each active value into a class name in the same way. The text becomes lower case without accents, each run of characters other than letters and digits becomes one hyphen, and hyphens at the start and the end are dropped. So `Late` matches `late`, and the app ID `com.netflix.ninja` matches a `css_class` of `com.netflix.ninja`. The TV pop-up uses this to fill the running app's button. A name that is a template gets no class name, so such a button can only match through its `css_class`.
+
+With `segmented: true`, each group under `sub_button: bottom` becomes one bar. Buttons outside a group each form a bar of their own when the card also has groups, and they share one bar when it has none. The TV pop-up's input and volume buttons are two groups, so they form two bars in one row.
 
 </details>
 
