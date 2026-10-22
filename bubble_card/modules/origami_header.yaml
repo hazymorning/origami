@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "1.4.1"
+  version: "2.0.0"
   supported:
     - separator
-  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color and background. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
+  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color and background. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. List Base before Header, because Header uses Base's helpers. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
   editor:
     - name: value_style
       label: "Value style"
@@ -53,7 +53,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const cfg = this.config.origami_header ?? {};
-      const raw = cfg.icon_color ? (typeof renderTemplate === "function" ? renderTemplate(cfg.icon_color) : cfg.icon_color) : "";
+      const raw = cfg.icon_color ? renderTemplate(cfg.icon_color) : "";
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
       card._orgH = {
@@ -63,90 +63,22 @@ origami_header:
         max,
         chip: cfg.value_style === "chip"
       };
-      const S = hass.states;
-      const sb = this.config.sub_button;
-      const flat = (list) => [
-        ...list.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
-        ...list.filter((i) => i && !Array.isArray(i.group))
-      ];
-      const items = [
-        ...flat(Array.isArray(sb) ? sb : (sb?.main ?? [])),
-        ...flat(Array.isArray(sb) ? [] : (sb?.bottom ?? []))
-      ];
-      const now = new Date();
-      const states = (id) => S[id]?.state ?? "unknown";
-      const minutesUntil = (id) => {
-        const v = String(states(id));
-        const t = v.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-        let end;
-        if (t) {
-          end = new Date(now);
-          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
-          if (end < now) end.setDate(end.getDate() + 1);
-        } else {
-          end = new Date(v.replace(" ", "T"));
-        }
-        const m = Math.round((end - now) / 60000);
-        return Number.isNaN(m) ? "" : m;
-      };
-      const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || Number.isNaN(v))
-        ? ""
-        : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
-      const fns = card._orgHFns ?? (card._orgHFns = new Map());
-      const run = (value, ctx) => {
-        if (typeof value !== "string") return value;
-        if (/\{(\{|%)/.test(value)) return renderTemplate(value, ctx.entity);
-        if (!value.includes("${")) return value;
-        let fn = fns.get(value);
-        if (!fn) {
-          try {
-            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "return fill`" + value + "`;");
-          } catch (e) {
-            fn = () => "";
-          }
-          fns.set(value, fn);
-        }
-        try {
-          return fn(fill, hass, ctx.entity, ctx.state, ctx.attr, states, minutesUntil);
-        } catch (e) {
-          return "";
-        }
-      };
-      const pick = (option, ctx) => {
-        if (option === undefined || option === null) return "";
-        if (typeof option === "object" && !Array.isArray(option)) {
-          const key = String(ctx.state).toLowerCase();
-          const hit = Object.keys(option).find((k) => k.toLowerCase() === key);
-          return hit === undefined ? "" : run(option[hit], ctx);
-        }
-        return run(option, ctx);
-      };
-      const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
-      const q = (v) => JSON.stringify(String(v));
+      const org = card._org;
+      if (org?.hass !== hass) throw new Error("origami_header needs origami_base 10 or later, listed before it");
       const rules = [];
-      card._orgHIcons = [];
-      items.forEach((item, i) => {
-        const opt = item.origami_header;
+      org.subs({ hass, renderTemplate }, this.config, "origami_header").forEach(({ n, item, opt }) => {
         if (!opt) return;
-        const entity = item.entity ?? this.config.entity;
-        const obj = S[entity];
-        const ctx = { entity, state: obj?.state ?? "unknown", attr: obj?.attributes ?? {} };
-        const sel = "ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + (i + 1);
-        const name = pick(opt.name, ctx);
-        const icon = pick(opt.icon, ctx);
-        const color = pick(opt.color, ctx);
-        const background = pick(opt.background, ctx);
-        if (has(name)) {
-          rules.push(sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }");
-          rules.push(sel + " .bubble-sub-button-name-container::before { content: " + q(name) + "; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: var(--ha-font-size-m); }");
+        const sel = "ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + n;
+        if (org.has(opt.name)) {
+          rules.push(...org.text(sel, item, opt.name, "var(--ha-font-size-m)"));
           if (!card._orgH.chip) rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
         }
-        if (has(color)) {
-          rules.push(sel + " { color: " + color + " !important; }");
-          rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + color + " !important; }");
+        if (org.has(opt.color)) {
+          rules.push(sel + " { color: " + opt.color + " !important; }");
+          rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + opt.color + " !important; }");
         }
-        if (has(background)) rules.push(sel + " { --org-header-chip: " + background + "; }");
-        if (has(icon)) card._orgHIcons.push([i + 1, String(icon)]);
+        if (org.has(opt.background)) rules.push(sel + " { --org-header-chip: " + opt.background + "; }");
+        if (org.has(opt.icon)) org.icon(card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-icon"), opt.icon);
       });
       card._orgHCss = rules.join("\n");
       return "";
@@ -285,10 +217,3 @@ origami_header:
     }
     ` : ""}
     ${card._orgHCss}
-    ${(() => {
-      (card._orgHIcons ?? []).forEach(([n, icon]) => {
-        const el = card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-icon");
-        if (el && el.getAttribute("icon") !== icon) el.setAttribute("icon", icon);
-      });
-      return "";
-    })()}

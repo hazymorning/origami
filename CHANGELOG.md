@@ -6,16 +6,22 @@ These changes are in the `next` branch and come with the next release.
 
 ### New
 
-- The room cards are now Bubble cards with the new Room module. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server.
+- The room cards are now Bubble cards with the Base module and its new `vertical` option, which places the name under the icon. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server. While a room's climate sensor has no color, the dot is transparent.
+- Base is now the shared core of all Origami modules. It holds the templates in values, the code that writes the text and icons of sub-buttons and the rule that decides which entities take a state color. Header and Tiles use this core, so their values work the same as Base's own, and Tiles colors its tiles by the same rule as Base.
+- Each sub-button of a Base card can have an `origami_base` key with `name`, `icon` and `color`, as in the Header and Tiles modules.
+- The new `animate` option of the Base module lets any Origami card fade in when it appears. It replaces the option of the same name in the Button module.
 - The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
 - The Button module has two new options. With `segmented`, the buttons in each group form one bar with thin lines between them. With `scroll`, the buttons stay in one row that scrolls sideways.
 
 ### Upgrading
 
-1. Copy `bubble_card/modules/origami_room.yaml` to `/config/bubble_card/modules/`.
-2. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
-3. Copy `bubble_card/modules/origami_button.yaml` to `/config/bubble_card/modules/` again.
-4. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
+This release changes how the modules work together, so every Origami card needs a look.
+
+1. Copy `origami_base.yaml`, `origami_header.yaml`, `origami_tiles.yaml` and `origami_button.yaml` from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
+2. Add `- origami_base` as the first entry under `modules` on every card with Header, Tiles or Button. Header and Tiles show an error until Base comes first, because they use Base's helpers. On separator and sub-buttons cards, Base draws nothing of its own.
+3. On cards that used `animate: true` under `origami_button`, move it to an `origami_base` key on the same card.
+4. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
+5. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
 
 ## 2.0 · The Unfolding
 
