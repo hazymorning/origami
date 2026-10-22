@@ -7,14 +7,16 @@ origami_popup:
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass) throw new Error("origami_popup needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_popup needs origami_base 11 or later, listed before it");
       const cfg = this.config.origami_popup ?? {};
+      const chip = cfg.value_style === "chip";
+      // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.
+      const type = ["classic", "home-assistant"].includes(this.config.popup_style) ? "switch" : this.config.button_type || (this.config.entity ? "switch" : "name");
       card._orgP = {
-        chip: cfg.value_style === "chip",
-        // A header with a button, a switch or a slider keeps Bubble Card's own layout
-        title: (this.config.button_type ?? "name") === "name",
+        chip,
+        title: type === "name",
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
-        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", "var(--ha-font-size-m)").join("\n")
+        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", chip ? "var(--font-size-compact)" : "var(--ha-font-size-m)").join("\n")
       };
       return "";
     })()}
@@ -146,12 +148,16 @@ origami_popup:
       background-color: var(--org-value-chip, var(--fill-subtle)) !important;
       box-shadow: var(--card-ring);
     }
-    div.bubble-header .bubble-sub-button,
-    div.bubble-header .bubble-sub-button-name-container,
-    div.bubble-header .bubble-sub-button-state {
+    div.bubble-header .bubble-sub-button {
       font-size: var(--font-size-compact) !important;
       font-weight: var(--ha-font-weight-bold) !important;
       color: var(--primary-text-color) !important;
+    }
+    div.bubble-header .bubble-sub-button-name-container,
+    div.bubble-header .bubble-sub-button-state {
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      color: inherit !important;
     }
     ` : `
     div.bubble-header .bubble-sub-button-container {
@@ -164,12 +170,16 @@ origami_popup:
       background: none !important;
       box-shadow: none !important;
     }
-    div.bubble-header .bubble-sub-button,
-    div.bubble-header .bubble-sub-button-name-container,
-    div.bubble-header .bubble-sub-button-state {
+    div.bubble-header .bubble-sub-button {
       font-size: var(--ha-font-size-m) !important;
       font-weight: var(--ha-font-weight-medium) !important;
       color: var(--secondary-text-color) !important;
+    }
+    div.bubble-header .bubble-sub-button-name-container,
+    div.bubble-header .bubble-sub-button-state {
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      color: inherit !important;
     }
     `}
     div.bubble-header .bubble-sub-button-icon {

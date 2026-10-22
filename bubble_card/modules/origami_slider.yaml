@@ -37,9 +37,16 @@ origami_slider:
       border-radius: var(--radius-small) !important;
     }
     .bubble-range-fill {
-      border-radius: 4px !important;
-      border-start-start-radius: var(--radius-small) !important;
-      border-end-start-radius: var(--radius-small) !important;
+      border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
+    }
+    .bubble-range-fill.fill-orientation-right {
+      border-radius: 4px var(--radius-small) var(--radius-small) 4px !important;
+    }
+    .bubble-range-fill.fill-orientation-top {
+      border-radius: var(--radius-small) var(--radius-small) 4px 4px !important;
+    }
+    .bubble-range-fill.fill-orientation-bottom {
+      border-radius: 4px 4px var(--radius-small) var(--radius-small) !important;
     }
     .bubble-range-value {
       inset-inline-end: var(--ha-space-2) !important;

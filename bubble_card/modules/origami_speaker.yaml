@@ -3,7 +3,7 @@ origami_speaker:
   version: "5.0.0"
   supported:
     - media-player
-  description: "The Speaker Select module creates the speaker rows for a music pop-up and works with Base. The Media module is not needed. The speaker's name is always visible, followed by what it plays. Album art fills the icon and appears blurred behind the row. A crown marks the group leader, and a link marks its members, whose rows point to the leader. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID. Selected takes an input_select, a select or a template, and the row whose entity ID or name it holds gets a stronger fill. Players lists other media players for the same speaker, such as a Music Assistant player, and the first one that plays gives the title, the artist and the picture. Picture gives the cover's address for integrations without one, and pictures whose address contains a text from Ignore pictures never show. Inputs adds source names that count as inputs, and Icons replaces the icon for a state or an input. If the volume sub-button has css_class set to readout, the module writes the volume into it. In a sections view, set rows to 1. The example in bubble_card/README.md shows the other card options."
+  description: "The Speaker Select module creates the speaker rows for a music pop-up and works with Base. The Media module is not needed. The speaker's name is always visible, followed by what it plays. Album art fills the icon and appears blurred behind the row. A crown marks the group leader, and a link marks its members, whose rows point to the leader. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID, and its template returns nothing while the speaker is not in a group. Selected takes an input_select, a select or a template, and the row whose entity ID or name matches the helper's state or the template's result gets a stronger fill. Players lists other media players for the same speaker, such as a Music Assistant player, and the first one that plays gives the title, the artist and the picture. Picture gives the cover's address for integrations without one, and pictures whose address contains an entry of Ignore pictures never show. Inputs adds source names that count as inputs, and Icons replaces the icon for a state or an input. If the volume sub-button has css_class set to readout, the module writes the volume into it. In a sections view, set rows to 1. The example in bubble_card/README.md shows the other card options."
   editor:
     - name: selected
       label: "Selected (an input_select, a select or a template)"
@@ -40,7 +40,7 @@ origami_speaker:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass) throw new Error("origami_speaker needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_speaker needs origami_base 11 or later, listed before it");
       // The row draws its own background, so Base leaves it as it is
       if (card.dataset.orgBg !== "own") card.dataset.orgBg = "own";
       const cfg = this.config.origami_speaker ?? {};
@@ -49,15 +49,16 @@ origami_speaker:
       const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
       const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
       const name = org.name(hass, entity, this.config.name);
+      // Selected is a helper whose state names the speaker, or a template that names it itself
       const pick = String(org.value(env, cfg.selected, ctx) ?? "").trim();
-      const chosen = String(hass.states[pick]?.state ?? pick);
+      const chosen = /^(input_)?select\./.test(pick) ? String(hass.states[pick]?.state ?? "") : pick;
       const member = m.role === "member";
       const line = [m.title, m.artist].filter(Boolean).join(" • ");
       card._orgSp = {
         m,
         member,
         grouped: m.role !== null,
-        dead: !st || ["unavailable", "unknown", "off", "standby"].includes(st.state),
+        dead: !st || ["unavailable", "unknown"].includes(st.state),
         chosen: chosen !== "" && (chosen === entity || chosen.toLowerCase() === name.toLowerCase()),
         audible: ["playing", "buffering"].includes(st?.state) || (member && m.playing),
         // The row shows the track after the name when the speaker plays one of its own
@@ -198,6 +199,7 @@ origami_speaker:
       margin: 0px !important;
     }
     ha-card .bubble-media-info-container {
+      ${card._orgSp.track ? "display: flex !important;" : ""}
       flex: 1 1 0% !important;
       min-width: 0;
       margin: 0px !important;

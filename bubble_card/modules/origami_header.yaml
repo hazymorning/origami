@@ -53,7 +53,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;
-      if (org?.hass !== hass) throw new Error("origami_header needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_header needs origami_base 11 or later, listed before it");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
       const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
