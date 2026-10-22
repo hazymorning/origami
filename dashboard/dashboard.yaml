@@ -212,7 +212,7 @@ views:
                   color-mix(in srgb, var(--primary-background-color) 28%, transparent);
               }
               .sheet {
-                padding: var(--ha-space-5) var(--ha-space-5) var(--ha-space-6, 24px) var(--ha-space-5);
+                padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px);
                 gap: var(--ha-space-5);
                 box-shadow: var(--ha-card-box-shadow);
               }

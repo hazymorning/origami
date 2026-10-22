@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "4.5.3"
+  version: "4.5.4"
   supported:
     - media-player
   description: "The Media module styles media player cards together with Base. Turn on Compact for slim rows. With an artwork entity or an app entity, the card is in TV mode. Without either, the card is in speaker mode. In TV mode, the card's entity decides whether the TV is on, and the app entity takes over when that entity is unavailable. The artwork entity adds the title, the app and a picture while it is playing. Cards with a slider at the bottom need rows set to 2.2. When the Base option for filled play and power buttons is on, the play button is filled while media is playing, and the power button is filled while the player is on."
@@ -48,7 +48,9 @@ origami_media:
           .map((e) => e?.attributes?.entity_picture)
           .find((p) => typeof p === "string" && p.length > 0);
       const art = tvMode ? tvArt : lpArt;
-      const src = (base.attributes?.source ?? "").toLowerCase();
+      // Speakers name their TV input "Optical In", "optical-in" or "optical"
+      const source = (e) => String(e?.attributes?.source ?? "").toLowerCase().replace(/^optical[\s-]in$/, "optical");
+      const src = source(base);
       card._orgMC = !!cfg.compact;
       card._orgM = {
         de: String(hass.locale?.language ?? hass.language ?? "").startsWith("de"),
@@ -65,7 +67,7 @@ origami_media:
         power,
         collapse: !!cfg.collapse,
         solid: !!(this.config.origami_base?.solid_controls ?? cfg.solid_controls),
-        entSrc: (ent.attributes?.source ?? "").toLowerCase(),
+        entSrc: source(ent),
         art: typeof art === "string" ? 'url("' + art + '")' : "none",
         on: tvMode ? power === true : (["playing", "on"].includes(base.state) || ["bluetooth", "optical"].includes(src)),
         playing: ["playing", "buffering"].includes(tvMode ? (entSt ?? appSt ?? "") : (base.state ?? "")),
@@ -137,7 +139,7 @@ origami_media:
         if (card._orgM.tvMode) return card._orgM.art !== "none" ? 0 : 1;
         const a = card._orgM.ent.attributes ?? {};
         const dlna = hass.states[entity + "_dlna"]?.attributes ?? {};
-        if (a.source?.toLowerCase() === "optical" || a.entity_picture) return 1;
+        if (card._orgM.entSrc === "optical" || a.entity_picture) return 1;
         if (dlna.entity_picture && dlna.source?.toLowerCase() === "dlna") return 0;
         return 1;
       })()} !important;

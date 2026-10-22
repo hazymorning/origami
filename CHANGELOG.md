@@ -13,17 +13,24 @@ These changes are in the `next` branch and come with the next release.
 - The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
 - The Button module has two new options. With `segmented`, the buttons in each group form one bar with thin lines between them. With `scroll`, the buttons stay in one row that scrolls sideways.
 
+### Bug fixes
+
+- The Header and Tiles modules now show values exactly as they are. Before, Bubble Card's style cleaner removed the space after a comma or a semicolon, so "Mon, 12:00" became "Mon,12:00", and a value with braces disappeared.
+- On iPhones, the menu now starts below the status bar instead of behind it.
+- The Media module now treats a speaker's "Optical In" source as its TV input, like "optical". The speaker card then shows TV input and the TV speaker icon instead of the playing state.
+
 ### Upgrading
 
 This release changes how the modules work together, so every card with the Header, Tiles or Button module needs a change.
 
-1. Copy `origami_base.yaml`, `origami_header.yaml`, `origami_tiles.yaml` and `origami_button.yaml` from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
+1. Copy `origami_base.yaml`, `origami_header.yaml`, `origami_tiles.yaml`, `origami_button.yaml` and `origami_media.yaml` from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
 2. Add `- origami_base` as the first entry under `modules` on every card with Header, Tiles or Button. Header and Tiles use Base's helpers, so without Base in front their cards look plain, and the card editor shows an error.
 3. On cards that used `animate: true` under `origami_button`, move it to an `origami_base` key on the same card.
 4. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. A separator or sub-buttons card that used Base alone now looks like a plain Bubble card.
 5. Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. Before, a tile with a number or a temperature was colored too. To keep that color, give the tile a `color` under its `origami_tiles` key.
 6. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
 7. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
+8. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
 
 ## 2.0 · The Unfolding
 
