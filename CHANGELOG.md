@@ -26,10 +26,10 @@ These changes are in the `next` branch and come with the next release.
 - Templates in values have `num()` for numbers in the format of your Home Assistant profile, with an optional unit such as `%` or `minute`, `format()` for an entity's state in Home Assistant's words, `word()` for Home Assistant's word for a value and `ago()` for how long ago something happened. An expression in `${ }` that returns `unavailable` or `unknown` now counts as empty, so the default appears. `minutesUntil()` also reads timers, paused timers and dates, and it reads times in the time zone of your Home Assistant.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
 - Base shares its number and date formatters among all cards, and Base and Tiles leave out steps that a card's layout does not need, so cards render with less work. Header and Popup draw their plain values with the same rules from Base, and Base and Media fill active controls with the same rules.
-- Media has three new options. `keep_name` keeps the card's name in the name line and shows the title and the artist in the state line, `state` replaces the state line with a value or a template, and `badge` marks a group's leader and members on the icon, as in Speaker Select.
+- Media has three new options. `keep_name` keeps the card's name in the name line and shows the title and the artist in the state line while music plays, `state` replaces the state line with a value or a template, and `badge` marks a group's leader and members on the icon, as in Speaker Select.
 - Header's new `size: large` makes the title as large as a pop-up's title, and Popup's new `art` option shows a cover blurred behind the pop-up's content.
-- Each Button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key, so a row of playlists can give each button its own tint.
-- Options that moved in this release still work in their old places. These are `compact` under `origami_media`, `animate` under `origami_button`, `solid_controls` under `origami_base`, `art_entity` and `app_entity` under `origami_media` and `subtitle_style` under `origami_popup`.
+- Each button in a Button card can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key, so the buttons in a row of playlists can each have their own tint.
+- Options that this release moved, renamed or replaced still work. These are `compact` under `origami_media`, `animate` under `origami_button`, `solid_controls` under `origami_base`, `art_entity` and `app_entity` under `origami_media` and `subtitle_style` under `origami_popup`.
 - The modules place their parts by the start and the end of a line instead of left and right, so cards are mirrored in languages that read from right to left.
 - The new `animate` option of the Base module lets any card with Base fade in when it appears. It replaces the option of the same name in the Button module.
 - The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
@@ -52,7 +52,7 @@ These changes are in the `next` branch and come with the next release.
 - On Climate cards, buttons that set a mode or a preset are filled again while that mode or preset is set.
 - A Media card's icon opens the more-info dialog again when you tap it, as on other Bubble cards.
 - A header keeps Bubble Card's own grid options once you set its rows.
-- A Button whose icon sits above or below its name has the icon in the middle and room for both lines.
+- In a Button card, a button whose icon sits above or below its name has its icon in the middle and room for both lines.
 - A sub-button slider takes its `custom_height`. Before, Base gave every sub-button slider the same height.
 - Numbers with a unit follow Home Assistant's format for the language, so English shows 33% and German shows 48 %.
 - A header value whose icon is on the right keeps a small gap between its text and its icon.
@@ -73,7 +73,7 @@ Every module changed, and several options changed their names or their meaning. 
 1. Copy all files from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
 2. Base is a global module, so Bubble Card runs it first on every card with an Origami module, and no card has to list it. A card that uses Base's options without another Origami module keeps `origami_base` in its list.
 3. A card with only Base shows a state line only with `state_content`. Add `state_content: state` where a card should show its state.
-4. Fade in moved from `origami_button` to `origami_base`. The old place still works, and new cards use `origami_base`.
+4. The `animate` option moved from `origami_button` to `origami_base`. The old place still works, and new cards use `origami_base`.
 5. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. A separator or sub-buttons card that used Base alone now looks like a plain Bubble card.
 6. The cards show Home Assistant's words, so some words change. For example, a German thermostat shows Nicht verfügbar instead of Fehler. To keep a word that a module writes, add it to the `words` option of Base on that card, such as `idle: Auto` on a thermostat. The line that Bubble Card writes from `state_content` always shows Home Assistant's words.
 7. On media cards, `art_entity` and `app_entity` still work as `layout: tv` with a `players` list that holds both entities, and new cards use `layout` and `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` moved from `origami_base` to `origami_media`. The old places still work.

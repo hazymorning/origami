@@ -23,10 +23,11 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
-        // The Art option shows a cover blurred behind the pop-up's content, and an empty value lets it fade out
-        art: this.config.origami_popup?.art === undefined ? null : org.picture(org.value({ hass, renderTemplate }, cfg.art, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} })) ?? "",
+        // The Art option shows a cover blurred behind the pop-up's content. While its value is empty, the last cover fades out.
+        art: cfg.art === undefined ? null : org.picture(org.value({ hass, renderTemplate }, cfg.art, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} })) ?? "",
         css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", "var(--ha-font-size-m)", list).join("\n")
       };
+      if (card._orgP.art) card._orgPArt = card._orgP.art;
       return "";
     })()}
     .bubble-pop-up {
@@ -55,7 +56,7 @@ origami_popup:
       inset: 0;
       z-index: 0;
       border-radius: inherit;
-      background: ${card._orgP.art ? "url(" + card._org.str(card._orgP.art) + ") center / cover no-repeat" : "none"};
+      background: ${card._orgPArt ? "url(" + card._org.str(card._orgPArt) + ") center / cover no-repeat" : "none"};
       filter: blur(50px) saturate(170%);
       opacity: ${card._orgP.art ? "0.16" : "0"};
       pointer-events: none;

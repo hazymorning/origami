@@ -3,7 +3,7 @@ origami_button:
   version: "3.2.0"
   supported:
     - sub-buttons
-  description: "Button turns a sub-buttons card into rows or grids of buttons, segmented bars or a row that scrolls sideways. A button lights up while its tap sets its entity's value, while its own entity is on, or when it matches the active option. Each button can have its own colors."
+  description: "Button turns a sub-buttons card into rows, grids, segmented bars or a row that scrolls sideways. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option. Each button can have its own colors."
   editor:
     - name: background
       label: "Background"
@@ -232,6 +232,7 @@ origami_button:
     }
     ${!card._orgB.press ? "" : card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       --org-btn-bg: var(--fill-strong);
+      --org-value-chip: var(--fill-strong);
     }` : `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       transform: scale(var(--press-scale));
     }`}

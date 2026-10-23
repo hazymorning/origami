@@ -114,8 +114,8 @@ origami_media:
       card.querySelector('.bubble-name').textContent = name;
       card.querySelector('.bubble-state').textContent = shown;
       if (!tv) org.icon(icon, m.icon(cfg.icons));
-      // With Group badge, a crown marks the group leader and a link marks its members, as in Speaker Select
-      org.badge(cfg.badge ? m.role : null);
+      // With Group badge, a crown marks the group leader and a link marks its members, as in Speaker Select. Without the option, Media leaves the mark to Speaker Select on a card that lists both.
+      if (cfg.badge !== undefined) org.badge(cfg.badge ? m.role : null);
       return "";
     })()}
     ha-card {

@@ -409,11 +409,11 @@ origami_base:
         const playing = ["playing", "buffering"].includes(player?.state);
         // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
         const cover = value(env, cfg.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} });
-        // A cover from the art option counts without a title, because the template already decides when there is one
+        // A cover from the art option counts without a title and needs no memory, because the option itself decides when there is a cover
         const given = picture(cover);
         const raw = given ?? picture(pa.entity_picture, list(cfg.ignore_art));
-        if (raw && inp) stale.set(showId + " " + plain(raw), title);
-        const art = raw && !inp && live && (given || title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title ? raw : null;
+        if (raw && inp && !given) stale.set(showId + " " + plain(raw), title);
+        const art = raw && !inp && live && (given || ((title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title)) ? raw : null;
         const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
         const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
         return {

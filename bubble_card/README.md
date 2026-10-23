@@ -420,11 +420,11 @@ The Media options go under `origami_media:`.
 | `ignore_art` | | A picture whose address contains one of these entries never shows. The option takes a list or one line with commas. |
 | `inputs` | | The option adds source names that count as inputs. Bluetooth, optical, HDMI, line in, AUX and similar names count already, also with a number after them, such as HDMI 1. Short names such as TV, CD and FM count only on their own, so a radio station called FM4 is not an input. |
 | `icons` | | The option maps a state or an input to an icon. The keys can be `playing`, `paused`, `idle`, `on`, `off`, `unavailable`, `bluetooth`, `tv` or `line`. A TV that is on but reports nothing else uses `on`. Without an entry, the card keeps its own icon, or Home Assistant's icon for the state. |
-| `keep_name` | `false` | The name line always shows the card's name. While music plays, the state line shows the title and the artist, as in Speaker Select. |
-| `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as a title from a template sensor. While the value is empty, the module's own line shows. |
+| `keep_name` | `false` | With the speaker layout, the name line always shows the card's name, and the state line shows the title and the artist while music plays. |
+| `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. |
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
 
-Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` shows also when the player reports no title, because the template decides when there is one. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
+Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` also shows while the player reports no title, because the option itself decides when there is a cover. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
 
 ```yaml
 type: custom:bubble-card
@@ -655,7 +655,7 @@ sub_button:
 
 Besides `active`, a button whose tap sets a value, such as a source, an option, a preset, a speed or an app, is highlighted while its entity has that value. A button with an entity of its own follows Base's rule for sub-buttons. It is highlighted while that entity is on and has a state color, unless it has `show_background: false` or `css_class: plain`, or opens something without `css_class: accent`. The TV pop-up's **TV** button works this way, because its tap selects the speaker's TV source.
 
-Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as a value in the Header module. `color` colors the icon, and `background` replaces the button's fill, so a row of playlists can give each button its own tint:
+Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as a value in the Header module. While a button is not highlighted, `color` colors its icon and `background` replaces its fill, so each button in a row of playlists can have its own tint:
 
 ```yaml
 - name: Chill
@@ -666,7 +666,7 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
     background: var(--media-tint)
 ```
 
-A button with `content_layout: icon-top` or `icon-bottom` stacks its icon and name in the middle, and it is twice as tall as a button in a row.
+A button with `content_layout: icon-top` or `icon-bottom` stacks its icon and name in the middle. Unless the card has `background: false`, it is twice as tall as a button whose icon sits beside its name.
 
 With `segmented: true`, each group under `sub_button: bottom` becomes one bar. Buttons outside a group each form a bar of their own when the card also has groups, and they share one bar when it has none. The TV pop-up's input and volume buttons are two groups, so they form two bars in one row.
 
@@ -881,7 +881,7 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 `value_style` can be `text` (the default) or `chip`. The image at the top of this page shows a pop-up with `text`. Each sub-button can have an `origami_popup` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as in the Header module. A value with a `name` of its own and no visibility conditions always shows. The row under the title appears only while at least one value shows.
 
-`art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template, such as the cover of the speaker that the pop-up controls, and the cover fades out while the value is empty.
+`art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template that returns one, such as the cover of the speaker that the pop-up controls. While the value is empty, the last cover fades out.
 
 The backdrop behind the pop-up is blurred, unless the pop-up sets its own `backdrop_blur` or uses Bubble Card's performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view. The other modes keep at least the space of the phone's home indicator.
 
