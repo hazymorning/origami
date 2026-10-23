@@ -12,7 +12,7 @@ origami_climate:
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_climate needs origami_base 12 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_climate needs origami_base 12 or later");
       // The thermostat's plus and minus buttons stay neutral while it works
       if (card.dataset.orgFill !== "own") card.dataset.orgFill = "own";
       const st = hass.states[entity];
