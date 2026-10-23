@@ -54,7 +54,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_header needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_header needs origami_base 12 or later, listed before it");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
       const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
@@ -68,9 +68,10 @@ origami_header:
         chip: cfg.value_style === "chip"
       };
       const scope = "ha-card .bubble-sub-button-container";
-      const rules = org.values(env, this.config, "origami_header", scope, "var(--ha-font-size-m)");
+      const list = org.subs(env, this.config, "origami_header");
+      const rules = org.values(env, this.config, "origami_header", scope, "var(--ha-font-size-m)", list);
       // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state
-      if (!card._orgH.chip) org.subs(env, this.config, "origami_header").forEach(({ n, opt }) => {
+      if (!card._orgH.chip) list.forEach(({ n, opt }) => {
         if (org.has(opt?.name)) rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + n + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
       });
       card._orgHCss = rules.join("\n");
@@ -187,29 +188,5 @@ origami_header:
       line-height: inherit !important;
     }
     ` : ""}
-    ${card._orgH.chip ? `
-    ha-card .bubble-sub-button-container {
-      gap: var(--ha-space-2) !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off,
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on {
-      gap: var(--ha-space-1) !important;
-      min-height: var(--control-height-mini) !important;
-      padding: 0 var(--ha-space-3) !important;
-      border-radius: var(--radius-inner) !important;
-      background-color: var(--org-value-chip, var(--fill-subtle)) !important;
-      color: var(--primary-text-color) !important;
-      font-variant-numeric: tabular-nums;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off .bubble-sub-button-icon:not(.hidden),
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on .bubble-sub-button-icon:not(.hidden) {
-      --mdc-icon-size: var(--icon-size-2xs) !important;
-      margin: 0 !important;
-      color: inherit !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off .bubble-sub-button-name-container:empty,
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on .bubble-sub-button-name-container:empty {
-      display: none !important;
-    }
-    ` : ""}
+    ${card._orgH.chip ? card._org.chips("ha-card .bubble-sub-button-container") : ""}
     ${card._orgHCss}
