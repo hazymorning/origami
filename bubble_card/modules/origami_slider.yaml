@@ -3,7 +3,7 @@ origami_slider:
   version: "1.4.1"
   supported:
     - button
-  description: "The Slider module turns a slider button into a standalone slider. List Base first, then Slider. The module hides the icon, name and state, so the card itself is the track. Set rows to 1."
+  description: "Slider turns a slider button into a standalone slider without an icon, a name or a state, so the card itself is the track. Set rows to 1."
   code: |
     ${(() => {
       const org = card._org;

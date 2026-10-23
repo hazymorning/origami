@@ -3,8 +3,19 @@ origami_tiles:
   version: "3.1.0"
   supported:
     - sub-buttons
-  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image, image_size and name_color. Each of these keys accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Without state, a tile shows the sub-button's state_content, its attribute or its entity's state, in Home Assistant's own words, with times such as last_changed as relative times. A tile whose entity is unavailable is dimmed. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In the list, a sign at the end of each row shows whether a tap opens, runs or switches something."
   editor:
+    - name: layout
+      label: "Layout"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Grid
+              value: grid
+            - label: List
+              value: list
+      default: grid
     - name: columns
       label: "Columns"
       selector:
@@ -19,7 +30,11 @@ origami_tiles:
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_tiles needs origami_base 11 or later, listed before it");
       const env = { hass, renderTemplate };
-      card._orgTilesCols = Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
+      const list = this.config.origami_tiles?.layout === "list";
+      card._orgTilesList = list;
+      card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
+      // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
+      const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
         const sel = ".bubble-sub-button.bubble-sub-button-" + n;
         const rules0 = [];
@@ -34,11 +49,43 @@ origami_tiles:
         if (entity && !look.available) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
         const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
-        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
+        // A row without a state line keeps its name in the middle
+        if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
+        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: " + (list ? "color-mix(in srgb, var(--org-tile-color) 18%, var(--ha-card-background))" : "var(--tint)") + "; }");
+        if (list) {
+          // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
+          const tap = org.act(item);
+          const [domain, verb] = String(tap.perform_action ?? tap.service ?? "").split(".");
+          const target = [].concat(tap.target?.entity_id ?? tap.data?.entity_id ?? tap.service_data?.entity_id ?? [])[0];
+          const id = item.entity ?? target ?? entity;
+          const sign = ["open", "run", "switch", "none"].includes(o.sign) ? o.sign
+            : org.links.includes(tap.action) ? "open"
+            : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
+            : ["perform-action", "call-service"].includes(tap.action) ? "run"
+            : "none";
+          const one = ".bubble-sub-button-" + n;
+          if (sign === "open") signs.open.push(one);
+          if (sign === "switch") signs[org.look(hass, id).on ? "on" : "switch"].push(one);
+          // A key that runs something is filled by Base's rule for its target, and it shows a stop sign when a second tap stops it
+          if (sign === "run") signs[!org.filled(hass, item, target ?? id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
+        }
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
+      // at() returns a selector list for the rows with these signs, with the same ending on each selector
+      const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
+      // The signs are icons from Material Design Icons, drawn as masks in the text color
+      const mask = (d) => "url(" + org.str("data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='" + d + "'/></svg>")) + ")";
+      card._orgTilesSign = {
+        at,
+        all: "open run running stop switch on",
+        chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
+        playMask: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
+        stopMask: mask("M18,18H6V6H18V18Z"),
+        // The knob is the circle that Base's pill switch uses
+        knob: mask("M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z")
+      };
       return "";
     })()}
     .bubble-container {
@@ -130,3 +177,104 @@ origami_tiles:
       color: var(--secondary-text-color);
     }
     ${card._orgTilesCss}
+    ${card._orgTilesList ? `
+    .bubble-sub-button-group:not(.hidden) {
+      gap: var(--ha-space-1) !important;
+      box-sizing: border-box;
+      padding: var(--ha-space-2);
+      border-radius: var(--ha-card-border-radius);
+      background-color: var(--fill-subtle);
+    }
+    .bubble-sub-button {
+      position: relative !important;
+      height: var(--control-height) !important;
+      padding: 0 var(--ha-space-2) !important;
+      border-radius: calc(var(--ha-card-border-radius) - var(--ha-space-2)) !important;
+      background-color: transparent !important;
+    }
+    .bubble-sub-button.bubble-action-enabled:active {
+      background-color: var(--fill-subtle) !important;
+    }
+    .bubble-sub-button-icon,
+    .bubble-sub-button-image {
+      width: var(--control-height-icon) !important;
+      min-width: var(--control-height-icon) !important;
+      height: var(--control-height-icon) !important;
+      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
+      box-shadow: none;
+    }
+    .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-s) !important;
+      background-color: var(--org-tile-chip, var(--fill-subtle));
+      color: var(--org-tile-color, var(--secondary-text-color)) !important;
+    }
+    .bubble-sub-button-name-container::after {
+      margin-top: 2px;
+    }
+    ${card._orgTilesSign.at(card._orgTilesSign.all)} {
+      padding-inline-end: calc(2 * var(--ha-space-2) + var(--org-toggle-w)) !important;
+    }
+    ${card._orgTilesSign.at(card._orgTilesSign.all, "::before")},
+    ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
+      content: "";
+      position: absolute;
+      top: 50%;
+      translate: 0 -50%;
+      pointer-events: none;
+    }
+    ${card._orgTilesSign.at("run running stop switch on", "::before")} {
+      inset-inline-end: var(--ha-space-2);
+      width: var(--org-toggle-w);
+      height: var(--org-toggle-h);
+      border-radius: var(--radius-inner);
+      background-color: var(--fill-subtle);
+      box-shadow: var(--card-ring);
+      transition: var(--transition-interactive);
+    }
+    ${card._orgTilesSign.at("running stop on", "::before")} {
+      background-color: var(--fill-active);
+    }
+    ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
+      -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
+      mask: var(--org-sign-icon) center / contain no-repeat;
+    }
+    ${card._orgTilesSign.at("open", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.chevron};
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
+      width: var(--icon-size-m);
+      height: var(--icon-size-m);
+      background-color: var(--secondary-text-color);
+      opacity: var(--opacity-muted);
+    }
+    ${card._orgTilesSign.at("open", "::after", "ha-card:dir(rtl) ")} {
+      scale: -1 1;
+    }
+    ${card._orgTilesSign.at("run running stop", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.playMask};
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-s)) / 2);
+      width: var(--icon-size-s);
+      height: var(--icon-size-s);
+      background-color: var(--primary-text-color);
+      opacity: var(--opacity-strong);
+    }
+    ${card._orgTilesSign.at("stop", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.stopMask};
+    }
+    ${card._orgTilesSign.at("running stop", "::after")} {
+      background-color: var(--text-color-active);
+      opacity: 1;
+    }
+    ${card._orgTilesSign.at("switch on", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.knob};
+      inset-inline-end: calc(var(--ha-space-2) + var(--org-toggle-w) - var(--ha-space-1) - var(--org-toggle-knob));
+      width: var(--org-toggle-knob);
+      height: var(--org-toggle-knob);
+      background-color: var(--primary-text-color);
+      opacity: var(--opacity-quiet);
+      transition: inset-inline-end var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) ease;
+    }
+    ${card._orgTilesSign.at("on", "::after")} {
+      inset-inline-end: calc(var(--ha-space-2) + var(--ha-space-1));
+      background-color: var(--text-color-active);
+      opacity: 1;
+    }` : ""}

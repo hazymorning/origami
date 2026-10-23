@@ -3,7 +3,7 @@ origami_climate:
   version: "3.1.0"
   supported:
     - button
-  description: "The Climate module shows what a thermostat is doing, and it works with Base. While the thermostat heats, cools, dries or runs its fan, the state line shows that action. At other times, the state line shows Home Assistant's word for the action, such as Idle, or the mode, and the icon is the card's own icon, muted while the thermostat is off. Without hvac_action, the card follows the mode alone. The words come from Home Assistant, with shorter German words for the actions. The module writes the state line itself, so state_content has no effect on the card. A sub-button with css_class set to readout shows the target temperature of its own thermostat, or the range for thermostats with a low and a high target. While a thermostat works, the icon shows Home Assistant's icon for its action, unless the card has an icon of its own. The Icons option is a map from an action or a state, such as heating or off, to an icon, and it replaces the card's icon too."
+  description: "Climate shows what a thermostat does. The state line names the action, such as heating, and a sub-button with css_class readout shows the target temperature. The icons option sets an icon for an action or a state."
   editor:
     - name: icons
       label: "Icons (a map from an action or a state to an icon)"

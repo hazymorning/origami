@@ -3,7 +3,7 @@ origami_fan:
   version: "3.0.1"
   supported:
     - button
-  description: "The Fan module lets the fan icon spin at the fan's speed, and it works with Base. The icon turns the other way while the fan runs in reverse, and it stands still when the system asks for less motion. The spin suits a fan icon, so a card with another icon, such as an air purifier, can leave the module out. Base fills the power button while the fan runs and fills each speed button while the fan runs at that button's speed. Bubble Card writes the state line from state_content in Home Assistant's own words, for example percentage."
+  description: "Fan lets the fan icon spin at the fan's speed. The icon turns the other way while the fan runs in reverse, and it stands still when the device asks for less motion."
   code: |
     ${(() => {
       const org = card._org;

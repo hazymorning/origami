@@ -24,7 +24,7 @@ Open any Bubble card in the editor and go to **Modules**, then **My Modules**, t
 
 ## How the modules work together
 
-List Base first on every Origami card, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base in front of it. Without Base, the card looks plain. On cards with Climate, Media, Speaker Select, Button, Header, Tiles or Popup, the card editor also shows an error.
+List Base first on every Origami card, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base in front of it. Without Base, the card looks plain, and the card editor shows an error.
 
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ Base follows Home Assistant's own rules for when an entity counts as on and whic
 Controls stay neutral. An active control uses `fill-active`, which is the text color used as a fill. This fill is dark in light mode and light in dark mode, like Home Assistant's switches when they are on.
 
 - A sub-button with `show_background: true` is filled while its entity, or the card's entity, is on and has a state color. On a card with Base's `vertical` option, only sub-buttons with `css_class: accent` are filled.
-- A sub-button whose tap sets a value is filled only while its entity has that value. This works for a speed, a preset, a mode, a source, an option, a value, an app, a brightness, a color temperature, a position and a target temperature, also without `show_background`. A fan's speed buttons, a speaker's source buttons and a TV's app buttons work this way. When a tap sets several values, all of them have to match. A tap that targets an area or a device sets no single entity's value, so it follows the next rules.
+- A sub-button whose tap sets a value is filled only while its entity has that value. This works for a speed, a preset, a mode, a source, an option, a value, an app, a brightness, a color temperature, a position and a target temperature, also without `show_background`. A fan's speed buttons, a speaker's source buttons and a TV's app buttons work this way. When a tap sets several of these values, all of them have to match, and a color is not compared. A tap that targets an area or a device sets no single entity's value. So the first rule applies to it, and the sub-button is filled while its entity, or the card's entity, is on.
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
@@ -87,13 +87,14 @@ origami_base:
 
 <br>
 
-The `origami_base`, `origami_header`, `origami_tiles` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. Base holds the code that reads them, so they work the same in all four modules. The `leader` and `art` options of Media and Speaker Select, Speaker Select's `selected`, Header's `icon_color` and Button's `active` and `color` accept the same values, and so does a card's `name` on a Media card.
+The `origami_base`, `origami_header`, `origami_tiles` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. Base holds the code that reads them, so they work the same in all four modules. The `leader` and `art` options of Media and Speaker Select, Speaker Select's `selected`, Header's `icon_color` and Button's `active` and `color` accept the same values. A Media card's `name` can be Jinja or JavaScript in `${ }`, but not a map.
 
 - `state`, `attr` and `entity` refer to the sub-button's entity, or to the card's entity if the sub-button has none.
 - `states(id)` returns another entity's state. `hass` is also available.
 - `minutesUntil(id)` returns the number of minutes until a time. It takes a timer, an `input_datetime` or a sensor whose state is a time, or a time itself. A paused timer gives the minutes it has left, and a time of day that has passed today counts for tomorrow. Times without a time zone count in the time zone of your Home Assistant.
 - `num(value)` writes a number in the format of your Home Assistant profile, such as 21,5 in German. `num(value, 1)` always shows one decimal. `num(value, 0, '%')` adds a unit, such as `%`, `minute` or `hour`, in the user's language, so 12 minutes read as 12 min in English and 12 Min. in German.
 - `word(value)` returns Home Assistant's word for a state of the template's own entity, such as `${word('off')}`.
+- `ago(id)` returns how long ago an entity changed, such as 3 days ago, in the user's language. `ago(id, 'last_triggered')` reads that attribute instead, such as when a script last ran.
 - `format(id)` returns an entity's state in Home Assistant's words, with its unit. `format(id, attribute)` does the same for an attribute, such as `format('fan.bedroom', 'percentage')`.
 - JavaScript runs in the browser, so the value is already there in the first frame. Jinja also works, but it waits for the server.
 - If an expression inside `${ }` returns an empty value, `unavailable` or `unknown`, the whole value counts as unset, and the default appears. States that are missing from a map also keep the default.
@@ -410,7 +411,7 @@ The Media options go under `origami_media:`.
 | Option | Default | Description |
 | --- | --- | --- |
 | `layout` | `speaker` | `speaker` is the default, and `tv` is for a TV. With `tv`, the card's own icon stays, and the card's entity decides whether the TV is on. When that entity is unavailable or unknown, the players below decide. |
-| `players` | | The option lists other media players for the same device, such as a Cast player or a Music Assistant player. The card's own entity gives the music while it plays something with a title. Otherwise, the first player that plays gives the title, the artist and the picture. A title that is a stream address or a file path does not count. The app's name comes from the card's own entity, or else from the first player that reports one. |
+| `players` | | The option lists other media players for the same device, such as a Cast player or a Music Assistant player. The card's own entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while it and the speaker are paused and only it has a title. A title that is a stream address or a file path does not count. The app's name comes from the card's own entity, or else from the first player that reports one. |
 | `collapse` | `false` | The slider at the bottom is hidden while the speaker plays nothing and uses no input. With the TV layout, it is hidden while the TV is off. |
 | `solid_controls` | `false` | Bubble Card's play and pause button is filled while media plays, and its power button is filled while the device is on. This option has no effect on sub-buttons. |
 | `leader` | | The option gives the group leader's entity ID for integrations that do not report `group_members`. It accepts a template, which returns nothing while the speaker is not in a group. |
@@ -541,7 +542,7 @@ The sub-button with `css_class: readout` shows the volume in Home Assistant's fo
 | Option | Description |
 | --- | --- |
 | `selected` | The option takes an `input_select`, a `select` or a template. The row whose entity ID or name matches the helper's state or the template's result gets a stronger fill. The package's `input_select.selected_speaker` works this way. |
-| `players` | The option lists other media players for the same speaker, such as a Music Assistant player. The first one that plays gives the title, the artist and the picture. |
+| `players` | The option lists other media players for the same speaker, such as a Music Assistant player. The card's own entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while it and the speaker are paused and only it has a title. A title that is a stream address or a file path does not count. |
 | `leader` | The option gives the group leader's entity ID for integrations that do not report `group_members`. It accepts a template, which returns nothing while the speaker is not in a group. |
 | `art` | The option gives the cover's address for integrations that report no picture. It accepts a template, in which `entity` is the speaker whose music the row shows. For a group member, that is the group leader. |
 | `ignore_art` | A picture whose address contains one of these entries never shows. The option takes a list or one line with commas. |
@@ -610,13 +611,13 @@ The Button module creates rows and grids of buttons on a sub-buttons card. Put e
 | `align` | `start` | `start`, `center` or `end` |
 | `active` | | The option takes plain text, a map from the card entity's state, Jinja or JavaScript in `${ }`. Buttons whose name, `css_class` or tap target matches it are highlighted, in any language. Separate several values with commas. |
 | `active_style` | `lamp` | `lamp` tints the active button in the lamp color, and `toggle` gives a filled button. |
-| `color` | `var(--lamp-color)` | The lamp color of the `lamp` style. A button whose own entity is on takes that entity's state color instead, such as cyan for a fan. |
+| `color` | `var(--lamp-color)` | The option sets the lamp color of the `lamp` style. A button whose own entity is on takes that entity's state color instead, such as cyan for a fan. |
 | `muted` | `false` | Dimmed text |
 | `icon_size` | `var(--icon-size-2xs)` | The icon size |
 | `padding` | `0` | The space around the buttons |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
 | `segmented` | `false` | The buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. |
-| `label_size` | `large` | The size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
+| `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
 
 ```yaml
@@ -722,7 +723,7 @@ The header leaves 24 px of space above it and 8 px below it. Sections and Bubble
 
 ### Tiles
 
-The Tiles module turns a sub-buttons card into a grid of tiles. Each tile has an icon, a name and a state line. Tiles are sub-buttons, so Bubble Card's visibility conditions decide when each one appears.
+The Tiles module turns a sub-buttons card into a grid of tiles or into a list. Each tile or row has an icon, a name and a state line. Tiles are sub-buttons, so Bubble Card's visibility conditions decide when each one appears.
 
 <img width="800" alt="Six tiles with the oven and the vacuum sorted to the front" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/favorites.webp">
 
@@ -731,17 +732,18 @@ The Tiles module turns a sub-buttons card into a grid of tiles. Each tile has an
 
 <br>
 
-Set the number of columns on the card with `origami_tiles: columns`, from 1 to 6. The default is 2. All other options are set on each tile, under its own `origami_tiles` key.
+Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. All other options are set on each tile, under its own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
 | `name` | The sub-button's name, or the entity's name | |
-| `state` | The state in Home Assistant's words | With `attribute` on the sub-button, the default is that attribute in Home Assistant's words. |
+| `state` | The state in Home Assistant's words | Without `state`, a tile shows the sub-button's `state_content`, else its `attribute`, else the entity's state, in Home Assistant's words. Times such as `last_changed` read as relative times. |
 | `color` | The state color while the entity is on | The icon color. A plain value applies in every state. A map applies only in the states it lists. For example, `'on': var(--blue-color)` applies only while the entity is on. |
 | `order` | | The tile's position. For example, `-1` moves the tile to the front. |
 | `image` | | A picture instead of the icon |
 | `image_size` | `cover` | The key sets the picture's size. For example, `230%` shows only its middle. |
 | `name_color` | | The name's color |
+| `sign` | Set by the tap action | In a list, the key sets the sign at the row's end. It is `open`, `run`, `switch` or `none`. |
 
 ```yaml
 type: custom:bubble-card
@@ -784,11 +786,79 @@ sub_button:
 
 A tile whose entity is unavailable is dimmed. More tile examples are in the Favorites section of [`dashboard.yaml`](../dashboard/dashboard.yaml).
 
+#### List
+
+With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. The row's icon takes the state color while its entity is on, and the state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
+
+- A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
+- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows Base's pill switch with the entity's state.
+- A row that runs a script, a scene or another action shows a key. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+
+A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_tiles
+origami_tiles:
+  layout: list
+sub_button:
+  bottom:
+    - entity: script.movie_night
+      name: Movie night
+      icon: mdi:movie-open-outline
+      origami_tiles:
+        state:
+          'on': Running
+          'off': Last run ${ago('script.movie_night', 'last_triggered')}
+      tap_action:
+        action: perform-action
+        perform_action: script.toggle
+        target:
+          entity_id: script.movie_night
+    - entity: input_boolean.bath_time
+      name: Bath
+      icon: mdi:bathtub-outline
+      origami_tiles:
+        color:
+          'on': var(--water-color)
+        state:
+          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')} left
+      tap_action:
+        action: toggle
+    # While the TV is off, the row turns it on. Once it is on, the row opens the TV pop-up.
+    - entity: media_player.living_room_tv
+      name: TV
+      icon: mdi:television
+      tap_action:
+        action: perform-action
+        perform_action: media_player.turn_on
+        target:
+          entity_id: media_player.living_room_tv
+      visibility:
+        - condition: state
+          entity: media_player.living_room_tv
+          state: ['off', standby, unavailable, unknown]
+    - entity: media_player.living_room_tv
+      name: TV
+      icon: mdi:television
+      state_content: app_name
+      tap_action:
+        action: navigate
+        navigation_path: '#popup_tv'
+      visibility:
+        - condition: state
+          entity: media_player.living_room_tv
+          state_not: ['off', standby, unavailable, unknown]
+```
+
 </details>
 
 ### Popup
 
-The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the pop-up's sub-buttons appear below the title, as text or as chips, and a long title ends with an ellipsis on one line. A header with a button, a switch or a slider keeps Bubble Card's own layout.
+The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the pop-up's sub-buttons appear below the title, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title stays on one line and ends with an ellipsis. Otherwise, Bubble Card scrolls it. A header with a button, a switch or a slider keeps Bubble Card's own layout.
 
 <details>
 <summary>Options and example</summary>
@@ -848,7 +918,7 @@ Base puts its helpers on `card._org`, so a module that is listed after Base can 
 | `matches(hass, item, id)` | It returns whether a sub-button's tap sets what the entity shows now, or `null` for a tap that sets nothing it can compare. |
 | `filled(hass, item, id)` and `rekey(map)` | `filled()` returns whether Base fills a sub-button, and `rekey()` turns the keys `true` and `false` of a map into `on` and `off`. |
 | `has(value)`, `act(item)` and `links` | `has()` tells whether a value is set, `act()` returns a sub-button's tap action with Bubble Card's default, and `links` lists the actions that never fill a sub-button. |
-| `media(hass, id, options)` and `picture(address, ignore)` | `media()` returns a media player's group, music, input, cover, app and whether it is active, as Media and Speaker Select show them. `picture()` returns a picture's address, or `null` when the address is empty or contains an entry of `ignore`. |
+| `media(hass, id, options)` and `picture(address, ignore)` | `media()` returns a media player's group, music, input, cover, app and whether it is active, as Media and Speaker Select show them. `picture()` returns a picture's address. It returns `null` when the address is empty, when it is not a web address or a path on the Home Assistant server, or when it contains an entry of the optional `ignore` list. |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size)` and `icon(element, icon)` | They return the CSS rules that show text or an icon in a sub-button. Without an icon, `icon()` gives the element its own icon back. |
 | `write(element, text)` | It writes text into an element that Bubble Card does not hand over, such as a sub-button's readout. |
 | `rename(text)` | It returns the word that the card's `words` option sets for a name or a value, or `null`. |

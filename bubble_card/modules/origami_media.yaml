@@ -3,7 +3,7 @@ origami_media:
   version: "5.1.0"
   supported:
     - media-player
-  description: "The Media module styles media player cards together with Base. With the speaker layout, the card shows the title and the artist while music plays, the input while the speaker uses one, and the cover in the icon. With the TV layout, the state line shows what plays, the running app, the source or the state, and the card's entity decides whether the TV is on. Players lists other media players for the same device, such as a Cast or Music Assistant player. The card's own entity gives the music while it plays something with a title, and otherwise the first player that plays gives the title, the artist and the picture. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID. For integrations that report no cover, Picture gives the cover's address, and pictures whose address contains an entry of Ignore pictures never show. Inputs adds source names that count as inputs. Icons replaces the card's icon for a state or an input, such as playing, off, bluetooth or tv, and without an entry the card keeps its own icon. The words come from Home Assistant, and Base's words option changes any of them. The module writes the name line and the state line itself, so state_content has no effect on the card. With Hide the slider when inactive, the card shrinks to its first row while nothing plays. With Filled play and power buttons, the play button is filled while media plays, and the power button is filled while the device is on. Cards with a slider at the bottom need rows set to 2.2."
+  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. Its options name other players of the same device, a group leader, a cover, more inputs and the icons."
   editor:
     - name: layout
       label: "Layout"
@@ -60,8 +60,8 @@ origami_media:
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];
       const ctx = { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} };
-      const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
       const tv = cfg.layout === "tv";
+      const m = org.media(hass, entity, { env, tv, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
       const twins = [].concat(cfg.players ?? []).map((p) => hass.states[p]).filter((p) => org.power(p) !== null);
       const power = org.power(ent) ?? (twins.length ? twins.some((p) => org.power(p)) : null);
@@ -70,6 +70,7 @@ origami_media:
       card._orgM = {
         tv,
         m,
+        music,
         power,
         on: tv ? power === true : m.active,
         playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
@@ -163,6 +164,7 @@ origami_media:
     .bubble-state {
       display: ${card._orgM.state} !important;
     }
+    ${card._orgM.music ? ".bubble-name.hidden { display: block !important; }" : ""}
     .bubble-sub-button-container {
       gap: var(--ha-space-2) !important;
       padding: 0;

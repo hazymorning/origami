@@ -31,6 +31,7 @@ The docs must read like plain, natural English from a native technical writer. T
 - No bold labels in front of fragments, such as "**Media.** The TV while it's on".
 - Use possessives where a native writer would ("the room's light group", "Google's servers"). Avoid long "of the" chains.
 - Prefer short sentences, but vary how they start.
+- A module's description has 50 words at most, and fewer is better. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
 - Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
 - No AI attribution anywhere: no `Co-Authored-By` trailers, no "Generated with" footers in commits, PRs or comments.
 

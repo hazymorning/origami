@@ -3,7 +3,7 @@ origami_header:
   version: "3.0.1"
   supported:
     - separator
-  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color for the icon, name_color for the text and background for a chip. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }, and they work the same as in Popup. List Base before Header, because Header uses Base's helpers. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
