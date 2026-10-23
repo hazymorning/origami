@@ -40,7 +40,7 @@ origami_speaker:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_speaker needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_speaker needs origami_base 12 or later, listed before it");
       // The row draws its own background, so Base leaves it as it is
       if (card.dataset.orgBg !== "own") card.dataset.orgBg = "own";
       const cfg = this.config.origami_speaker ?? {};
@@ -70,14 +70,14 @@ origami_speaker:
       const rtl = !!hass.translationMetadata?.translations?.[hass.language]?.isRTL;
       // Bubble Card hands the state line to a module whose code contains this exact assignment
       const next = s.dead ? org.word(hass, st)
-        : member ? (rtl ? "← " : "→ ") + (org.rename(org.name(hass, m.leader)) ?? org.name(hass, m.leader))
+        : member ? (rtl ? "← " : "→ ") + ((n) => org.rename(n) ?? n)(org.name(hass, m.leader))
         : m.input ? org.word(hass, m.show, "source")
         : s.track ? line
         : org.word(hass, m.show);
-      if (card.querySelector('.bubble-state') && card.querySelector('.bubble-state').innerText !== next) card.querySelector('.bubble-state').innerText = next;
+      if (org.fresh(card.querySelector('.bubble-state'), next)) card.querySelector('.bubble-state').textContent = next;
       org.icon(icon, m.icon(cfg.icons));
-      org.write(card.querySelector(".readout .bubble-sub-button-state") ?? card.querySelector(".readout .bubble-sub-button-name-container"),
-        s.dead || st?.attributes?.volume_level == null ? "–" : org.word(hass, st, "volume_level"));
+      // Each readout shows its own speaker's volume
+      org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));
       // A crown marks the group leader, and a link marks its members
       const host = card.querySelector(".bubble-main-icon-container") ?? card.querySelector(".bubble-icon-container");
       if (host) {
@@ -99,11 +99,9 @@ origami_speaker:
       --org-icon-size: var(--icon-size-xs);
       --org-tile-size: calc(var(--org-icon-size) + 2 * var(--ha-space-1));
       --org-chip-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);
-      --org-name-size: var(--ha-font-size-m);
       --org-color: var(--state-media_player-active-color);
       --org-chip-bg: ${card._orgSp.audible ? "var(--org-field)" : "var(--fill-subtle)"};
       --org-chip-ink: ${card._orgSp.audible ? "var(--org-color)" : "var(--primary-text-color)"};
-      --org-text-max: 100%;
     }
     ha-card .bubble-container {
       height: 100% !important;

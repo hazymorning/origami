@@ -3065,7 +3065,6 @@ cards:
             - entity: media_player.living_room
               sub_button_type: slider
               always_visible: true
-              custom_height: 26
         rows: '2.2'
 
       # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps

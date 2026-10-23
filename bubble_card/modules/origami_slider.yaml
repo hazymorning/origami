@@ -7,7 +7,7 @@ origami_slider:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_slider needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_slider needs origami_base 12 or later, listed before it");
       return "";
     })()}
     ha-card {

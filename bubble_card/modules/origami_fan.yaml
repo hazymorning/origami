@@ -7,7 +7,7 @@ origami_fan:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_fan needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_fan needs origami_base 12 or later, listed before it");
       const st = hass.states[entity];
       const pct = Math.min(Math.max(Number(st?.attributes?.percentage) || 0, 0), 100);
       card._orgFanSpin = st?.state === "on"

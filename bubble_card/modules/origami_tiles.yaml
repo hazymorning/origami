@@ -28,7 +28,7 @@ origami_tiles:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_tiles needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_tiles needs origami_base 12 or later, listed before it");
       const env = { hass, renderTemplate };
       const list = this.config.origami_tiles?.layout === "list";
       card._orgTilesList = list;
@@ -40,7 +40,7 @@ origami_tiles:
         const rules0 = [];
         const o = opt ?? {};
         const obj = hass.states[entity];
-        const name = [o.name, org.run(env, item.name, ctx), ctx.attr.friendly_name].find(org.has) ?? "";
+        const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
         // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
         const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
         const state = [o.state, obj ? org.state(hass, entity, parts) : ""].find(org.has) ?? "";
@@ -55,9 +55,10 @@ origami_tiles:
         if (list) {
           // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
           const tap = org.act(item);
-          const [domain, verb] = String(tap.perform_action ?? tap.service ?? "").split(".");
-          const target = [].concat(tap.target?.entity_id ?? tap.data?.entity_id ?? tap.service_data?.entity_id ?? [])[0];
-          const id = item.entity ?? target ?? entity;
+          const [domain, verb] = org.service(item).split(".");
+          // The sign follows the entity that the tap acts on
+          const target = org.targets(item)[0];
+          const id = (target === "entity" ? null : target) ?? entity;
           const sign = ["open", "run", "switch", "none"].includes(o.sign) ? o.sign
             : org.links.includes(tap.action) ? "open"
             : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
@@ -67,7 +68,7 @@ origami_tiles:
           if (sign === "open") signs.open.push(one);
           if (sign === "switch") signs[org.look(hass, id).on ? "on" : "switch"].push(one);
           // A key that runs something is filled by Base's rule for its target, and it shows a stop sign when a second tap stops it
-          if (sign === "run") signs[!org.filled(hass, item, target ?? id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
+          if (sign === "run") signs[!org.filled(hass, item, id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
         }
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
@@ -171,7 +172,7 @@ origami_tiles:
     }
     .bubble-sub-button-name-container::after {
       content: var(--org-tile-state, "");
-      max-width: min(var(--org-tile-state-max, 100%), 100%);
+      max-width: 100%;
       margin-top: calc(var(--ha-space-1) - 2px);
       font-size: var(--ha-font-size-s);
       color: var(--secondary-text-color);

@@ -55,7 +55,7 @@ origami_media:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_media needs origami_base 11 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later, listed before it");
       const cfg = this.config.origami_media ?? {};
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];
@@ -78,10 +78,12 @@ origami_media:
         art: m.art && (!tv || power) ? 'url(' + org.str(m.art) + ')' : "none",
         collapse: !!cfg.collapse,
         solid: !!cfg.solid_controls,
-        rest: tv ? !power : !ent || ["off", "standby", "idle", "unavailable", "unknown"].includes(ent.state),
-        state: this.config.show_state === false ? "none" : "var(--org-state-display, block)"
+        // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
+        state: this.config.show_state === false || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
       };
       const c = card._orgM;
+      // With Filled play and power buttons, the play button is filled while media plays and the power button while the device is on
+      c.filled = c.solid ? [c.playing ? ".bubble-play-pause-button" : "", c.powered ? ".bubble-power-button" : ""].filter(Boolean) : [];
       // Bubble Card hands the name and the state line to a module whose code contains these exact assignments
       const name = music ? m.title : org.name(hass, entity, this.config.name, env);
       const line = tv
@@ -92,22 +94,22 @@ origami_media:
         : m.input ? org.word(hass, m.show, "source")
         : music ? m.artist || org.word(hass, m.player)
         : org.word(hass, m.show);
-      if (card.querySelector('.bubble-name') && card.querySelector('.bubble-name').innerText !== name) card.querySelector('.bubble-name').innerText = name;
-      if (card.querySelector('.bubble-state') && card.querySelector('.bubble-state').innerText !== line) card.querySelector('.bubble-state').innerText = line;
+      if (org.fresh(card.querySelector('.bubble-name'), name)) card.querySelector('.bubble-name').textContent = name;
+      if (org.fresh(card.querySelector('.bubble-state'), line)) card.querySelector('.bubble-state').textContent = line;
       if (!tv) org.icon(icon, m.icon(cfg.icons));
       return "";
     })()}
     ha-card {
       --org-color: var(--state-media_player-playing-color, var(--state-media_player-active-color));
-      --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-tile-bg, var(--org-inset))"};
+      --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-inset)"};
       --org-chip-ink: ${card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)"};
     }
     ${card._orgM.collapse && !card._orgM.on ? `
     .bubble-container,
     .bubble-media-player-container {
-      height: var(--org-row-height, calc(var(--tile-size) + 2 * var(--ha-space-4))) !important;
+      height: var(--org-row-height) !important;
       min-height: 0 !important;
-      max-height: var(--org-row-height, calc(var(--tile-size) + 2 * var(--ha-space-4))) !important;
+      max-height: var(--org-row-height) !important;
       overflow: hidden !important;
     }
     .bubble-sub-button-bottom-container,
@@ -123,15 +125,12 @@ origami_media:
       overflow: visible;
       background-image: none !important;
     }
-    .bubble-icon-container.bubble-main-icon-container {
-      background-color: var(--org-chip-bg) !important;
-    }
     .bubble-main-icon-container::before {
       content: "";
       position: absolute;
       inset: 0;
       z-index: 2;
-      border-radius: var(--org-tile-radius, var(--radius-inner));
+      border-radius: var(--org-tile-radius);
       background-image: ${card._orgM.art};
       background-size: cover;
       background-position: center;
@@ -140,7 +139,6 @@ origami_media:
     .bubble-media-player .bubble-entity-picture {
       display: none !important;
     }
-    ${card._orgM.rest ? ".bubble-entity-picture { display: none !important; }" : ""}
     .bubble-main-icon-container .bubble-icon {
       color: var(--org-chip-ink) !important;
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
@@ -154,23 +152,14 @@ origami_media:
     }
     .bubble-name,
     .bubble-state {
-      max-width: var(--org-text-max, 100%) !important;
       margin: 0 !important;
       line-height: var(--ha-line-height-normal);
-      white-space: nowrap !important;
       overflow: hidden !important;
-      text-overflow: ellipsis;
     }
     .bubble-state {
       display: ${card._orgM.state} !important;
     }
     ${card._orgM.music ? ".bubble-name.hidden { display: block !important; }" : ""}
-    .bubble-sub-button-container {
-      gap: var(--ha-space-2) !important;
-      padding: 0;
-      margin-inline-end: var(--ha-space-4);
-    }
-    .bubble-sub-button,
     .bubble-media-button {
       min-width: var(--tile-size) !important;
       width: var(--tile-size) !important;
@@ -181,23 +170,12 @@ origami_media:
     .bubble-media-button {
       background-color: transparent !important;
     }
-    ${card._orgM.solid && card._orgM.playing ? `
-    .bubble-play-pause-button {
+    ${card._orgM.filled.length ? `
+    ${card._orgM.filled.join(", ")} {
       color: var(--text-color-active);
       background-color: var(--fill-active) !important;
     }
-    .bubble-play-pause-button .bubble-media-button-icon {
+    ${card._orgM.filled.map((b) => b + " .bubble-media-button-icon").join(", ")} {
       color: var(--text-color-active) !important;
       --icon-primary-color: var(--text-color-active) !important;
-    }
-    ` : ""}
-    ${card._orgM.solid && card._orgM.powered ? `
-    .bubble-power-button {
-      color: var(--text-color-active);
-      background-color: var(--fill-active) !important;
-    }
-    .bubble-power-button .bubble-media-button-icon {
-      color: var(--text-color-active) !important;
-      --icon-primary-color: var(--text-color-active) !important;
-    }
-    ` : ""}
+    }` : ""}
