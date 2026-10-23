@@ -630,12 +630,6 @@ force_icon: true
 modules:
   - origami_base
   - origami_speaker
-hide:
-  play_pause_button: true
-  volume_button: true
-  previous_button: true
-  next_button: true
-  power_button: true
 sub_button:
   main:
     - entity: media_player.living_room
@@ -663,7 +657,7 @@ origami_speaker:
     - placeholder
 ```
 
-Groups come from Home Assistant's `group_members` attribute, as in the Media module. A member's row shows its leader's name, and Base's `words` option can shorten it, such as `Living room: Living`. Tapping a row does not select the speaker. Give each row a tap action that sets your speaker selection.
+Groups come from Home Assistant's `group_members` attribute, as in the Media module. A member's row shows its leader's name, and Base's `words` option can shorten it, such as `Living room: Living`. Tapping a row does not select the speaker. Give each row a tap action that sets your speaker selection. A readout without a tap action of its own passes the tap to the row. The module hides Bubble Card's media buttons, so a row needs no `hide` option.
 
 A row can also be a volume slider over its whole width. Use a button card with `button_type: slider` instead of the media player card, and give it an icon. A slide anywhere on the row then changes the volume, so a stray touch can make a speaker loud, and the plain row is the safer choice.
 
@@ -768,7 +762,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card. Put e
 | `padding` | `0` | The option sets the space around the buttons. |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
 | `segmented` | `false` | With `true`, the buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. With the names of groups instead, only those groups become small switches, which can stand in any row, also in one that scrolls. |
-| `chips` | `false` | The buttons are round pills with the label in the text color and the icon in the secondary color. An active button has a bold label with every style. |
+| `chips` | `false` | The buttons are round pills with the label in the text color and the icon in the secondary color. A chip with only an icon is a circle. An active button has a bold label with every style. |
 | `pending` | `false` | After a tap, the button shows the look its tap is about to give it, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, and buttons that only open something and segments never do. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
@@ -894,6 +888,7 @@ The Header module creates a section header. The separator card's name is the tit
 | `icon_color` | | The option sets the icon color of plain values. It accepts a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The option sets the icon size of plain values. Chips use `--icon-size-2xs`, which is 14 px. For a small dot, use `var(--dot-size)`. |
 | `size` | `normal` | With `large`, the title is as large as a pop-up's title, for a header that stands in for one. A large header leaves 8 px above its title and none below it. |
+| `title_action` | `false` | A tap on the title, or anywhere on the header, runs the first value's tap action. A title next to a value that opens a menu works this way. |
 | `value_size` | `var(--ha-font-size-m)` | The option sets the size of the values' text. |
 | `icon_gap` | `var(--ha-space-1)` | The option sets the space between the icon and the name of plain values. Chips keep their own space. |
 | `value_max_width` | | The option sets the maximum width of the values, such as `50%`. Longer values end with an ellipsis. Set `scrolling_effect: false` on these sub-buttons, because otherwise Bubble Card scrolls them. |

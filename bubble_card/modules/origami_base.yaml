@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.2.0"
+  version: "12.3.0"
   is_global: true
   supported:
     - button
@@ -512,6 +512,13 @@ origami_base:
         },
         write: (el, text) => {
           if (card._org.fresh(el, text)) el.textContent = text;
+        },
+        // remeasure() lets Bubble Card measure a handed-over line again. Bubble Card decides whether a line scrolls only when its text changes, so a line written while its card was hidden, such as in a closed pop-up, keeps its ellipsis once it shows.
+        remeasure: (el, scrolls) => {
+          if (!scrolls || !el || el.hasAttribute("data-animated") || el.clientWidth === 0 || el.scrollWidth - el.clientWidth <= 1) return;
+          const text = el.textContent;
+          el.textContent = "";
+          el.textContent = text;
         },
         // readouts() writes a text into each sub-button with css_class readout, or another class, made by text() from that sub-button's own entity
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {

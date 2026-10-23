@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.3.0"
+  version: "3.3.1"
   supported:
     - sub-buttons
   description: "Button turns a sub-buttons card into rows, grids, chips, segmented bars or a row that scrolls sideways. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
@@ -372,6 +372,11 @@ origami_button:
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right {
       padding-inline-end: var(--ha-space-3) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:not(:has(.bubble-sub-button-name-container:not(:empty))) {
+      width: var(--org-btn-height) !important;
+      padding: 0 !important;
+      justify-content: center !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
       margin-inline: var(--ha-space-1) 0 !important;

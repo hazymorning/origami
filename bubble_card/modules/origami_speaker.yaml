@@ -1,6 +1,6 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.2.0"
+  version: "5.3.0"
   supported:
     - media-player
     - button
@@ -74,10 +74,13 @@ origami_speaker:
         : s.track ? line
         : org.word(hass, m.show);
       card.querySelector('.bubble-state').textContent = next;
+      org.remeasure(card.querySelector('.bubble-state'), this.config.scrolling_effect !== false);
       org.icon(icon, m.icon(cfg.icons));
       // Each readout shows its own speaker's volume
       org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));
       org.badge(m.role);
+      // A readout without an action of its own passes the tap to the row, so the row's tap selects the speaker there too
+      s.through = org.items(this.config).map((item, i) => org.slug(item.css_class) === "readout" && !item.tap_action && !item.hold_action && !item.double_tap_action ? "ha-card .bubble-sub-button-" + (i + 1) : null).filter(Boolean);
       return "";
     })()}
     ha-card {
@@ -161,6 +164,13 @@ origami_speaker:
     ha-card .bubble-range-fill::after {
       display: none;
     }` : ""}
+    ${card._orgSp.through.length ? card._orgSp.through.join(", ") + ` {
+      pointer-events: none !important;
+    }` : ""}
+    /* A row shows no media buttons, so the card needs no hide option for them */
+    ha-card .bubble-buttons-container {
+      display: none !important;
+    }
     ha-card .bubble-sub-button.readout {
       padding: 0px !important;
       justify-content: flex-end !important;

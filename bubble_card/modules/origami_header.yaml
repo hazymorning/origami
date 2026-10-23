@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.2.0"
+  version: "3.3.0"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
@@ -52,6 +52,11 @@ origami_header:
               value: normal
             - label: Large
               value: large
+    - name: title_action
+      label: "A tap on the title runs the first value's action"
+      selector:
+        boolean: {}
+      default: false
     - name: value_size
       label: "Value size"
       selector:
@@ -89,6 +94,8 @@ origami_header:
         max,
         // A large title is as large as a pop-up's title, for a header that stands in for one
         large: cfg.size === "large",
+        // With title_action, the whole header runs the first value's tap action, such as a title that opens a menu
+        titled: !!cfg.title_action,
         text,
         gap: gap || "var(--ha-space-1)",
         chip: cfg.value_style === "chip"
@@ -183,6 +190,24 @@ origami_header:
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
       margin: -2px 0 0 !important;
     }
+    ${card._orgH.titled ? `
+    ha-card .bubble-container {
+      position: relative !important;
+    }
+    ha-card .bubble-sub-button-container,
+    ha-card .bubble-sub-button-container .bubble-sub-button-1 {
+      position: static !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-1::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button:not(.bubble-sub-button-1) {
+      position: relative;
+      z-index: 1;
+    }
+    ` : ""}
     ${card._orgH.max ? `
     ha-card .bubble-sub-button-container {
       flex: 0 1 auto !important;

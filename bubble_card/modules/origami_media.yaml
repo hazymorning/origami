@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.3.0"
+  version: "5.3.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress. Options name other players, a group leader, a cover and icons."
@@ -122,6 +122,8 @@ origami_media:
       // Bubble Card hands the name and the state line to a module whose code contains these exact assignments, and it skips a write that repeats a line's text
       card.querySelector('.bubble-name').textContent = name;
       card.querySelector('.bubble-state').textContent = shown;
+      org.remeasure(card.querySelector('.bubble-name'), this.config.scrolling_effect !== false);
+      org.remeasure(card.querySelector('.bubble-state'), this.config.scrolling_effect !== false);
       if (!tv) org.icon(icon, m.icon(cfg.icons));
       // With Group badge, a crown marks the group leader and a link marks its members, as in Speaker Select. Without the option, Media leaves the mark to Speaker Select on a card that lists both.
       if (cfg.badge !== undefined) org.badge(cfg.badge ? m.role : null);
