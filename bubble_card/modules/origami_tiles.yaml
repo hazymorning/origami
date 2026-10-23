@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.0.0"
+  version: "3.1.0"
   supported:
     - sub-buttons
-  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image, image_size and name_color. Each of these keys accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Without state, a tile shows its entity's state, or the sub-button's attribute, in Home Assistant's own words. A tile whose entity is unavailable is dimmed. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
+  description: "The Tiles module turns a sub-buttons card into a grid of tiles with an icon, a name and a state line. Set up each tile under its sub-button's origami_tiles key, which takes name, state, color, order, image, image_size and name_color. Each of these keys accepts a value, a map from the entity's state to a value, or JavaScript in ${ }. Without state, a tile shows the sub-button's state_content, its attribute or its entity's state, in Home Assistant's own words, with times such as last_changed as relative times. A tile whose entity is unavailable is dimmed. Bubble Card's visibility conditions decide when a tile appears. List Base before Tiles, because Tiles uses Base's helpers."
   editor:
     - name: columns
       label: "Columns"
@@ -26,7 +26,9 @@ origami_tiles:
         const o = opt ?? {};
         const obj = hass.states[entity];
         const name = [o.name, org.run(env, item.name, ctx), ctx.attr.friendly_name].find(org.has) ?? "";
-        const state = [o.state, obj ? org.word(hass, obj, item.attribute || null) : ""].find(org.has) ?? "";
+        // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
+        const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
+        const state = [o.state, obj ? org.state(hass, entity, parts) : ""].find(org.has) ?? "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
         if (entity && !look.available) rules0.push(sel + " { opacity: var(--opacity-disabled); }");

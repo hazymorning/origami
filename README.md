@@ -2508,7 +2508,6 @@ cards:
                     sub_button_type: slider
                     always_visible: true
               rows: '2.2'
-              state_content: state
           - type: conditional
             conditions:
               - condition: state
@@ -2534,6 +2533,12 @@ cards:
                 # Home Assistant's word for this source is the source's own name
                 words:
                   optical in: TV input
+              origami_media:
+                # The icon shows what the speaker does
+                icons:
+                  'off': mdi:speaker-off
+                  bluetooth: mdi:speaker-bluetooth
+                  tv: mdi:television-speaker
               hide:
                 power_button: true
                 previous_button: true
@@ -2611,7 +2616,6 @@ cards:
                     sub_button_type: slider
                     always_visible: true
               rows: '2.2'
-              state_content: state
           # A plug as a compact row with a switch
           - type: custom:bubble-card
             card_type: button
@@ -2894,7 +2898,6 @@ cards:
                     data:
                       thermostat: climate.living_room
                       step: 0.5
-            state_content: []
             rows: 1.375
 
       # Turns everything in the room off, shown as a plain text button
@@ -3064,7 +3067,6 @@ cards:
               always_visible: true
               custom_height: 26
         rows: '2.2'
-        state_content: state
 
       # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
       - type: custom:bubble-card

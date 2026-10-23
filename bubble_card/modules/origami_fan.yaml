@@ -1,11 +1,13 @@
 origami_fan:
   name: "Origami • Fan"
-  version: "3.0.0"
+  version: "3.0.1"
   supported:
     - button
-  description: "The Fan module lets the fan icon spin at the fan's speed, and it works with Base. The icon turns the other way while the fan runs in reverse, and it stands still when the system asks for less motion. Base fills the power button while the fan runs and fills each speed button while the fan runs at that button's speed. Bubble Card writes the state line from state_content in Home Assistant's own words, for example percentage."
+  description: "The Fan module lets the fan icon spin at the fan's speed, and it works with Base. The icon turns the other way while the fan runs in reverse, and it stands still when the system asks for less motion. The spin suits a fan icon, so a card with another icon, such as an air purifier, can leave the module out. Base fills the power button while the fan runs and fills each speed button while the fan runs at that button's speed. Bubble Card writes the state line from state_content in Home Assistant's own words, for example percentage."
   code: |
     ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_fan needs origami_base 11 or later, listed before it");
       const st = hass.states[entity];
       const pct = Math.min(Math.max(Number(st?.attributes?.percentage) || 0, 0), 100);
       card._orgFanSpin = st?.state === "on"

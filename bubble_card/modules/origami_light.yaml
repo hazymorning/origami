@@ -1,12 +1,17 @@
 origami_light:
   name: "Origami • Light"
-  version: "6.0.0"
+  version: "6.0.1"
   supported:
     - button
   description: "The Light module colors the slider of a light card in the state color for lights, and it works with Base. In dark mode, the fill stays neutral and only the slider mark is colored, because Bubble Card keeps light text on the fill. Bubble Card writes the state line from state_content in Home Assistant's own words, for example state and brightness. Set rows to 1.375 on regular cards and to 1 on compact cards, including cards in pop-ups."
   code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 11)) throw new Error("origami_light needs origami_base 11 or later, listed before it");
+      return "";
+    })()}
     ha-card {
-      --org-slider-fill: ${hass.themes?.darkMode ? "color-mix(in srgb, var(--org-color) var(--tint-strength), color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background)))" : "color-mix(in srgb, var(--org-color) var(--fill-strength), var(--ha-card-background))"};
+      --org-slider-fill: ${card._org.opts.dark ? "color-mix(in srgb, var(--org-color) var(--tint-strength), var(--org-slider-base))" : "color-mix(in srgb, var(--org-color) var(--fill-strength), var(--ha-card-background))"};
       --org-slider-mark: var(--org-color);
     }
     .bubble-range-value {

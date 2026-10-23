@@ -1,9 +1,9 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.0.0"
+  version: "3.1.0"
   supported:
     - sub-buttons
-  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each button that should show its name. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it, in any language. Separate several values with commas. A button whose tap sets what its entity shows now, such as a source, an option, a preset or a speed, is also highlighted, and so is a button whose own entity is on and has a state color, unless its Background is off. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have large bold labels, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect. List Base first, as on every Origami card. Base's Fade in option lets the buttons fade in when they appear."
+  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each button that should show its name. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes plain text, a map from the card entity's state or a template, and it highlights every button whose name, css_class or tap target matches it, in any language. Separate several values with commas. A button whose tap sets what its entity shows now, such as a source, an option, a preset or a speed, is also highlighted, and so is a button whose own entity is on and has a state color, unless its Background is off. With Segmented on, the buttons in each Bubble Card group form one bar, with a thin line between them. The groups share one row, so all buttons have the same width, and the active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels in the Segment label size, and they ignore Background, Alignment, Columns, Active style and Scroll sideways. The Lamp style tints active buttons in the Lamp color, and a button whose own entity is on takes that entity's state color. With Scroll sideways on, the buttons stay in one row that scrolls sideways, and Columns has no effect. List Base first, as on every Origami card. Base's Fade in option lets the buttons fade in when they appear."
   editor:
     - name: background
       label: "Background"
@@ -16,11 +16,11 @@ origami_button:
         select:
           mode: dropdown
           options:
-            - label: Left
+            - label: Start
               value: start
             - label: Center
               value: center
-            - label: Right
+            - label: End
               value: end
       default: start
     - name: columns
@@ -51,6 +51,10 @@ origami_button:
       label: "Active button (template or text)"
       selector:
         template: {}
+    - name: color
+      label: "Lamp color (a color, a map from the card entity's state or a template)"
+      selector:
+        template: {}
     - name: active_style
       label: "Active style"
       selector:
@@ -67,6 +71,17 @@ origami_button:
       selector:
         boolean: {}
       default: false
+    - name: label_size
+      label: "Segment label size"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Large
+              value: large
+            - label: Normal
+              value: normal
+      default: large
     - name: scroll
       label: "Scroll sideways"
       selector:
@@ -86,7 +101,10 @@ origami_button:
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
       const norm = (v) => String(v ?? "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       const low = (v) => String(v ?? "").trim().toLocaleLowerCase(lang);
-      const raw = String(org.run({ hass, renderTemplate }, cfg.active ?? "", { entity, state: "", attr: {} }) ?? "").trim();
+      const env = { hass, renderTemplate };
+      const st = hass.states[entity];
+      const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
+      const raw = String(org.value(env, cfg.active, ctx) ?? "").trim();
       let list = [];
       if (raw.startsWith("[")) {
         try { list = JSON.parse(raw); } catch (e) { list = [raw]; }
@@ -95,17 +113,23 @@ origami_button:
       }
       const want = (Array.isArray(list) ? list : [list]).map(low).filter(Boolean);
       const slugs = want.map(norm).filter(Boolean);
-      // A button is active when its name or css_class matches, when its tap sets what its entity shows now, or while its own entity is on
+      // A button is active when its name, its css_class or an entity its tap targets matches, when its tap sets what its entity shows now, or while its own entity is on
+      const lamps = [];
       const active = org.items(this.config).map((item, i) => {
         const names = [item.name, item.css_class].filter((v) => typeof v === "string" && !/\{(\{|%)|\$\{/.test(v));
-        const named = names.some((v) => want.includes(low(v)) || (norm(v) && slugs.includes(norm(v))));
+        const tap = org.act(item);
+        const targets = [].concat(tap.target?.entity_id ?? tap.data?.entity_id ?? tap.service_data?.entity_id ?? []).map(low);
+        const named = names.some((v) => want.includes(low(v)) || (norm(v) && slugs.includes(norm(v)))) || targets.some((v) => want.includes(v));
         // A tap that sets a value lights the button while its entity has that value. Otherwise, a button with an entity of its own follows Base's rule for that entity.
         const id = item.entity ?? entity;
         const set = org.matches(hass, item, id);
         const plain = String(item.css_class ?? "").toLowerCase().split(/\s+/).includes("plain");
         const lit = set === null && !!item.entity && item.show_background !== false && org.filled(hass, item, id);
+        // A button whose own entity is on takes that entity's state color as its lamp
+        if (item.entity && org.look(hass, item.entity).lit) lamps.push([i + 1, org.look(hass, item.entity).color]);
         return named || (set === true && !plain) || lit ? i + 1 : 0;
       }).filter(Boolean);
+      const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
       const sel = active.map((n) => base + ".bubble-sub-button-" + n);
       const seg = !!cfg.segmented;
@@ -123,6 +147,10 @@ origami_button:
         seg,
         scroll,
         press: cfg.press ?? true,
+        large: cfg.label_size !== "normal",
+        // The Lamp style tints active buttons in the lamp color, or in the state color of a button's own entity
+        lamp: lamp || "var(--lamp-color)",
+        lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => base + ".bubble-sub-button-" + n + " { --org-btn-lamp: " + c + "; }").join("\n    "),
         cols,
         pad: pad || "0",
         size: size || "var(--icon-size-2xs)",
@@ -139,7 +167,9 @@ origami_button:
       --org-btn-bg: ${card._orgB.bg || card._orgB.seg ? "var(--fill-subtle)" : "transparent"};
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
+      --org-btn-lamp: ${card._orgB.lamp};
     }
+    ${card._orgB.lamps}
     ha-card .bubble-container {
       display: block !important;
       height: auto !important;
@@ -204,7 +234,7 @@ origami_button:
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap !important;
-      font-size: ${card._orgB.seg ? "var(--ha-font-size-l)" : "var(--ha-font-size-s)"} !important;
+      font-size: ${card._orgB.seg ? (card._orgB.large ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"} !important;
       font-weight: ${card._orgB.seg ? "var(--ha-font-weight-bold)" : "var(--ha-font-weight-medium)"} !important;
       ${card._orgB.seg ? "font-variant-numeric: tabular-nums;" : ""}
       color: inherit !important;
@@ -272,16 +302,19 @@ origami_button:
       scrollbar-width: none;
       mask-image: var(--scroller-mask);
     }
+    ha-card:dir(rtl) .bubble-sub-button-bottom-container {
+      mask-image: linear-gradient(to left, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
+    }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
       scroll-snap-align: start;
       scroll-margin-inline-start: var(--scroller-bleed);
     }` : ""}
     ${card._orgB.on("")} {
-      ${card._orgB.seg ? "" : card._orgB.toggle ? "background: var(--toggle-on) !important;" : card._orgB.bg ? "background: var(--lamp-tint) !important;" : ""}
+      ${card._orgB.seg ? "" : card._orgB.toggle ? "background: var(--toggle-on) !important;" : card._orgB.bg ? "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;" : ""}
       color: ${card._orgB.toggle ? "var(--ha-card-background)" : "var(--primary-text-color)"} !important;
     }
     ${card._orgB.on(" .bubble-sub-button-icon:not(.hidden)")} {
-      color: ${card._orgB.toggle ? "var(--ha-card-background)" : "var(--lamp-color)"} !important;
+      color: ${card._orgB.toggle ? "var(--ha-card-background)" : "var(--org-btn-lamp)"} !important;
       opacity: 1 !important;
     }
     ${card._orgB.on(" .bubble-sub-button-name-container")} {
