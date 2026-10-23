@@ -143,28 +143,7 @@ origami_popup:
       margin-inline-end: auto !important;
       padding: 0px !important;
     }
-    div.bubble-header .bubble-sub-button {
-      width: auto !important;
-      min-width: 0px !important;
-    }
-    div.bubble-header .bubble-sub-button-container {
-      gap: var(--ha-space-3) !important;
-    }
-    div.bubble-header .bubble-sub-button {
-      height: auto !important;
-      padding: 0px !important;
-      border-radius: 0px !important;
-      background: none !important;
-      box-shadow: none !important;
-      font-size: var(--ha-font-size-m) !important;
-      font-weight: var(--ha-font-weight-medium) !important;
-      color: var(--secondary-text-color) !important;
-    }
-    div.bubble-header .bubble-sub-button-name-container {
-      font-size: inherit !important;
-      font-weight: inherit !important;
-      color: inherit !important;
-    }
+    ${card._org.plain("div.bubble-header .bubble-sub-button-container", "var(--ha-font-weight-medium)")}
     ${card._orgP.chip ? card._org.chips("div.bubble-header .bubble-sub-button-container") : ""}
     div.bubble-header .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-2xs) !important;

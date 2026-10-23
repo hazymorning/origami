@@ -66,10 +66,8 @@ origami_media:
       // The speaker shows its music while it plays, and its name at other times
       const music = !tv && m.active && m.playing && !m.input && !!m.title;
       card._orgM = {
-        tv,
         m,
         music,
-        power,
         on: tv ? power === true : m.active,
         playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
         powered: tv ? power === true : org.power(ent) === true,
@@ -82,7 +80,7 @@ origami_media:
       const c = card._orgM;
       // With Filled play and power buttons, the play button is filled while media plays and the power button while the device is on
       c.filled = c.solid ? [c.playing ? ".bubble-play-pause-button" : "", c.powered ? ".bubble-power-button" : ""].filter(Boolean) : [];
-      // Bubble Card hands the name and the state line to a module whose code contains these exact assignments
+      // Bubble Card hands the name and the state line to a module whose code contains these exact assignments, and it skips a write that repeats a line's text
       const name = music ? m.title : org.name(hass, entity, this.config.name, env);
       const line = tv
         ? (power === null ? org.word(hass, ent ?? null, null, ent?.state ?? "unavailable")
@@ -92,8 +90,8 @@ origami_media:
         : m.input ? org.word(hass, m.show, "source")
         : music ? m.artist || org.word(hass, m.player)
         : org.word(hass, m.show);
-      if (org.fresh(card.querySelector('.bubble-name'), name)) card.querySelector('.bubble-name').textContent = name;
-      if (org.fresh(card.querySelector('.bubble-state'), line)) card.querySelector('.bubble-state').textContent = line;
+      card.querySelector('.bubble-name').textContent = name;
+      card.querySelector('.bubble-state').textContent = line;
       if (!tv) org.icon(icon, m.icon(cfg.icons));
       return "";
     })()}
@@ -142,12 +140,4 @@ origami_media:
     .bubble-media-button {
       background-color: transparent !important;
     }
-    ${card._orgM.filled.length ? `
-    ${card._orgM.filled.join(", ")} {
-      color: var(--text-color-active);
-      background-color: var(--fill-active) !important;
-    }
-    ${card._orgM.filled.map((b) => b + " .bubble-media-button-icon").join(", ")} {
-      color: var(--text-color-active) !important;
-      --icon-primary-color: var(--text-color-active) !important;
-    }` : ""}
+    ${card._org.fill(card._orgM.filled)}

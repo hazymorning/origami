@@ -116,7 +116,7 @@ origami_button:
       const lamps = [];
       const active = org.items(this.config).map((item, i) => {
         const names = [item.name, item.css_class].filter((v) => ["string", "number"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v))).map(String);
-        const named = want.length > 0 && (names.some((v) => want.includes(low(v)) || (org.slug(v) && slugs.includes(org.slug(v)))) || org.targets(item).map(low).some((v) => want.includes(v)));
+        const named = want.length > 0 && (names.some((v) => want.includes(low(v)) || slugs.includes(org.slug(v))) || org.targets(item).map(low).some((v) => want.includes(v)));
         // A tap that sets a value lights the button while its entity has that value. Otherwise, a button with an entity of its own and a background follows Base's rule for that entity.
         const r = org.why(hass, item, item.entity ?? entity);
         // A button whose own entity is on takes that entity's state color as its lamp

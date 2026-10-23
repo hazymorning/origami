@@ -921,9 +921,7 @@ sub_button:
     - name: Fan
       entity: fan.bedroom
       icon: mdi:fan
-      origami_tiles:
-        state:
-          'on': ${num(attr.percentage, 0, '%')}
+      state_content: percentage
       visibility:
         - condition: state
           entity: fan.bedroom
@@ -1010,7 +1008,7 @@ sub_button:
       icon: mdi:shower
       origami_tiles:
         name:
-          'on': ${minutesUntil('input_datetime.bath_time_end')} min
+          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
         state:
           'on': Running
           'off': Ready
@@ -1035,7 +1033,7 @@ sub_button:
       icon: mdi:printer-outline
       origami_tiles:
         name:
-          'on': ${minutesUntil('input_datetime.printer_end')} min
+          'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
         state:
           'on': Running
         name_color:

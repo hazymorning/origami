@@ -43,7 +43,7 @@ origami_tiles:
         const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
         // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
         const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
-        const state = [o.state, obj ? org.state(hass, entity, parts) : ""].find(org.has) ?? "";
+        const state = org.has(o.state) ? o.state : obj ? org.state(hass, entity, parts) : "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
         // A tile is dimmed while its entity is missing or unavailable. A scene or a button that was never used is unknown, and it stays as it is.
@@ -77,9 +77,9 @@ origami_tiles:
       }).join("\n");
       // at() returns a selector list for the rows with these signs, with the same ending on each selector
       const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
-      // The signs are icons from Material Design Icons, drawn as masks in the text color
+      // The signs are icons from Material Design Icons, drawn as masks in the text color. Only the list builds them.
       const mask = (d) => "url(" + org.str("data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='" + d + "'/></svg>")) + ")";
-      card._orgTilesSign = {
+      card._orgTilesSign = list && {
         at,
         all: "open run running stop switch on",
         chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
@@ -120,7 +120,7 @@ origami_tiles:
       height: auto !important;
       padding: var(--ha-space-4) !important;
       border-radius: var(--ha-card-border-radius) !important;
-      background-color: var(--fill-subtle) !important;
+      background-color: var(--tile-background, var(--fill-subtle)) !important;
       color: var(--primary-text-color) !important;
       transition: var(--transition-interactive) !important;
     }
@@ -138,12 +138,12 @@ origami_tiles:
       margin: 0 !important;
       margin-inline-end: var(--ha-space-3) !important;
       border-radius: var(--radius-inner) !important;
-      box-shadow: var(--ha-card-box-shadow);
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow));
       transition: var(--transition-interactive);
     }
     .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-m) !important;
-      background-color: var(--org-tile-chip, var(--ha-card-background));
+      background-color: var(--org-tile-chip, var(--tile-chip-background, var(--ha-card-background)));
       color: var(--org-tile-color, var(--primary-text-color)) !important;
     }
     .bubble-sub-button-name-container {

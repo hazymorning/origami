@@ -145,7 +145,7 @@ origami_base:
         : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
       const fns = card._orgFns ?? (card._orgFns = new Map());
       // num() writes a number the way the user's profile in Home Assistant asks for. Without digits, it keeps the number's own decimals.
-      const formats = { comma_decimal: "en-US", decimal_comma: "de", space_comma: "fr", none: "en-US" };
+      const formats = { comma_decimal: "en-US", decimal_comma: "de", quote_decimal: "de-CH", space_comma: "fr", none: "en-US" };
       // Home Assistant puts a space before a percent sign only in these languages (blank_before_percent.ts)
       const spaced = ["cs", "de", "fi", "fr", "sk", "sv"];
       const num = (hass, v, digits, unit) => {
@@ -288,7 +288,7 @@ origami_base:
       const service = (item) => String(act(item).perform_action ?? act(item).service ?? "");
       const targets = (item) => {
         const a = act(item);
-        return [].concat(a.target?.entity_id ?? (a.data ?? a.service_data)?.entity_id ?? []).map(String);
+        return list(a.target?.entity_id ?? (a.data ?? a.service_data)?.entity_id);
       };
       const matches = (hass, item, entity) => {
         const a = act(item);
@@ -337,8 +337,8 @@ origami_base:
         if (!/^https?:\/\//i.test(u) && !u.startsWith("/")) return null;
         return ignore.some((f) => u.toLowerCase().includes(f)) ? null : u;
       };
-      // A cover that a speaker keeps showing after a switch to an input is remembered with the title it had, so it returns when the title changes
-      const stale = card._orgStale ?? (card._orgStale = new Map());
+      // A cover that a speaker keeps showing after a switch to an input is remembered with the title it had, so it returns when the title changes. All cards share this memory, so every card for the speaker agrees.
+      const stale = globalThis.__origamiStale ?? (globalThis.__origamiStale = new Map());
       const plain = (u) => {
         const [path, query = ""] = u.split("?");
         return path + "|" + (new URLSearchParams(query).get("cache") ?? query.replace(/(^|&)token=[^&]*/g, ""));
@@ -359,7 +359,7 @@ origami_base:
         const s = norm(source);
         if (!s) return null;
         if (list(extra).map(norm).includes(s)) return "line";
-        const hit = (n) => s === n || (!exact.includes(n) && (s.startsWith(n + " ") || new RegExp("^" + n + "\\d").test(s)));
+        const hit = (n) => s === n || (!exact.includes(n) && s.startsWith(n) && /^[ \d]/.test(s.slice(n.length)));
         return Object.keys(inputs).find((k) => inputs[k].some(hit)) ?? null;
       };
       // A title says something about the music, unless it is a stream address, a file path or the source's own name. A file path starts with a slash or a drive, or it ends with a file name, so 24/7 and AC/DC stay titles.
@@ -406,8 +406,8 @@ origami_base:
         // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
         const cover = value(env, cfg.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} });
         const raw = picture(cover) ?? picture(pa.entity_picture, list(cfg.ignore_art));
-        if (raw && inp) stale.set(plain(raw), title);
-        const art = raw && !inp && live && (title || artist || pa.media_album_name) && stale.get(plain(raw)) !== title ? raw : null;
+        if (raw && inp) stale.set(showId + " " + plain(raw), title);
+        const art = raw && !inp && live && (title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title ? raw : null;
         const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
         const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
         return {
@@ -425,6 +425,8 @@ origami_base:
       };
       // Bubble Card writes these attributes as relative times
       const stamps = { calendar: ["start_time", "end_time"], sun: ["next_dawn", "next_dusk", "next_midnight", "next_noon", "next_rising", "next_setting"] };
+      // Bubble Card leaves out these attributes while they are 0, so a closed cover shows its state instead. A fan or a light that is off also shows its state, because some fans keep their last speed while they are off.
+      const zero = { cover: ["current_position"], fan: ["percentage"], light: ["brightness"], valve: ["current_position"] };
       // ago() writes a time relative to now in the user's language, such as 3 days ago, the way Home Assistant writes last_changed
       const ago = (hass, t, big = true) => {
         const sec = Math.round((new Date(t) - now) / 1000);
@@ -485,6 +487,7 @@ origami_base:
               : p === "name" ? card._org.name(hass, id)
               : ["last_changed", "last_updated"].includes(p) ? ago(hass, st[p])
               : p === "last_triggered" || (stamps[domain] ?? []).includes(p) ? ago(hass, st.attributes?.[p])
+              : (zero[domain] ?? []).includes(p) && (Number(st.attributes?.[p]) === 0 || st.state === "off") ? ""
               : word(hass, st, p);
           };
           // When no part has a value, the line shows the state, as Bubble Card's does
@@ -515,7 +518,8 @@ origami_base:
         // text() returns the rules that show a text in a sub-button instead of its own name or state
         text: (sel, item, text, size) => [
           // Bubble Card hides a sub-button that has nothing of its own to show
-          ...(item.visibility ? [] : [sel + ".hidden:not([style*='display: none']) { display: flex !important; }"]),
+          // Bubble Card also hides the group and the lane around it, so they show again while they hold this sub-button. Only the hidden class gives this rule weight, so the vertical layout's rule for groups and lanes still wins.
+          ...(item.visibility ? [] : [sel + ".hidden:not([style*='display: none']) { display: flex !important; }", ".hidden:where(.bubble-sub-button-group, .bubble-sub-button-alignment-lane):where(:has(" + sel.split(" ").pop() + ":not([style*='display: none']))) { display: flex !important; }"]),
           sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }",
           sel + " .bubble-sub-button-name-container::before { content: " + str(text) + "; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: " + size + "; }"
         ],
@@ -566,6 +570,13 @@ origami_base:
             + chip.map((c) => c + " .bubble-sub-button-icon:not(.hidden)").join(", ") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
             + chip.map((c) => c + " .bubble-sub-button-name-container:empty").join(", ") + " { display: none !important; }";
         },
+        // fill() returns the rules that fill active controls, such as filled sub-buttons and Media's play button, with their icons and names
+        fill: (sel) => !sel.length ? "" : sel.join(", ") + " { color: var(--text-color-active) !important; background-color: var(--fill-active) !important; }\n"
+          + sel.map((s) => s + " :is(.bubble-sub-button-icon, .bubble-sub-button-name-container, .bubble-media-button-icon)").join(", ") + " { color: var(--text-color-active) !important; --icon-primary-color: var(--text-color-active) !important; opacity: 1 !important; }",
+        // plain() returns the rules that show the sub-buttons in a container as plain text values, for Header and Popup
+        plain: (scope, weight) => scope + " { gap: var(--ha-space-3) !important; }\n"
+          + scope + " .bubble-sub-button { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; font-size: var(--ha-font-size-m) !important; font-weight: " + weight + " !important; color: var(--secondary-text-color) !important; white-space: nowrap !important; }\n"
+          + scope + " .bubble-sub-button-name-container { font-size: inherit !important; font-weight: inherit !important; color: inherit !important; opacity: 1 !important; }",
         // icon() shows an icon instead of the card's own, and without an icon it gives the card its own icon back
         icon: (el, icon) => {
           if (!el) return;
@@ -1013,13 +1024,11 @@ origami_base:
       // The pill switches are filled while their entity is on. Otherwise, why() decides for each sub-button, and under the icon only accent fills.
       const sel = org.opts.toggle ? [...org.pills] : [];
       if (!org.opts.toggle) org.items(this.config).forEach((item, i) => {
-        const r = org.why(hass, item, item.entity ?? entity);
-        if (!r || (org.opts.vertical && org.slug(item.css_class) !== "accent")) return;
+        const r = (!org.opts.vertical || org.slug(item.css_class) === "accent") && org.why(hass, item, item.entity ?? entity);
+        if (!r) return;
         const one = " .bubble-sub-button.bubble-sub-button-" + (i + 1) + keep;
         sel.push(r === "set" ? "ha-card" + one : r === "accent" ? "ha-card" + one + ".accent:is(.background-on, .background-off)" : auto + one + ":is(.background-on, .background-off)");
       });
-      if (!sel.length) return "";
-      return "    " + sel.join(",\n    ") + " {\n      color: var(--text-color-active) !important;\n      background-color: var(--fill-active) !important;\n    }\n    "
-        + sel.flatMap((s) => [s + " .bubble-sub-button-icon", s + " .bubble-sub-button-name-container"]).join(",\n    ") + " {\n      color: var(--text-color-active) !important;\n      opacity: 1 !important;\n    }\n";
+      return org.fill(sel);
     })()}
     `}

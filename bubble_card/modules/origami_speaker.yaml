@@ -56,30 +56,28 @@ origami_speaker:
       const line = [m.title, m.artist].filter(Boolean).join(" • ");
       card._orgSp = {
         m,
-        member,
         grouped: m.role !== null,
         dead: org.power(st) === null,
         chosen: chosen !== "" && (chosen === entity || chosen.toLowerCase() === name.toLowerCase()),
         audible: org.power(st) !== null && (m.playing || ["playing", "buffering"].includes(st?.state)),
         // The row shows the track after the name while the speaker plays, pauses or buffers music of its own
         track: !!line && !member && !m.input && m.live,
-        line,
         art: m.art
       };
       const s = card._orgSp;
       const rtl = !!hass.translationMetadata?.translations?.[hass.language]?.isRTL;
-      // Bubble Card hands the state line to a module whose code contains this exact assignment
+      // Bubble Card hands the state line to a module whose code contains this exact assignment, and it skips a write that repeats the line's text
       const next = s.dead ? org.word(hass, st)
         : member ? (rtl ? "← " : "→ ") + ((n) => org.rename(n) ?? n)(org.name(hass, m.leader))
         : m.input ? org.word(hass, m.show, "source")
         : s.track ? line
         : org.word(hass, m.show);
-      if (org.fresh(card.querySelector('.bubble-state'), next)) card.querySelector('.bubble-state').textContent = next;
+      card.querySelector('.bubble-state').textContent = next;
       org.icon(icon, m.icon(cfg.icons));
       // Each readout shows its own speaker's volume
       org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));
       // A crown marks the group leader, and a link marks its members
-      const host = card.querySelector(".bubble-main-icon-container") ?? card.querySelector(".bubble-icon-container");
+      const host = card.querySelector(".bubble-main-icon-container");
       if (host) {
         let b = host.querySelector(".org-group-badge");
         if (!b) {

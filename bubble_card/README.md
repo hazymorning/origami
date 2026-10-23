@@ -24,7 +24,7 @@ Open any Bubble card in the editor and go to **Modules**, then **My Modules**, t
 
 ## How the modules work together
 
-List Base first on every Origami card, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base in front of it. Without Base, the card looks plain, and the card editor shows an error.
+List Base first on every Origami card, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base in front of it. Without Base in front of it, a module does not run, and the card editor shows an error. On Climate, Media and Speaker Select cards, the lines that the module writes then stop changing.
 
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
@@ -102,12 +102,12 @@ The `origami_base`, `origami_header`, `origami_tiles` and `origami_popup` keys o
 ```yaml
 sub_button:
   bottom:
-    - name: Fan
-      entity: fan.bedroom
+    - name: Bath
+      entity: input_boolean.bath_time
       origami_tiles:
-        # While the fan runs, the tile shows its speed. Otherwise, it shows Home Assistant's word for the state.
+        # While the bath runs, the tile counts the minutes until it ends. Otherwise, it shows Home Assistant's word for the state.
         state:
-          'on': ${format(entity, 'percentage')}
+          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
 ```
 
 </details>
@@ -293,7 +293,7 @@ To show a lamp as a compact row, use Base's compact example with a light entity.
 
 ### Fan
 
-The Fan module lets a fan card's icon spin at the fan's speed, and it works with Base and its `group` option. The icon turns the other way while the fan runs in reverse, and it stands still when your device asks for less motion. Base fills the power button while the fan runs and the speed button for the fan's current speed. With `state_content: percentage`, Bubble Card shows the speed while the fan runs and Home Assistant's word for off while it is off.
+The Fan module lets a fan card's icon spin at the fan's speed, and it works with Base and its `group` option. The icon turns the other way while the fan runs in reverse, and it stands still when your device asks for less motion. Base fills the power button while the fan runs and the speed button for the fan's current speed. With `state_content: percentage`, Bubble Card shows the speed while the fan runs. While it is off, Bubble Card shows Home Assistant's word for off, as long as the fan reports a speed of 0.
 
 <img width="800" alt="Two fan cards, one at speed two and one that is off" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-fan.webp">
 
@@ -734,7 +734,7 @@ Set the layout on the card with `origami_tiles: layout`, which is `grid`, the de
 | Key | Default | Description |
 | --- | --- | --- |
 | `name` | The sub-button's name, or the entity's name | The tile shows this name. |
-| `state` | The state in Home Assistant's words | Without `state`, a tile shows the sub-button's `state_content`, else its `attribute`, else the entity's state, in Home Assistant's words. Times such as `last_changed` read as relative times. |
+| `state` | The state in Home Assistant's words | Without `state`, a tile shows the sub-button's `state_content`, else its `attribute`, else the entity's state, in Home Assistant's words. Times such as `last_changed` read as relative times. As on Bubble Card's own state line, a speed, a brightness or a position of 0 is left out. A speed or a brightness is also left out while the fan or the light is off, so a fan tile with `state_content: percentage` shows Off while the fan is off. |
 | `color` | The state color while the entity is on | The key sets the icon's color. A plain value applies in every state. A map applies only in the states it lists. For example, `'on': var(--blue-color)` applies only while the entity is on. |
 | `order` | | The key sets the tile's position. For example, `-1` moves the tile to the front. |
 | `image` | | The tile shows this picture instead of the icon. |
@@ -907,7 +907,7 @@ Base puts its helpers on `card._org`, so a module that is listed after Base can 
 | `look(hass, id)` | It returns whether the entity is on and available, whether it has a state color, whether it is lit, which means on with a state color, and the color itself. Home Assistant's rules decide, with Origami's two exceptions. For a thermostat, it also returns its action and the mode that matches it. |
 | `power(stateObj)` and `input(source, extra)` | `power()` returns whether a device is switched on, or `null` while it has no answer. `input()` returns whether a source is a `bluetooth`, `tv` or `line` input, or `null`. |
 | `word(hass, stateObj, attribute, value)` | It returns a state or an attribute in Home Assistant's words, with the shorter words and the card's `words` option. |
-| `state(hass, id, parts)` | It returns a state line from a list such as `["state", "brightness"]`, joined the way Bubble Card joins `state_content`. The parts can also be `name`, `last_changed`, `last_updated` and `last_triggered`, and times read as relative times. |
+| `state(hass, id, parts)` | It returns a state line from a list such as `["state", "brightness"]`, joined the way Bubble Card joins `state_content`. The parts can also be `name`, `last_changed`, `last_updated` and `last_triggered`, and times read as relative times. As in Bubble Card, a speed, a brightness or a position of 0 is left out, and so is a speed or a brightness while the fan or the light is off. |
 | `name(hass, id, own, env)` | It returns the card's own name, which can be a template, or else the entity's name. |
 | `num(hass, value, digits, unit)` and `ago(hass, time)` | `num()` writes a number in the format of the user's profile, with an optional unit. `ago()` writes a time relative to now, such as 3 days ago, in the user's language. |
 | `value(env, option, ctx)` and `run(env, value, ctx)` | They read an option with a map, Jinja or JavaScript in `${ }`. `env` holds `hass` and `renderTemplate`, and `ctx` holds `entity`, `state` and `attr`. |
@@ -918,12 +918,12 @@ Base puts its helpers on `card._org`, so a module that is listed after Base can 
 | `has(value)`, `pick(map, key, off)` and `slug(value)` | `has()` tells whether a value is set. `pick()` returns a map's entry for a key in any case, with the keys `true` and `false` read as `on` and `off`. With `off` set to `true`, `unavailable` and `unknown` also take the map's `off` entry when they have none of their own. `slug()` writes a value as Bubble Card writes a class name, so `css_class: Accent` reads as `accent`. |
 | `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media and Speaker Select show it. Its options are `env`, `tv` for the TV layout and `cfg`, which holds the module's `players`, `leader`, `art`, `ignore_art` and `inputs` options. It returns the group, the music, the input, the cover, the app, whether the player is active and whether the device is on, the media color and an `icon()` function that reads an `icons` map. `picture()` returns a picture's address. It returns `null` when the address is empty, when it is not a web address or a path on the Home Assistant server, or when it contains an entry of the optional `ignore` list. |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size, list)` and `icon(element, icon)` | They return the CSS rules that show text or an icon in a sub-button. `values()` takes the list from `subs()` when a module already has it. Without an icon, `icon()` gives the element its own icon back. |
-| `cover(address, opacity)` and `chips(scope)` | `cover()` returns the rules that show a cover in a media card's icon, and `chips()` returns the rules that turn the values in a container into chips, as in Header and Popup. |
-| `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text)` | `fresh()` tells whether an element needs a new text. `write()` writes text into an element that Bubble Card does not hand over, such as a sub-button's readout, and `readouts()` writes a text into every sub-button with `css_class: readout`. The function `text` makes each text from that sub-button's own entity. |
+| `cover(address, opacity)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | `cover()` returns the rules that show a cover in a media card's icon. `chips()` and `plain()` return the rules that show the values in a container as chips or as plain text, as in Header and Popup. `fill()` returns the rules that fill active controls, as Base fills sub-buttons and Media fills its play and power buttons. |
+| `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text. `write()` writes text into an element that Bubble Card does not hand over, such as a sub-button's readout, and `readouts()` writes a text into every sub-button with `css_class: readout`. The function `text` makes each text from that sub-button's own entity. |
 | `rename(text)` | It returns the word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` | It returns a CSS string that Bubble Card's cleaner leaves as it is. |
 
-Bubble Card hands the state line to a module whose code contains `card.querySelector('.bubble-state').textContent =` word for word, and the name line to one whose code contains `card.querySelector('.bubble-name').textContent =`. The same assignment with `innerText` or `innerHTML` also counts. Bubble Card then stops writing that line and keeps scrolling long text. So a module that writes a line uses this exact assignment in its own code and takes the text from `word()`, `state()` or `name()`. Before it writes, the module asks `fresh()`, because Bubble Card repeats a long line while it scrolls, and a new text on every render would restart the scrolling. The Origami modules use `textContent`, because reading it needs no layout.
+Bubble Card hands the state line to a module whose code contains `card.querySelector('.bubble-state').textContent =` word for word, and the name line to one whose code contains `card.querySelector('.bubble-name').textContent =`. The same assignment with `innerText` or `innerHTML` also counts. Bubble Card then stops writing that line and keeps scrolling long text. So a module that writes a line uses this exact assignment in its own code and takes the text from `word()`, `state()` or `name()`. Bubble Card skips a write that repeats the line's text, so the module can write the line on every render, and the scrolling goes on.
 
 Base keeps the card's options in `card._org.opts` and the look of the card's entity in `card._org.me`. A module that keeps its sub-buttons neutral or fills them itself sets `data-org-fill="own"` on the card. Base then fills only sub-buttons that set a value or have `css_class: accent`. A module that draws the background of a media card itself sets `data-org-bg="own"`, and Base leaves the background alone. Base does all this without knowing the module's name.
 
