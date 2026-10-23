@@ -1,9 +1,9 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.2.0"
+  version: "3.3.0"
   supported:
     - sub-buttons
-  description: "Button turns a sub-buttons card into rows, grids, segmented bars or a row that scrolls sideways. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option. Each button can have its own colors."
+  description: "Button turns a sub-buttons card into rows, grids, chips, segmented bars or a row that scrolls sideways. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
   editor:
     - name: background
       label: "Background"
@@ -67,7 +67,16 @@ origami_button:
               value: toggle
       default: lamp
     - name: segmented
-      label: "Segmented"
+      label: "Segmented (true for all groups, or the names of groups that become small switches)"
+      selector:
+        text: {}
+    - name: chips
+      label: "Chips"
+      selector:
+        boolean: {}
+      default: false
+    - name: pending
+      label: "Show a tapped button's next look until its state changes"
       selector:
         boolean: {}
       default: false
@@ -112,22 +121,61 @@ origami_button:
       }
       const want = (Array.isArray(list) ? list : [list]).map(low).filter(Boolean);
       const slugs = want.map(org.slug).filter(Boolean);
-      // A button is active when its name, its css_class or an entity its tap targets matches, when its tap sets what its entity shows now, or while its own entity is on
+      // segmented is true for one bar of all groups. A list of group names makes only those groups small segmented switches, which can sit in any row.
+      const segRaw = cfg.segmented;
+      const seg = segRaw === true || (!Array.isArray(segRaw) && org.yes(segRaw));
+      const segNames = seg ? [] : [].concat(segRaw ?? []).flatMap((v) => String(v).split(",")).map(low).filter((v) => v && v !== "false");
+      // Bubble Card numbers the sub-buttons of the groups first, in their order
+      const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
+      let k = 0;
+      const bars = bottom.filter((g) => Array.isArray(g?.group)).map((g) => ({ name: low(g.name), n: g.group.filter(Boolean).map(() => ++k) })).filter((g) => segNames.includes(g.name));
+      const inBar = bars.flatMap((g) => g.n);
+      // A button is active when its name, its css_class or an entity its tap targets matches, when its tap sets what its entity shows now, or while its own entity is on. Its own on key decides before all of these.
       const lamps = [];
-      const active = org.items(this.config).map((item, i) => {
+      const subs = org.subs(env, this.config, "origami_button");
+      // A button waits only while its look can change. A tap that only opens something never changes it, and segments show their choice at once. A button's own pending key decides for that button.
+      const keyed = (opt, k) => !!opt && k in opt;
+      const changes = (opt, item) => keyed(opt, "on") || !!item.entity || cfg.active !== undefined || org.matches(hass, item, item.entity ?? entity) !== null;
+      const pendingOn = (opt, item, n) => !seg && !inBar.includes(n) && ![...org.links, "none"].includes(org.act(item).action) && (keyed(opt, "pending") ? org.yes(opt.pending) : !!cfg.pending && changes(opt, item));
+      const active = subs.map(({ n, item, opt }) => {
+        const own = item.entity ? org.look(hass, item.entity) : null;
+        // A button whose own entity is on takes that entity's state color as its lamp
+        if (own?.lit) lamps.push([n, own.color]);
+        if (keyed(opt, "on") || org.yes(opt?.disabled)) return org.why(hass, item, item.entity ?? entity, opt) ? n : 0;
         const names = [item.name, item.css_class].filter((v) => ["string", "number"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v))).map(String);
         const named = want.length > 0 && (names.some((v) => want.includes(low(v)) || slugs.includes(org.slug(v))) || org.targets(item).map(low).some((v) => want.includes(v)));
         // A tap that sets a value lights the button while its entity has that value. Otherwise, a button with an entity of its own and a background follows Base's rule for that entity.
         const r = org.why(hass, item, item.entity ?? entity);
-        // A button whose own entity is on takes that entity's state color as its lamp
-        const own = item.entity ? org.look(hass, item.entity) : null;
-        if (own?.lit) lamps.push([i + 1, own.color]);
-        return named || r === "set" || (r !== null && !!item.entity && item.show_background !== false) ? i + 1 : 0;
+        return named || r === "set" || (r !== null && !!item.entity && item.show_background !== false) ? n : 0;
       }).filter(Boolean);
+      // pending shows a tapped button with the look it is about to get, at reduced opacity and without taps, until its state changes or 10 seconds pass
+      const pend = card._orgPend ?? (card._orgPend = new Map());
+      const mark = (el, p) => {
+        el?.classList.toggle("org-pending-on", !!p && !p.was);
+        el?.classList.toggle("org-pending-off", !!p && p.was);
+      };
+      subs.forEach(({ n, item, opt }) => {
+        const p = pend.get(n);
+        if (p && (active.includes(n) !== p.was || Date.now() > p.until || !pendingOn(opt, item, n))) pend.delete(n);
+        mark(card.querySelector(".bubble-sub-button-bottom-container .bubble-sub-button-" + n), pend.get(n));
+      });
+      // Bubble Card runs a tap through a hass-action event, so a tap on a button marks it there
+      if (!card._orgPendOn) {
+        card._orgPendOn = true;
+        card.addEventListener("hass-action", (e) => {
+          const el = e.composedPath().find((x) => x.classList?.contains("bubble-sub-button"));
+          const n = Number(el?.className.match(/bubble-sub-button-(\d+)/)?.[1]);
+          if (e.detail?.action !== "tap" || !card._orgB?.pending?.includes(n)) return;
+          const p = { was: card._orgB.active.includes(n), until: Date.now() + 10000 };
+          pend.set(n, p);
+          mark(el, p);
+          setTimeout(() => { if (pend.get(n) === p) { pend.delete(n); mark(el, null); } }, 10000);
+        });
+      }
       const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
-      const sel = active.map((n) => base + ".bubble-sub-button-" + n);
-      const seg = !!cfg.segmented;
+      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => base + ".bubble-sub-button-" + n + ":not(.org-pending-off)"), base + ".org-pending-on"];
+      const chips = !!cfg.chips;
       const scroll = !!cfg.scroll && !seg;
       // Segments fill one row and center their content, and a scrolling row is a single line, so both ignore Columns
       const align = seg ? "center" : ["start", "center", "end"].includes(cfg.align) ? cfg.align : "start";
@@ -135,7 +183,14 @@ origami_button:
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim();
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
-      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)").join("\n    ");
+      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)", subs).join("\n    ");
+      // A small segmented switch is a track around its group, and its active segment takes the stronger fill
+      const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
+      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: 0 0 auto; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle); scroll-snap-align: start; scroll-margin-inline-start: var(--scroller-bleed); }\n    "
+        + bar(g) + " > .bubble-sub-button { height: 100% !important; padding: 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; scroll-snap-align: none; }").join("\n    ");
+      const barOn = bars.flatMap((g) => g.n.filter((n) => active.includes(n)).map((n) => bar(g) + " > .bubble-sub-button.bubble-sub-button-" + n));
+      // A divider is a short line between two buttons, and it shows while its group shows
+      const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => base + ".bubble-sub-button-" + n);
       card._orgB = {
         bg: cfg.background ?? true,
         muted: !!cfg.muted,
@@ -143,6 +198,14 @@ origami_button:
         toggle: seg || cfg.active_style === "toggle",
         seg,
         scroll,
+        chips,
+        active,
+        pending: subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n),
+        bars: barCss,
+        // each() adds each suffix it receives to every selector in a list and joins the results, or matches nothing for an empty list
+        each: (list, ...ends) => list.length ? list.flatMap((s) => ends.map((e) => s + e)).join(",\n    ") : ".org-none",
+        barOn,
+        dividers,
         press: cfg.press ?? true,
         large: cfg.label_size !== "normal",
         // The Lamp style tints active buttons in the lamp color, or in the state color of a button's own entity
@@ -155,7 +218,7 @@ origami_button:
         row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
         rev: { start: "flex-end", center: "center", end: "flex-start" }[align],
         // on() adds each suffix it receives to every active button's selector and joins the results into one list
-        on: (...ends) => sel.length ? sel.flatMap((s) => ends.map((e) => s + e)).join(",\n    ") : ".org-none"
+        on: (...ends) => card._orgB.each(sel, ...ends)
       };
       return "";
     })()}
@@ -166,6 +229,7 @@ origami_button:
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
       --org-btn-lamp: ${card._orgB.lamp};
+      --org-btn-radius: ${!card._orgB.chips ? "var(--radius-inner)" : card._orgB.bg || card._orgB.seg ? "calc(var(--org-btn-height) / 2)" : "calc(var(--control-height-icon) / 2)"};
     }
     ${card._orgB.lamps}
     ${card._orgB.values}
@@ -211,7 +275,7 @@ origami_button:
       justify-content: ${card._orgB.rev} !important;
       align-items: center !important;
       gap: 0 !important;
-      border-radius: ${card._orgB.seg ? "0" : "var(--radius-inner)"} !important;
+      border-radius: ${card._orgB.seg ? "0" : "var(--org-btn-radius)"} !important;
       background: var(--org-value-chip, var(--org-btn-bg)) !important;
       box-shadow: none !important;
       color: ${card._orgB.seg ? "var(--primary-text-color)" : "var(--secondary-text-color)"} !important;
@@ -300,10 +364,52 @@ origami_button:
     ${card._orgB.on("::after", " + .bubble-sub-button::after")} {
       display: none;
     }` : ""}
+    ${card._orgB.chips ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      color: var(--primary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      color: var(--secondary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right {
+      padding-inline-end: var(--ha-space-3) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
+      margin-inline: var(--ha-space-1) 0 !important;
+    }` : ""}
+    ${card._orgB.bars}
+    ${card._orgB.each(card._orgB.barOn, "")} {
+      background: var(--fill-strong) !important;
+      color: var(--primary-text-color) !important;
+    }
+    ${card._orgB.each(card._orgB.barOn, " .bubble-sub-button-name-container")} {
+      font-weight: var(--ha-font-weight-bold) !important;
+    }
+    ${card._orgB.dividers.length ? card._orgB.each(card._orgB.dividers, "") + ` {
+      flex: 0 0 1px !important;
+      width: 1px !important;
+      min-width: 1px !important;
+      height: var(--icon-size-s) !important;
+      align-self: center;
+      margin-inline: var(--ha-space-1) !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: var(--fill-strong) !important;
+      pointer-events: none;
+    }
+    ` + card._orgB.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {
+      display: flex !important;
+    }
+    ` + card._orgB.each(card._orgB.dividers, " > *") + ` {
+      display: none !important;
+    }` : ""}
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
+      opacity: var(--opacity-muted) !important;
+      pointer-events: none !important;
+    }
     ${card._orgB.scroll ? `ha-card .bubble-sub-button-bottom-container {
       width: auto !important;
       margin: calc(-1 * var(--scroller-bleed)) !important;
-      padding: var(--scroller-padding) !important;
+      padding: ${card._orgB.chips ? "var(--scroller-bleed)" : "var(--scroller-padding)"} !important;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
@@ -327,5 +433,5 @@ origami_button:
     }
     ${card._orgB.on(" .bubble-sub-button-name-container")} {
       opacity: 1 !important;
-      ${card._orgB.toggle ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
+      ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }

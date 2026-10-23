@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.1.0"
+  version: "3.2.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right or right after the title, as text or as chips. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -52,6 +52,21 @@ origami_header:
               value: normal
             - label: Large
               value: large
+    - name: inline
+      label: "Values follow the title, and the title taps the first value"
+      selector:
+        boolean: {}
+      default: false
+    - name: value_size
+      label: "Value size"
+      selector:
+        text: {}
+      default: "var(--ha-font-size-m)"
+    - name: icon_gap
+      label: "Space between a value's icon and its name"
+      selector:
+        text: {}
+      default: "var(--ha-space-1)"
   code: |
     ${(() => {
       // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
@@ -70,6 +85,8 @@ origami_header:
       const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
+      const text = String(cfg.value_size ?? "").trim() || "var(--ha-font-size-m)";
+      const gap = String(cfg.icon_gap ?? "").trim();
       card._orgH = {
         weight: cfg.weight === "regular" ? "var(--ha-font-weight-normal)" : cfg.weight === "medium" ? "var(--ha-font-weight-medium)" : "var(--ha-font-weight-bold)",
         color: String(raw ?? "").trim() || "currentcolor",
@@ -77,17 +94,21 @@ origami_header:
         max,
         // A large title is as large as a pop-up's title, for a header that stands in for one
         large: cfg.size === "large",
+        // Inline values follow the title, and a tap on the title runs the first value's action, as for a title with a menu
+        inline: !!cfg.inline,
+        text,
+        gap: gap || "var(--ha-space-1)",
         chip: cfg.value_style === "chip"
       };
       const scope = "ha-card .bubble-sub-button-container";
       const list = org.subs(env, this.config, "origami_header");
-      const rules = org.values(env, this.config, "origami_header", scope, "var(--ha-font-size-m)", list);
+      const rules = org.values(env, this.config, "origami_header", scope, text, list);
       // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state, on either side of the name
       if (!card._orgH.chip) list.forEach(({ n, opt }) => {
         if (!org.has(opt?.name)) return;
         const sel = scope + " .bubble-sub-button.bubble-sub-button-" + n;
-        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
-        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--ha-space-1) 0 !important; }");
+        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--org-header-icon-gap) !important; }");
+        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--org-header-icon-gap) 0 !important; }");
       });
       card._orgHCss = rules.join("\n");
       return "";
@@ -96,6 +117,7 @@ origami_header:
       --org-header-weight: ${card._orgH.weight};
       --org-header-icon-color: ${card._orgH.color};
       --org-header-icon-size: ${card._orgH.size};
+      --org-header-icon-gap: ${card._orgH.gap};
     }
     ha-card .bubble-container {
       display: flex !important;
@@ -104,7 +126,9 @@ origami_header:
       gap: 0 !important;
       height: auto !important;
       min-height: 0 !important;
-      padding: var(--ha-space-6, 24px) 0 var(--ha-space-2) 0 !important;
+      ${card._orgH.large ? `box-sizing: border-box !important;
+      min-height: calc(var(--ha-space-2) + var(--control-height-icon)) !important;
+      padding: var(--ha-space-2) 0 0 0 !important;` : "padding: var(--org-header-above, var(--ha-space-6, 24px)) 0 var(--org-header-below, var(--ha-space-2)) 0 !important;"}
       background: none !important;
       border: none !important;
       border-radius: 0 !important;
@@ -144,6 +168,9 @@ origami_header:
       background: none !important;
     }
     ${card._org.plain("ha-card .bubble-sub-button-container", "var(--org-header-weight)")}
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      font-size: ${card._orgH.text} !important;
+    }
     ha-card .bubble-sub-button-container .bubble-sub-button:not(.bubble-action-enabled) {
       pointer-events: none;
     }
@@ -153,7 +180,7 @@ origami_header:
       font-weight: var(--ha-font-weight-normal) !important;
       --mdc-icon-size: var(--org-header-icon-size) !important;
       margin-block: -2px 0 !important;
-      margin-inline: 0 var(--ha-space-1) !important;
+      margin-inline: 0 var(--org-header-icon-gap) !important;
       color: var(--org-header-icon-color) !important;
       opacity: 1 !important;
     }
@@ -163,6 +190,28 @@ origami_header:
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
       margin: -2px 0 0 !important;
     }
+    ${card._orgH.inline ? `
+    ha-card .bubble-container {
+      position: relative !important;
+      width: fit-content !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    ha-card .bubble-sub-button-container {
+      position: static !important;
+      flex: 0 0 auto !important;
+      justify-content: flex-start !important;
+      margin-inline-start: var(--ha-space-1) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-1 {
+      position: static !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-1::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    ` : ""}
     ${card._orgH.max ? `
     ha-card .bubble-sub-button-container {
       flex: 0 1 auto !important;

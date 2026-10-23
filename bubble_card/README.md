@@ -34,13 +34,13 @@ Base is a global module, so Bubble Card runs it first on every card, and no card
 | [Climate](#climate) | `origami_climate` | button | Climate shows what a thermostat does. |
 | [Media](#media) | `origami_media` | media player | Media shows speakers and TVs. |
 | [Speaker Select](#speaker-select) | `origami_speaker` | media player | Speaker Select shows the speaker rows of a music pop-up. |
-| [Slider](#slider) | `origami_slider` | button with a slider | Slider turns a card into a standalone slider. |
+| [Slider](#slider) | `origami_slider` | button with a slider, sub-buttons | Slider turns a card into a standalone slider, or slider sub-buttons into rows with names. |
 | [Button](#button) | `origami_button` | sub-buttons | Button shows rows and grids of buttons, segmented bars and rows that scroll sideways. |
 | [Header](#header) | `origami_header` | separator | Header shows a section header with values. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Tiles shows grids and lists of tiles. |
 | [Popup](#popup) | `origami_popup` | pop-up | Popup styles a pop-up's header, backdrop and close button. |
 
-Give button cards `rows: 1.375` and compact cards `rows: 1`, including cards in pop-ups. This makes the height that Bubble Card reserves match the frame. Media cards with a slider at the bottom need `rows: '2.2'`. Cards with Base's `vertical` option set their own height, so they need no `rows`.
+Give button cards `rows: 1.375` and compact cards `rows: 1`, including cards in pop-ups. This makes the height that Bubble Card reserves match the frame. Media cards with a slider at the bottom need `rows: '2.2'`. Cards with Base's `vertical` option set their own height, so they need no `rows`. A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
 
 <details>
 <summary>Color</summary>
@@ -145,6 +145,11 @@ Each sub-button can have its own `origami_base` key, which accepts the same valu
 | `icon` | The sub-button shows this icon. |
 | `color` | The sub-button's icon has this color. |
 | `name_color` | The sub-button's text has this color. |
+| `on` | While the value is true, the sub-button is filled. While it is false, empty or missing from a map, the sub-button stays neutral. Base's own rule decides only for a sub-button without this key. The key has no effect on pill switches, on plain, dropdown, slider and readout sub-buttons, or under `vertical` without `css_class: accent`. |
+| `disabled` | While the value is true, the sub-button takes the disabled color, ignores taps and is never filled. |
+| `dot` | While the value is true, the sub-button takes the text color and shows a small dot under its icon. This marks a control that is on without filling it, such as shuffle in a play row. |
+
+The `name`, `icon`, `color`, `name_color`, `disabled` and `dot` keys work the same in the keys of Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so the name `Group ·` reads as Group · 20 %.
 
 Bubble Card writes the state line from `state_content` in Home Assistant's words, and Base keeps it as it is. A card without `state_content` has no state line, unless it has `button_type: state`. The Climate, Media and Speaker Select modules write the state line themselves, and Media also writes the name line, so `state_content` has no effect on their cards.
 
@@ -412,17 +417,18 @@ The Media options go under `origami_media:`.
 | Option | Default | Description |
 | --- | --- | --- |
 | `layout` | `speaker` | `speaker` is the default, and `tv` is for a TV. With `tv`, the card's own icon stays, and the card's entity decides whether the TV is on. When that entity is unavailable or unknown, the players below decide. |
-| `players` | | The option lists other media players for the same device, such as a Cast player or a Music Assistant player. The card's own entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while it and the speaker are paused and only it has a title. A title that is a stream address or a file path does not count. The app's name comes from the card's own entity, or else from the first player that reports one. |
+| `players` | | The option lists other media players for the same device, such as a Cast player or a Music Assistant player. The card's own entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while it and the speaker are paused and only it has a title. A title that is a stream address or a file path does not count. The app's name comes from the card's own entity, or else from the first player that reports one. The option also accepts a template, such as one that names the Music Assistant player of whichever speaker the card shows. |
 | `collapse` | `false` | The slider at the bottom is hidden while the speaker plays nothing and uses no input. With the TV layout, it is hidden while the TV is off. |
 | `solid_controls` | `false` | Bubble Card's play and pause button is filled while media plays, and its power button is filled while the device is on. This option has no effect on sub-buttons. |
-| `leader` | | The option gives the group leader's entity ID for integrations that do not report `group_members`. It accepts a template, which returns nothing while the speaker is not in a group. |
+| `leader` | | The option gives the group leader's entity ID for integrations that do not report `group_members`. It accepts a template, which returns nothing while the speaker is not in a group. A card whose entity stands in for another speaker, such as a universal media player, can name that speaker here, and the card then shows that speaker's music, source and group. |
 | `art` | | The option gives the cover's address for integrations that report no picture. It accepts a template, in which `entity` is the speaker whose music the card shows. For a group member, that is the group leader. |
 | `ignore_art` | | A picture whose address contains one of these entries never shows. The option takes a list or one line with commas. |
 | `inputs` | | The option adds source names that count as inputs. Bluetooth, optical, HDMI, line in, AUX and similar names count already, also with a number after them, such as HDMI 1. Short names such as TV, CD and FM count only on their own, so a radio station called FM4 is not an input. |
 | `icons` | | The option maps a state or an input to an icon. The keys can be `playing`, `paused`, `idle`, `on`, `off`, `unavailable`, `bluetooth`, `tv` or `line`. A TV that is on but reports nothing else uses `on`. Without an entry, the card keeps its own icon, or Home Assistant's icon for the state. |
 | `keep_name` | `false` | With the speaker layout, the name line always shows the card's name, and the state line shows the title and the artist while music plays. |
-| `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. |
+| `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
+| `icon_color` | | The option maps the same keys as `icons` to a color for the icon, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
 
 Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` also shows while the player reports no title, because the option itself decides when there is a cover. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
 
@@ -502,6 +508,106 @@ origami_media:
 
 A `leader` template returns nothing while the speaker is not in a group, because a speaker whose leader is its own entity ID counts as a group leader.
 
+#### Play row
+
+A bottom sub-button with `css_class: play` is a large play key, and its group becomes a play row. With five keys, the two outer keys are small and in the secondary text color, and the keys beside the play key are large. A ring around the play key shows how far the track has played. The ring comes from a player in `players` that plays or pauses as the card's music does and reports a length, or else from the player whose music the card shows, and it stops while the music is paused. Radio and inputs have no length, so the ring goes and the key keeps its place. While the play key is hidden by its `visibility`, the whole row is hidden, which makes the card compact. A card with a play key also shows the title and the artist while the music is paused, because the key resumes it.
+
+Base never fills the keys of a play row. Its `dot` key marks a key that is on, such as shuffle, and its `disabled` key shows a key that cannot work. A main sub-button with `css_class: members` shows how many speakers play in the group, the leader included, next to its icon. With `bottom_layout: rows` under `sub_button` and `rows: auto`, each bottom group is a row below the card's own row, and the card grows with its rows. A tap sends fixed data, so shuffle and repeat need small scripts that switch them. The scripts for the example are below the card.
+
+```yaml
+# The music card of a pop-up, with a play row and a volume row
+type: custom:bubble-card
+card_type: media-player
+button_type: state
+entity: media_player.living_room
+name: Living room
+modules:
+  - origami_base
+  - origami_media
+hide:
+  power_button: true
+  previous_button: true
+  next_button: true
+  volume_button: true
+  play_pause_button: true
+rows: auto
+sub_button:
+  bottom_layout: rows
+  main:
+    - icon: mdi:speaker-multiple
+      css_class: members
+      show_name: true
+      show_background: true
+  bottom:
+    - name: Playback
+      group:
+        - icon: mdi:shuffle-variant
+          entity: media_player.living_room
+          origami_base:
+            dot: "${attr.shuffle === true}"
+          tap_action:
+            action: perform-action
+            perform_action: script.living_room_shuffle
+        - icon: mdi:skip-previous
+          tap_action:
+            action: perform-action
+            perform_action: media_player.media_previous_track
+            target:
+              entity_id: media_player.living_room
+        - icon: mdi:play
+          css_class: play
+          entity: media_player.living_room
+          origami_base:
+            icon: "${state === 'playing' ? 'mdi:pause' : ''}"
+          tap_action:
+            action: perform-action
+            perform_action: media_player.media_play_pause
+            target:
+              entity_id: media_player.living_room
+          visibility:
+            - condition: state
+              entity: media_player.living_room
+              state:
+                - playing
+                - paused
+        - icon: mdi:skip-next
+          tap_action:
+            action: perform-action
+            perform_action: media_player.media_next_track
+            target:
+              entity_id: media_player.living_room
+        - icon: mdi:repeat
+          entity: media_player.living_room
+          origami_base:
+            dot: "${['all', 'one'].includes(attr.repeat)}"
+          tap_action:
+            action: perform-action
+            perform_action: script.living_room_repeat
+    - name: Volume
+      group:
+        - entity: media_player.living_room
+          sub_button_type: slider
+          always_visible: true
+```
+
+```yaml
+# Scripts for the shuffle and repeat keys, in scripts.yaml
+living_room_shuffle:
+  sequence:
+    - action: media_player.shuffle_set
+      target:
+        entity_id: media_player.living_room
+      data:
+        shuffle: "{{ not state_attr('media_player.living_room', 'shuffle') }}"
+living_room_repeat:
+  sequence:
+    - action: media_player.repeat_set
+      target:
+        entity_id: media_player.living_room
+      data:
+        repeat: "{{ {'off': 'all', 'all': 'one'}.get(state_attr('media_player.living_room', 'repeat'), 'off') }}"
+```
+
 </details>
 
 ### Speaker Select
@@ -563,7 +669,7 @@ Groups come from Home Assistant's `group_members` attribute, as in the Media mod
 
 ### Slider
 
-The Slider module turns a card into a standalone slider, so the card itself is the track. It hides the card's icon, name and state, and it works with Base.
+The Slider module turns a card into a standalone slider, so the card itself is the track. It hides the card's icon, name and state, and it works with Base. On a sub-buttons card, it shows each slider sub-button as a row with its name.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
 
@@ -591,6 +697,28 @@ rows: 1
 
 Use `slider_value_position: hidden` to hide the number.
 
+On a sub-buttons card, each slider sub-button with `always_visible: true` is a row with its name before the track, and the names stand in one column. `label_width` under `origami_slider` sets the column's width, and without it the column is as wide as the longest name. The tracks take the card's background, because these rows usually stand on a pop-up. On other separator, sub-buttons and pop-up cards, slider sub-buttons keep Bubble Card's own look.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_slider
+origami_slider:
+  label_width: 72px
+sub_button:
+  main: []
+  bottom:
+    - entity: media_player.living_room
+      name: Living
+      sub_button_type: slider
+      always_visible: true
+    - entity: media_player.office
+      name: Office
+      sub_button_type: slider
+      always_visible: true
+```
+
 </details>
 
 ### Button
@@ -616,7 +744,9 @@ The Button module creates rows and grids of buttons on a sub-buttons card. Put e
 | `icon_size` | `var(--icon-size-2xs)` | The option sets the size of the icons. |
 | `padding` | `0` | The option sets the space around the buttons. |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
-| `segmented` | `false` | The buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. |
+| `segmented` | `false` | With `true`, the buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. With the names of groups instead, only those groups become small switches, which can stand in any row, also in one that scrolls. |
+| `chips` | `false` | The buttons are round pills with the label in the text color and the icon in the secondary color. An active button has a bold label with every style. |
+| `pending` | `false` | After a tap, the button shows the look its tap is about to give it, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, and buttons that only open something and segments never do. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
 
@@ -655,7 +785,7 @@ sub_button:
 
 Besides `active`, a button whose tap sets a value, such as a source, an option, a preset, a speed or an app, is highlighted while its entity has that value. A button with an entity of its own follows Base's rule for sub-buttons. It is highlighted while that entity is on and has a state color, unless it has `show_background: false` or `css_class: plain`, or opens something without `css_class: accent`. The TV pop-up's **TV** button works this way, because its tap selects the speaker's TV source.
 
-Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as a value in the Header module. While a button is not highlighted, `color` colors its icon and `background` replaces its fill, so each button in a row of playlists can have its own tint:
+Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as a value in the Header module. Base's `on`, `disabled` and `dot` keys also work here, and `on` decides before the other rules whether the button is highlighted, except for `css_class: plain` and `disabled`. While a button is not highlighted, `color` colors its icon and `background` replaces its fill, so each button in a row of playlists can have its own tint:
 
 ```yaml
 - name: Chill
@@ -669,6 +799,57 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
 A button with `content_layout: icon-top` or `icon-bottom` stacks its icon and name in the middle. Unless the card has `background: false`, it is twice as tall as a button whose icon sits beside its name.
 
 With `segmented: true`, each group under `sub_button: bottom` becomes one bar. Buttons outside a group each form a bar of their own when the card also has groups, and they share one bar when it has none. The TV pop-up's input and volume buttons are two groups, so they form two bars in one row.
+
+A button with `css_class: divider` is a short line between its neighbors, and it shows while its group shows. The chip row of a music pop-up uses chips, a divider and a small switch between two speakers. Each segment is highlighted while the speaker helper has its option:
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_button
+origami_button:
+  scroll: true
+  chips: true
+  segmented: Speaker
+  active_style: toggle
+  icon_size: var(--icon-size-xs)
+sub_button:
+  main: []
+  bottom:
+    - name: Source
+      group:
+        - name: Bluetooth
+          icon: mdi:bluetooth
+          show_name: true
+          tap_action:
+            action: perform-action
+            perform_action: media_player.select_source
+            target:
+              entity_id: media_player.living_room
+            data:
+              source: Bluetooth
+        - css_class: divider
+    - name: Speaker
+      group:
+        - name: Living
+          show_name: true
+          tap_action:
+            action: perform-action
+            perform_action: input_select.select_option
+            target:
+              entity_id: input_select.selected_speaker
+            data:
+              option: media_player.living_room
+        - name: Office
+          show_name: true
+          tap_action:
+            action: perform-action
+            perform_action: input_select.select_option
+            target:
+              entity_id: input_select.selected_speaker
+            data:
+              option: media_player.office
+```
 
 </details>
 
@@ -689,7 +870,10 @@ The Header module creates a section header. The separator card's name is the tit
 | `weight` | `bold` | The option sets the font weight of the values, which is `bold`, `medium` or `regular`. With the Origami theme, `medium` looks the same as `regular`. |
 | `icon_color` | | The option sets the icon color of plain values. It accepts a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The option sets the icon size of plain values. Chips use `--icon-size-2xs`, which is 14 px. For a small dot, use `var(--dot-size)`. |
-| `size` | `normal` | With `large`, the title is as large as a pop-up's title, for a header that stands in for one. |
+| `size` | `normal` | With `large`, the title is as large as a pop-up's title, for a header that stands in for one. A large header leaves 8 px above its title and none below it. |
+| `inline` | `false` | The values follow the title instead of standing on the right, and a tap on the title runs the first value's action. A title with a chevron that opens a menu works this way. |
+| `value_size` | `var(--ha-font-size-m)` | The option sets the size of the values' text. |
+| `icon_gap` | `var(--ha-space-1)` | The option sets the space between the icon and the name of plain values. Chips keep their own space. |
 | `value_max_width` | | The option sets the maximum width of the values, such as `50%`. Longer values end with an ellipsis. Set `scrolling_effect: false` on these sub-buttons, because otherwise Bubble Card scrolls them. |
 
 Each sub-button can have its own `origami_header` key with `name`, `icon`, `color`, `name_color` and `background`. As in every module, `color` sets the icon's color, and `name_color` sets the text's color. The icon takes the text's color while neither `color` nor `icon_color` sets one. `background` replaces the chip's background, and `var(--tint)` tints the chip in the value's color. Popup uses the same keys for its values.
@@ -731,7 +915,7 @@ sub_button:
         action: toggle
 ```
 
-The header leaves 24 px of space above it and 8 px below it. Sections and Bubble Card pop-ups have a gap of 8 px between cards, so the title gets 32 px of space above it and 16 px below it. Inside a vertical stack, Bubble Card uses a gap of 14 px, which gives 38 px and 22 px. The header sets its own height, so it needs no `grid_options`. Bubble Card gives the title no tap action, and only the sub-buttons can have one.
+The header leaves 24 px of space above it and 8 px below it. Popup's `gap` option changes this for the headers in its pop-up. Sections and Bubble Card pop-ups have a gap of 8 px between cards, so the title gets 32 px of space above it and 16 px below it. Inside a vertical stack, Bubble Card uses a gap of 14 px, which gives 38 px and 22 px. The header sets its own height, so it needs no `grid_options`. Bubble Card gives the title no tap action, and only the sub-buttons can have one.
 
 </details>
 
@@ -883,6 +1067,10 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 `art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template that returns one, such as the cover of the speaker that the pop-up controls. While the value is empty, the last cover fades out.
 
+`gap` sets the space between the cards of a vertical stack in the pop-up, such as `var(--ha-space-4)`. A Header separator in that stack then has twice the gap above its title and the gap once below it. Without `gap`, Bubble Card's 14 px apply.
+
+Without a header, the content starts 16 px below the pop-up's top edge, as below a header. The Home Assistant style and the adaptive dialog keep Bubble Card's own space. A row of buttons that scrolls sideways reaches the pop-up's edges.
+
 The backdrop behind the pop-up is blurred, unless the pop-up sets its own `backdrop_blur` or uses Bubble Card's performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view. The other modes keep at least the space of the phone's home indicator.
 
 ```yaml
@@ -933,13 +1121,13 @@ Base puts its helpers on `card._org`, so every module that runs after Base can u
 | `items(config)` and `subs(env, config, key)` | `items()` lists the sub-buttons in Bubble Card's numbering, and `subs()` adds the values of each one's own key. |
 | `act(item)`, `service(item)`, `targets(item)` and `links` | `act()` returns a sub-button's tap action with Bubble Card's default, `service()` returns the action that the tap performs, such as `script.toggle`, and `targets()` lists the entities that the tap targets. `links` lists the tap actions that open something, which never fill a sub-button. |
 | `matches(hass, item, id)` | It returns whether a sub-button's tap sets what the entity shows now, or `null` for a tap that sets nothing it can compare. |
-| `why(hass, item, id)` and `filled(hass, item, id)` | `why()` returns why Base fills a sub-button, which is `set`, `accent` or `on`, or `null` while it stays neutral. `filled()` returns whether `why()` gives a reason. The rule does not look at the card's layout options or at `show_background`, and Base itself never fills readouts, dropdowns and sliders. |
-| `has(value)`, `pick(map, key, off)` and `slug(value)` | `has()` tells whether a value is set. `pick()` returns a map's entry for a key in any case, with the keys `true` and `false` read as `on` and `off`. With `off` set to `true`, `unavailable` and `unknown` also take the map's `off` entry when they have none of their own. `slug()` writes a value as Bubble Card writes a class name, so `css_class: Accent` reads as `accent`. |
-| `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media and Speaker Select show it. Its options are `env`, `tv` for the TV layout and `cfg`, which holds the module's `players`, `leader`, `art`, `ignore_art` and `inputs` options. It returns the group, the music, the input, the cover, the app, whether the player is active and whether the device is on, the media color and an `icon()` function that reads an `icons` map. `picture()` returns a picture's address. It returns `null` when the address is empty, when it is not a web address or a path on the Home Assistant server, or when it contains an entry of the optional `ignore` list. |
+| `why(hass, item, id, keys)` and `filled(hass, item, id, keys)` | `why()` returns why Base fills a sub-button, which is `set`, `accent` or `on`, or `null` while it stays neutral. The optional `keys` are the sub-button's own keys, as `subs()` returns them, so that `on` and `disabled` count. `filled()` returns whether `why()` gives a reason. The rule does not look at the card's layout options or at `show_background`, and Base itself never fills readouts, dropdowns and sliders. |
+| `has(value)`, `yes(value)`, `pick(map, key, off)` and `slug(value)` | `has()` tells whether a value is set. `yes()` tells whether a value means true, as `true`, `1`, `yes` and `on` do. `pick()` returns a map's entry for a key in any case, with the keys `true` and `false` read as `on` and `off`. With `off` set to `true`, `unavailable` and `unknown` also take the map's `off` entry when they have none of their own. `slug()` writes a value as Bubble Card writes a class name, so `css_class: Accent` reads as `accent`. |
+| `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media and Speaker Select show it. Its options are `env`, `tv` for the TV layout and `cfg`, which holds the module's `players`, `leader`, `art`, `ignore_art` and `inputs` options. It returns the group, the music, the input, the cover, the app, the players from `players` as `twins`, whether the player is active and whether the device is on, the media color and an `icon()` function that reads an `icons` map. `picture()` returns a picture's address. It returns `null` when the address is empty, when it is not a web address or a path on the Home Assistant server, or when it contains an entry of the optional `ignore` list. |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size, list)` and `icon(element, icon)` | They return the CSS rules that show text or an icon in a sub-button. `values()` takes the list from `subs()` when a module already has it. Without an icon, `icon()` gives the element its own icon back. |
-| `badge(role)` | It marks the card's icon with a crown for a group's `leader` or a link for a `member`, and without a role it removes the mark. Media and Speaker Select use it. |
+| `badge(role)` and `part(host, class, build)` | `badge()` marks the card's icon with a crown for a group's `leader` or a link for a `member`, and without a role it removes the mark. Media and Speaker Select use it. `part()` returns the child of `host` with this class, and it builds the child once with the function `build`, as Media builds its progress ring. |
 | `cover(address, opacity)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | `cover()` returns the rules that show a cover in a media card's icon. `chips()` and `plain()` return the rules that show the values in a container as chips or as plain text, as in Header and Popup. `fill()` returns the rules that fill active controls, as Base fills sub-buttons and Media fills its play and power buttons. |
-| `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text. `write()` writes text into an element that Bubble Card does not hand over, such as a sub-button's readout, and `readouts()` writes a text into every sub-button with `css_class: readout`. The function `text` makes each text from that sub-button's own entity. |
+| `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text, class)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text. `write()` writes text into an element that Bubble Card does not hand over, such as a sub-button's readout, and `readouts()` writes a text into every sub-button with `css_class: readout`, or with the class given as `class`. The function `text` makes each text from that sub-button's own entity. |
 | `rename(text)` | It returns the word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` | It returns a CSS string that Bubble Card's cleaner leaves as it is. |
 

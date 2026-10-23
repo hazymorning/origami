@@ -1,17 +1,89 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.4.1"
+  version: "1.5.0"
   supported:
     - button
-  description: "Slider turns a slider button into a standalone slider without an icon, a name or a state, so the card itself is the track. Set rows to 1."
+    - sub-buttons
+  description: "Slider turns a slider button into a standalone slider without an icon, a name or a state, so the card itself is the track. Set rows to 1. On a sub-buttons card, each slider sub-button becomes a row with its name before the track."
+  editor:
+    - name: label_width
+      label: "Name width on a sub-buttons card (the longest name if empty)"
+      selector:
+        text: {}
   code: |
     ${(() => {
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_slider needs origami_base 12 or later");
+      if (this.config.card_type === "sub-buttons") {
+        // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name unless label_width sets it
+        const env = { hass, renderTemplate };
+        const width = String(this.config.origami_slider?.label_width ?? "").trim();
+        card._orgSl = {
+          width: width || "max-content",
+          names: org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider")
+            .map(({ n, item, entity }) => {
+              const name = org.name(hass, entity, item.name, env);
+              return "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")::before { content: " + org.str(org.rename(name) ?? name) + "; }";
+            }).join("\n    ")
+        };
+        return "";
+      }
+      card._orgSl = null;
       // The card is the track, so Base rounds its fill like a sub-button's slider
       if (card.dataset.orgTrack !== "") card.dataset.orgTrack = "";
       return "";
     })()}
+    ${card._orgSl ? `
+    ha-card .bubble-container {
+      display: block !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    ha-card .bubble-container > .bubble-sub-button-container {
+      display: none !important;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      position: static !important;
+      inset: auto !important;
+      display: grid !important;
+      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
+      gap: var(--ha-space-2) var(--ha-space-3) !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: auto !important;
+    }
+    ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline:not([style*="display: none"]) {
+      grid-column: 1 / -1;
+      display: grid !important;
+      grid-template-columns: subgrid;
+      align-items: center;
+      width: auto !important;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline::before {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-bold);
+      color: var(--primary-text-color);
+    }
+    ha-card [class*="bubble-sub-button-slider-"] {
+      --org-inset: var(--ha-card-background);
+      height: 100% !important;
+    }
+    ${card._orgSl.names}
+    ` : `
     ha-card {
       --org-row-height: var(--control-height-icon);
       --bubble-border: none;
@@ -51,3 +123,4 @@ origami_slider:
       font-weight: var(--ha-font-weight-bold);
       color: var(--secondary-text-color);
     }
+    `}

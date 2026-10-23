@@ -1,9 +1,9 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.2.0"
+  version: "5.3.0"
   supported:
     - media-player
-  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. Its options name other players of the same device, a group leader, a cover, more inputs and the icons."
+  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress. Options name other players, a group leader, a cover and icons."
   editor:
     - name: layout
       label: "Layout"
@@ -64,6 +64,10 @@ origami_media:
       label: "Group badge"
       selector:
         boolean: {}
+    - name: icon_color
+      label: "Icon colors (a map from a state or an input to a color)"
+      selector:
+        object: {}
   code: |
     ${(() => {
       const org = card._org;
@@ -78,8 +82,11 @@ origami_media:
       const m = org.media(hass, entity, { env, tv, cfg });
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
       const power = m.power;
-      // The speaker shows its music while it plays, and its name at other times
-      const music = !tv && m.active && m.playing && !m.input && !!m.title;
+      // A bottom sub-button with css_class play is the play key, and its row becomes the play row. Sub-buttons are found by number, because Bubble Card also turns a name such as Play into a class.
+      const numbered = (cls) => org.items(this.config).map((item, i) => org.slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean);
+      const play = numbered("play")[0] ?? null;
+      // The speaker shows its music while it plays, and its name at other times. A card with a play key also shows paused music, because the key resumes it.
+      const music = !tv && !m.input && !!m.title && ((m.active && m.playing) || (!!play && m.player?.state === "paused"));
       card._orgM = {
         m,
         music,
@@ -110,19 +117,179 @@ origami_media:
       // The State option replaces the state line while it has a value, such as a title from a template sensor
       const set = org.value(env, cfg.state, { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} });
       const shown = org.has(set) ? String(set) : line;
+      // A State value that repeats the name hides the state line, so a template can leave a single line such as Nothing playing
+      if (org.has(set) && shown === name) c.state = "none";
       // Bubble Card hands the name and the state line to a module whose code contains these exact assignments, and it skips a write that repeats a line's text
       card.querySelector('.bubble-name').textContent = name;
       card.querySelector('.bubble-state').textContent = shown;
       if (!tv) org.icon(icon, m.icon(cfg.icons));
       // With Group badge, a crown marks the group leader and a link marks its members, as in Speaker Select. Without the option, Media leaves the mark to Speaker Select on a card that lists both.
       if (cfg.badge !== undefined) org.badge(cfg.badge ? m.role : null);
+      // Icon colors is a map from the same kinds as Icons, so the icon can say what the speaker does without a cover
+      c.ink = org.pick(cfg.icon_color, m.kind, true) ?? null;
+      // A sub-button with css_class members shows how many speakers play in the group, the leader included
+      const n = [].concat(m.show?.attributes?.group_members ?? []).length;
+      org.readouts(hass, this.config, entity, () => n > 1 ? org.num(hass, n) : "", "members");
+      c.members = numbered("members").map((sel) => "ha-card .bubble-sub-button" + sel);
+      // A ring around the play key shows how far the track has played
+      c.play = play;
+      c.group = ".bubble-sub-button-group:has(> " + play + ")";
+      c.row = "ha-card " + c.group;
+      const key = play && card.querySelector(".bubble-sub-button" + play);
+      if (key) {
+        const ring = org.part(key, "org-ring", () => {
+          const ns = "http://www.w3.org/2000/svg";
+          const svg = document.createElementNS(ns, "svg");
+          svg.setAttribute("viewBox", "0 0 64 64");
+          ["org-ring-track", "org-ring-arc"].forEach((cls) => {
+            const circle = document.createElementNS(ns, "circle");
+            circle.setAttribute("cx", "32");
+            circle.setAttribute("cy", "32");
+            circle.setAttribute("r", "31");
+            circle.setAttribute("class", cls);
+            svg.appendChild(circle);
+          });
+          return svg;
+        });
+        // The ring follows a player in players that plays or pauses as the shown music does, or else the player whose music shows. Radio and inputs have no length, so the ring goes and its place stays.
+        const moving = (p) => ["playing", "buffering"].includes(p?.state);
+        const pool = m.input ? [] : [...m.twins.filter((p) => moving(p) === moving(m.player)), m.player];
+        const src = pool.find((p) => ["playing", "paused", "buffering"].includes(p?.state) && Number(p.attributes?.media_duration) > 0);
+        const arc = ring.querySelector(".org-ring-arc");
+        const sig = src ? [src.entity_id, src.state, src.attributes.media_position, src.attributes.media_position_updated_at, src.attributes.media_duration].join("|") : "";
+        ring.style.display = src ? "" : "none";
+        // The ring starts again only when the position changes, so other updates leave it where it is
+        if (ring._orgSig !== sig) {
+          ring._orgSig = sig;
+          arc.getAnimations?.().forEach((a) => a.cancel());
+          if (src) {
+            const a = src.attributes;
+            const length = Number(a.media_duration);
+            const since = Date.parse(a.media_position_updated_at);
+            const moving = ["playing", "buffering"].includes(src.state);
+            const p0 = Math.min(1, Math.max(0, (Number(a.media_position ?? 0) + (moving && Number.isFinite(since) ? (Date.now() - since) / 1000 : 0)) / length));
+            const full = 2 * Math.PI * 31;
+            arc.style.strokeDasharray = String(full);
+            arc.style.strokeDashoffset = String(full * (1 - p0));
+            if (moving && p0 < 1 && arc.animate) arc.animate([{ strokeDashoffset: full * (1 - p0) }, { strokeDashoffset: 0 }], { duration: (1 - p0) * length * 1000, easing: "linear", fill: "forwards" });
+          }
+        }
+      }
       return "";
     })()}
     ha-card {
       --org-color: ${card._orgM.m.color};
-      --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-inset)"};
-      --org-chip-ink: ${card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)"};
+      --org-chip-bg: ${card._orgM.on && !card._orgM.ink ? "var(--org-field)" : "var(--org-inset)"};
+      --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)")};
     }
+    ${card._orgM.members.length ? `${card._orgM.members.join(", ")} {
+      gap: 0 !important;
+      justify-content: center !important;
+      width: auto !important;
+      min-width: var(--tile-size) !important;
+      padding: 0 var(--ha-space-3) !important;
+    }
+    ${card._orgM.members.map((s) => s + ":has(.bubble-sub-button-name-container:not(:empty))").join(", ")} {
+      min-width: var(--control-height-lg) !important;
+    }
+    ${card._orgM.members.map((s) => s + " .bubble-sub-button-name-container").join(", ")} {
+      margin-inline-start: var(--ha-space-1);
+      font-size: var(--ha-font-size-m) !important;
+      font-weight: var(--ha-font-weight-bold) !important;
+    }
+    ${card._orgM.members.map((s) => s + " .bubble-sub-button-name-container:empty").join(", ")} {
+      display: none !important;
+    }` : ""}
+    ${card._orgM.play ? `
+    ${card._orgM.row} {
+      display: grid !important;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      align-items: center !important;
+      justify-items: center !important;
+      height: var(--control-height-lg) !important;
+      gap: 0 !important;
+    }
+    ${card._orgM.row}:has(> :nth-child(5):last-child) {
+      grid-template-columns: minmax(0, 57fr) minmax(0, 48fr) minmax(0, 106fr) minmax(0, 48fr) minmax(0, 57fr);
+    }
+    ha-card .bubble-sub-button-group:has(> ${card._orgM.play}:is(.hidden, [style*="display: none"])) {
+      display: none !important;
+    }
+    ${card._orgM.row} > .bubble-sub-button {
+      position: relative;
+      width: auto !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+      background: none !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    ${card._orgM.row} > .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-s);
+      margin: 0 !important;
+      opacity: 1 !important;
+    }
+    ha-card :where(${card._orgM.group} > .bubble-sub-button) {
+      color: var(--secondary-text-color) !important;
+    }
+    ha-card :where(${card._orgM.group}) > .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      color: inherit !important;
+    }
+    ${card._orgM.row} > .bubble-sub-button:first-child .bubble-sub-button-icon:not(.hidden) {
+      translate: -1.1px 0;
+    }
+    ${card._orgM.row} > .bubble-sub-button:last-child .bubble-sub-button-icon:not(.hidden) {
+      translate: 1px 0;
+    }
+    ha-card :where(${card._orgM.group} > .bubble-sub-button:has(+ ${card._orgM.play}), ${card._orgM.group} > ${card._orgM.play} + .bubble-sub-button) {
+      color: var(--primary-text-color) !important;
+    }
+    ${card._orgM.row} > :is(.bubble-sub-button:has(+ ${card._orgM.play}), ${card._orgM.play} + .bubble-sub-button) .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--control-height-icon);
+    }
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} {
+      display: grid !important;
+      place-items: center;
+      width: var(--control-height-lg) !important;
+      height: var(--control-height-lg) !important;
+      isolation: isolate;
+    }
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} > * {
+      grid-area: 1 / 1;
+    }
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {
+      content: "";
+      position: absolute;
+      inset: calc((var(--control-height-lg) - var(--control-height-sm)) / 2);
+      z-index: -1;
+      border-radius: 50%;
+      background-color: var(--fill-active);
+    }
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: 32px;
+      color: var(--text-color-active) !important;
+    }
+    ha-card .bubble-sub-button${card._orgM.play} .org-ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      rotate: -90deg;
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-button${card._orgM.play} .org-ring circle {
+      fill: none;
+      stroke-width: 2;
+    }
+    ha-card .bubble-sub-button${card._orgM.play} .org-ring-track {
+      stroke: color-mix(in srgb, var(--primary-text-color) 12%, var(--ha-card-background));
+    }
+    ha-card .bubble-sub-button${card._orgM.play} .org-ring-arc {
+      stroke: color-mix(in srgb, var(--primary-text-color) 64%, var(--ha-card-background));
+      stroke-linecap: round;
+    }` : ""}
     ${card._orgM.collapse && !card._orgM.on ? `
     .bubble-container,
     .bubble-media-player-container {
