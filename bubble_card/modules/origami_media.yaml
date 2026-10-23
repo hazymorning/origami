@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.1.0"
+  version: "5.2.0"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. Its options name other players of the same device, a group leader, a cover, more inputs and the icons."
@@ -52,11 +52,26 @@ origami_media:
       label: "Icons (a map from a state or an input to an icon)"
       selector:
         object: {}
+    - name: keep_name
+      label: "Keep name (the title goes to the state line)"
+      selector:
+        boolean: {}
+    - name: state
+      label: "State line (text or template)"
+      selector:
+        text: {}
+    - name: badge
+      label: "Group badge"
+      selector:
+        boolean: {}
   code: |
     ${(() => {
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later");
-      const cfg = this.config.origami_media ?? {};
+      const own = this.config.origami_media ?? {};
+      // Origami 2 named a TV's players art_entity and app_entity, and those still work as the TV layout with these players
+      const old = [own.art_entity, own.app_entity].filter(Boolean);
+      const cfg = old.length && !own.layout && !own.players ? { ...own, layout: "tv", players: old } : own;
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];
       const tv = cfg.layout === "tv";
@@ -73,26 +88,34 @@ origami_media:
         powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
-        solid: !!cfg.solid_controls,
+        // Origami 2 kept Filled play and power buttons under origami_base, and that place still works
+        solid: !!(cfg.solid_controls ?? this.config.origami_base?.solid_controls),
         // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
         state: this.config.show_state === false || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
       };
       const c = card._orgM;
       // With Filled play and power buttons, the play button is filled while media plays and the power button while the device is on
       c.filled = c.solid ? [c.playing ? ".bubble-play-pause-button" : "", c.powered ? ".bubble-power-button" : ""].filter(Boolean) : [];
-      // Bubble Card hands the name and the state line to a module whose code contains these exact assignments, and it skips a write that repeats a line's text
-      const name = music ? m.title : org.name(hass, entity, this.config.name, env);
+      // With Keep name, the name line always shows the card's name, and the state line shows the title and the artist while music plays
+      const keep = !!cfg.keep_name;
+      const name = music && !keep ? m.title : org.name(hass, entity, this.config.name, env);
       const line = tv
         ? (power === null ? org.word(hass, ent ?? null, null, ent?.state ?? "unavailable")
           : !power ? org.word(hass, ent, null, "off")
           : m.title || (m.app ? org.word(hass, m.appEntity, "app_name", m.app) : "") || (m.source ? org.word(hass, m.show, "source") : "")
             || org.word(hass, m.player ?? ent, null, m.player?.state === "paused" ? "paused" : "on"))
         : m.input ? org.word(hass, m.show, "source")
-        : music ? m.artist || org.word(hass, m.player)
+        : music ? (keep ? [m.title, m.artist].filter(Boolean).join(" • ") : m.artist) || org.word(hass, m.player)
         : org.word(hass, m.show);
+      // The State option replaces the state line while it has a value, such as a title from a template sensor
+      const set = org.value(env, cfg.state, { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} });
+      const shown = org.has(set) ? String(set) : line;
+      // Bubble Card hands the name and the state line to a module whose code contains these exact assignments, and it skips a write that repeats a line's text
       card.querySelector('.bubble-name').textContent = name;
-      card.querySelector('.bubble-state').textContent = line;
+      card.querySelector('.bubble-state').textContent = shown;
       if (!tv) org.icon(icon, m.icon(cfg.icons));
+      // With Group badge, a crown marks the group leader and a link marks its members, as in Speaker Select
+      org.badge(cfg.badge ? m.role : null);
       return "";
     })()}
     ha-card {

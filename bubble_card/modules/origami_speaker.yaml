@@ -1,6 +1,6 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.1.0"
+  version: "5.1.1"
   supported:
     - media-player
   description: "Speaker Select turns media player cards into speaker rows for a music pop-up. Each row shows the speaker's name, what it plays and its cover. A crown and a link mark a group, and the selected speaker's row has a stronger fill."
@@ -76,20 +76,7 @@ origami_speaker:
       org.icon(icon, m.icon(cfg.icons));
       // Each readout shows its own speaker's volume
       org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));
-      // A crown marks the group leader, and a link marks its members
-      const host = card.querySelector(".bubble-main-icon-container");
-      if (host) {
-        let b = host.querySelector(".org-group-badge");
-        if (!b) {
-          b = document.createElement("div");
-          b.className = "org-group-badge";
-          b.appendChild(document.createElement("ha-icon"));
-          host.appendChild(b);
-        }
-        const shown = s.grouped ? "flex" : "none";
-        if (b.style.display !== shown) b.style.display = shown;
-        org.icon(b.querySelector("ha-icon"), member ? "mdi:link-variant" : "mdi:crown");
-      }
+      org.badge(m.role);
       return "";
     })()}
     ha-card {
@@ -122,29 +109,6 @@ origami_speaker:
     ${card._org.cover(card._orgSp.art, card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)")}
     ha-card .bubble-sub-button-container {
       margin-inline-end: var(--ha-space-4) !important;
-    }
-    .org-group-badge {
-      position: absolute;
-      top: -3px;
-      inset-inline-end: -3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--org-color);
-      background-color: var(--tint);
-      box-shadow: 0 0 0 2px var(--ha-card-background);
-      pointer-events: none;
-      z-index: 3;
-      --mdc-icon-size: 10px;
-    }
-    .org-group-badge ha-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 0;
     }
     ha-card .bubble-content-container {
       display: flex !important;

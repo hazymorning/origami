@@ -1,9 +1,9 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.1.0"
+  version: "3.2.0"
   supported:
     - sub-buttons
-  description: "Button turns a sub-buttons card into rows or grids of buttons, segmented bars or a row that scrolls sideways. A button lights up while its tap sets what its entity shows, while its own entity is on, or when it matches the active option."
+  description: "Button turns a sub-buttons card into rows or grids of buttons, segmented bars or a row that scrolls sideways. A button lights up while its tap sets its entity's value, while its own entity is on, or when it matches the active option. Each button can have its own colors."
   editor:
     - name: background
       label: "Background"
@@ -134,6 +134,8 @@ origami_button:
       const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim();
+      // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
+      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)").join("\n    ");
       card._orgB = {
         bg: cfg.background ?? true,
         muted: !!cfg.muted,
@@ -147,6 +149,7 @@ origami_button:
         lamp: lamp || "var(--lamp-color)",
         lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => base + ".bubble-sub-button-" + n + " { --org-btn-lamp: " + c + "; }").join("\n    "),
         cols,
+        values,
         pad: pad || "0",
         size: size || "var(--icon-size-2xs)",
         row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
@@ -165,6 +168,7 @@ origami_button:
       --org-btn-lamp: ${card._orgB.lamp};
     }
     ${card._orgB.lamps}
+    ${card._orgB.values}
     ha-card .bubble-container {
       display: block !important;
       height: auto !important;
@@ -208,7 +212,7 @@ origami_button:
       align-items: center !important;
       gap: 0 !important;
       border-radius: ${card._orgB.seg ? "0" : "var(--radius-inner)"} !important;
-      background: var(--org-btn-bg) !important;
+      background: var(--org-value-chip, var(--org-btn-bg)) !important;
       box-shadow: none !important;
       color: ${card._orgB.seg ? "var(--primary-text-color)" : "var(--secondary-text-color)"} !important;
       font-size: var(--ha-font-size-m) !important;
@@ -218,6 +222,13 @@ origami_button:
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right {
       justify-content: ${card._orgB.row} !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
+      height: auto !important;
+      min-height: calc(2 * var(--org-btn-height)) !important;
+      padding: var(--ha-space-3) var(--ha-space-2) !important;
+      justify-content: center !important;
+      gap: var(--ha-space-2) !important;
     }
     ${!card._orgB.press ? "" : card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       --org-btn-bg: var(--fill-strong);
@@ -248,7 +259,8 @@ origami_button:
       margin-block: 0 !important;
       margin-inline: var(--ha-space-2) 0 !important;
     }
-    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden),
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-icon:not(.hidden) {
       margin: 0 !important;
     }
     ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:first-child, :nth-child(1 of .bubble-sub-button:not(.hidden))) {

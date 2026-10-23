@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.0.0"
+  version: "12.1.0"
   is_global: true
   supported:
     - button
@@ -409,9 +409,11 @@ origami_base:
         const playing = ["playing", "buffering"].includes(player?.state);
         // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
         const cover = value(env, cfg.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} });
-        const raw = picture(cover) ?? picture(pa.entity_picture, list(cfg.ignore_art));
+        // A cover from the art option counts without a title, because the template already decides when there is one
+        const given = picture(cover);
+        const raw = given ?? picture(pa.entity_picture, list(cfg.ignore_art));
         if (raw && inp) stale.set(showId + " " + plain(raw), title);
-        const art = raw && !inp && live && (title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title ? raw : null;
+        const art = raw && !inp && live && (given || title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title ? raw : null;
         const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
         const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
         return {
@@ -581,6 +583,21 @@ origami_base:
         plain: (scope, weight) => scope + " { gap: var(--ha-space-3) !important; }\n"
           + scope + " .bubble-sub-button { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; font-size: var(--ha-font-size-m) !important; font-weight: " + weight + " !important; color: var(--secondary-text-color) !important; white-space: nowrap !important; }\n"
           + scope + " .bubble-sub-button-name-container { font-size: inherit !important; font-weight: inherit !important; color: inherit !important; opacity: 1 !important; }",
+        // badge() marks a group's leader with a crown and its members with a link on the card's icon, for Media and Speaker Select. Without a role, the mark goes.
+        badge: (role) => {
+          const host = card.querySelector(".bubble-main-icon-container");
+          let b = host?.querySelector(".org-group-badge");
+          if (!host || (!b && !role)) return;
+          if (!b) {
+            b = document.createElement("div");
+            b.className = "org-group-badge";
+            b.appendChild(document.createElement("ha-icon"));
+            host.appendChild(b);
+          }
+          const shown = role ? "flex" : "none";
+          if (b.style.display !== shown) b.style.display = shown;
+          if (role) card._org.icon(b.firstChild, role === "member" ? "mdi:link-variant" : "mdi:crown");
+        },
         // icon() shows an icon instead of the card's own, and without an icon it gives the card its own icon back
         icon: (el, icon) => {
           if (!el) return;
@@ -601,9 +618,10 @@ origami_base:
         toggle: !!cfgB.toggle && !vertical,
         // toggle wins over group, because a pill switch cannot sit in a tray
         group: !!cfgB.group && !vertical && !cfgB.toggle,
-        compact: !!cfgB.compact,
+        // Origami 2 kept compact under origami_media and Fade in under origami_button, and those places still work
+        compact: !!(cfgB.compact ?? this.config.origami_media?.compact),
         tile: !!cfgB.tile,
-        animate: !!cfgB.animate,
+        animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
         frame: ["button", "media-player"].includes(type),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
         bare: ["separator", "sub-buttons", "pop-up"].includes(type),
@@ -672,6 +690,29 @@ origami_base:
       color: var(--primary-text-color) !important;
     }
     ${card._org.opts.frame ? `
+    .org-group-badge {
+      position: absolute;
+      top: -3px;
+      inset-inline-end: -3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--org-color);
+      background-color: var(--tint);
+      box-shadow: 0 0 0 2px var(--ha-card-background);
+      pointer-events: none;
+      z-index: 3;
+      --mdc-icon-size: 10px;
+    }
+    .org-group-badge ha-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+    }
     .card-content {
       display: flex;
       align-items: center;

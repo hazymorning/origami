@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.0.1"
+  version: "3.1.0"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
@@ -42,6 +42,16 @@ origami_header:
       label: "Value max width (for example 50%)"
       selector:
         text: {}
+    - name: size
+      label: "Title size"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Normal
+              value: normal
+            - label: Large
+              value: large
   code: |
     ${(() => {
       // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
@@ -65,6 +75,8 @@ origami_header:
         color: String(raw ?? "").trim() || "currentcolor",
         size: size || "var(--icon-size-xs)",
         max,
+        // A large title is as large as a pop-up's title, for a header that stands in for one
+        large: cfg.size === "large",
         chip: cfg.value_style === "chip"
       };
       const scope = "ha-card .bubble-sub-button-container";
@@ -109,7 +121,8 @@ origami_header:
       min-width: 0;
       margin: 0 !important;
       padding: 0 !important;
-      font-size: var(--ha-font-size-l) !important;
+      font-size: ${card._orgH.large ? "var(--ha-font-size-2xl)" : "var(--ha-font-size-l)"} !important;
+      ${card._orgH.large ? "line-height: var(--ha-line-height-condensed) !important;" : ""}
       font-weight: var(--ha-font-weight-bold) !important;
       color: var(--primary-text-color) !important;
       white-space: nowrap !important;
