@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.3.0"
+  version: "12.3.1"
   is_global: true
   supported:
     - button
@@ -904,7 +904,7 @@ origami_base:
       ${card._org.opts.compact || card._org.opts.vertical ? "display: none !important;" : ""}
       max-width: 100% !important;
       font-size: var(--ha-font-size-s);
-      font-weight: var(--ha-font-weight-bold);
+      font-weight: var(--ha-font-weight-medium);
       color: var(--secondary-text-color);
       opacity: 1 !important;
       white-space: nowrap !important;
