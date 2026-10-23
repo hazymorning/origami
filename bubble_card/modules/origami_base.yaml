@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.3.1"
+  version: "12.3.2"
   is_global: true
   supported:
     - button
@@ -959,6 +959,14 @@ origami_base:
       height: auto !important;
       flex-wrap: wrap !important;
       align-items: flex-start !important;
+    }
+    /* A long name shrinks and scrolls, so the sub-buttons keep their place in the card's own row */
+    ha-card .with-bottom-buttons > .bubble-wrapper > .bubble-content-container {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+    }
+    ha-card .with-bottom-buttons > .bubble-wrapper > .bubble-sub-button-container {
+      flex: 0 0 auto !important;
     }
     ha-card .bubble-sub-button-bottom-container {
       position: static !important;
