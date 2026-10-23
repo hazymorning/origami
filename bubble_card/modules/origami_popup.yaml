@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.2.0"
+  version: "4.3.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover blurred behind the content. On a header that shows only a name, the sub-buttons become values below the title, as text or as chips, with the same keys as in Header."
@@ -28,6 +28,8 @@ origami_popup:
         css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", "var(--ha-font-size-m)", list).join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
+      // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
+      card._orgP.gap = String(cfg.gap ?? "").trim();
       return "";
     })()}
     .bubble-pop-up {
@@ -39,9 +41,20 @@ origami_popup:
         display: none;
     }
     .bubble-pop-up-container {
+      --scroller-bleed: calc(2 * var(--ha-space-4));
+      --scroller-padding: var(--scroller-bleed) var(--scroller-bleed) calc(var(--scroller-bleed) + var(--ha-space-4));
+      --scroller-mask: linear-gradient(to right, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
+      ${card._orgP.gap ? `--bubble-pop-up-gap: ${card._orgP.gap};
+      --org-header-above: ${card._orgP.gap};
+      --org-header-below: 0px;` : ""}
       margin-top: 0px !important;
       padding-top: var(--org-popup-pad) !important;
       padding-inline: calc(2 * var(--ha-space-4)) !important;
+    }
+    /* Without a header, Bubble Card keeps a strip for dragging and pulls the content over part of it. The content then starts at the same padding as below a header. */
+    .bubble-pop-up.no-header:not(.popup-style-home-assistant):not(.popup-mode-adaptive-dialog) > .bubble-pop-up-container {
+      margin-top: calc(-1 * var(--ha-space-6, 24px)) !important;
+      padding-top: var(--org-popup-pad) !important;
     }
     .bubble-pop-up:is(.popup-mode-fit-content, .popup-mode-centered, .popup-mode-adaptive-dialog, .is-standalone-pop-up, .editor) .bubble-pop-up-container {
       padding-bottom: max(var(--org-popup-pad), var(--safe-area-inset-bottom, 0px)) !important;
@@ -187,5 +200,9 @@ origami_popup:
               value: chip
     - name: art
       label: "Art (a cover's address or a template, blurred behind the content)"
+      selector:
+        text: {}
+    - name: gap
+      label: "Space between the cards in a vertical stack (for example var(--ha-space-4))"
       selector:
         text: {}

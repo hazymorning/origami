@@ -35,6 +35,14 @@ These changes are in the `next` branch and come with the next release.
 - The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
 - The Button module has two new options. With `segmented`, the buttons in each group form one bar with thin lines between them. With `scroll`, the buttons stay in one row that scrolls sideways.
 - The Button module's `active` option also matches the entity that a button's tap targets, so `scene.living_room_evening` highlights its button whatever the label says. The new `color` option sets the lamp color, and a button whose own entity is on takes that entity's state color. The new `label_size` option makes segmented labels smaller.
+- The Media module has a play row for music pop-ups. A bottom sub-button with `css_class: play` is a large play key with a ring that shows how far the track has played, and the keys beside it hold shuffle, previous, next and repeat. A card with a play key also shows the title while the music is paused. A sub-button with `css_class: members` shows how many speakers play in the group.
+- Media's new `icon_color` option colors the icon by what the speaker does, its `players` option accepts a template, and a `state` value that repeats the name hides the state line.
+- Sub-buttons have three new keys. `on` decides whether a sub-button is filled, `disabled` shows a control that cannot work and ignores taps, and `dot` marks a control that is on with a small dot instead of a fill. On a slider that is always visible, `name` stands before the value.
+- A card with `bottom_layout: rows` and `rows: auto` grows with its rows. The value on a sub-button slider is in the secondary text color, and a key next to a slider in the same group is as tall as the slider.
+- The Button module has new options for a row of chips. `chips` gives round pills, `segmented` takes the names of groups that become small switches in the row, and a button with `css_class: divider` is a short line between two buttons. With `pending`, a tapped button shows the look it is about to get until its state changes.
+- Header's new `inline` option places the values right after the title and lets a tap on the title run the first value's action. Its new `value_size` and `icon_gap` options set the size of the values and the space next to their icons.
+- The Slider module shows slider sub-buttons on a sub-buttons card as rows with their names, such as the speakers of a group.
+- Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
 
 ### Bug fixes
 
@@ -58,6 +66,7 @@ These changes are in the `next` branch and come with the next release.
 - A header value whose icon is on the right keeps a small gap between its text and its icon.
 - The Button module's `active` option also matches buttons whose name is a number.
 - On a card with Base's `vertical` option, a sub-button with `css_class: accent` whose tap sets a value is filled only while its entity has that value.
+- A pop-up without a header starts its content 16 px below its top edge, as below a header. Before, Bubble Card's own rule placed it 10 px below the edge.
 - Each readout on a Speaker Select row shows the volume of its own entity.
 - With both `toggle` and `group`, Base shows the pill switches, because `group` has no effect together with `toggle`.
 - Numbers follow the number format with apostrophes, as used in Switzerland.
