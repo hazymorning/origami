@@ -40,8 +40,9 @@ These changes are in the `next` branch and come with the next release.
 - Sub-buttons have three new keys. `on` decides whether a sub-button is filled, `disabled` shows a control that cannot work and ignores taps, and `dot` marks a control that is on with a small dot instead of a fill. On a slider that is always visible, `name` stands before the value.
 - A card with `bottom_layout: rows` and `rows: auto` grows with its rows. The value on a sub-button slider is in the secondary text color, and a key next to a slider in the same group is as tall as the slider.
 - The Button module has new options for a row of chips. `chips` gives round pills, `segmented` takes the names of groups that become small switches in the row, and a button with `css_class: divider` is a short line between two buttons. With `pending`, a tapped button shows the look it is about to get until its state changes.
-- Header's new `inline` option places the values right after the title and lets a tap on the title run the first value's action. Its new `value_size` and `icon_gap` options set the size of the values and the space next to their icons.
+- Header's new `value_size` and `icon_gap` options set the size of the values and the space next to their icons.
 - The Slider module shows slider sub-buttons on a sub-buttons card as rows with their names, such as the speakers of a group.
+- Speaker Select also works on a button card with a slider, so a speaker's whole row can set its volume.
 - Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
 
 ### Bug fixes
@@ -66,6 +67,7 @@ These changes are in the `next` branch and come with the next release.
 - A header value whose icon is on the right keeps a small gap between its text and its icon.
 - The Button module's `active` option also matches buttons whose name is a number.
 - On a card with Base's `vertical` option, a sub-button with `css_class: accent` whose tap sets a value is filled only while its entity has that value.
+- In Speaker Select, the line after the name stays in the middle of the row while it scrolls.
 - A pop-up without a header starts its content 16 px below its top edge, as below a header. Before, Bubble Card's own rule placed it 10 px below the edge.
 - Each readout on a Speaker Select row shows the volume of its own entity.
 - With both `toggle` and `group`, Base shows the pill switches, because `group` has no effect together with `toggle`.
