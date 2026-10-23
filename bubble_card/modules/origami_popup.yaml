@@ -1,9 +1,9 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.0.0"
+  version: "4.1.0"
   supported:
     - pop-up
-  description: "The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header with only a name, the pop-up's sub-buttons appear below the title, as text or as chips. Each sub-button can have an origami_popup key with name, icon, color for the icon, name_color for the text and background for a chip, the same keys as in Header. The backdrop is blurred, unless the pop-up sets its own backdrop_blur or uses performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view, and the other modes keep at least the space of the phone's home indicator."
+  description: "The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header with only a name, the pop-up's sub-buttons appear below the title, as text or as chips, and a long title ends with an ellipsis on one line. A value with a name of its own and no visibility conditions always shows. Each sub-button can have an origami_popup key with name, icon, color for the icon, name_color for the text and background for a chip, the same keys as in Header. The backdrop is blurred, unless the pop-up sets its own backdrop_blur or uses performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view, and the other modes keep at least the space of the phone's home indicator."
   code: |-
     ${(() => {
       const org = card._org;
@@ -12,9 +12,14 @@ origami_popup:
       const chip = cfg.value_style === "chip";
       // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.
       const type = ["classic", "home-assistant"].includes(this.config.popup_style) ? "switch" : this.config.button_type || (this.config.entity ? "switch" : "name");
+      // A value with a name of its own and no visibility conditions always shows, even while Bubble Card would hide it, so the header keeps the row for it
+      const forced = org.subs({ hass, renderTemplate }, this.config, "origami_popup").filter(({ item, opt }) => org.has(opt?.name) && !item.visibility).map(({ n }) => ".bubble-sub-button-" + n);
       card._orgP = {
         chip,
         title: type === "name",
+        // The icon passes its tap to the card, unless the pop-up has an entity whose icon Bubble Card makes tappable
+        icon: !this.config.entity,
+        any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
         css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", chip ? "var(--font-size-compact)" : "var(--ha-font-size-m)").join("\n")
       };
@@ -75,9 +80,9 @@ origami_popup:
     .bubble-icon-container {
       background: transparent !important;
     }
-    .bubble-icon-container {
+    ${card._orgP.icon ? `.bubble-icon-container {
       pointer-events: none;
-    }
+    }` : ""}
     .bubble-icon {
       --mdc-icon-size: 36px;
     }
@@ -91,18 +96,22 @@ origami_popup:
       min-height: 0px !important;
     }
     .bubble-name {
-      font-size: 24px !important;
+      font-size: var(--ha-font-size-2xl) !important;
       font-weight: var(--ha-font-weight-bold);
       line-height: var(--ha-line-height-condensed) !important;
       margin-inline-start: 0px !important;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 1 !important;
     }
-    .bubble-header-container:has(.bubble-sub-button:not(.hidden)) {
+    .bubble-header-container:has(${card._orgP.any}) {
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button:not(.hidden)) .bubble-container {
+    div.bubble-header:has(${card._orgP.any}) .bubble-container {
       height: calc(var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button:not(.hidden)) .bubble-wrapper {
+    div.bubble-header:has(${card._orgP.any}) .bubble-wrapper {
       display: grid !important;
       grid-template-areas: "i n a" "i b a" !important;
       grid-template-columns: auto 1fr auto !important;

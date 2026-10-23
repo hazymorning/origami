@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "11.0.0"
+  version: "11.1.0"
   supported:
     - button
     - media-player
@@ -51,33 +51,45 @@ origami_base:
     ${(() => {
       // Base leaves these helpers on card._org for the modules listed after it. They take hass as an argument, so no module reads an earlier render.
       const cfgB = this.config.origami_base ?? {};
-      // Domains whose states other than these count as on. Media players that are paused or idle count as resting, so a paused speaker does not glow.
-      const resting = {
-        alarm_control_panel: ["disarmed"], alert: ["idle"], camera: ["idle"], cover: ["closed"], device_tracker: ["not_home"],
-        lawn_mower: ["docked", "paused", "idle", "returning"], lock: ["locked"], media_player: ["standby", "idle", "paused"],
-        person: ["not_home"], plant: ["ok"], timer: ["idle", "paused"], vacuum: ["idle", "docked", "paused"], valve: ["closed"]
+      // look() follows Home Assistant's rules for when an entity is active and which state color it takes (frontend: state_active.ts, state_color.ts, data/group.ts and data/climate.ts)
+      const stamped = ["ai_task", "button", "conversation", "datetime", "event", "image", "infrared", "input_button", "notify", "radio_frequency", "scene", "stt", "tag", "tts", "wake_word"];
+      const rule = {
+        alarm_control_panel: (s) => s !== "disarmed", alert: (s) => s !== "idle", camera: (s) => ["streaming", "recording"].includes(s), cover: (s) => s !== "closed",
+        device_tracker: (s) => s !== "not_home", group: (s) => ["on", "home", "open", "locked", "problem"].includes(s), lawn_mower: (s) => !["docked", "paused", "idle"].includes(s),
+        lock: (s) => s !== "locked", media_player: (s) => s !== "standby", person: (s) => s !== "not_home", plant: (s) => s === "problem", timer: (s) => s === "active",
+        vacuum: (s) => !["idle", "docked", "paused"].includes(s), valve: (s) => s !== "closed"
       };
-      // Home Assistant colors a working thermostat by the mode that matches its action
-      const mode = { heating: "heat", preheating: "heat", cooling: "cool", defrosting: "heat", drying: "dry", fan: "fan_only" };
-      const coloured = ["alarm_control_panel", "alert", "automation", "binary_sensor", "calendar", "camera", "climate", "cover",
-        "device_tracker", "fan", "humidifier", "input_boolean", "lawn_mower", "light", "lock", "media_player", "person", "plant",
-        "remote", "schedule", "script", "siren", "sun", "switch", "timer", "update", "vacuum", "valve", "water_heater"];
+      // Origami differs from Home Assistant in two places on purpose. A media player that is paused or idle rests, so a paused speaker does not glow. A thermostat that reports its action counts as on only while it works.
+      const rests = { media_player: ["idle", "paused"] };
+      // Home Assistant colors a thermostat by the mode that matches its action
+      const mode = { cooling: "cool", defrosting: "heat", drying: "dry", fan: "fan_only", heating: "heat", idle: "off", off: "off", preheating: "heat" };
+      const coloured = ["alarm_control_panel", "alert", "automation", "binary_sensor", "calendar", "camera", "climate", "cover", "device_tracker", "fan", "group",
+        "humidifier", "input_boolean", "lawn_mower", "light", "lock", "media_player", "person", "plant", "remote", "schedule", "script", "siren", "sun", "switch",
+        "timer", "update", "vacuum", "valve", "water_heater", "weather"];
       const look = (hass, id) => {
         const st = hass.states[id];
-        const s = String(st?.state ?? "unavailable").toLowerCase();
+        const s = String(st?.state ?? "unavailable");
         const a = st?.attributes ?? {};
-        let d = (id ?? "").split(".")[0];
-        if (d === "group") d = String(a.entity_id?.[0] ?? "group.").split(".")[0];
+        const d = String(id ?? "").split(".")[0];
         const act = String(a.hvac_action ?? "").toLowerCase();
-        const key = (d === "climate" && act ? (mode[act] ?? s) : s).replace(/[^a-z0-9]+/g, "_");
-        const names = ["--state-" + d + "-" + key + "-color", "--state-" + d + "-active-color", "--state-active-color"];
-        if (a.device_class) names.unshift("--state-" + d + "-" + a.device_class + "-" + key + "-color");
         const available = !["unavailable", "unknown"].includes(s);
-        // A thermostat counts as on while its action shows that it works. Without an action, every mode except off counts.
-        const on = available && s !== "off" && !(resting[d] ?? []).includes(s)
-          && (d !== "climate" || a.hvac_action === undefined || a.hvac_action === null || !["", "off", "idle"].includes(act));
-        return { on, available, coloured: coloured.includes(d), lit: on && coloured.includes(d), color: names.reduceRight((acc, n) => acc ? "var(" + n + ", " + acc + ")" : "var(" + n + ")", "") };
+        const on = stamped.includes(d) ? s !== "unavailable"
+          : available && (s !== "off" || d === "alert") && (rule[d]?.(s) ?? true) && !(rests[d] ?? []).includes(s)
+            && (d !== "climate" || !act || !["off", "idle"].includes(act));
+        // A group takes the colors of its members' domain when all members share one
+        const kinds = [...new Set([].concat(a.entity_id ?? []).map((e) => String(e).split(".")[0]))];
+        const cd = d === "group" && kinds.length === 1 && coloured.includes(kinds[0]) ? kinds[0] : d;
+        const key = (cd === "climate" && mode[act] ? mode[act] : s).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+        const names = ["--state-" + cd + "-" + key + "-color", "--state-" + cd + "-" + (on ? "active" : "inactive") + "-color", "--state-" + (on ? "active" : "inactive") + "-color"];
+        if (a.device_class) names.unshift("--state-" + cd + "-" + a.device_class + "-" + key + "-color");
+        return {
+          on, available, coloured: coloured.includes(cd), lit: on && coloured.includes(cd),
+          color: names.reduceRight((acc, n) => acc ? "var(" + n + ", " + acc + ")" : "var(" + n + ")", ""),
+          action: act || null, mode: mode[act] ?? null
+        };
       };
+      // power() tells whether a device is switched on. It is null while the device has no answer, and false while it is off or in standby.
+      const power = (st) => !st || ["unavailable", "unknown"].includes(st.state) ? null : !["off", "standby"].includes(st.state);
       // items() lists the sub-buttons in Bubble Card's numbering. Groups come first, and a sub-buttons card has no main sub-buttons.
       const items = (cfg) => {
         const sb = cfg.sub_button;
@@ -91,18 +103,34 @@ origami_base:
         ];
       };
       const now = new Date();
-      const minutesUntil = (v) => {
-        const t = String(v).match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-        let end;
-        if (t) {
-          end = new Date(now);
-          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
-          if (end < now) end.setDate(end.getDate() + 1);
-        } else {
-          end = new Date(String(v).replace(" ", "T"));
+      // Home Assistant keeps times without an offset in the server's time zone, so minutesUntil() reads them there, whatever the browser's zone is
+      const wall = (zone, t) => {
+        try {
+          const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: zone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+            .formatToParts(t).map((x) => [x.type, Number(x.value)]));
+          return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+        } catch (e) {
+          return t.getTime() - t.getTimezoneOffset() * 60000;
         }
-        const m = Math.round((end - now) / 60000);
-        return Number.isNaN(m) ? "" : m;
+      };
+      const minutesUntil = (v, zone) => {
+        const text = String(v ?? "").trim();
+        const t = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        const here = wall(zone, now);
+        let left;
+        if (t) {
+          // A time of day that has passed today means the same time tomorrow
+          const day = here - (here % 86400000);
+          left = day + ((Number(t[1]) * 60 + Number(t[2])) * 60 + Number(t[3] ?? 0)) * 1000 - here;
+          if (left < 0) left += 86400000;
+        } else if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(text)) {
+          left = new Date(text.replace(" ", "T")) - now;
+        } else {
+          const m = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+          left = m ? Date.UTC(m[1], m[2] - 1, m[3], m[4] ?? 0, m[5] ?? 0, m[6] ?? 0) - here : NaN;
+        }
+        const n = Math.round(left / 60000);
+        return Number.isNaN(n) ? "" : n;
       };
       // A value that is missing, or that only says the entity has no answer, leaves the whole text empty, so the default shows
       const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || v === "unavailable" || v === "unknown" || Number.isNaN(v))
@@ -111,16 +139,28 @@ origami_base:
       const fns = card._orgFns ?? (card._orgFns = new Map());
       // num() writes a number the way the user's profile in Home Assistant asks for. Without digits, it keeps the number's own decimals.
       const formats = { comma_decimal: "en-US", decimal_comma: "de", space_comma: "fr", none: "en-US" };
-      const num = (hass, v, digits) => {
+      // Home Assistant puts a space before a percent sign only in these languages (blank_before_percent.ts)
+      const spaced = ["cs", "de", "fi", "fr", "sk", "sv"];
+      const num = (hass, v, digits, unit) => {
         const n = Number(v);
-        if (v === null || v === undefined || v === "" || Number.isNaN(n)) return "";
+        if (v === null || v === undefined || v === "" || typeof v === "boolean" || Number.isNaN(n)) return "";
         const f = hass.locale?.number_format;
-        const lang = f === "system" ? undefined : formats[f] ?? hass.locale?.language ?? hass.language ?? "en";
+        const lang = String(hass.locale?.language ?? hass.language ?? "en");
         const opts = { ...(digits === undefined ? { maximumFractionDigits: 3 } : { minimumFractionDigits: digits, maximumFractionDigits: digits }), ...(f === "none" ? { useGrouping: false } : {}) };
+        let out;
         try {
-          return new Intl.NumberFormat(lang, opts).format(n);
+          out = new Intl.NumberFormat(f === "system" ? undefined : formats[f] ?? lang, opts).format(n);
         } catch (e) {
-          return String(n);
+          out = String(n);
+        }
+        if (!unit) return out;
+        if (unit === "%" || unit === "percent") return out + (spaced.includes(lang.split("-")[0]) ? "\u00a0" : "") + "%";
+        // A unit such as minute, hour or day takes its short name in the user's language, and the number keeps the user's format
+        try {
+          return new Intl.NumberFormat(lang, { style: "unit", unit, unitDisplay: "short", maximumFractionDigits: 3 }).formatToParts(n)
+            .reduce((acc, x) => ["integer", "group", "decimal", "fraction", "minusSign"].includes(x.type) ? (acc.done ? acc : { text: acc.text + out, done: true }) : { ...acc, text: acc.text + x.value }, { text: "", done: false }).text;
+        } catch (e) {
+          return out + " " + unit;
         }
       };
       // A value is plain text, a map from the state to a value, Jinja, or JavaScript in ${ }. The env argument holds the calling module's hass and renderTemplate.
@@ -131,7 +171,7 @@ origami_base:
         let fn = fns.get(v);
         if (!fn) {
           try {
-            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "num", "format", "return fill`" + v + "`;");
+            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "num", "format", "word", "return fill`" + v + "`;");
           } catch (e) {
             fn = () => "";
           }
@@ -139,15 +179,22 @@ origami_base:
         }
         const states = (id) => env.hass.states[id]?.state ?? "unknown";
         try {
-          const until = (id) => {
-            const st = env.hass.states[id];
-            const a = st?.attributes ?? {};
-            if (a.finishes_at) return minutesUntil(a.finishes_at);
+          const zone = env.hass.config?.time_zone;
+          // minutesUntil() takes an entity, such as a timer or an input_datetime, or a time itself
+          const until = (v) => {
+            const st = env.hass.states[v];
+            if (!st) return minutesUntil(v, zone);
+            const a = st.attributes ?? {};
+            if (st.state === "active" && a.finishes_at) return minutesUntil(a.finishes_at, zone);
+            const left = String(a.remaining ?? "").match(/^(\d+):(\d{2}):(\d{2})$/);
+            if (st.state === "paused" && left) return Math.round(Number(left[1]) * 60 + Number(left[2]) + Number(left[3]) / 60);
             if (a.has_date && Number.isFinite(Number(a.timestamp))) return Math.round((Number(a.timestamp) * 1000 - now) / 60000);
-            return minutesUntil(st?.state ?? "unknown");
+            return ["unavailable", "unknown"].includes(st.state) ? "" : minutesUntil(st.state, zone);
           };
           const format = (id, attribute) => ["unavailable", "unknown"].includes(env.hass.states[id]?.state ?? "unknown") ? "" : word(env.hass, env.hass.states[id], attribute || null);
-          return fn(fill, env.hass, ctx.entity, ctx.state, ctx.attr, states, until, (x, digits) => num(env.hass, x, digits), format);
+          // word() gives Home Assistant's word for a value of the template's own entity, such as ${word('off')}
+          const say = (val, attribute) => word(env.hass, env.hass.states[ctx.entity] ?? null, attribute || null, val);
+          return fn(fill, env.hass, ctx.entity, ctx.state, ctx.attr, states, until, (x, digits, unit) => num(env.hass, x, digits, unit), format, say);
         } catch (e) {
           return "";
         }
@@ -201,26 +248,50 @@ origami_base:
       // Links and the more-info dialog never fill a sub-button. Bubble Card gives a sub-button without a tap action the more-info dialog.
       const links = ["navigate", "more-info", "url", "fire-dom-event"];
       const act = (item) => item.tap_action ?? { action: item.sub_button_type === "select" ? "none" : "more-info" };
-      // matches() tells whether a sub-button's tap sets what its entity shows now, such as a fan speed, a preset, a mode or a source. It returns null for a tap that sets nothing.
-      const keys = ["percentage", "preset_mode", "hvac_mode", "fan_mode", "swing_mode", "sound_mode", "source", "option", "direction", "effect",
-        "fan_speed", "mode", "operation_mode", "oscillating", "shuffle", "repeat", "is_volume_muted"];
+      // matches() tells whether a sub-button's tap sets what its entity shows now, such as a speed, a preset, a mode, a source, an app, a brightness or a position. It returns null for a tap that sets nothing it can compare.
+      // Each key names what it is compared with, the entity's state or one of its attributes. A tap that sets several keys matches when all of them match.
+      const keys = {
+        percentage: "percentage", preset_mode: "preset_mode", hvac_mode: "state", fan_mode: "fan_mode", swing_mode: "swing_mode", sound_mode: "sound_mode", source: "source",
+        option: "state", value: "state", operation_mode: "state", direction: "direction", effect: "effect", fan_speed: "fan_speed", mode: "mode", oscillating: "oscillating",
+        shuffle: "shuffle", repeat: "repeat", is_volume_muted: "is_volume_muted", position: "current_position", tilt_position: "current_tilt_position",
+        temperature: "temperature", humidity: "humidity", brightness_pct: "brightness", color_temp_kelvin: "color_temp_kelvin"
+      };
+      // How far a number may be from the tap's value and still match, usually half of the entity's step
+      const slack = (k, at, want) => k === "percentage" ? (Number(at.percentage_step) || 1) / 2
+        : k === "temperature" ? (Number(at.target_temp_step) || 0.1) / 2
+        : k === "value" ? (Number(at.step) || 0) / 2
+        : k === "color_temp_kelvin" ? want * 0.015
+        : ["brightness_pct", "position", "tilt_position", "humidity"].includes(k) ? 0.6 : 0;
       const matches = (hass, item, entity) => {
         const a = act(item);
         if (!["perform-action", "call-service"].includes(a.action)) return null;
         const data = a.data ?? a.service_data ?? {};
-        const key = keys.find((k) => ["string", "number", "boolean"].includes(typeof data[k]) && !/\{(\{|%)/.test(String(data[k])));
-        if (!key) return null;
-        const id = [].concat(a.target?.entity_id ?? data.entity_id ?? entity)[0];
+        const fixed = (v) => ["string", "number", "boolean"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v));
+        // An app button plays the app's ID, which an Android TV reports as app_id
+        const app = String(a.perform_action ?? a.service ?? "") === "media_player.play_media" && String(data.media_content_type ?? "").toLowerCase() === "app" && fixed(data.media_content_id);
+        const used = app ? [] : Object.keys(keys).filter((k) => fixed(data[k]));
+        if (!app && !used.length) return null;
+        const target = a.target ?? {};
+        const ids = [].concat(target.entity_id ?? data.entity_id ?? []);
+        // A tap that targets an area, a device, a floor or a label has no single entity to compare with
+        if (!ids.length && ["area_id", "device_id", "floor_id", "label_id"].some((k) => target[k] ?? data[k])) return null;
+        const id = ids[0] ?? entity;
         const st = hass.states[id === "entity" ? entity : id];
         if (!st || ["unavailable", "unknown"].includes(st.state)) return false;
-        const want = String(data[key]).toLowerCase();
-        // These keys set the state itself, so an off thermostat matches its off mode
-        if (["hvac_mode", "option", "operation_mode"].includes(key)) return String(st.state).toLowerCase() === want;
-        if (st.state === "off") return key === "percentage" && Number(want) === 0;
-        if (key === "percentage") return Math.abs(Number(st.attributes?.percentage) - Number(want)) <= (Number(st.attributes?.percentage_step) || 1) / 2;
-        return String(st.attributes?.[key] ?? "").toLowerCase() === want;
+        const at = st.attributes ?? {};
+        if (app) return String(at.app_id ?? "").toLowerCase() === String(data.media_content_id).trim().toLowerCase();
+        return used.every((k) => {
+          const want = data[k];
+          // Keys that set the state compare before the off check, so an off thermostat matches its off mode. Otherwise, an entity that is off matches only a speed or a brightness of 0.
+          if (keys[k] !== "state" && st.state === "off") return ["percentage", "brightness_pct"].includes(k) && Number(want) === 0;
+          const have = keys[k] === "state" ? st.state : k === "brightness_pct" ? (at.brightness == null ? null : Number(at.brightness) / 2.55) : at[keys[k]];
+          if (have === null || have === undefined) return false;
+          const n = Number(want), m = Number(have);
+          if (typeof want !== "boolean" && typeof have !== "boolean" && String(want).trim() !== "" && String(have).trim() !== "" && Number.isFinite(n) && Number.isFinite(m)) return Math.abs(m - n) <= slack(k, at, n) + 1e-9;
+          return String(have).toLowerCase() === String(want).toLowerCase();
+        });
       };
-      // filled() is Base's rule for one sub-button: a tap that sets a value fills while the entity has it, and any other tap fills while the entity is on, unless it opens something
+      // filled() is Base's rule for one sub-button. A tap that sets a value fills it while the entity has that value, and any other tap fills it while the entity is on, unless the tap opens something.
       const filled = (hass, item, entity) => {
         const cls = String(item.css_class ?? "").toLowerCase().split(/\s+/);
         if (cls.includes("plain")) return false;
@@ -230,12 +301,6 @@ origami_base:
       };
       // rekey() turns the keys true and false of a map into on and off, the way a YAML dashboard writes them
       const rekey = (map) => Object.fromEntries(Object.entries(map && typeof map === "object" ? map : {}).map(([k, v]) => [alias[k.toLowerCase()] ?? k, v]));
-      // The inputs that speakers and receivers report. A card can add its own names with the inputs option of Media or Speaker.
-      const inputs = {
-        bluetooth: ["bluetooth"],
-        tv: ["optical", "optical in", "optical-in", "spdif", "toslink", "coaxial", "co-axial", "coax", "hdmi", "hdmi arc", "arc", "earc", "tv"],
-        line: ["line in", "line-in", "line-in2", "line_in", "aux", "analog", "rca", "xlr", "phono", "cd", "fm"]
-      };
       const picture = (v, ignore) => {
         const u = typeof v === "string" ? v.trim() : "";
         if (!u || ["unknown", "unavailable", "none", "null", "undefined"].includes(u.toLowerCase())) return null;
@@ -251,6 +316,33 @@ origami_base:
       const busy = ["playing", "paused", "buffering"];
       // A list option can also be one text with commas
       const list = (v) => [].concat(v ?? []).flatMap((x) => String(x).split(",")).map((x) => x.trim().toLowerCase()).filter(Boolean);
+      const norm = (v) => String(v ?? "").trim().toLowerCase().replace(/[\s_-]+/g, " ");
+      // The inputs that speakers and receivers report. Short names count only as they are. Longer names also count with a number or a word after them, such as HDMI 1 or Line In 2.
+      const inputs = {
+        bluetooth: ["bluetooth"],
+        tv: ["optical", "spdif", "toslink", "coaxial", "co axial", "coax", "hdmi", "arc", "earc", "tv", "tv audio"],
+        line: ["line in", "aux", "analog", "phono", "rca", "xlr", "cd", "fm"]
+      };
+      const exact = ["arc", "earc", "tv", "tv audio", "rca", "xlr", "cd", "fm"];
+      // input() tells which kind of input a source is, or null for a source that is not an input. The names in extra count as line inputs.
+      const input = (source, extra) => {
+        const s = norm(source);
+        if (!s) return null;
+        if (list(extra).map(norm).includes(s)) return "line";
+        const hit = (n) => s === n || (!exact.includes(n) && (s.startsWith(n + " ") || new RegExp("^" + n + "\\d").test(s)));
+        return Object.keys(inputs).find((k) => inputs[k].some(hit)) ?? null;
+      };
+      // A title says something about the music, unless it is a stream address, a file path or the source's own name
+      const real = (p) => {
+        const t = String(p?.attributes?.media_title ?? "").trim();
+        return t !== "" && !/^[a-z][a-z0-9+.-]*:\/\//i.test(t) && !/^\S*\/\S*$/.test(t) && norm(t) !== norm(p?.attributes?.source);
+      };
+      const readable = (v) => typeof v === "string" && v && !(v.includes(".") && !v.includes(" ")) ? v : null;
+      // An app's name comes from the card's words first, which can also name an app by its ID, then from the name the device reports
+      const appOf = (p) => {
+        const a = p?.attributes ?? {};
+        return rename(a.app_name) ?? rename(a.app_id) ?? readable(a.app_name) ?? readable(a.app_id);
+      };
       // media() reads a media player the way Media and Speaker show it, from Home Assistant's standard attributes. The options fill the gaps that some integrations leave.
       const media = (hass, id, o = {}) => {
         const st = hass.states[id];
@@ -262,38 +354,57 @@ origami_base:
         const showId = group.role === "member" ? group.leader : id;
         const show = hass.states[showId] ?? st;
         const twins = [].concat(o.players ?? []).map((p) => hass.states[p]).filter(Boolean);
-        const player = twins.find((p) => ["playing", "buffering"].includes(p.state)) ?? (busy.includes(show?.state) ? show : null) ?? twins.find((p) => p.state === "paused") ?? show;
         const source = String(show?.attributes?.source ?? "").trim();
-        const src = source.toLowerCase();
-        const extra = list(o.inputs);
-        const off = !show || ["off", "standby", "unavailable", "unknown"].includes(show.state);
-        const input = off ? null : inputs.bluetooth.includes(src) ? "bluetooth" : inputs.tv.includes(src) ? "tv" : inputs.line.includes(src) || extra.includes(src) ? "line" : null;
+        const powered = power(show);
+        const inp = powered ? input(source, o.inputs) : null;
+        // The speaker's own music comes first. Another player gives the music when it plays and the speaker does not, or when only that player has a title. A speaker that is off or uses an input shows only itself.
+        const pool = [show, ...twins].filter(Boolean);
+        const tier = (states) => {
+          const t = pool.filter((p) => states.includes(p.state));
+          return t.find(real) ?? t[0];
+        };
+        const player = inp || powered === false ? show : tier(["playing", "buffering"]) ?? tier(["paused"]) ?? show;
         const pa = player?.attributes ?? {};
-        const title0 = String(pa.media_title ?? "").trim();
-        // A title that is a stream address or the source's own name says nothing about the music
-        const title = /^[a-z][a-z0-9+.-]*:\/\//i.test(title0) || title0.toLowerCase() === src ? "" : title0;
-        const readable = (v) => typeof v === "string" && v && !(v.includes(".") && !v.includes(" ")) ? v : null;
+        const title = real(player) ? String(pa.media_title).trim() : "";
         const read = (k) => String(pa[k] ?? "").trim();
         const series = read("media_series_title"), season = read("media_season"), episode = read("media_episode");
         const described = { playlist: read("media_playlist"), channel: read("media_channel"), tvshow: series && series + (season ? " S" + season + (episode ? "E" + episode : "") : "") }[read("media_content_type")] || "";
         const artist = described || read("media_artist") || (title ? readable(pa.app_name) ?? "" : "");
         const live = busy.includes(player?.state) || player?.state === "on";
+        const playing = ["playing", "buffering"].includes(player?.state);
         // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
         const cover = o.env ? value(o.env, o.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} }) : o.art;
         const raw = picture(cover, []) ?? picture(pa.entity_picture, list(o.ignore));
-        if (raw && input) stale.set(plain(raw), title);
-        const art = raw && !input && live && (title || artist || pa.media_album_name) && stale.get(plain(raw)) !== title ? raw : null;
-        const holder = [show, ...twins].find((p) => p && !["off", "unavailable", "unknown"].includes(p.state) && (readable(p.attributes?.app_name) || readable(p.attributes?.app_id)));
-        const kind = off ? "off" : input ?? (["playing", "buffering"].includes(show.state) ? "playing" : show.state);
+        if (raw && inp) stale.set(plain(raw), title);
+        const art = raw && !inp && live && (title || artist || pa.media_album_name) && stale.get(plain(raw)) !== title ? raw : null;
+        const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
+        const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
         return {
-          st, show, showId, player, ...group, source, input, title, artist, art, live, kind,
-          // icon() picks the icon for what the speaker does, and a card's icons option can replace any of them
-          icon: (own) => ({ off: "mdi:speaker-off", bluetooth: "mdi:speaker-bluetooth", tv: "mdi:television-speaker", playing: "mdi:speaker-pause", ...rekey(own) })[kind] ?? null,
-          app: holder ? (readable(holder.attributes.app_name) ?? readable(holder.attributes.app_id)) : null,
-          appEntity: holder ?? null,
-          playing: ["playing", "buffering"].includes(player?.state),
-          off
+          st, show, showId, player, ...group, source, input: inp, title, artist, art, live, kind, playing, power: powered,
+          // The speaker is active while it plays, uses an input, or is simply on, as a TV is
+          active: powered === true && (playing || inp !== null || show.state === "on"),
+          // icon() returns the card's icon for what the speaker does, from the map in a card's icons option. Without an entry, the card keeps its own icon.
+          icon: (own) => {
+            const map = rekey(own);
+            return map[kind] ?? (kind === "unavailable" ? map.off : null) ?? null;
+          },
+          app: holder ? appOf(holder) : null,
+          appEntity: holder ?? null
         };
+      };
+      // ago() writes a time relative to now in the user's language, such as 3 days ago, the way Home Assistant writes last_changed
+      const ago = (hass, t) => {
+        const sec = Math.round((new Date(t) - now) / 1000);
+        if (!t || Number.isNaN(sec)) return "";
+        const abs = Math.abs(sec);
+        const [unit, size] = abs < 45 ? ["second", 1] : abs < 2700 ? ["minute", 60] : abs < 79200 ? ["hour", 3600] : abs < 432000 ? ["day", 86400]
+          : abs < 2419200 ? ["week", 604800] : abs < 31536000 ? ["month", 2592000] : ["year", 31536000];
+        try {
+          const out = new Intl.RelativeTimeFormat(String(hass.locale?.language ?? hass.language ?? "en"), { numeric: "auto" }).format(Math.round(sec / size), unit);
+          return out.charAt(0).toLocaleUpperCase() + out.slice(1);
+        } catch (e) {
+          return "";
+        }
       };
       card._org = {
         version: 11,
@@ -313,46 +424,30 @@ origami_base:
         matches,
         filled,
         rekey,
+        power,
+        input,
+        picture,
         media,
-        // state() joins the parts of a state line, each in Home Assistant's words, the way Bubble Card joins state_content
+        ago,
+        // name() is the card's own name, which can be a template, then the entity's name in Home Assistant
+        name: (hass, id, own, env) => {
+          const st = hass.states[id];
+          const v = env ? run(env, own, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) : own;
+          return has(v) ? String(v) : String(st?.attributes?.friendly_name ?? id ?? "");
+        },
+        // state() joins the parts of a state line the way Bubble Card joins state_content. Each part is the state, the name, last_changed, last_updated or an attribute, in Home Assistant's words, and times read as relative times.
         state: (hass, id, parts) => {
           const st = hass.states[id];
           if (!st) return word(hass, null, null, "unavailable");
-          return parts.map((p) => p === "state" ? word(hass, st) : word(hass, st, p)).filter(has).join(" • ");
+          const one = (p) => p === "state" ? word(hass, st)
+            : p === "name" ? card._org.name(hass, id)
+            : ["last_changed", "last_updated"].includes(p) ? ago(hass, st[p])
+            : p === "last_triggered" ? ago(hass, st.attributes?.last_triggered)
+            : word(hass, st, p);
+          return [].concat(parts ?? "state").map(one).filter(has).join(" • ");
         },
-        // name() is the card's own name, then the entity's name in Home Assistant
-        name: (hass, id, own) => has(own) ? String(own) : String(hass.states[id]?.attributes?.friendly_name ?? id ?? ""),
         write: (el, text) => {
           if (el && el.innerText !== text) el.innerText = text;
-        },
-        // title() writes a line that scrolls when it is too long, the way Bubble Card's scrolling_effect does
-        title: (el, text, scroll) => {
-          if (!el) return;
-          el.templateDetected = true;
-          if (!text) {
-            if (el.textContent !== "") el.textContent = "";
-            el.removeAttribute("data-animated");
-            el._orgTxt = "";
-            el._orgAnim = false;
-            return;
-          }
-          if (el._orgTxt !== text) {
-            el._orgTxt = text;
-            el._orgAnim = false;
-            el.removeAttribute("data-animated");
-            el.textContent = text;
-          }
-          if (!scroll || el.clientWidth === 0 || el._orgAnim || el.scrollWidth <= el.clientWidth + 1) return;
-          const sep = '<span class="bubble-scroll-separator"> | </span>';
-          const esc = text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-          el.innerHTML = '<div class="scrolling-container"><span>' + esc + sep + esc + sep + "</span></div>";
-          const span = el.querySelector(".scrolling-container span");
-          if (span) {
-            span.style.animationDuration = Math.max(1, span.getBoundingClientRect().width / 2 / 16).toFixed(2) + "s";
-            span.style.animationPlayState = "running";
-          }
-          el._orgAnim = true;
-          el.setAttribute("data-animated", "true");
         },
         // subs() returns each sub-button with its number, its entity and the values of its own key, such as origami_header
         subs: (env, cfg, key) => items(cfg).map((item, i) => {
@@ -397,26 +492,28 @@ origami_base:
           if (el.getAttribute("icon") !== String(icon)) el.setAttribute("icon", String(icon));
         }
       };
-      card._orgV = !!cfgB.vertical && (this.config.card_type ?? "button") === "button";
-      card._orgT = !!cfgB.toggle && !card._orgV;
-      card._orgG = !!cfgB.group && !card._orgV;
-      card._orgC = !!cfgB.compact;
-      card._orgF = !!cfgB.tile;
-      card._orgA = !!cfgB.animate;
-      card._orgFrame = ["button", "media-player"].includes(this.config.card_type ?? "button");
-      // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
-      card._orgBare = ["separator", "sub-buttons", "pop-up"].includes(this.config.card_type);
-      const me = look(hass, entity);
-      card._orgOn = me.on;
-      card._orgLit = me.lit;
-      card._orgColor = me.color;
-      card._orgDark = !!hass.themes?.darkMode;
+      // The card's options and its entity's look stay on card._org, where Base's own styles read them
+      const type = this.config.card_type ?? "button";
+      const vertical = !!cfgB.vertical && type === "button";
+      const opts = card._org.opts = {
+        vertical,
+        toggle: !!cfgB.toggle && !vertical,
+        group: !!cfgB.group && !vertical,
+        compact: !!cfgB.compact,
+        tile: !!cfgB.tile,
+        animate: !!cfgB.animate,
+        frame: ["button", "media-player"].includes(type),
+        // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
+        bare: ["separator", "sub-buttons", "pop-up"].includes(type),
+        dark: !!hass.themes?.darkMode
+      };
+      card._org.me = look(hass, entity);
       // Each pill switch shows the state of its own entity
-      card._orgPill = card._orgT ? items(this.config).map((item, i) => look(hass, item.entity ?? entity).on
+      card._org.pills = opts.toggle ? items(this.config).map((item, i) => look(hass, item.entity ?? entity).on
         ? 'ha-card .bubble-sub-button.bubble-sub-button-' + (i + 1) + ':not([class*="bubble-sub-button-slider-"])' : null).filter(Boolean) : [];
       return "";
     })()}
-    ${card._orgA ? `
+    ${card._org.opts.animate ? `
     ha-card {
       animation: origami-in var(--duration-slow) ease-in;
     }
@@ -426,43 +523,44 @@ origami_base:
         transform: translateY(10px);
       }
     }` : ""}
-    ${card._orgBare ? "" : `
+    ${card._org.opts.bare ? "" : `
     ha-card {
       --bubble-border: var(--border-width) solid var(--border-color);
       --bubble-sub-slider-height: var(--control-height-mini);
       --bubble-slider-fill-color: var(--org-slider-fill);
-      --org-slider-fill: color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background));
+      --org-slider-base: color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background));
+      --org-slider-fill: var(--org-slider-base);
       --org-slider-mark: var(--primary-text-color);
-      --org-color: ${card._orgColor};
-      --org-surface: ${card._orgF ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
-      --org-surface-shadow: ${card._orgF ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
-      --org-inset: ${card._orgF ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
-      --org-inset-shadow: ${card._orgF ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
-      --org-field: ${card._orgF ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
-      --org-key-field: ${card._orgF ? "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))" : card._orgDark ? "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-strong))" : "var(--tint)"};
-      --org-chip-bg: ${card._orgLit ? "var(--org-field)" : "var(--org-tile-bg, var(--org-inset))"};
-      --org-chip-ink: ${card._orgLit ? "var(--org-color)" : "var(--primary-text-color)"};
-      --org-key-bg: ${card._orgF ? "var(--fill-subtle)" : card._orgDark ? "var(--fill-strong)" : "var(--ha-card-background)"};
-      ${card._orgC ? "--org-row-height: var(--control-height);" : ""}
-      ${card._orgC ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._orgC ? "--org-tile-radius: calc(var(--radius-small) + 2px);" : ""}
-      ${card._orgC ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
-      ${card._orgC ? "--org-icon-size: var(--icon-size-xs);" : ""}
-      ${card._orgC ? "--org-name-size: var(--ha-font-size-m);" : ""}
-      ${card._orgC ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
-      ${card._orgC ? "--org-state-display: none;" : ""}
-      ${card._orgC ? "--org-toggle-w: var(--tile-size);" : ""}
-      ${card._orgC ? "--org-toggle-h: var(--icon-size-l);" : ""}
-      ${card._orgC ? "--org-toggle-knob: var(--icon-size-s);" : ""}
-      ${card._orgC ? "--org-toggle-gap: calc((var(--org-row-height) - var(--org-toggle-h)) / 2);" : ""}
-      ${card._orgC ? "--org-text-max: 100%;" : ""}
-      ${card._orgV ? "--org-row-height: auto; --org-tile-inset: 0px; --org-state-display: none;" : ""}
+      --org-color: ${card._org.me.color};
+      --org-surface: ${card._org.opts.tile ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
+      --org-surface-shadow: ${card._org.opts.tile ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
+      --org-inset: ${card._org.opts.tile ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
+      --org-inset-shadow: ${card._org.opts.tile ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
+      --org-field: ${card._org.opts.tile ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
+      --org-key-field: ${card._org.opts.tile ? "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))" : card._org.opts.dark ? "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-strong))" : "var(--tint)"};
+      --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-tile-bg, var(--org-inset))"};
+      --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--primary-text-color)"};
+      --org-key-bg: ${card._org.opts.tile ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
+      ${card._org.opts.compact ? "--org-row-height: var(--control-height);" : ""}
+      ${card._org.opts.compact ? "--org-tile-size: var(--org-toggle-h);" : ""}
+      ${card._org.opts.compact ? "--org-tile-radius: calc(var(--radius-small) + 2px);" : ""}
+      ${card._org.opts.compact ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
+      ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-xs);" : ""}
+      ${card._org.opts.compact ? "--org-name-size: var(--ha-font-size-m);" : ""}
+      ${card._org.opts.compact ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
+      ${card._org.opts.compact ? "--org-state-display: none;" : ""}
+      ${card._org.opts.compact ? "--org-toggle-w: var(--tile-size);" : ""}
+      ${card._org.opts.compact ? "--org-toggle-h: var(--icon-size-l);" : ""}
+      ${card._org.opts.compact ? "--org-toggle-knob: var(--icon-size-s);" : ""}
+      ${card._org.opts.compact ? "--org-toggle-gap: calc((var(--org-row-height) - var(--org-toggle-h)) / 2);" : ""}
+      ${card._org.opts.compact ? "--org-text-max: 100%;" : ""}
+      ${card._org.opts.vertical ? "--org-row-height: auto; --org-tile-inset: 0px; --org-state-display: none;" : ""}
     }
     .bubble-sub-button-icon {
       --mdc-icon-size: var(--org-icon-size, var(--icon-size-m));
       color: var(--primary-text-color) !important;
     }
-    ${card._orgFrame ? `
+    ${card._org.opts.frame ? `
     .card-content {
       display: flex;
       align-items: center;
@@ -491,15 +589,15 @@ origami_base:
     .bubble-background {
       background-color: var(--org-surface) !important;
     }
-    .bubble-button-background {
+    ${this.config.button_type === "slider" ? "" : `.bubble-button-background {
       opacity: 1 !important;
-    }
+    }`}
     ${this.config.card_type === "media-player" && !this.config.cover_background ? `
     ha-card:not([data-org-bg="own"]) .bubble-background {
       filter: none !important;
       opacity: 1 !important;
     }` : ""}
-    ${card._orgF ? "ha-card .bubble-container { background-color: transparent !important; }" : ""}
+    ${card._org.opts.tile ? "ha-card .bubble-container { background-color: transparent !important; }" : ""}
     .bubble-icon-container {
       min-width: var(--org-tile-size, var(--tile-size)) !important;
       width: var(--org-tile-size, var(--tile-size)) !important;
@@ -541,7 +639,7 @@ origami_base:
     }
     .bubble-state,
     .bubble-artist {
-      ${card._orgC || card._orgV ? "display: none !important;" : ""}
+      ${card._org.opts.compact || card._org.opts.vertical ? "display: none !important;" : ""}
       max-width: var(--org-text-max, 100%) !important;
       font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-bold);
@@ -551,7 +649,7 @@ origami_base:
       overflow: hidden !important;
       text-overflow: ellipsis;
     }
-    ${card._orgV ? `
+    ${card._org.opts.vertical ? `
     ha-card .bubble-container {
       height: auto !important;
     }
@@ -652,7 +750,7 @@ origami_base:
       height: var(--control-height-mini) !important;
       min-height: var(--control-height-mini) !important;
     }
-    ${card._orgV ? `
+    ${card._org.opts.vertical ? `
     ha-card .bubble-sub-button-container {
       grid-area: more;
       inset-inline-end: 0 !important;
@@ -700,7 +798,7 @@ origami_base:
     ha-card .bubble-sub-button.bubble-action-enabled,
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
       pointer-events: auto;
-    }` : card._orgT ? `
+    }` : card._org.opts.toggle ? `
     .bubble-sub-button-container {
       margin-inline-end: var(--org-toggle-gap, calc(var(--ha-space-4) + var(--ha-space-2))) !important;
       inset-inline-end: 0 !important;
@@ -727,16 +825,16 @@ origami_base:
       color: var(--primary-text-color) !important;
       transition: all var(--duration-normal) var(--ease-standard);
     }
-    ${card._orgPill.length ? card._orgPill.join(",\n    ") + ` {
+    ${card._org.pills.length ? card._org.pills.join(",\n    ") + ` {
       color: var(--text-color-active);
       background-color: var(--fill-active) !important;
     }
-    ` + card._orgPill.map((p) => p + " .bubble-sub-button-icon").join(",\n    ") + ` {
+    ` + card._org.pills.map((p) => p + " .bubble-sub-button-icon").join(",\n    ") + ` {
       margin-inline-start: calc(var(--org-toggle-w, calc(var(--tile-size) + var(--ha-space-2))) - 2 * var(--ha-space-1) - var(--org-toggle-knob, var(--icon-size-m))) !important;
       opacity: 1 !important;
       color: var(--text-color-active) !important;
     }` : ""}` : `
-    ${card._orgFrame ? `
+    ${card._org.opts.frame ? `
     ha-card .bubble-sub-button-container {
       margin-inline-end: var(--org-tile-inset, var(--ha-space-4)) !important;
       inset-inline-end: 0 !important;
@@ -766,7 +864,7 @@ origami_base:
       color: var(--primary-text-color) !important;
     }
     `}
-    ${card._orgG ? `
+    ${card._org.opts.group ? `
     ha-card {
       --org-group-key: min(var(--control-height-mini), var(--org-tile-size, var(--tile-size)));
       --org-group-pad: calc((var(--org-tile-size, var(--tile-size)) - var(--org-group-key)) / 2);
@@ -816,7 +914,7 @@ origami_base:
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
         // Under the icon, a sub-button without an action of its own passes the tap to the card
         const select = item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(entity ?? "").split(".")[0]) || item.select_attribute));
-        if (card._orgV && !select && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push(sel + " { pointer-events: none !important; }");
+        if (card._org.opts.vertical && !select && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push(sel + " { pointer-events: none !important; }");
         if (!opt) return;
         if (org.has(opt.name)) rules.push(...org.text(sel, item, opt.name, "var(--ha-font-size-s)"));
         if (org.has(opt.color)) rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + opt.color + " !important; }");
@@ -825,22 +923,22 @@ origami_base:
       return rules.join("\n");
     })()}
     ${(() => {
-      if (card._orgT) return "";
+      if (card._org.opts.toggle) return "";
       const org = card._org;
       const keep = ':not(.is-select):not(.readout):not(.plain):not([class*="bubble-sub-button-slider-"])';
       const sel = [];
-      // A sub-button that sets a value, such as a fan speed or a source, is filled while that value is set. Any other sub-button is filled while its entity is on, unless it opens something, and accent fills it even then. A module that styles its own sub-buttons sets data-org-fill="own" on the card, and only accent fills there.
+      // A sub-button that sets a value, such as a fan speed or a source, is filled while that value is set. Any other sub-button is filled while its entity is on, unless it opens something, and accent fills it even then. A module that styles its own sub-buttons sets data-org-fill="own" on the card. There, only a sub-button that sets a value or has accent is filled.
       const auto = 'ha-card:not([data-org-fill="own"])';
       org.items(this.config).forEach((item, i) => {
         const id = item.entity ?? entity;
         const one = " .bubble-sub-button.bubble-sub-button-" + (i + 1) + keep;
         const set = org.matches(hass, item, id);
         if (set !== null) {
-          if (set && !card._orgV) sel.push(auto + one);
+          if (set && !card._org.opts.vertical) sel.push("ha-card" + one);
           return;
         }
         if (!org.look(hass, id).lit) return;
-        if (!card._orgV && !org.links.includes(org.act(item).action)) sel.push(auto + one + ":is(.background-on, .background-off)");
+        if (!card._org.opts.vertical && !org.links.includes(org.act(item).action)) sel.push(auto + one + ":is(.background-on, .background-off)");
         sel.push("ha-card" + one + ".accent:is(.background-on, .background-off)");
       });
       if (!sel.length) return "";

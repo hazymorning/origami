@@ -1,9 +1,9 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.0.0"
+  version: "5.1.0"
   supported:
     - media-player
-  description: "The Media module styles media player cards together with Base. With the speaker layout, the card shows the title and the artist while music plays, the input while the speaker uses one, and the cover in the icon. With the TV layout, the state line shows what plays, the running app, the source or the state, and the card's entity decides whether the TV is on. Players lists other media players for the same device, such as a Cast or Music Assistant player, and the first one that plays gives the title, the artist and the picture. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID. For integrations that report no cover, Picture gives the cover's address, and pictures whose address contains an entry of Ignore pictures never show. Inputs adds source names that count as inputs. Icons replaces the icon for a state or an input, such as playing, off, bluetooth or tv. The words come from Home Assistant, and Base's words option changes any of them. With Hide the slider when inactive, the card shrinks to its first row while nothing plays. With Filled play and power buttons, the play button is filled while media plays, and the power button is filled while the speaker plays or uses an input, or while the TV is on. Cards with a slider at the bottom need rows set to 2.2."
+  description: "The Media module styles media player cards together with Base. With the speaker layout, the card shows the title and the artist while music plays, the input while the speaker uses one, and the cover in the icon. With the TV layout, the state line shows what plays, the running app, the source or the state, and the card's entity decides whether the TV is on. Players lists other media players for the same device, such as a Cast or Music Assistant player. The card's own entity gives the music while it plays something with a title, and otherwise the first player that plays gives the title, the artist and the picture. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID. For integrations that report no cover, Picture gives the cover's address, and pictures whose address contains an entry of Ignore pictures never show. Inputs adds source names that count as inputs. Icons replaces the card's icon for a state or an input, such as playing, off, bluetooth or tv, and without an entry the card keeps its own icon. The words come from Home Assistant, and Base's words option changes any of them. The module writes the name line and the state line itself, so state_content has no effect on the card. With Hide the slider when inactive, the card shrinks to its first row while nothing plays. With Filled play and power buttons, the play button is filled while media plays, and the power button is filled while the device is on. Cards with a slider at the bottom need rows set to 2.2."
   editor:
     - name: layout
       label: "Layout"
@@ -63,42 +63,41 @@ origami_media:
       const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
       const tv = cfg.layout === "tv";
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
-      const answers = (e) => e && !["unavailable", "unknown"].includes(e.state);
-      const twins = [].concat(cfg.players ?? []).map((p) => hass.states[p]).filter(answers);
-      const power = answers(ent) ? !["off", "standby"].includes(ent.state) : twins.length ? twins.some((p) => !["off", "standby"].includes(p.state)) : null;
+      const twins = [].concat(cfg.players ?? []).map((p) => hass.states[p]).filter((p) => org.power(p) !== null);
+      const power = org.power(ent) ?? (twins.length ? twins.some((p) => org.power(p)) : null);
+      // The speaker shows its music while it plays, and its name at other times
+      const music = !tv && m.active && m.playing && !m.input && !!m.title;
       card._orgM = {
         tv,
         m,
         power,
-        on: tv ? power === true : ["playing", "on"].includes(m.show?.state) || m.input !== null,
+        on: tv ? power === true : m.active,
         playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
+        powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? 'url(' + org.str(m.art) + ')' : "none",
         collapse: !!cfg.collapse,
         solid: !!cfg.solid_controls,
         rest: tv ? !power : !ent || ["off", "standby", "idle", "unavailable", "unknown"].includes(ent.state),
-        // A group leader's or another player's title shows even when the card's own entity has none, so Bubble Card would hide it
-        lead: !tv && !m.input && m.show?.state === "playing" && !!m.title
+        state: this.config.show_state === false ? "none" : "var(--org-state-display, block)"
       };
       const c = card._orgM;
-      // Bubble Card hands the state line to a module whose code contains this exact assignment
+      // Bubble Card hands the name and the state line to a module whose code contains these exact assignments
+      const name = music ? m.title : org.name(hass, entity, this.config.name, env);
       const line = tv
         ? (power === null ? org.word(hass, ent ?? null, null, ent?.state ?? "unavailable")
           : !power ? org.word(hass, ent, null, "off")
           : m.title || (m.app ? org.word(hass, m.appEntity, "app_name", m.app) : "") || (m.source ? org.word(hass, m.show, "source") : "")
             || org.word(hass, m.player ?? ent, null, m.player?.state === "paused" ? "paused" : "on"))
-        : m.input ? org.word(hass, m.show, "source") : org.word(hass, m.show);
+        : m.input ? org.word(hass, m.show, "source")
+        : music ? m.artist || org.word(hass, m.player)
+        : org.word(hass, m.show);
+      if (card.querySelector('.bubble-name') && card.querySelector('.bubble-name').innerText !== name) card.querySelector('.bubble-name').innerText = name;
       if (card.querySelector('.bubble-state') && card.querySelector('.bubble-state').innerText !== line) card.querySelector('.bubble-state').innerText = line;
-      if (!tv) {
-        org.icon(icon, m.icon(cfg.icons));
-        const scroll = this.config.scrolling_effect !== false;
-        org.title(card.querySelector(".bubble-title"), !m.input && m.show?.state === "playing" && m.title ? m.title : org.name(hass, entity, this.config.name), scroll);
-        org.title(card.querySelector(".bubble-artist"), m.input ? org.word(hass, m.show, "source")
-          : m.show?.state === "playing" && m.artist ? m.artist : org.word(hass, m.show), scroll);
-      }
+      if (!tv) org.icon(icon, m.icon(cfg.icons));
       return "";
     })()}
     ha-card {
-      --org-color: var(--state-media_player-active-color);
+      --org-color: var(--state-media_player-playing-color, var(--state-media_player-active-color));
       --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-tile-bg, var(--org-inset))"};
       --org-chip-ink: ${card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)"};
     }
@@ -117,7 +116,6 @@ origami_media:
     ` : ""}
     .bubble-icon-container {
       position: relative;
-      ${this.config.tap_action ? "" : "pointer-events: none;"}
     }
     .bubble-icon-container,
     .bubble-main-icon-container {
@@ -147,11 +145,14 @@ origami_media:
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
       opacity: ${card._orgM.art !== "none" ? 0 : 1} !important;
     }
+    .bubble-name-container {
+      display: flex !important;
+    }
+    .bubble-media-info-container {
+      display: none !important;
+    }
     .bubble-name,
-    .bubble-title,
-    .bubble-state,
-    .bubble-artist {
-      display: block !important;
+    .bubble-state {
       max-width: var(--org-text-max, 100%) !important;
       margin: 0 !important;
       line-height: var(--ha-line-height-normal);
@@ -159,9 +160,8 @@ origami_media:
       overflow: hidden !important;
       text-overflow: ellipsis;
     }
-    .bubble-state,
-    .bubble-artist {
-      display: var(--org-state-display, block) !important;
+    .bubble-state {
+      display: ${card._orgM.state} !important;
     }
     .bubble-sub-button-container {
       gap: var(--ha-space-2) !important;
@@ -189,7 +189,7 @@ origami_media:
       --icon-primary-color: var(--text-color-active) !important;
     }
     ` : ""}
-    ${card._orgM.solid && card._orgM.on ? `
+    ${card._orgM.solid && card._orgM.powered ? `
     .bubble-power-button {
       color: var(--text-color-active);
       background-color: var(--fill-active) !important;
@@ -199,5 +199,3 @@ origami_media:
       --icon-primary-color: var(--text-color-active) !important;
     }
     ` : ""}
-    ${card._orgM.tv ? ".bubble-artist { display: none !important; }" : ""}
-    ${card._orgM.lead ? ".bubble-media-info-container { display: flex !important; } .bubble-name-container { display: none !important; }" : ""}

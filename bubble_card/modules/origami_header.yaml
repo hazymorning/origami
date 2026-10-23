@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.0.0"
+  version: "3.0.1"
   supported:
     - separator
   description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color for the icon, name_color for the text and background for a chip. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }, and they work the same as in Popup. List Base before Header, because Header uses Base's helpers. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
@@ -44,12 +44,13 @@ origami_header:
         text: {}
   code: |
     ${(() => {
-      // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height unless rows are set
-      const setRows = this.config.grid_options?.rows ?? this.config.rows;
-      if (setRows === undefined && !this._orgHAutoRows && typeof this.getGridOptions === "function") {
-        const base = this.getGridOptions.bind(this);
-        this.getGridOptions = () => ({ ...base(), rows: "auto", min_rows: undefined, max_rows: undefined });
-        this._orgHAutoRows = true;
+      // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
+      const auto = (this.config.grid_options?.rows ?? this.config.rows) === undefined;
+      const own = Object.getPrototypeOf(this)?.getGridOptions;
+      if (typeof own === "function" && auto !== !!this._orgHAutoRows) {
+        if (auto) this.getGridOptions = () => ({ ...own.call(this), rows: "auto", min_rows: undefined, max_rows: undefined });
+        else delete this.getGridOptions;
+        this._orgHAutoRows = auto;
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;

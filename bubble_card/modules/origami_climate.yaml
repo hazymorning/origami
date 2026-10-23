@@ -1,9 +1,9 @@
 origami_climate:
   name: "Origami • Climate"
-  version: "3.0.0"
+  version: "3.1.0"
   supported:
     - button
-  description: "The Climate module shows what a thermostat is doing, and it works with Base. While the thermostat heats, cools, dries or runs its fan, the icon and the state line show that action. At other times, the state line shows Home Assistant's word for the action, such as Idle, or the mode, and the icon is the card's own icon, muted while the thermostat is off. Without hvac_action, the card follows the mode alone. The words come from Home Assistant, with shorter German words for the actions. Set state_content to an empty list, and the module writes the state line. A sub-button with css_class set to readout shows the target temperature, or the range for thermostats with a low and a high target. The Icons option is a map from an action or a state, such as heating or off, to an icon."
+  description: "The Climate module shows what a thermostat is doing, and it works with Base. While the thermostat heats, cools, dries or runs its fan, the state line shows that action. At other times, the state line shows Home Assistant's word for the action, such as Idle, or the mode, and the icon is the card's own icon, muted while the thermostat is off. Without hvac_action, the card follows the mode alone. The words come from Home Assistant, with shorter German words for the actions. The module writes the state line itself, so state_content has no effect on the card. A sub-button with css_class set to readout shows the target temperature of its own thermostat, or the range for thermostats with a low and a high target. While a thermostat works, the icon shows Home Assistant's icon for its action, unless the card has an icon of its own. The Icons option is a map from an action or a state, such as heating or off, to an icon, and it replaces the card's icon too."
   editor:
     - name: icons
       label: "Icons (a map from an action or a state to an icon)"
@@ -16,11 +16,13 @@ origami_climate:
       // The thermostat's plus and minus buttons stay neutral while it works
       if (card.dataset.orgFill !== "own") card.dataset.orgFill = "own";
       const st = hass.states[entity];
-      const a = st?.attributes ?? {};
       const look = org.look(hass, entity);
-      const act = String(a.hvac_action ?? "").toLowerCase();
-      // Home Assistant's icons for the actions
-      const icons = { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt", ...org.rekey(this.config.origami_climate?.icons) };
+      const act = look.action ?? "";
+      // Without an icon of the card's own, the icon shows what the thermostat does, with Home Assistant's icons for the actions. The Icons option replaces any of them.
+      const icons = {
+        ...(this.config.icon ? {} : { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt" }),
+        ...org.rekey(this.config.origami_climate?.icons)
+      };
       const working = look.on && act !== "" && !["idle", "off"].includes(act);
       const off = look.available && (st.state === "off" || act === "off");
       const key = !look.available ? "unavailable" : working ? act : off ? "off" : act || st.state;
@@ -29,11 +31,15 @@ origami_climate:
       // Bubble Card hands the state line to a module whose code contains this exact assignment
       const line = !look.available || off || !act ? org.word(hass, st) : org.word(hass, st, "hvac_action");
       if (card.querySelector('.bubble-state') && card.querySelector('.bubble-state').innerText !== line) card.querySelector('.bubble-state').innerText = line;
-      // The readout shows the target, or the range of a thermostat with a low and a high target
-      const low = a.target_temp_low, high = a.target_temp_high;
-      const target = a.temperature != null ? org.num(hass, a.temperature) + "°"
-        : low != null && high != null ? org.num(hass, low) + "–" + org.num(hass, high) + "°" : "";
-      if (target) org.write(card.querySelector(".readout .bubble-sub-button-name-container"), target);
+      // Each readout shows the target of its own thermostat, or the range of one with a low and a high target. The range stays in this order in right-to-left languages.
+      org.items(this.config).forEach((item, i) => {
+        if (!String(item.css_class ?? "").split(/\s+/).includes("readout")) return;
+        const a = hass.states[item.entity ?? entity]?.attributes ?? {};
+        const low = a.target_temp_low, high = a.target_temp_high;
+        const target = a.temperature != null ? org.num(hass, a.temperature) + "°"
+          : low != null && high != null ? "\u2066" + org.num(hass, low) + "–" + org.num(hass, high) + "°\u2069" : "–";
+        org.write(card.querySelector(".bubble-sub-button-" + (i + 1) + " .bubble-sub-button-name-container"), target);
+      });
       return "";
     })()}
     ha-card .bubble-icon-container.bubble-main-icon-container .bubble-icon,
