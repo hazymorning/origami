@@ -763,11 +763,11 @@ sub_button:
       origami_tiles:
         # While the vacuum is cleaning, the progress replaces the name
         name: >-
-          ${(p => Number.isNaN(p) || p < 0 ? 'Error'
-          : ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
-          : p + ' %')(Math.round(states('number.robot_cleaning_progress')))}
+          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+          : Number.isNaN(p) ? '' : p < 0 ? 'Error'
+          : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
         state:
-          docked: 'Off'
+          docked: ${word('off')}
           cleaning: Vacuum
         order:
           cleaning: -1

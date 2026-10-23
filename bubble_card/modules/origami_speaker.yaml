@@ -47,7 +47,7 @@ origami_speaker:
       const env = { hass, renderTemplate };
       const st = hass.states[entity];
       const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
-      const m = org.media(hass, entity, { env, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
+      const m = org.media(hass, entity, { env, cfg });
       const name = org.name(hass, entity, this.config.name, env);
       // Selected is a helper whose state names the speaker, or a template that names it itself
       const pick = String(org.value(env, cfg.selected, ctx) ?? "").trim();
@@ -64,7 +64,7 @@ origami_speaker:
         // The row shows the track after the name while the speaker plays, pauses or buffers music of its own
         track: !!line && !member && !m.input && m.live,
         line,
-        art: m.art ? 'url(' + org.str(m.art) + ')' : "none"
+        art: m.art
       };
       const s = card._orgSp;
       const rtl = !!hass.translationMetadata?.translations?.[hass.language]?.isRTL;
@@ -98,8 +98,9 @@ origami_speaker:
       --org-row-height: calc(var(--control-height-list) + 2px);
       --org-icon-size: var(--icon-size-xs);
       --org-tile-size: calc(var(--org-icon-size) + 2 * var(--ha-space-1));
-      --org-chip-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);
-      --org-color: var(--state-media_player-active-color);
+      --org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);
+      --org-tile-radius: max(var(--radius-small), calc(var(--ha-card-border-radius, var(--bubble-border-radius, 24px)) - var(--org-tile-inset)));
+      --org-color: ${card._orgSp.m.color};
       --org-chip-bg: ${card._orgSp.audible ? "var(--org-field)" : "var(--fill-subtle)"};
       --org-chip-ink: ${card._orgSp.audible ? "var(--org-color)" : "var(--primary-text-color)"};
     }
@@ -112,44 +113,17 @@ origami_speaker:
       overflow: hidden;
     }
     .bubble-background::before {
-      content: ${card._orgSp.art !== "none" ? '""' : "none"};
+      content: ${card._orgSp.art ? '""' : "none"};
       position: absolute;
       inset: 0;
-      background-image: ${card._orgSp.art};
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      background: ${card._orgSp.art ? "url(" + card._org.str(card._orgSp.art) + ") center / cover no-repeat" : "none"};
       filter: blur(40px);
       opacity: 0.2;
       pointer-events: none;
     }
-    ha-card .bubble-icon-container {
-      min-height: 0px !important;
-      margin-block: 0px !important;
-      margin-inline: var(--org-chip-inset) var(--ha-space-1) !important;
-      border-radius: max(var(--radius-small), calc(var(--ha-card-border-radius, var(--bubble-border-radius, 24px)) - var(--org-chip-inset))) !important;
-      position: relative;
-      overflow: visible !important;
-    }
-    ha-card .bubble-main-icon-container::before {
-      content: ${card._orgSp.art !== "none" ? '""' : "none"};
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      border-radius: inherit;
-      background-image: ${card._orgSp.art};
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    .bubble-media-player .bubble-entity-picture,
-    .bubble-main-icon-container .bubble-entity-picture {
-      display: none !important;
-    }
-    ha-card .bubble-icon-container .bubble-icon {
-      color: var(--org-chip-ink) !important;
-      transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
-      opacity: ${card._orgSp.art !== "none" ? "0" : card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)"} !important;
+    ${card._org.cover(card._orgSp.art, card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)")}
+    ha-card .bubble-sub-button-container {
+      margin-inline-end: var(--ha-space-4) !important;
     }
     .org-group-badge {
       position: absolute;

@@ -46,7 +46,8 @@ origami_tiles:
         const state = [o.state, obj ? org.state(hass, entity, parts) : ""].find(org.has) ?? "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
-        if (entity && !look.available) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
+        // A tile is dimmed while its entity is missing or unavailable. A scene or a button that was never used is unknown, and it stays as it is.
+        if (entity && (!obj || obj.state === "unavailable")) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
         const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
         // A row without a state line keeps its name in the middle

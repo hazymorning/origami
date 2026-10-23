@@ -8,6 +8,8 @@ origami_slider:
     ${(() => {
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_slider needs origami_base 12 or later, listed before it");
+      // The card is the track, so Base rounds its fill like a sub-button's slider
+      if (card.dataset.orgTrack !== "") card.dataset.orgTrack = "";
       return "";
     })()}
     ha-card {
@@ -40,18 +42,6 @@ origami_slider:
     .bubble-background,
     .card-content {
       border-radius: var(--radius-small) !important;
-    }
-    .bubble-range-fill {
-      border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
-    }
-    .bubble-range-fill.fill-orientation-right {
-      border-radius: 4px var(--radius-small) var(--radius-small) 4px !important;
-    }
-    .bubble-range-fill.fill-orientation-top {
-      border-radius: var(--radius-small) var(--radius-small) 4px 4px !important;
-    }
-    .bubble-range-fill.fill-orientation-bottom {
-      border-radius: 4px 4px var(--radius-small) var(--radius-small) !important;
     }
     .bubble-range-value {
       inset-inline-end: var(--ha-space-2) !important;

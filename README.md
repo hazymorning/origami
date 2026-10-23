@@ -923,8 +923,7 @@ sub_button:
       icon: mdi:fan
       origami_tiles:
         state:
-          'on': ${attr.percentage} %
-          'off': 'Off'
+          'on': ${num(attr.percentage, 0, '%')}
       visibility:
         - condition: state
           entity: fan.bedroom
@@ -991,12 +990,12 @@ sub_button:
       force_icon: true
       origami_tiles:
         name: >-
-          ${(p => Number.isNaN(p) || p < 0 ? 'Error'
-          : ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
-          : p + ' %')(Math.round(states('number.robot_cleaning_progress')))}
+          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+          : Number.isNaN(p) ? '' : p < 0 ? 'Error'
+          : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
         state:
-          docked: 'Off'
-          idle: 'Off'
+          docked: ${word('off')}
+          idle: ${word('off')}
           cleaning: Vacuum
         order:
           cleaning: -1
@@ -1039,7 +1038,6 @@ sub_button:
           'on': ${minutesUntil('input_datetime.printer_end')} min
         state:
           'on': Running
-          'off': 'Off'
         name_color:
           'on': initial
       tap_action:
@@ -1112,7 +1110,7 @@ sub_button:
       entity: sensor.climate_home
       icon: mdi:thermometer
       origami_header:
-        name: ${attr.temperature_average}°
+        name: ${num(attr.temperature_average)}°
       tap_action:
         action: perform-action
         perform_action: input_boolean.toggle
@@ -1126,7 +1124,6 @@ sub_button:
       state_content: windows_open
       origami_header:
         icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
-        color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
         name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
         background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
       tap_action:
@@ -1188,11 +1185,11 @@ sub_button:
     - entity: sensor.climate_living_room
       show_icon: false
       origami_base:
-        name: ${attr.temperature}° |
+        name: ${num(attr.temperature)}° |
     - entity: sensor.climate_living_room
       show_icon: false
       origami_base:
-        name: ${attr.humidity}%
+        name: ${num(attr.humidity, 0, '%')}
 ```
 
 **All rooms** is the last card. It turns `input_boolean.all_rooms` on and off, and the rooms after the fourth are conditional cards that appear while this toggle is on.
@@ -1231,9 +1228,6 @@ styles: |-
   ha-card .bubble-sub-button-container {
     justify-content: center !important;
     margin: 0 !important;
-  }
-  ha-card .bubble-sub-button-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-    margin-left: var(--ha-space-1) !important;
   }
 ```
 
@@ -2441,7 +2435,6 @@ bg_blur: '0'
 shadow_opacity: '12'
 hide_backdrop: false
 modules:
-  - default
   - origami_base
   - origami_popup
 origami_popup:
@@ -2773,7 +2766,7 @@ cards:
                   show_name: true
                   show_background: false
                   origami_header:
-                    name: ${attr.temperature}° / ${attr.humidity} %
+                    name: ${num(attr.temperature)}° / ${num(attr.humidity, 0, '%')}
                     # The dot uses the comfort color
                     color: ${attr.color_code ?? "transparent"}
                   tap_action:
@@ -2942,11 +2935,11 @@ The TV pop-up is a remote control for the TV. It opens from **TV** in the naviga
 - The top card shows the TV, its current program and its power button. A separate speaker plays the TV's sound, and the card's slider sets the speaker's volume. A blurred picture of the current program appears behind the pop-up.
 - The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input. Its tap selects that source, so it is filled while the speaker uses that input.
 - The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number, and a tap on the icon turns the sound back on.
-- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. Each button's `css_class` is the ID of its app, which the TV reports in its `app_id` attribute.
+- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. The Base module fills a button while the TV reports its app as the source, the `app_name` or the `app_id`.
 - The remote has a back button, a home button and a round pad with an OK button.
 - Every card inside the pop-up's vertical stack is a Bubble card. The row with the input and volume buttons, the row of apps and the remote are sub-buttons cards with the [Button](bubble_card/README.md#button) module. Its `segmented` option joins each group of buttons into one bar, and its `scroll` option lets the apps scroll. The remote's own `styles` place its buttons in a grid and draw the round pad.
 
-The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons need your TV's source names and app IDs.
+The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons call `media_player.select_source`, which the [Android Debug Bridge](https://www.home-assistant.io/integrations/androidtv/) integration offers, and they need your TV's app names or app IDs. With Android TV Remote alone, call `media_player.play_media` with `media_content_type: app` and the app's ID as `media_content_id` instead. Base fills those buttons by the app's ID too.
 
 </details>
 
@@ -2957,7 +2950,7 @@ The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Andr
 
 | Entity | Purpose |
 | --- | --- |
-| `media_player.living_room_tv` | The TV and its apps, from Android TV Remote |
+| `media_player.living_room_tv` | The TV and its apps, from Android Debug Bridge |
 | `remote.living_room_tv` | The remote, from Android TV Remote |
 | `media_player.living_room_tv_cast` | The current program and its picture, from Google Cast |
 | `media_player.living_room` | The speaker that plays the TV's sound |
@@ -3163,7 +3156,7 @@ cards:
                       speaker: media_player.living_room
                       step: 0.1
 
-      # The app buttons scroll sideways. Each button's css_class is its app's ID, so the running app's button is filled.
+      # The app buttons scroll sideways. A button is filled while the TV runs its app, because the TV reports the running app as its source.
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
@@ -3172,12 +3165,10 @@ cards:
         origami_button:
           scroll: true
           active_style: toggle
-          active: "{{ state_attr('media_player.living_room_tv', 'app_id') }}"
         sub_button:
           main: []
           bottom:
             - name: Netflix
-              css_class: com.netflix.ninja
               show_name: true
               tap_action:
                 action: perform-action
@@ -3187,7 +3178,6 @@ cards:
                 data:
                   source: Netflix
             - name: YouTube
-              css_class: com.google.android.youtube.tv
               show_name: true
               tap_action:
                 action: perform-action
@@ -3197,7 +3187,6 @@ cards:
                 data:
                   source: YouTube
             - name: Prime Video
-              css_class: com.amazon.amazonvideo.livingroom
               show_name: true
               tap_action:
                 action: perform-action
@@ -3207,7 +3196,6 @@ cards:
                 data:
                   source: Prime Video
             - name: Disney+
-              css_class: com.disney.disneyplus
               show_name: true
               tap_action:
                 action: perform-action
@@ -3217,7 +3205,6 @@ cards:
                 data:
                   source: Disney+
             - name: Spotify
-              css_class: com.spotify.tv.android
               show_name: true
               tap_action:
                 action: perform-action
@@ -3227,7 +3214,6 @@ cards:
                 data:
                   source: Spotify
             - name: Plex
-              css_class: com.plexapp.android
               show_name: true
               tap_action:
                 action: perform-action
