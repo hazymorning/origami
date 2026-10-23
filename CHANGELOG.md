@@ -22,10 +22,10 @@ These changes are in the `next` branch and come with the next release.
 - The Popup module keeps Bubble Card's own header layout on pop-ups whose header has a button, a switch or a slider. With `scrolling_effect: false`, a long title stays on one line and ends with an ellipsis, and a value with a name of its own and no visibility conditions always shows.
 - Header and Popup share their value keys. Each value can have `name`, `icon`, `color`, `name_color` and `background`, and `color` is the icon's color in every module. Popup's chips look like Header's chips, because Base draws both.
 - The Tiles module has a `list` layout for favorites and similar lists. Each row shows its icon in the state color, a state line and a sign at its end. A chevron opens something, a switch toggles the entity, and a play button runs a script or a scene. The play button is filled while its script runs, and with `script.toggle` it shows a stop sign. The sign follows the tap action and the entity that the tap targets.
-- The Tiles module has an `image_size` key, shows a sub-button's `state_content` or `attribute` in Home Assistant's words and dims tiles whose entity is unavailable. Times such as `last_changed` and the states of scenes, buttons and timestamp sensors read as relative times, such as 3 days ago.
+- The Tiles module has an `image_size` key, shows a sub-button's `state_content` or `attribute` in Home Assistant's words and dims tiles whose entity is unavailable. Times such as `last_changed` and the states of scenes, buttons and timestamp sensors read as relative times, such as 3 days ago. As on Bubble Card's own state line, a speed, a brightness or a position of 0 is left out. A speed or a brightness is also left out while the fan or the light is off, so a fan tile needs only `state_content: percentage` to show its speed while it runs and Off while it is off.
 - Templates in values have `num()` for numbers in the format of your Home Assistant profile, with an optional unit such as `%` or `minute`, `format()` for an entity's state in Home Assistant's words, `word()` for Home Assistant's word for a value and `ago()` for how long ago something happened. An expression in `${ }` that returns `unavailable` or `unknown` now counts as empty, so the default appears. `minutesUntil()` also reads timers, paused timers and dates, and it reads times in the time zone of your Home Assistant.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
-- Base keeps one number and date formatter for all cards, and the modules write a line only when its text changes, so cards render with less work.
+- Base shares its number and date formatters among all cards, and Base and Tiles leave out steps that a card's layout does not need, so cards render with less work. Header and Popup draw their plain values with the same rules from Base, and Base and Media fill active controls with the same rules.
 - The modules place their parts by the start and the end of a line instead of left and right, so cards are mirrored in languages that read from right to left.
 - The new `animate` option of the Base module lets any card with Base fade in when it appears. It replaces the option of the same name in the Button module.
 - The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
@@ -55,6 +55,11 @@ These changes are in the `next` branch and come with the next release.
 - On a card with Base's `vertical` option, a sub-button with `css_class: accent` whose tap sets a value is filled only while its entity has that value.
 - Each readout on a Speaker Select row shows the volume of its own entity.
 - With both `toggle` and `group`, Base shows the pill switches, because `group` has no effect together with `toggle`.
+- Numbers follow the number format with apostrophes, as used in Switzerland.
+- A value that Base, Header or Popup shows in place of a hidden sub-button also shows when Bubble Card hides the group around it.
+- All cards for one speaker agree on whether an old cover still shows after the speaker leaves an input.
+- A tap that sets a value for several entities, listed in one `entity_id` line and separated by commas, fills its button while the first of them has that value.
+- In the grid layout, the Tiles module reads the theme's `tile-background`, `tile-chip-background` and `tile-chip-shadow`, as Base's `tile` option does.
 
 ### Upgrading
 

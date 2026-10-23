@@ -20,14 +20,14 @@ origami_climate:
       const act = look.action ?? "";
       // Without an icon of the card's own, the icon shows what the thermostat does, with Home Assistant's icons for the actions. The Icons option replaces any of them.
       const builtin = this.config.icon ? {} : { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt" };
-      const working = look.on && act !== "" && !["idle", "off"].includes(act);
+      const working = look.on && act !== "";
       const off = look.available && (st.state === "off" || act === "off");
       const key = !look.available ? "unavailable" : working ? act : off ? "off" : act || st.state;
       card._orgCl = { off };
       org.icon(icon, org.pick(this.config.origami_climate?.icons, key, true) ?? builtin[key] ?? null);
-      // Bubble Card hands the state line to a module whose code contains this exact assignment
+      // Bubble Card hands the state line to a module whose code contains this exact assignment, and it skips a write that repeats the line's text
       const line = !look.available || off || !act ? org.word(hass, st) : org.word(hass, st, "hvac_action");
-      if (org.fresh(card.querySelector('.bubble-state'), line)) card.querySelector('.bubble-state').textContent = line;
+      card.querySelector('.bubble-state').textContent = line;
       // Each readout shows the target of its own thermostat, or the range of one with a low and a high target. The range stays in this order in right-to-left languages.
       org.readouts(hass, this.config, entity, (t) => {
         const a = t?.attributes ?? {};
