@@ -192,6 +192,9 @@ origami_media:
     ${card._orgM.members.map((s) => s + ":has(.bubble-sub-button-name-container:not(:empty))").join(", ")} {
       min-width: var(--control-height-lg) !important;
     }
+    ${card._orgM.members.map((s) => s + " .bubble-sub-button-icon").join(", ")} {
+      --mdc-icon-size: var(--icon-size-s) !important;
+    }
     ${card._orgM.members.map((s) => s + " .bubble-sub-button-name-container").join(", ")} {
       margin-inline-start: var(--ha-space-1);
       font-size: var(--ha-font-size-m) !important;
@@ -256,7 +259,7 @@ origami_media:
       height: var(--control-height-lg) !important;
       isolation: isolate;
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} > * {
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} > :not(.org-ring) {
       grid-area: 1 / 1;
     }
     ${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {

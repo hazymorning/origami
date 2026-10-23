@@ -3,7 +3,7 @@ origami_header:
   version: "3.2.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right or right after the title, as text or as chips. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -52,11 +52,6 @@ origami_header:
               value: normal
             - label: Large
               value: large
-    - name: inline
-      label: "Values follow the title, and the title taps the first value"
-      selector:
-        boolean: {}
-      default: false
     - name: value_size
       label: "Value size"
       selector:
@@ -94,8 +89,6 @@ origami_header:
         max,
         // A large title is as large as a pop-up's title, for a header that stands in for one
         large: cfg.size === "large",
-        // Inline values follow the title, and a tap on the title runs the first value's action, as for a title with a menu
-        inline: !!cfg.inline,
         text,
         gap: gap || "var(--ha-space-1)",
         chip: cfg.value_style === "chip"
@@ -190,28 +183,6 @@ origami_header:
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
       margin: -2px 0 0 !important;
     }
-    ${card._orgH.inline ? `
-    ha-card .bubble-container {
-      position: relative !important;
-      width: fit-content !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    ha-card .bubble-sub-button-container {
-      position: static !important;
-      flex: 0 0 auto !important;
-      justify-content: flex-start !important;
-      margin-inline-start: var(--ha-space-1) !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button-1 {
-      position: static !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button-1::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-    }
-    ` : ""}
     ${card._orgH.max ? `
     ha-card .bubble-sub-button-container {
       flex: 0 1 auto !important;

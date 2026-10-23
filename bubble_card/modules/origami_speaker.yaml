@@ -1,9 +1,10 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.1.1"
+  version: "5.2.0"
   supported:
     - media-player
-  description: "Speaker Select turns media player cards into speaker rows for a music pop-up. Each row shows the speaker's name, what it plays and its cover. A crown and a link mark a group, and the selected speaker's row has a stronger fill."
+    - button
+  description: "Speaker Select turns media player cards into speaker rows for a music pop-up. Each row shows the speaker's name, what it plays and its cover. A crown and a link mark a group. On a button card with a slider, the whole row sets the volume."
   editor:
     - name: selected
       label: "Selected (an input_select, a select or a template)"
@@ -125,7 +126,7 @@ origami_speaker:
       flex: 1 1 auto !important;
       flex-direction: row !important;
       justify-content: flex-start !important;
-      align-items: baseline !important;
+      align-items: center !important;
       gap: var(--ha-space-2) !important;
       min-width: 0;
       overflow: hidden;
@@ -156,6 +157,10 @@ origami_speaker:
     ha-card .bubble-state[data-animated="true"] {
       text-overflow: clip;
     }
+    ${this.config.button_type === "slider" ? `
+    ha-card .bubble-range-fill::after {
+      display: none;
+    }` : ""}
     ha-card .bubble-sub-button.readout {
       padding: 0px !important;
       justify-content: flex-end !important;

@@ -33,7 +33,7 @@ Base is a global module, so Bubble Card runs it first on every card, and no card
 | [Fan](#fan) | `origami_fan` | button | Fan spins the icon at the fan's speed. |
 | [Climate](#climate) | `origami_climate` | button | Climate shows what a thermostat does. |
 | [Media](#media) | `origami_media` | media player | Media shows speakers and TVs. |
-| [Speaker Select](#speaker-select) | `origami_speaker` | media player | Speaker Select shows the speaker rows of a music pop-up. |
+| [Speaker Select](#speaker-select) | `origami_speaker` | media player, button | Speaker Select shows the speaker rows of a music pop-up. |
 | [Slider](#slider) | `origami_slider` | button with a slider, sub-buttons | Slider turns a card into a standalone slider, or slider sub-buttons into rows with names. |
 | [Button](#button) | `origami_button` | sub-buttons | Button shows rows and grids of buttons, segmented bars and rows that scroll sideways. |
 | [Header](#header) | `origami_header` | separator | Header shows a section header with values. |
@@ -665,6 +665,29 @@ origami_speaker:
 
 Groups come from Home Assistant's `group_members` attribute, as in the Media module. A member's row shows its leader's name, and Base's `words` option can shorten it, such as `Living room: Living`. Tapping a row does not select the speaker. Give each row a tap action that sets your speaker selection.
 
+A row can also be a volume slider over its whole width. Use a button card with `button_type: slider` instead of the media player card, and give it an icon. A slide anywhere on the row then changes the volume, so a stray touch can make a speaker loud, and the plain row is the safer choice.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: media_player.living_room
+name: Living
+icon: mdi:speaker
+modules:
+  - origami_base
+  - origami_speaker
+sub_button:
+  main:
+    - entity: media_player.living_room
+      name: Volume
+      css_class: readout
+      show_name: true
+      show_icon: false
+      show_background: false
+rows: 1
+```
+
 </details>
 
 ### Slider
@@ -871,7 +894,6 @@ The Header module creates a section header. The separator card's name is the tit
 | `icon_color` | | The option sets the icon color of plain values. It accepts a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The option sets the icon size of plain values. Chips use `--icon-size-2xs`, which is 14 px. For a small dot, use `var(--dot-size)`. |
 | `size` | `normal` | With `large`, the title is as large as a pop-up's title, for a header that stands in for one. A large header leaves 8 px above its title and none below it. |
-| `inline` | `false` | The values follow the title instead of standing on the right, and a tap on the title runs the first value's action. A title with a chevron that opens a menu works this way. |
 | `value_size` | `var(--ha-font-size-m)` | The option sets the size of the values' text. |
 | `icon_gap` | `var(--ha-space-1)` | The option sets the space between the icon and the name of plain values. Chips keep their own space. |
 | `value_max_width` | | The option sets the maximum width of the values, such as `50%`. Longer values end with an ellipsis. Set `scrolling_effect: false` on these sub-buttons, because otherwise Bubble Card scrolls them. |
