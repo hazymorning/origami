@@ -59,12 +59,10 @@ origami_media:
       const cfg = this.config.origami_media ?? {};
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];
-      const ctx = { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} };
       const tv = cfg.layout === "tv";
-      const m = org.media(hass, entity, { env, tv, players: cfg.players, leader: org.value(env, cfg.leader, ctx), art: cfg.art, inputs: cfg.inputs, ignore: cfg.ignore_art });
+      const m = org.media(hass, entity, { env, tv, cfg });
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
-      const twins = [].concat(cfg.players ?? []).map((p) => hass.states[p]).filter((p) => org.power(p) !== null);
-      const power = org.power(ent) ?? (twins.length ? twins.some((p) => org.power(p)) : null);
+      const power = m.power;
       // The speaker shows its music while it plays, and its name at other times
       const music = !tv && m.active && m.playing && !m.input && !!m.title;
       card._orgM = {
@@ -75,7 +73,7 @@ origami_media:
         on: tv ? power === true : m.active,
         playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
         powered: tv ? power === true : org.power(ent) === true,
-        art: m.art && (!tv || power) ? 'url(' + org.str(m.art) + ')' : "none",
+        art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
         solid: !!cfg.solid_controls,
         // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
@@ -100,7 +98,7 @@ origami_media:
       return "";
     })()}
     ha-card {
-      --org-color: var(--state-media_player-playing-color, var(--state-media_player-active-color));
+      --org-color: ${card._orgM.m.color};
       --org-chip-bg: ${card._orgM.on ? "var(--org-field)" : "var(--org-inset)"};
       --org-chip-ink: ${card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)"};
     }
@@ -117,33 +115,7 @@ origami_media:
       display: none !important;
     }
     ` : ""}
-    .bubble-icon-container {
-      position: relative;
-    }
-    .bubble-icon-container,
-    .bubble-main-icon-container {
-      overflow: visible;
-      background-image: none !important;
-    }
-    .bubble-main-icon-container::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      border-radius: var(--org-tile-radius);
-      background-image: ${card._orgM.art};
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    .bubble-media-player .bubble-entity-picture {
-      display: none !important;
-    }
-    .bubble-main-icon-container .bubble-icon {
-      color: var(--org-chip-ink) !important;
-      transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
-      opacity: ${card._orgM.art !== "none" ? 0 : 1} !important;
-    }
+    ${card._org.cover(card._orgM.art, "1")}
     .bubble-name-container {
       display: flex !important;
     }

@@ -70,9 +70,12 @@ origami_header:
       const scope = "ha-card .bubble-sub-button-container";
       const list = org.subs(env, this.config, "origami_header");
       const rules = org.values(env, this.config, "origami_header", scope, "var(--ha-font-size-m)", list);
-      // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state
+      // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state, on either side of the name
       if (!card._orgH.chip) list.forEach(({ n, opt }) => {
-        if (org.has(opt?.name)) rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + n + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
+        if (!org.has(opt?.name)) return;
+        const sel = scope + " .bubble-sub-button.bubble-sub-button-" + n;
+        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
+        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--ha-space-1) 0 !important; }");
       });
       card._orgHCss = rules.join("\n");
       return "";

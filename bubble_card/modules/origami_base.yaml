@@ -313,9 +313,9 @@ origami_base:
           // Keys that set the state compare before the off check, so an off thermostat matches its off mode. Otherwise, an entity that is off matches only a speed or a brightness of 0.
           if (keys[k] !== "state" && st.state === "off") return ["percentage", "brightness_pct"].includes(k) && Number(want) === 0;
           const have = keys[k] === "state" ? st.state : k === "brightness_pct" ? (at.brightness == null ? null : Number(at.brightness) / 2.55) : at[keys[k]];
-          if (have === null || have === undefined) return false;
           // A TV that runs an app reports it as its source, its app_name or its app_id, and a source button may name any of them
           if (k === "source") return [have, at.app_name, at.app_id].some((h) => h != null && String(h).toLowerCase() === String(want).toLowerCase());
+          if (have === null || have === undefined) return false;
           const n = Number(want), m = Number(have);
           if (typeof want !== "boolean" && typeof have !== "boolean" && String(want).trim() !== "" && String(have).trim() !== "" && Number.isFinite(n) && Number.isFinite(m)) return Math.abs(m - n) <= slack(k, at, n) + 1e-9;
           return String(have).toLowerCase() === String(want).toLowerCase();
@@ -373,21 +373,21 @@ origami_base:
         const a = p?.attributes ?? {};
         return rename(a.app_name) ?? rename(a.app_id) ?? readable(a.app_name) ?? readable(a.app_id);
       };
-      // media() reads a media player the way Media and Speaker show it, from Home Assistant's standard attributes. The options fill the gaps that some integrations leave.
-      const media = (hass, id, o = {}) => {
+      // media() reads a media player the way Media and Speaker show it, from Home Assistant's standard attributes. The module's options in cfg fill the gaps that some integrations leave, and tv marks the TV layout.
+      const media = (hass, id, { env, tv, cfg = {} } = {}) => {
         const st = hass.states[id];
-        const lead = String(o.leader ?? "").trim();
+        const lead = String(value(env, cfg.leader, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) ?? "").trim();
         const members = st?.attributes?.group_members;
         const group = lead && hass.states[lead] ? { leader: lead, role: lead === id ? "leader" : "member" }
           : Array.isArray(members) && members.length > 1 && members.includes(id) ? { leader: members[0], role: members[0] === id ? "leader" : "member" }
           : { leader: null, role: null };
         const showId = group.role === "member" ? group.leader : id;
         const show = hass.states[showId] ?? st;
-        const twins = list(o.players).map((p) => hass.states[p]).filter(Boolean);
+        const twins = list(cfg.players).map((p) => hass.states[p]).filter(Boolean);
         const source = String(show?.attributes?.source ?? "").trim();
         const powered = power(show);
         // A TV's HDMI sources are where its pictures come from, so the TV layout counts no source as an input
-        const inp = powered && !o.tv ? input(source, o.inputs) : null;
+        const inp = powered && !tv ? input(source, cfg.inputs) : null;
         // The speaker's own music comes first. Another player gives the music while it plays and the speaker does not, or while both are paused and only that player has a title. A speaker that is off or uses an input shows only itself.
         const pool = [show, ...twins].filter(Boolean);
         const tier = (states) => {
@@ -404,14 +404,17 @@ origami_base:
         const live = busy.includes(player?.state) || player?.state === "on";
         const playing = ["playing", "buffering"].includes(player?.state);
         // The art option is read for the speaker whose music shows, so a group member gets its leader's cover
-        const cover = o.env ? value(o.env, o.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} }) : o.art;
-        const raw = picture(cover, []) ?? picture(pa.entity_picture, list(o.ignore));
+        const cover = value(env, cfg.art, { entity: showId, state: show?.state ?? "unknown", attr: show?.attributes ?? {} });
+        const raw = picture(cover) ?? picture(pa.entity_picture, list(cfg.ignore_art));
         if (raw && inp) stale.set(plain(raw), title);
         const art = raw && !inp && live && (title || artist || pa.media_album_name) && stale.get(plain(raw)) !== title ? raw : null;
         const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
         const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
         return {
-          st, show, showId, player, ...group, source, input: inp, title, artist, art, live, kind, playing, power: powered,
+          st, show, showId, player, ...group, source, input: inp, title, artist, art, live, kind, playing,
+          // power is the device's own answer, and while it has none, whether any of its players is on
+          power: power(st) ?? (twins.some((p) => power(p) !== null) ? twins.some((p) => power(p) === true) : null),
+          color: "var(--state-media_player-playing-color, var(--state-media_player-active-color))",
           // The speaker is active while it plays, uses an input, or is simply on, as a TV is
           active: powered === true && (playing || inp !== null || show.state === "on"),
           // icon() returns the card's icon for what the speaker does, from the map in a card's icons option. Without an entry, the card keeps its own icon.
@@ -477,7 +480,8 @@ origami_base:
           const one = (part) => {
             // Bubble Card also takes the spellings last-changed, last-updated and last-triggered
             const p = String(part).trim().replace(/^last-(changed|updated|triggered)$/, "last_$1");
-            return p === "state" ? word(hass, st)
+            // The state of a scene, a button or a timestamp sensor is a time, which reads as a relative time
+            return p === "state" ? ((stamped.includes(domain) || st.attributes?.device_class === "timestamp") && !["unavailable", "unknown"].includes(st.state) ? ago(hass, st.state) : word(hass, st))
               : p === "name" ? card._org.name(hass, id)
               : ["last_changed", "last_updated"].includes(p) ? ago(hass, st[p])
               : p === "last_triggered" || (stamps[domain] ?? []).includes(p) ? ago(hass, st.attributes?.[p])
@@ -530,6 +534,30 @@ origami_base:
           });
           return rules;
         },
+        // cover() returns the rules that show a cover in a media card's icon, or the icon itself at the given opacity while there is no cover
+        cover: (art, opacity) => `
+    ha-card .bubble-main-icon-container {
+      position: relative;
+      overflow: visible !important;
+      background-image: none !important;
+    }
+    ha-card .bubble-main-icon-container::before {
+      content: ${art ? '""' : "none"};
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: inherit;
+      background: ${art ? "url(" + str(art) + ") center / cover no-repeat" : "none"};
+    }
+    .bubble-media-player .bubble-entity-picture,
+    .bubble-main-icon-container .bubble-entity-picture {
+      display: none !important;
+    }
+    ha-card .bubble-main-icon-container .bubble-icon {
+      color: var(--org-chip-ink) !important;
+      transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
+      opacity: ${art ? "0" : opacity} !important;
+    }`,
         // chips() returns the rules that turn the values in a container into chips, for Header and Popup. A value with show_background turned off stays plain.
         chips: (scope) => {
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
@@ -556,7 +584,8 @@ origami_base:
       const opts = card._org.opts = {
         vertical,
         toggle: !!cfgB.toggle && !vertical,
-        group: !!cfgB.group && !vertical,
+        // toggle wins over group, because a pill switch cannot sit in a tray
+        group: !!cfgB.group && !vertical && !cfgB.toggle,
         compact: !!cfgB.compact,
         tile: !!cfgB.tile,
         animate: !!cfgB.animate,
@@ -790,16 +819,16 @@ origami_base:
       background-color: var(--org-slider-fill) !important;
       opacity: 1 !important;
     }
-    ha-card [class*="bubble-sub-button-slider-"] .bubble-range-fill {
+    :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill {
       border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
     }
-    ha-card [class*="bubble-sub-button-slider-"] .bubble-range-fill.fill-orientation-right {
+    :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-right {
       border-radius: 4px var(--radius-small) var(--radius-small) 4px !important;
     }
-    ha-card [class*="bubble-sub-button-slider-"] .bubble-range-fill.fill-orientation-top {
+    :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-top {
       border-radius: var(--radius-small) var(--radius-small) 4px 4px !important;
     }
-    ha-card [class*="bubble-sub-button-slider-"] .bubble-range-fill.fill-orientation-bottom {
+    :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-bottom {
       border-radius: 4px 4px var(--radius-small) var(--radius-small) !important;
     }
     ha-card .bubble-range-value.in-info-wrapper {

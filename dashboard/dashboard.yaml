@@ -576,8 +576,7 @@ views:
                   icon: mdi:fan
                   origami_tiles:
                     state:
-                      'on': ${attr.percentage} %
-                      'off': 'Off'
+                      'on': ${num(attr.percentage, 0, '%')}
                   visibility:
                     - condition: state
                       entity: fan.bedroom
@@ -644,12 +643,12 @@ views:
                   force_icon: true
                   origami_tiles:
                     name: >-
-                      ${(p => Number.isNaN(p) || p < 0 ? 'Error'
-                      : ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
-                      : p + ' %')(Math.round(states('number.robot_cleaning_progress')))}
+                      ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+                      : Number.isNaN(p) ? '' : p < 0 ? 'Error'
+                      : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
                     state:
-                      docked: 'Off'
-                      idle: 'Off'
+                      docked: ${word('off')}
+                      idle: ${word('off')}
                       cleaning: Vacuum
                     order:
                       cleaning: -1
@@ -692,7 +691,6 @@ views:
                       'on': ${minutesUntil('input_datetime.printer_end')} min
                     state:
                       'on': Running
-                      'off': 'Off'
                     name_color:
                       'on': initial
                   tap_action:
@@ -826,7 +824,7 @@ views:
                   entity: sensor.climate_home
                   icon: mdi:thermometer
                   origami_header:
-                    name: ${attr.temperature_average}°
+                    name: ${num(attr.temperature_average)}°
                   tap_action:
                     action: perform-action
                     perform_action: input_boolean.toggle
@@ -840,7 +838,6 @@ views:
                   state_content: windows_open
                   origami_header:
                     icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
-                    color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
                     name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
                     background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
                   tap_action:
@@ -1364,11 +1361,11 @@ views:
                     - entity: sensor.climate_living_room
                       show_icon: false
                       origami_base:
-                        name: ${attr.temperature}° |
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_living_room
                       show_icon: false
                       origami_base:
-                        name: ${attr.humidity}%
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1403,11 +1400,11 @@ views:
                     - entity: sensor.climate_bedroom
                       show_icon: false
                       origami_base:
-                        name: ${attr.temperature}° |
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_bedroom
                       show_icon: false
                       origami_base:
-                        name: ${attr.humidity}%
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1437,11 +1434,11 @@ views:
                     - entity: sensor.climate_office
                       show_icon: false
                       origami_base:
-                        name: ${attr.temperature}° |
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_office
                       show_icon: false
                       origami_base:
-                        name: ${attr.humidity}%
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1476,11 +1473,11 @@ views:
                     - entity: sensor.climate_bathroom
                       show_icon: false
                       origami_base:
-                        name: ${attr.temperature}° |
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_bathroom
                       show_icon: false
                       origami_base:
-                        name: ${attr.humidity}%
+                        name: ${num(attr.humidity, 0, '%')}
               - type: conditional
                 conditions:
                   - condition: state
@@ -1522,11 +1519,11 @@ views:
                       - entity: sensor.climate_kitchen
                         show_icon: false
                         origami_base:
-                          name: ${attr.temperature}° |
+                          name: ${num(attr.temperature)}° |
                       - entity: sensor.climate_kitchen
                         show_icon: false
                         origami_base:
-                          name: ${attr.humidity}%
+                          name: ${num(attr.humidity, 0, '%')}
               - type: conditional
                 conditions:
                   - condition: state
@@ -1568,11 +1565,11 @@ views:
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
                         origami_base:
-                          name: ${attr.temperature}° |
+                          name: ${num(attr.temperature)}° |
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
                         origami_base:
-                          name: ${attr.humidity}%
+                          name: ${num(attr.humidity, 0, '%')}
 
           # More or fewer rooms
           - type: custom:bubble-card
@@ -1606,9 +1603,6 @@ views:
               ha-card .bubble-sub-button-container {
                 justify-content: center !important;
                 margin: 0 !important;
-              }
-              ha-card .bubble-sub-button-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-                margin-left: var(--ha-space-1) !important;
               }
 
           # Space for the navbar at the end of the page
@@ -2214,7 +2208,6 @@ views:
             shadow_opacity: '12'
             hide_backdrop: false
             modules:
-              - default
               - origami_base
               - origami_popup
             origami_popup:
@@ -2546,7 +2539,7 @@ views:
                               show_name: true
                               show_background: false
                               origami_header:
-                                name: ${attr.temperature}° / ${attr.humidity} %
+                                name: ${num(attr.temperature)}° / ${num(attr.humidity, 0, '%')}
                                 # The dot uses the comfort color
                                 color: ${attr.color_code ?? "transparent"}
                               tap_action:
@@ -2885,7 +2878,7 @@ views:
                                   speaker: media_player.living_room
                                   step: 0.1
 
-                  # The app buttons scroll sideways. Each button's css_class is its app's ID, so the running app's button is filled.
+                  # The app buttons scroll sideways. A button is filled while the TV runs its app, because the TV reports the running app as its source.
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
@@ -2894,12 +2887,10 @@ views:
                     origami_button:
                       scroll: true
                       active_style: toggle
-                      active: "{{ state_attr('media_player.living_room_tv', 'app_id') }}"
                     sub_button:
                       main: []
                       bottom:
                         - name: Netflix
-                          css_class: com.netflix.ninja
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2909,7 +2900,6 @@ views:
                             data:
                               source: Netflix
                         - name: YouTube
-                          css_class: com.google.android.youtube.tv
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2919,7 +2909,6 @@ views:
                             data:
                               source: YouTube
                         - name: Prime Video
-                          css_class: com.amazon.amazonvideo.livingroom
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2929,7 +2918,6 @@ views:
                             data:
                               source: Prime Video
                         - name: Disney+
-                          css_class: com.disney.disneyplus
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2939,7 +2927,6 @@ views:
                             data:
                               source: Disney+
                         - name: Spotify
-                          css_class: com.spotify.tv.android
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2949,7 +2936,6 @@ views:
                             data:
                               source: Spotify
                         - name: Plex
-                          css_class: com.plexapp.android
                           show_name: true
                           tap_action:
                             action: perform-action
