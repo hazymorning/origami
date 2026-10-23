@@ -3,7 +3,7 @@ origami_popup:
   version: "4.1.0"
   supported:
     - pop-up
-  description: "The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header with only a name, the pop-up's sub-buttons appear below the title, as text or as chips, and a long title ends with an ellipsis on one line. A value with a name of its own and no visibility conditions always shows. Each sub-button can have an origami_popup key with name, icon, color for the icon, name_color for the text and background for a chip, the same keys as in Header. The backdrop is blurred, unless the pop-up sets its own backdrop_blur or uses performance mode. A classic pop-up keeps Bubble Card's space below the last card, so the last card can scroll into view, and the other modes keep at least the space of the phone's home indicator."
+  description: "Popup styles a pop-up's header, backdrop and close button. On a header that shows only a name, the sub-buttons become values below the title, as text or as chips, with the same keys as in Header."
   code: |-
     ${(() => {
       const org = card._org;

@@ -3,7 +3,7 @@ origami_speaker:
   version: "5.1.0"
   supported:
     - media-player
-  description: "The Speaker Select module creates the speaker rows for a music pop-up and works with Base. The Media module is not needed. The speaker's name is always visible, followed by what it plays. Album art fills the icon and appears blurred behind the row. A crown marks the group leader, and a link marks its members, whose rows point to the leader. Groups come from Home Assistant's group_members. For integrations without it, Leader gives the group leader's entity ID, and its template returns nothing while the speaker is not in a group. Selected takes an input_select, a select or a template, and the row whose entity ID or name matches the helper's state or the template's result gets a stronger fill. Players lists other media players for the same speaker, such as a Music Assistant player. The speaker's own entity gives the music while it plays something with a title, and otherwise the first player that plays gives the title, the artist and the picture. Picture gives the cover's address for integrations without one, and pictures whose address contains an entry of Ignore pictures never show. Inputs adds source names that count as inputs, and Icons replaces the row's icon for a state or an input. Without an entry, the row keeps its own icon. If the volume sub-button has css_class set to readout, the module writes the volume into it. In a sections view, set rows to 1. The example in bubble_card/README.md shows the other card options."
+  description: "Speaker Select turns media player cards into speaker rows for a music pop-up. Each row shows the speaker's name, what it plays and its cover. A crown and a link mark a group, and the selected speaker's row has a stronger fill."
   editor:
     - name: selected
       label: "Selected (an input_select, a select or a template)"
@@ -60,7 +60,7 @@ origami_speaker:
         grouped: m.role !== null,
         dead: org.power(st) === null,
         chosen: chosen !== "" && (chosen === entity || chosen.toLowerCase() === name.toLowerCase()),
-        audible: m.playing || ["playing", "buffering"].includes(st?.state),
+        audible: org.power(st) !== null && (m.playing || ["playing", "buffering"].includes(st?.state)),
         // The row shows the track after the name while the speaker plays, pauses or buffers music of its own
         track: !!line && !member && !m.input && m.live,
         line,
