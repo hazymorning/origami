@@ -7,7 +7,7 @@ origami_popup:
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_popup needs origami_base 12 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_popup needs origami_base 12 or later");
       const cfg = this.config.origami_popup ?? {};
       const chip = cfg.value_style === "chip";
       // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.

@@ -24,7 +24,7 @@ Open any Bubble card in the editor and go to **Modules**, then **My Modules**, t
 
 ## How the modules work together
 
-List Base first on every Origami card, and then the card's own module. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base in front of it. Without Base in front of it, a module does not run, and the card editor shows an error. On Climate, Media and Speaker Select cards, the lines that the module writes then stop changing.
+Base is a global module, so Bubble Card runs it first on every card, and no card has to list it. It works only on cards that list an Origami module, so other Bubble cards keep their own look. A card that uses Base's options without another Origami module lists `origami_base`. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base. Without Base, a module does not run, and the card editor shows an error. On Climate, Media and Speaker Select cards, the lines that the module writes then stop changing.
 
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
@@ -116,7 +116,7 @@ sub_button:
 
 ### Base
 
-The Base module is the frame for button and media player cards. It sets the height, icon and text styles, and it keeps the sub-buttons neutral. Its options create a slim row, add a pill switch, group the sub-buttons, turn the card into a tile, place the name under the icon, let the card fade in or change the card's words. Base also holds the helpers that the other modules use, so it comes first on every Origami card.
+The Base module is the frame for button and media player cards. It sets the height, icon and text styles, and it keeps the sub-buttons neutral. Its options create a slim row, add a pill switch, group the sub-buttons, turn the card into a tile, place the name under the icon, let the card fade in or change the card's words. Base also holds the helpers that the other modules use, and Bubble Card runs it first on every card with an Origami module.
 
 <img width="800" alt="A regular card, a tile and two compact rows with the pill switch" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-base.webp">
 
@@ -900,7 +900,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Climate shows how a module writes the state line, Media shows how it writes the name line too, Tiles shows how a module turns a sub-buttons card into a grid of tiles, and Speaker Select shows how a module reads a media player with Base's `media()` helper.
 
-Base puts its helpers on `card._org`, so a module that is listed after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. These are the helpers:
+Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. These are the helpers:
 
 | Helper | Description |
 | --- | --- |

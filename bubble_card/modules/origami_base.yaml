@@ -1,6 +1,7 @@
 origami_base:
   name: "Origami • Base"
   version: "12.0.0"
+  is_global: true
   supported:
     - button
     - media-player
@@ -11,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and the shared core of every Origami card, so it comes first in the list of modules. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, a fade in and the card's own words."
+  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, a fade in and the card's own words."
   editor:
     - name: compact
       label: "Compact"
@@ -49,7 +50,10 @@ origami_base:
         object: {}
   code: |
     ${(() => {
-      // Base leaves these helpers on card._org for the modules listed after it. They take hass as an argument, so no module reads an earlier render.
+      // Base is a global module, so Bubble Card runs it first on every card, and no card has to list it. It works only on cards that use an Origami module.
+      card._orgOn = [].concat(this.config.modules ?? []).some((m) => String(m).startsWith("origami_"));
+      if (!card._orgOn) return "";
+      // Base leaves these helpers on card._org for the modules that run after it. They take hass as an argument, so no module reads an earlier render.
       const cfgB = this.config.origami_base ?? {};
       // look() follows Home Assistant's rules for when an entity is active and which state color it takes, as the frontend's state_active.ts, state_color.ts, data/group.ts and data/climate.ts define them
       const stamped = ["ai_task", "button", "conversation", "datetime", "event", "image", "infrared", "input_button", "notify", "radio_frequency", "scene", "stt", "tag", "tts", "wake_word"];
@@ -611,6 +615,7 @@ origami_base:
         ? 'ha-card .bubble-sub-button.bubble-sub-button-' + (i + 1) + ':not([class*="bubble-sub-button-slider-"])' : null).filter(Boolean) : [];
       return "";
     })()}
+    ${!card._orgOn ? "" : `
     ${card._org.opts.animate ? `
     ha-card {
       animation: origami-in var(--duration-slow) ease-in;
@@ -1031,4 +1036,5 @@ origami_base:
       });
       return org.fill(sel);
     })()}
+    `}
     `}

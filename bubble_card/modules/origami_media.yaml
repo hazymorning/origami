@@ -55,7 +55,7 @@ origami_media:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later");
       const cfg = this.config.origami_media ?? {};
       const env = { hass, renderTemplate };
       const ent = hass.states[entity];

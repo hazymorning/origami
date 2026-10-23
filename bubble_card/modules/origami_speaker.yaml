@@ -40,7 +40,7 @@ origami_speaker:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_speaker needs origami_base 12 or later, listed before it");
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_speaker needs origami_base 12 or later");
       // The row draws its own background, so Base leaves it as it is
       if (card.dataset.orgBg !== "own") card.dataset.orgBg = "own";
       const cfg = this.config.origami_speaker ?? {};
