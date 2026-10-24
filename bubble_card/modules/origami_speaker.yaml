@@ -1,84 +1,97 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "4.1.4"
+  version: "5.3.0"
   supported:
     - media-player
-  description: "The Speaker Select module creates the speaker rows for a music pop-up and works with Base. The Media module is not needed. The speaker's name is always visible, followed by what it is playing. Album art fills the icon and appears blurred behind the row. A crown marks the group leader, and a link marks its members. When a speaker is selected in input_select.lautsprecher_wahlen, its row has a stronger fill. If the volume sub-button has css_class set to readout, the module writes the volume into it as a percentage. In a sections view, set rows to 1. The example in bubble_card/README.md shows the other card options."
+    - button
+  description: "Speaker Select turns media player cards into speaker rows for a music pop-up. Each row shows the speaker's name, what it plays and its cover. A crown and a link mark a group. On a button card with a slider, the whole row sets the volume."
+  editor:
+    - name: selected
+      label: "Selected (an input_select, a select or a template)"
+      selector:
+        template: {}
+    - name: players
+      label: "Players (other media players for the same speaker)"
+      selector:
+        entity:
+          domain: media_player
+          multiple: true
+    - name: leader
+      label: "Leader (for groups without group_members)"
+      selector:
+        template: {}
+    - name: art
+      label: "Picture (the cover's address, if the player has none)"
+      selector:
+        template: {}
+    - name: ignore_art
+      label: "Ignore pictures (texts in the addresses of pictures to leave out)"
+      selector:
+        text:
+          multiple: true
+    - name: inputs
+      label: "Inputs (more source names that count as inputs)"
+      selector:
+        text:
+          multiple: true
+    - name: icons
+      label: "Icons (a map from a state or an input to an icon)"
+      selector:
+        object: {}
   code: |
     ${(() => {
-      const s = hass.states;
-      const st = s[entity];
-      const a = st?.attributes ?? {};
-      const link = s["sensor.linkplay_" + (entity ?? "").split(".")[1]];
-      const g = link?.attributes?.group_state;
-      const slave = g === "slave";
-      const masterId = s["sensor.linkplay_master"]?.state;
-      const master = slave && masterId ? s[masterId] : null;
-      const showId = master ? masterId : (entity ?? "");
-      const show = master ?? st;
-      const showLink = s["sensor.linkplay_" + showId.split(".")[1]];
-      const src = (showLink?.attributes?.source ?? "").trim().toLowerCase();
-      const tvSrc = ["optical", "optical-in", "optical in", "spdif", "coaxial", "co-axial", "coax", "hdmi", "arc", "tv"];
-      const artless = ["optical", "optical-in", "optical in", "spdif", "coaxial", "co-axial", "coax", "hdmi", "arc", "tv", "line in", "line-in", "line-in2", "line_in", "aux", "rca", "xlr", "phono", "fm", "cd"];
-      const ignore = String(this.config.origami_speaker?.ignore_art ?? "").split(",").map(v => v.trim().toLowerCase()).filter(Boolean);
-      const clean = (u) => {
-        const v = typeof u === "string" ? u.trim() : "";
-        if (!v || ["unknown", "unavailable", "none", "null", "undefined"].includes(v.toLowerCase())) return null;
-        if (!/^https?:\/\//i.test(v) && !v.startsWith("/")) return null;
-        if (ignore.some(f => v.toLowerCase().includes(f))) return null;
-        return v;
-      };
-      const norm = (v) => {
-        const parts = v.split("?");
-        const query = parts[1] ?? "";
-        const cache = new URLSearchParams(query).get("cache");
-        return parts[0] + "|" + (cache ?? query.replace(/(^|&)token=[^&]*/g, ""));
-      };
-      if (!window.__origamiBadArt) window.__origamiBadArt = new Set();
-      const bad = window.__origamiBadArt;
-      const raw = clean(s["sensor.linkplay_" + showId.split(".")[1]]?.attributes?.entity_picture ?? show?.attributes?.entity_picture);
-      if (raw && artless.includes(src)) bad.add(norm(raw));
-      const hasTrack = !!(show?.attributes?.media_title || show?.attributes?.media_artist || show?.attributes?.media_album_name);
-      const live = ["playing", "paused", "buffering", "on"].includes(show?.state ?? "");
-      const physical = artless.includes(src) || src === "bluetooth";
-      const art = raw && !physical && live && hasTrack && !bad.has(norm(raw)) ? raw : null;
-      const ownTitle = String(a.media_title ?? "").trim();
-      const ownArtist = String(a.media_artist ?? "").trim();
-      const ownSrc = String(a.source ?? "").trim();
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_speaker needs origami_base 12 or later");
+      // The row draws its own background, so Base leaves it as it is
+      if (card.dataset.orgBg !== "own") card.dataset.orgBg = "own";
+      const cfg = this.config.origami_speaker ?? {};
+      const env = { hass, renderTemplate };
+      const st = hass.states[entity];
+      const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
+      const m = org.media(hass, entity, { env, cfg });
+      const name = org.name(hass, entity, this.config.name, env);
+      // Selected is a helper whose state names the speaker, or a template that names it itself
+      const pick = String(org.value(env, cfg.selected, ctx) ?? "").trim();
+      const chosen = /^(input_)?select\./.test(pick) ? String(hass.states[pick]?.state ?? "") : pick;
+      const member = m.role === "member";
+      const line = [m.title, m.artist].filter(Boolean).join(" • ");
       card._orgSp = {
-        st,
-        show,
-        showId,
-        slave,
-        grouped: ["master", "slave"].includes(g),
-        dead: !st || ["unavailable", "unknown", "off", "standby"].includes(st.state),
-        chosen: s["input_select.lautsprecher_wahlen"]?.state === entity,
-        bt: src === "bluetooth",
-        tv: tvSrc.includes(src),
-        showPlaying: ["playing", "buffering"].includes(show?.state),
-        audible: ["playing", "buffering"].includes(st?.state) || (slave && ["playing", "buffering"].includes(master?.state)),
-        nativeInfo: !((ownTitle + ownArtist) === "" || (ownTitle !== "" && ownSrc !== "" && ownTitle === ownSrc)) && st?.state !== "idle",
-        hasArt: !!art,
-        art: art ? 'url("' + art + '")' : "none",
-        masterName: master ? ({ Wohnzimmer: "Wohnzi", Potterbox: "Potti", Mandaloffice: "Office", Hedwig: "Hedwig", Mandalotsen: "Lotsen", Gandalf: "Gandalf" }[master.attributes?.friendly_name] ?? master.attributes?.friendly_name) : null
+        m,
+        grouped: m.role !== null,
+        dead: org.power(st) === null,
+        chosen: chosen !== "" && (chosen === entity || chosen.toLowerCase() === name.toLowerCase()),
+        audible: org.power(st) !== null && (m.playing || ["playing", "buffering"].includes(st?.state)),
+        // The row shows the track after the name while the speaker plays, pauses or buffers music of its own
+        track: !!line && !member && !m.input && m.live,
+        art: m.art
       };
-      const mass = s[showId + "_mass"];
-      const massOn = mass && ["playing", "paused", "buffering"].includes(mass.state);
-      const lineTitle = (massOn ? mass.attributes?.media_title : null) || show?.attributes?.media_title || "";
-      const lineArtist = (massOn ? mass.attributes?.media_artist : null) || show?.attributes?.media_artist || "";
-      card._orgSp.line = lineTitle && lineArtist ? lineTitle + " \u2022 " + lineArtist : lineTitle || lineArtist;
+      const s = card._orgSp;
+      const rtl = !!hass.translationMetadata?.translations?.[hass.language]?.isRTL;
+      // Bubble Card hands the state line to a module whose code contains this exact assignment, and it skips a write that repeats the line's text
+      const next = s.dead ? org.word(hass, st)
+        : member ? (rtl ? "← " : "→ ") + ((n) => org.rename(n) ?? n)(org.name(hass, m.leader))
+        : m.input ? org.word(hass, m.show, "source")
+        : s.track ? line
+        : org.word(hass, m.show);
+      card.querySelector('.bubble-state').textContent = next;
+      org.remeasure(card.querySelector('.bubble-state'), this.config.scrolling_effect !== false);
+      org.icon(icon, m.icon(cfg.icons));
+      // Each readout shows its own speaker's volume
+      org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));
+      org.badge(m.role);
+      // A readout without an action of its own passes the tap to the row, so the row's tap selects the speaker there too
+      s.through = org.items(this.config).map((item, i) => org.slug(item.css_class) === "readout" && !item.tap_action && !item.hold_action && !item.double_tap_action ? "ha-card .bubble-sub-button-" + (i + 1) : null).filter(Boolean);
       return "";
     })()}
     ha-card {
       --org-row-height: calc(var(--control-height-list) + 2px);
       --org-icon-size: var(--icon-size-xs);
       --org-tile-size: calc(var(--org-icon-size) + 2 * var(--ha-space-1));
-      --org-chip-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);
-      --org-name-size: var(--ha-font-size-m);
-      --org-color: var(--state-media_player-active-color);
+      --org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);
+      --org-tile-radius: max(var(--radius-small), calc(var(--ha-card-border-radius, var(--bubble-border-radius, 24px)) - var(--org-tile-inset)));
+      --org-color: ${card._orgSp.m.color};
       --org-chip-bg: ${card._orgSp.audible ? "var(--org-field)" : "var(--fill-subtle)"};
       --org-chip-ink: ${card._orgSp.audible ? "var(--org-color)" : "var(--primary-text-color)"};
-      --org-text-max: 100%;
     }
     ha-card .bubble-container {
       height: 100% !important;
@@ -89,66 +102,17 @@ origami_speaker:
       overflow: hidden;
     }
     .bubble-background::before {
-      content: ${card._orgSp.hasArt ? '""' : "none"};
+      content: ${card._orgSp.art ? '""' : "none"};
       position: absolute;
       inset: 0;
-      background-image: ${card._orgSp.art};
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      background: ${card._orgSp.art ? "url(" + card._org.str(card._orgSp.art) + ") center / cover no-repeat" : "none"};
       filter: blur(40px);
       opacity: 0.2;
       pointer-events: none;
     }
-    ha-card .bubble-icon-container {
-      min-height: 0px !important;
-      margin: 0px var(--ha-space-1) 0px var(--org-chip-inset) !important;
-      border-radius: max(var(--radius-small), calc(var(--ha-card-border-radius, var(--bubble-border-radius, 24px)) - var(--org-chip-inset))) !important;
-      position: relative;
-      overflow: visible !important;
-    }
-    ha-card .bubble-main-icon-container::before {
-      content: ${card._orgSp.hasArt ? '""' : "none"};
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      border-radius: inherit;
-      background-image: ${card._orgSp.art};
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    .bubble-media-player .bubble-entity-picture,
-    .bubble-main-icon-container .bubble-entity-picture {
-      display: none !important;
-    }
-    ha-card .bubble-icon-container .bubble-icon {
-      color: var(--org-chip-ink) !important;
-      transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
-      opacity: ${card._orgSp.hasArt ? "0" : card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)"} !important;
-    }
-    .org-group-badge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--org-color);
-      background-color: var(--tint);
-      box-shadow: 0 0 0 2px var(--ha-card-background);
-      pointer-events: none;
-      z-index: 3;
-      --mdc-icon-size: 10px;
-    }
-    .org-group-badge ha-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 0;
+    ${card._org.cover(card._orgSp.art, card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)")}
+    ha-card .bubble-sub-button-container {
+      margin-inline-end: var(--ha-space-4) !important;
     }
     ha-card .bubble-content-container {
       display: flex !important;
@@ -158,47 +122,54 @@ origami_speaker:
       flex: 1 1 auto;
       min-width: 0;
       overflow: visible;
-      margin-right: var(--ha-space-2);
+      margin-inline-end: var(--ha-space-2);
     }
     ha-card .bubble-name-container {
       display: flex !important;
-      flex: ${card._orgSp.nativeInfo ? "0 0 auto" : "0 1 auto"} !important;
+      flex: 1 1 auto !important;
       flex-direction: row !important;
       justify-content: flex-start !important;
-      align-items: baseline !important;
+      align-items: center !important;
       gap: var(--ha-space-2) !important;
       min-width: 0;
       overflow: hidden;
       margin: 0px !important;
     }
     ha-card .bubble-media-info-container {
-      flex: 1 1 0% !important;
-      min-width: 0;
-      margin: 0px !important;
+      display: none !important;
     }
     .bubble-name {
       flex-shrink: 0;
       line-height: var(--ha-line-height-normal);
       opacity: ${card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.chosen ? "1" : "var(--opacity-strong)"} !important;
     }
-    ha-card .bubble-state,
-    ha-card .bubble-title {
+    ha-card .bubble-state {
+      display: block !important;
+      flex: 1 1 0% !important;
       min-width: 0;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
       font-size: var(--ha-font-size-s) !important;
       font-weight: var(--ha-font-weight-medium) !important;
       line-height: var(--ha-line-height-normal) !important;
       color: var(--secondary-text-color) !important;
       opacity: 1 !important;
     }
-    ha-card .bubble-state {
-      display: ${card._orgSp.nativeInfo && !card._orgSp.slave ? "none" : "flex"} !important;
-    }
-    ha-card .bubble-artist {
-      display: none !important;
-    }
     ha-card .bubble-name[data-animated="true"],
-    ha-card .bubble-title[data-animated="true"] {
+    ha-card .bubble-state[data-animated="true"] {
       text-overflow: clip;
+    }
+    ${this.config.button_type === "slider" ? `
+    ha-card .bubble-range-fill::after {
+      display: none;
+    }` : ""}
+    ${card._orgSp.through.length ? card._orgSp.through.join(", ") + ` {
+      pointer-events: none !important;
+    }` : ""}
+    /* A row shows no media buttons, so the card needs no hide option for them */
+    ha-card .bubble-buttons-container {
+      display: none !important;
     }
     ha-card .bubble-sub-button.readout {
       padding: 0px !important;
@@ -209,96 +180,3 @@ origami_speaker:
       font-weight: var(--ha-font-weight-bold) !important;
       color: var(--secondary-text-color);
     }
-    ${(() => {
-      const m = card._orgSp;
-      const next = m.dead ? "mdi:speaker-off"
-        : m.bt ? "mdi:bluetooth"
-        : m.tv ? "mdi:television"
-        : m.showPlaying ? "mdi:speaker-pause"
-        : "mdi:speaker";
-      if (icon && icon.getAttribute("icon") !== next) icon.setAttribute("icon", next);
-      return "";
-    })()}
-    ${(() => {
-      const host = card.querySelector(".bubble-main-icon-container") ?? card.querySelector(".bubble-icon-container");
-      if (!host) return "";
-      let b = host.querySelector(".org-group-badge");
-      if (!b) {
-        b = document.createElement("div");
-        b.className = "org-group-badge";
-        b.appendChild(document.createElement("ha-icon"));
-        host.appendChild(b);
-      }
-      const m = card._orgSp;
-      const wanted = m.grouped ? "flex" : "none";
-      if (b.style.display !== wanted) b.style.display = wanted;
-      const ic = b.querySelector("ha-icon");
-      const glyph = m.slave ? "mdi:link-variant" : "mdi:crown";
-      if (ic && ic.getAttribute("icon") !== glyph) ic.setAttribute("icon", glyph);
-      return "";
-    })()}
-    ${(() => {
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const m = card._orgSp;
-      const w = String(hass.locale?.language ?? hass.language ?? "").startsWith("de")
-        ? { group: "Gruppe", playing: "läuft", paused: "pausiert", idle: "inaktiv" }
-        : { group: "group", playing: "playing", paused: "paused", idle: "idle" };
-      const next = m.dead ? "offline"
-        : m.slave ? ("\u2192 " + (m.masterName ?? w.group))
-        : m.bt ? "Bluetooth"
-        : m.tv ? "TV"
-        : m.showPlaying ? (m.line || w.playing)
-        : m.show?.state === "paused" ? w.paused
-        : w.idle;
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}
-    ${(() => {
-      const el = card.querySelector(".bubble-title");
-      if (!el) return "";
-      el.templateDetected = true;
-      const m = card._orgSp;
-      const full = m.nativeInfo && !m.slave ? m.line : "";
-      if (!full) {
-        if (el.textContent !== "") el.textContent = "";
-        if (el.getAttribute("data-animated") === "true") el.removeAttribute("data-animated");
-        el._orgTxt = "";
-        el._orgAnim = false;
-        return "";
-      }
-      if (el._orgTxt !== full) {
-        el._orgTxt = full;
-        el._orgAnim = false;
-        el.removeAttribute("data-animated");
-        el.textContent = full;
-      }
-      if (el.clientWidth === 0) return "";
-      if (!el._orgAnim) {
-        const over = el.scrollWidth > el.clientWidth + 1;
-        if (over) {
-          const sep = '<span class="bubble-scroll-separator"> | </span>';
-          const esc = full.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-          el.innerHTML = '<div class="scrolling-container"><span>' + esc + sep + esc + sep + "</span></div>";
-          const span = el.querySelector(".scrolling-container span");
-          if (span) {
-            span.style.animationDuration = Math.max(1, span.getBoundingClientRect().width / 2 / 16).toFixed(2) + "s";
-            span.style.animationPlayState = "running";
-          }
-          el._orgAnim = true;
-        }
-      }
-      if (el._orgAnim && el.getAttribute("data-animated") !== "true") el.setAttribute("data-animated", "true");
-      if (!el._orgAnim && el.getAttribute("data-animated") === "true") el.removeAttribute("data-animated");
-      return "";
-    })()}
-    ${(() => {
-      const sb = card.querySelector(".readout");
-      const el = sb?.querySelector(".bubble-sub-button-state") ?? sb?.querySelector(".bubble-sub-button-name-container");
-      if (!el) return "";
-      const m = card._orgSp;
-      const v = m.st?.attributes?.volume_level;
-      const next = v != null && !m.dead ? Math.round(v * 100) + " %" : "–";
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}

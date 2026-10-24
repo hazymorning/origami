@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "1.4.1"
+  version: "3.5.0"
   supported:
     - separator
-  description: "The Header module creates a section header on a separator card. The card's name is the title, and the sub-buttons are the values on the right. Setting Value style to Chips turns the values into pills. A sub-button with show_background turned off stays plain. Each sub-button can have an origami_header key with name, icon, color and background. These keys accept a value, a map from the entity's state to a value, or JavaScript in ${ }. The header leaves 24 px of space above it and 8 px below it, and it sets its own height."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -15,6 +15,8 @@ origami_header:
               value: text
             - label: Chips
               value: chip
+            - label: Switch
+              value: switch
       default: text
     - name: weight
       label: "Value weight"
@@ -37,124 +39,114 @@ origami_header:
       label: "Icon size"
       selector:
         text: {}
-      default: "var(--dot-size, 12px)"
+      default: "var(--icon-size-xs)"
     - name: value_max_width
       label: "Value max width (for example 50%)"
       selector:
         text: {}
+    - name: size
+      label: "Title size"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Normal
+              value: normal
+            - label: Large
+              value: large
+    - name: title_action
+      label: "A tap on the title runs the first value's action"
+      selector:
+        boolean: {}
+      default: false
+    - name: value_size
+      label: "Value size"
+      selector:
+        text: {}
+      default: "var(--ha-font-size-m)"
+    - name: icon_gap
+      label: "Space between a value's icon and its name"
+      selector:
+        text: {}
+      default: "var(--ha-space-1)"
+    - name: scroll
+      label: "The values scroll sideways next to the title"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
-      // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height unless rows are set
-      const setRows = this.config.grid_options?.rows ?? this.config.rows;
-      if (setRows === undefined && !this._orgHAutoRows && typeof this.getGridOptions === "function") {
-        const base = this.getGridOptions.bind(this);
-        this.getGridOptions = () => ({ ...base(), rows: "auto", min_rows: undefined, max_rows: undefined });
-        this._orgHAutoRows = true;
+      // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
+      const auto = (this.config.grid_options?.rows ?? this.config.rows) === undefined;
+      const own = Object.getPrototypeOf(this)?.getGridOptions;
+      if (typeof own === "function" && auto !== !!this._orgHAutoRows) {
+        if (auto) this.getGridOptions = () => ({ ...own.call(this), rows: "auto", min_rows: undefined, max_rows: undefined });
+        else delete this.getGridOptions;
+        this._orgHAutoRows = auto;
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_header needs origami_base 12 or later");
+      const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
-      const raw = cfg.icon_color ? (typeof renderTemplate === "function" ? renderTemplate(cfg.icon_color) : cfg.icon_color) : "";
+      const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
+      const text = String(cfg.value_size ?? "").trim() || "var(--ha-font-size-m)";
+      const gap = String(cfg.icon_gap ?? "").trim();
       card._orgH = {
         weight: cfg.weight === "regular" ? "var(--ha-font-weight-normal)" : cfg.weight === "medium" ? "var(--ha-font-weight-medium)" : "var(--ha-font-weight-bold)",
         color: String(raw ?? "").trim() || "currentcolor",
-        size: size || "var(--dot-size, 12px)",
+        size: size || "var(--icon-size-xs)",
         max,
-        chip: cfg.value_style === "chip"
+        // A large title is as large as a pop-up's title, for a header that stands in for one
+        large: cfg.size === "large",
+        // With title_action, the whole header runs the first value's tap action, such as a title that opens a menu
+        titled: !!cfg.title_action,
+        text,
+        gap: gap || "var(--ha-space-1)",
+        chip: cfg.value_style === "chip",
+        // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
+        switch: cfg.value_style === "switch",
+        picked: [],
+        // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
+        scroll: !!cfg.scroll
       };
-      const S = hass.states;
-      const sb = this.config.sub_button;
-      const flat = (list) => [
-        ...list.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
-        ...list.filter((i) => i && !Array.isArray(i.group))
-      ];
-      const items = [
-        ...flat(Array.isArray(sb) ? sb : (sb?.main ?? [])),
-        ...flat(Array.isArray(sb) ? [] : (sb?.bottom ?? []))
-      ];
-      const now = new Date();
-      const states = (id) => S[id]?.state ?? "unknown";
-      const minutesUntil = (id) => {
-        const v = String(states(id));
-        const t = v.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-        let end;
-        if (t) {
-          end = new Date(now);
-          end.setHours(Number(t[1]), Number(t[2]), Number(t[3] ?? 0), 0);
-          if (end < now) end.setDate(end.getDate() + 1);
-        } else {
-          end = new Date(v.replace(" ", "T"));
-        }
-        const m = Math.round((end - now) / 60000);
-        return Number.isNaN(m) ? "" : m;
-      };
-      const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === "" || Number.isNaN(v))
-        ? ""
-        : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
-      const fns = card._orgHFns ?? (card._orgHFns = new Map());
-      const run = (value, ctx) => {
-        if (typeof value !== "string") return value;
-        if (/\{(\{|%)/.test(value)) return renderTemplate(value, ctx.entity);
-        if (!value.includes("${")) return value;
-        let fn = fns.get(value);
-        if (!fn) {
-          try {
-            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "return fill`" + value + "`;");
-          } catch (e) {
-            fn = () => "";
-          }
-          fns.set(value, fn);
-        }
-        try {
-          return fn(fill, hass, ctx.entity, ctx.state, ctx.attr, states, minutesUntil);
-        } catch (e) {
-          return "";
-        }
-      };
-      const pick = (option, ctx) => {
-        if (option === undefined || option === null) return "";
-        if (typeof option === "object" && !Array.isArray(option)) {
-          const key = String(ctx.state).toLowerCase();
-          const hit = Object.keys(option).find((k) => k.toLowerCase() === key);
-          return hit === undefined ? "" : run(option[hit], ctx);
-        }
-        return run(option, ctx);
-      };
-      const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
-      const q = (v) => JSON.stringify(String(v));
-      const rules = [];
-      card._orgHIcons = [];
-      items.forEach((item, i) => {
-        const opt = item.origami_header;
-        if (!opt) return;
-        const entity = item.entity ?? this.config.entity;
-        const obj = S[entity];
-        const ctx = { entity, state: obj?.state ?? "unknown", attr: obj?.attributes ?? {} };
-        const sel = "ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + (i + 1);
-        const name = pick(opt.name, ctx);
-        const icon = pick(opt.icon, ctx);
-        const color = pick(opt.color, ctx);
-        const background = pick(opt.background, ctx);
-        if (has(name)) {
-          rules.push(sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }");
-          rules.push(sel + " .bubble-sub-button-name-container::before { content: " + q(name) + "; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: var(--ha-font-size-m); }");
-          if (!card._orgH.chip) rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
-        }
-        if (has(color)) {
-          rules.push(sel + " { color: " + color + " !important; }");
-          rules.push(sel + " .bubble-sub-button-icon:not(.hidden) { color: " + color + " !important; }");
-        }
-        if (has(background)) rules.push(sel + " { --org-header-chip: " + background + "; }");
-        if (has(icon)) card._orgHIcons.push([i + 1, String(icon)]);
+      const scope = "ha-card .bubble-sub-button-container";
+      const list = org.subs(env, this.config, "origami_header");
+      // A chip that has nothing to show but its icon, with no name, no state and no name key, is a square with a larger icon
+      card._orgH.bare = card._orgH.chip ? list.filter(({ item, opt }) => item.show_background !== false && !(opt && "name" in opt) && !(item.show_name && org.has(item.name))
+        && !["show_state", "state_content", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false)).map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n) : [];
+      if (card._orgH.switch || card._orgH.chip) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n);
+      // In a row that scrolls, a newly chosen value scrolls into view, such as the chip of the room a pop-up opens on
+      const pick = card._orgH.scroll ? card._orgH.picked[0] ?? "" : "";
+      if (pick && pick !== card._orgHPick) requestAnimationFrame(() => {
+        const row = card.querySelector(scope.replace(/^ha-card /, ""));
+        const chip = card.querySelector(pick.replace(/^ha-card /, ""));
+        if (!row || !chip || !row.clientWidth) return;
+        card._orgHPick = pick;
+        const start = chip.offsetLeft - row.offsetLeft;
+        if (start < row.scrollLeft || start + chip.offsetWidth > row.scrollLeft + row.clientWidth - 48) row.scrollTo({ left: Math.max(0, start - 8), behavior: card._orgHSeen ? "smooth" : "auto" });
+        card._orgHSeen = true;
+      });
+      const rules = org.values(env, this.config, "origami_header", scope, text, list);
+      // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state, on either side of the name
+      if (!card._orgH.chip) list.forEach(({ n, opt }) => {
+        if (!org.has(opt?.name)) return;
+        const sel = scope + " .bubble-sub-button.bubble-sub-button-" + n;
+        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--org-header-icon-gap) !important; }");
+        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--org-header-icon-gap) 0 !important; }");
       });
       card._orgHCss = rules.join("\n");
       return "";
     })()}
     ha-card {
+      /* A chosen value stands on the card background, and in dark mode on a lighter surface, as on a switch */
+      --org-header-pick: ${card._org.opts.dark ? "color-mix(in srgb, var(--primary-text-color) 22%, var(--ha-card-background))" : "var(--ha-card-background)"};
       --org-header-weight: ${card._orgH.weight};
       --org-header-icon-color: ${card._orgH.color};
       --org-header-icon-size: ${card._orgH.size};
+      --org-header-icon-gap: ${card._orgH.gap};
     }
     ha-card .bubble-container {
       display: flex !important;
@@ -163,7 +155,9 @@ origami_header:
       gap: 0 !important;
       height: auto !important;
       min-height: 0 !important;
-      padding: var(--ha-space-6, 24px) 0 var(--ha-space-2) 0 !important;
+      ${card._orgH.large ? `box-sizing: border-box !important;
+      min-height: calc(var(--ha-space-2) + var(--control-height-icon)) !important;
+      padding: var(--ha-space-2) 0 0 0 !important;` : "padding: var(--org-header-above, var(--ha-space-6, 24px)) 0 var(--org-header-below, var(--ha-space-2)) 0 !important;"}
       background: none !important;
       border: none !important;
       border-radius: 0 !important;
@@ -180,7 +174,8 @@ origami_header:
       min-width: 0;
       margin: 0 !important;
       padding: 0 !important;
-      font-size: var(--ha-font-size-l) !important;
+      font-size: ${card._orgH.large ? "var(--ha-font-size-2xl)" : "var(--ha-font-size-l)"} !important;
+      ${card._orgH.large ? "line-height: var(--ha-line-height-condensed) !important;" : ""}
       font-weight: var(--ha-font-weight-bold) !important;
       color: var(--primary-text-color) !important;
       white-space: nowrap !important;
@@ -195,40 +190,26 @@ origami_header:
       display: flex !important;
       align-items: center !important;
       justify-content: flex-end !important;
-      gap: var(--ha-space-3) !important;
       height: auto !important;
-      margin: 0 0 0 var(--ha-space-3) !important;
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-3) !important;
       padding: 0 !important;
       background: none !important;
     }
+    ${card._org.plain("ha-card .bubble-sub-button-container", "var(--org-header-weight)")}
     ha-card .bubble-sub-button-container .bubble-sub-button {
-      width: auto !important;
-      min-width: 0 !important;
-      height: auto !important;
-      padding: 0 !important;
-      border-radius: 0 !important;
-      background: none !important;
-      box-shadow: none !important;
-      font-size: var(--ha-font-size-m) !important;
-      font-weight: var(--org-header-weight) !important;
-      color: var(--secondary-text-color) !important;
-      white-space: nowrap !important;
+      font-size: ${card._orgH.text} !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button:not(.bubble-action-enabled) {
       pointer-events: none;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-button-name-container {
-      font-size: inherit !important;
-      font-weight: inherit !important;
-      color: inherit !important;
-      opacity: 1 !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
       display: block !important;
       flex-shrink: 0;
       font-weight: var(--ha-font-weight-normal) !important;
       --mdc-icon-size: var(--org-header-icon-size) !important;
-      margin: -2px var(--ha-space-1) 0 0 !important;
+      margin-block: -2px 0 !important;
+      margin-inline: 0 var(--org-header-icon-gap) !important;
       color: var(--org-header-icon-color) !important;
       opacity: 1 !important;
     }
@@ -236,14 +217,33 @@ origami_header:
       margin: 0 !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
-      margin: -2px 0 0 0 !important;
+      margin: -2px 0 0 !important;
     }
+    ${card._orgH.titled ? `
+    ha-card .bubble-container {
+      position: relative !important;
+    }
+    ha-card .bubble-sub-button-container,
+    ha-card .bubble-sub-button-container .bubble-sub-button-1 {
+      position: static !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button-1::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button:not(.bubble-sub-button-1) {
+      position: relative;
+      z-index: 1;
+    }
+    ` : ""}
     ${card._orgH.max ? `
     ha-card .bubble-sub-button-container {
       flex: 0 1 auto !important;
       min-width: 0 !important;
       max-width: ${card._orgH.max} !important;
-      margin: 0 0 0 auto !important;
+      margin: 0 !important;
+      margin-inline-start: auto !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button {
       min-width: 0 !important;
@@ -259,36 +259,74 @@ origami_header:
       line-height: inherit !important;
     }
     ` : ""}
-    ${card._orgH.chip ? `
+    ${card._orgH.chip ? card._org.chips("ha-card .bubble-sub-button-container") : ""}
+    ${card._orgH.bare.length ? card._orgH.bare.join(",\n    ") + ` {
+      justify-content: center !important;
+      min-width: var(--control-height-mini) !important;
+      padding: 0 !important;
+    }
+    ` + card._orgH.bare.map((s) => s + " .bubble-sub-button-icon:not(.hidden)").join(",\n    ") + ` {
+      --mdc-icon-size: var(--icon-size-xs) !important;
+    }` : ""}
+    ${card._orgH.chip && card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
+      background-color: var(--org-header-pick) !important;
+      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+    }` : ""}
+    ${card._orgH.scroll ? `
+    /* A row of chips is a row of boxes, so it keeps more space from the cards below it than a title alone */
+    ha-card .bubble-container {
+      padding-bottom: calc(var(--org-header-below, var(--ha-space-2)) + var(--ha-space-2)) !important;
+    }
     ha-card .bubble-sub-button-container {
-      gap: var(--ha-space-2) !important;
+      flex: 1 1 0% !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      margin-block: calc(-1 * var(--ha-space-1)) !important;
+      margin-inline: var(--ha-space-2) calc(-1 * var(--scroller-bleed, 0px)) !important;
+      padding-block: var(--ha-space-1) !important;
+      padding-inline: var(--ha-space-2) var(--scroller-bleed, 0px) !important;
+      mask-image: linear-gradient(to right, transparent 0px, black var(--ha-space-2), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
     }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off,
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on {
-      gap: var(--ha-space-1) !important;
-      min-height: var(--control-height-mini) !important;
-      padding: 0 var(--ha-space-3) !important;
+    ha-card:dir(rtl) .bubble-sub-button-container {
+      mask-image: linear-gradient(to left, transparent 0px, black var(--ha-space-2), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+    }` : ""}
+    ${card._orgH.switch ? `
+    ha-card .bubble-sub-button-container {
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      margin-inline-start: auto !important;
+      padding: var(--ha-space-1) !important;
       border-radius: var(--radius-inner) !important;
-      background-color: var(--org-header-chip, var(--fill-subtle)) !important;
-      color: var(--primary-text-color) !important;
-      font-variant-numeric: tabular-nums;
+      background-color: var(--fill-subtle) !important;
     }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off .bubble-sub-button-icon:not(.hidden),
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on .bubble-sub-button-icon:not(.hidden) {
-      --mdc-icon-size: var(--icon-size-2xs) !important;
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      box-sizing: border-box;
+      justify-content: center !important;
+      min-width: var(--control-height-icon) !important;
+      height: var(--control-height-mini) !important;
+      padding: 0 var(--ha-space-3) !important;
+      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--secondary-text-color) !important;
+      transition: var(--transition-interactive);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
       margin: 0 !important;
       color: inherit !important;
     }
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-off .bubble-sub-button-name-container:empty,
-    ha-card .bubble-sub-button-container .bubble-sub-button.background-on .bubble-sub-button-name-container:empty {
-      display: none !important;
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-action-enabled:active {
+      transform: scale(var(--press-scale));
     }
-    ` : ""}
+    ${card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
+      background: var(--org-header-pick) !important;
+      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+      color: var(--primary-text-color) !important;
+    }` : ""}` : ""}
     ${card._orgHCss}
-    ${(() => {
-      (card._orgHIcons ?? []).forEach(([n, icon]) => {
-        const el = card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-icon");
-        if (el && el.getAttribute("icon") !== icon) el.setAttribute("icon", icon);
-      });
-      return "";
-    })()}

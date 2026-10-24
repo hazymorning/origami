@@ -212,7 +212,7 @@ views:
                   color-mix(in srgb, var(--primary-background-color) 28%, transparent);
               }
               .sheet {
-                padding: var(--ha-space-5) var(--ha-space-5) var(--ha-space-6, 24px) var(--ha-space-5);
+                padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px);
                 gap: var(--ha-space-5);
                 box-shadow: var(--ha-card-box-shadow);
               }
@@ -525,6 +525,7 @@ views:
             card_type: separator
             name: Favorites
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-m)
@@ -545,6 +546,7 @@ views:
           - type: custom:bubble-card
             card_type: sub-buttons
             modules:
+              - origami_base
               - origami_tiles
             grid_options:
               columns: full
@@ -572,10 +574,7 @@ views:
                 - name: Fan
                   entity: fan.bedroom
                   icon: mdi:fan
-                  origami_tiles:
-                    state:
-                      'on': ${attr.percentage} %
-                      'off': 'Off'
+                  state_content: percentage
                   visibility:
                     - condition: state
                       entity: fan.bedroom
@@ -604,6 +603,7 @@ views:
                   origami_tiles:
                     state: Dinner
                     image: ${attr.recipe?.image}
+                    image_size: 230%
                   visibility:
                     - condition: state
                       entity: sensor.dinner
@@ -641,12 +641,12 @@ views:
                   force_icon: true
                   origami_tiles:
                     name: >-
-                      ${(p => Number.isNaN(p) || p < 0 ? 'Error'
-                      : ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
-                      : p + ' %')(Math.round(states('number.robot_cleaning_progress')))}
+                      ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+                      : Number.isNaN(p) ? '' : p < 0 ? 'Error'
+                      : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
                     state:
-                      docked: 'Off'
-                      idle: 'Off'
+                      docked: ${word('off')}
+                      idle: ${word('off')}
                       cleaning: Vacuum
                     order:
                       cleaning: -1
@@ -661,7 +661,7 @@ views:
                   icon: mdi:shower
                   origami_tiles:
                     name:
-                      'on': ${minutesUntil('input_datetime.bath_time_end')} min
+                      'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
                     state:
                       'on': Running
                       'off': Ready
@@ -686,10 +686,9 @@ views:
                   icon: mdi:printer-outline
                   origami_tiles:
                     name:
-                      'on': ${minutesUntil('input_datetime.printer_end')} min
+                      'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
                     state:
                       'on': Running
-                      'off': 'Off'
                     name_color:
                       'on': initial
                   tap_action:
@@ -809,6 +808,7 @@ views:
             card_type: separator
             name: Rooms
             modules:
+              - origami_base
               - origami_header
             origami_header:
               value_style: chip
@@ -822,7 +822,7 @@ views:
                   entity: sensor.climate_home
                   icon: mdi:thermometer
                   origami_header:
-                    name: ${attr.temperature_average}°
+                    name: ${num(attr.temperature_average)}°
                   tap_action:
                     action: perform-action
                     perform_action: input_boolean.toggle
@@ -836,7 +836,7 @@ views:
                   state_content: windows_open
                   origami_header:
                     icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
-                    color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
+                    name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
                     background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
                   tap_action:
                     action: perform-action
@@ -1332,7 +1332,10 @@ views:
                 name: Living
                 icon: mdi:sofa
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1346,21 +1349,21 @@ views:
                   bottom:
                     - entity: sensor.climate_living_room
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.living_room_balcony_door
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_living_room
                       show_icon: false
-                      origami_room:
-                        name: ${attr.temperature}° |
+                      origami_base:
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_living_room
                       show_icon: false
-                      origami_room:
-                        name: ${attr.humidity}%
+                      origami_base:
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1368,7 +1371,10 @@ views:
                 name: Bedroom
                 icon: mdi:bed
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1382,21 +1388,21 @@ views:
                   bottom:
                     - entity: sensor.climate_bedroom
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.bedroom_window
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_bedroom
                       show_icon: false
-                      origami_room:
-                        name: ${attr.temperature}° |
+                      origami_base:
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_bedroom
                       show_icon: false
-                      origami_room:
-                        name: ${attr.humidity}%
+                      origami_base:
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1404,7 +1410,10 @@ views:
                 name: Office
                 icon: mdi:chair-rolling
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1418,16 +1427,16 @@ views:
                   bottom:
                     - entity: sensor.climate_office
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: sensor.climate_office
                       show_icon: false
-                      origami_room:
-                        name: ${attr.temperature}° |
+                      origami_base:
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_office
                       show_icon: false
-                      origami_room:
-                        name: ${attr.humidity}%
+                      origami_base:
+                        name: ${num(attr.humidity, 0, '%')}
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -1435,7 +1444,10 @@ views:
                 name: Bath
                 icon: mdi:bathtub
                 modules:
-                  - origami_room
+                  - origami_base
+                origami_base:
+                  tile: true
+                  vertical: true
                 button_action:
                   tap_action:
                     action: navigate
@@ -1449,21 +1461,21 @@ views:
                   bottom:
                     - entity: sensor.climate_bathroom
                       icon: mdi:circle
-                      origami_room:
-                        color: ${attr.color_code}
+                      origami_base:
+                        color: ${attr.color_code ?? "transparent"}
                     - entity: binary_sensor.bathroom_window
                       icon: mdi:window-closed-variant
-                      origami_room:
+                      origami_base:
                         icon:
                           'on': mdi:window-open-variant
                     - entity: sensor.climate_bathroom
                       show_icon: false
-                      origami_room:
-                        name: ${attr.temperature}° |
+                      origami_base:
+                        name: ${num(attr.temperature)}° |
                     - entity: sensor.climate_bathroom
                       show_icon: false
-                      origami_room:
-                        name: ${attr.humidity}%
+                      origami_base:
+                        name: ${num(attr.humidity, 0, '%')}
               - type: conditional
                 conditions:
                   - condition: state
@@ -1477,8 +1489,10 @@ views:
                   name: Kitchen
                   icon: mdi:chef-hat
                   modules:
-                    - origami_room
-                  origami_room:
+                    - origami_base
+                  origami_base:
+                    tile: true
+                    vertical: true
                     animate: true
                   button_action:
                     tap_action:
@@ -1493,21 +1507,21 @@ views:
                     bottom:
                       - entity: sensor.climate_kitchen
                         icon: mdi:circle
-                        origami_room:
-                          color: ${attr.color_code}
+                        origami_base:
+                          color: ${attr.color_code ?? "transparent"}
                       - entity: binary_sensor.kitchen_window
                         icon: mdi:window-closed-variant
-                        origami_room:
+                        origami_base:
                           icon:
                             'on': mdi:window-open-variant
                       - entity: sensor.climate_kitchen
                         show_icon: false
-                        origami_room:
-                          name: ${attr.temperature}° |
+                        origami_base:
+                          name: ${num(attr.temperature)}° |
                       - entity: sensor.climate_kitchen
                         show_icon: false
-                        origami_room:
-                          name: ${attr.humidity}%
+                        origami_base:
+                          name: ${num(attr.humidity, 0, '%')}
               - type: conditional
                 conditions:
                   - condition: state
@@ -1521,8 +1535,10 @@ views:
                   name: WC
                   icon: mdi:toilet
                   modules:
-                    - origami_room
-                  origami_room:
+                    - origami_base
+                  origami_base:
+                    tile: true
+                    vertical: true
                     animate: true
                   button_action:
                     tap_action:
@@ -1537,26 +1553,27 @@ views:
                     bottom:
                       - entity: sensor.climate_small_bathroom
                         icon: mdi:circle
-                        origami_room:
-                          color: ${attr.color_code}
+                        origami_base:
+                          color: ${attr.color_code ?? "transparent"}
                       - entity: binary_sensor.small_bathroom_window
                         icon: mdi:window-closed-variant
-                        origami_room:
+                        origami_base:
                           icon:
                             'on': mdi:window-open-variant
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
-                        origami_room:
-                          name: ${attr.temperature}° |
+                        origami_base:
+                          name: ${num(attr.temperature)}° |
                       - entity: sensor.climate_small_bathroom
                         show_icon: false
-                        origami_room:
-                          name: ${attr.humidity}%
+                        origami_base:
+                          name: ${num(attr.humidity, 0, '%')}
 
           # More or fewer rooms
           - type: custom:bubble-card
             card_type: separator
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-l)
@@ -1584,9 +1601,6 @@ views:
               ha-card .bubble-sub-button-container {
                 justify-content: center !important;
                 margin: 0 !important;
-              }
-              ha-card .bubble-sub-button-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-                margin-left: var(--ha-space-1) !important;
               }
 
           # Space for the navbar at the end of the page
@@ -2192,10 +2206,10 @@ views:
             shadow_opacity: '12'
             hide_backdrop: false
             modules:
-              - default
+              - origami_base
               - origami_popup
             origami_popup:
-              subtitle_style: text
+              value_style: text
             # Hides the scenes again when you close the pop-up
             close_action:
               action: perform-action
@@ -2228,8 +2242,9 @@ views:
                             - origami_base
                             - origami_media
                           origami_media:
-                            art_entity: media_player.living_room_tv_cast
-                            app_entity: media_player.living_room_tv
+                            layout: tv
+                            players:
+                              - media_player.living_room_tv_cast
                           hide:
                             power_button: true
                             previous_button: true
@@ -2257,7 +2272,6 @@ views:
                                 sub_button_type: slider
                                 always_visible: true
                           rows: '2.2'
-                          state_content: state
                       - type: conditional
                         conditions:
                           - condition: state
@@ -2280,6 +2294,15 @@ views:
                             - origami_media
                           origami_base:
                             group: true
+                            # Home Assistant's word for this source is the source's own name
+                            words:
+                              optical in: TV input
+                          origami_media:
+                            # The icon shows what the speaker does
+                            icons:
+                              'off': mdi:speaker-off
+                              bluetooth: mdi:speaker-bluetooth
+                              tv: mdi:television-speaker
                           hide:
                             power_button: true
                             previous_button: true
@@ -2357,7 +2380,6 @@ views:
                                 sub_button_type: slider
                                 always_visible: true
                           rows: '2.2'
-                          state_content: state
                       # A plug as a compact row with a switch
                       - type: custom:bubble-card
                         card_type: button
@@ -2386,6 +2408,7 @@ views:
                         card_type: separator
                         name: Lights
                         modules:
+                          - origami_base
                           - origami_header
                         origami_header:
                           icon_size: var(--icon-size-s)
@@ -2449,10 +2472,12 @@ views:
                           type: custom:bubble-card
                           card_type: sub-buttons
                           modules:
+                            - origami_base
                             - origami_button
+                          origami_base:
+                            animate: true
                           origami_button:
                             columns: 2
-                            animate: true
                             padding: var(--ha-space-1) 0 0 0
                             # The scene that was turned on last is highlighted
                             active: "{{ states('sensor.living_room_scene') }}"
@@ -2499,10 +2524,10 @@ views:
                         card_type: separator
                         name: Climate
                         modules:
+                          - origami_base
                           - origami_header
                         origami_header:
-                          # The dot uses the comfort color
-                          icon_color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
+                          icon_size: var(--dot-size)
                         grid_options:
                           rows: auto
                         sub_button:
@@ -2512,7 +2537,9 @@ views:
                               show_name: true
                               show_background: false
                               origami_header:
-                                name: ${attr.temperature}° / ${attr.humidity} %
+                                name: ${num(attr.temperature)}° / ${num(attr.humidity, 0, '%')}
+                                # The dot uses the comfort color
+                                color: ${attr.color_code ?? "transparent"}
                               tap_action:
                                 action: more-info
                       - type: conditional
@@ -2584,9 +2611,7 @@ views:
                                     entity_id: fan.living_room
                                   data:
                                     percentage: 100
-                          state_content:
-                            - state
-                            - percentage
+                          state_content: percentage
                           rows: 1.375
                       - type: custom:bubble-card
                         card_type: button
@@ -2600,6 +2625,11 @@ views:
                         origami_base:
                           group: true
                           tile: true
+                        origami_climate:
+                          icons:
+                            heating: mdi:radiator
+                            preheating: mdi:radiator
+                            'off': mdi:radiator-off
                         scrolling_effect: false
                         tap_action:
                           action: more-info
@@ -2632,13 +2662,13 @@ views:
                                 data:
                                   thermostat: climate.living_room
                                   step: 0.5
-                        state_content: []
                         rows: 1.375
 
                   # Turns everything in the room off, shown as a plain text button
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       background: false
@@ -2674,6 +2704,7 @@ views:
             with_bottom_offset: true
             performance_mode: performance
             modules:
+              - origami_base
               - origami_popup
             # A blurred picture of the current program appears behind the pop-up
             styles: |-
@@ -2717,8 +2748,9 @@ views:
                       - origami_media
                       - '!default'
                     origami_media:
-                      art_entity: media_player.living_room_tv_cast
-                      app_entity: media_player.living_room_tv
+                      layout: tv
+                      players:
+                        - media_player.living_room_tv_cast
                     scrolling_effect: false
                     slider_live_update: false
                     cover_background: false
@@ -2746,21 +2778,18 @@ views:
                         - entity: media_player.living_room
                           sub_button_type: slider
                           always_visible: true
-                          custom_height: 26
                     rows: '2.2'
-                    state_content: state
 
                   # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       segmented: true
                       icon_size: var(--icon-size-m)
                       padding: var(--ha-space-2) 0
-                      # The TV button is filled while the speaker uses its TV input
-                      active: "{{ 'TV' if (state_attr('media_player.living_room', 'source') | lower) == 'optical in' else '' }}"
                     sub_button:
                       main: []
                       bottom:
@@ -2775,6 +2804,7 @@ views:
                                   entity_id: remote.living_room_tv
                                 data:
                                   command: TV_INPUT
+                            # The button is filled while the speaker uses this source, because its tap selects it
                             - name: TV
                               show_name: true
                               tap_action:
@@ -2846,20 +2876,19 @@ views:
                                   speaker: media_player.living_room
                                   step: 0.1
 
-                  # The app buttons scroll sideways. Each button's css_class is its app's ID, so the running app's button is filled.
+                  # The app buttons scroll sideways. A button is filled while the TV runs its app, because the TV reports the running app as its source.
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       scroll: true
                       active_style: toggle
-                      active: "{{ state_attr('media_player.living_room_tv', 'app_id') }}"
                     sub_button:
                       main: []
                       bottom:
                         - name: Netflix
-                          css_class: com.netflix.ninja
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2869,7 +2898,6 @@ views:
                             data:
                               source: Netflix
                         - name: YouTube
-                          css_class: com.google.android.youtube.tv
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2879,7 +2907,6 @@ views:
                             data:
                               source: YouTube
                         - name: Prime Video
-                          css_class: com.amazon.amazonvideo.livingroom
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2889,7 +2916,6 @@ views:
                             data:
                               source: Prime Video
                         - name: Disney+
-                          css_class: com.disney.disneyplus
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2899,7 +2925,6 @@ views:
                             data:
                               source: Disney+
                         - name: Spotify
-                          css_class: com.spotify.tv.android
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2909,7 +2934,6 @@ views:
                             data:
                               source: Spotify
                         - name: Plex
-                          css_class: com.plexapp.android
                           show_name: true
                           tap_action:
                             action: perform-action
@@ -2923,6 +2947,7 @@ views:
                   - type: custom:bubble-card
                     card_type: sub-buttons
                     modules:
+                      - origami_base
                       - origami_button
                     origami_button:
                       background: false
@@ -3075,6 +3100,7 @@ views:
             popup_mode: fit-content
             with_bottom_offset: true
             modules:
+              - origami_base
               - origami_popup
             styles: '.bubble-pop-up-container { mask-image: none !important; }'
             # Hides the timer row again when you close the pop-up
