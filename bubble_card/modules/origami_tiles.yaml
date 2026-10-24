@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.1.0"
+  version: "3.1.1"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In the list, a sign at the end of each row shows whether a tap opens, runs or switches something."
@@ -176,6 +176,7 @@ origami_tiles:
       max-width: 100%;
       margin-top: calc(var(--ha-space-1) - 2px);
       font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
       color: var(--secondary-text-color);
     }
     ${card._orgTilesCss}
