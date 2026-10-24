@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.3.2"
+  version: "12.4.0"
   is_global: true
   supported:
     - button
@@ -36,6 +36,11 @@ origami_base:
       default: false
     - name: vertical
       label: "Name under the icon (button cards)"
+      selector:
+        boolean: {}
+      default: false
+    - name: large
+      label: "Large name"
       selector:
         boolean: {}
       default: false
@@ -647,6 +652,7 @@ origami_base:
         // Origami 2 kept compact under origami_media and Fade in under origami_button, and those places still work
         compact: !!(cfgB.compact ?? this.config.origami_media?.compact),
         tile: !!cfgB.tile,
+        large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
         frame: ["button", "media-player"].includes(type),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
@@ -657,6 +663,8 @@ origami_base:
       // On the cards that Base frames, and on separator, sub-buttons and pop-up cards with the Slider module, sliders take Origami's look. Other cards keep Bubble Card's sliders.
       card._org.fills = !opts.bare ? "ha-card" : [].concat(this.config.modules ?? []).includes("origami_slider") ? 'ha-card [class*="bubble-sub-button-slider-"]' : null;
       // Each pill switch shows the state of its own entity
+      // key excludes slider sub-buttons and a bottom row that another module styles, such as Button on a button card, from Base's look for sub-buttons
+      card._org.key = ':not([class*="bubble-sub-button-slider-"]):not(:where(ha-card[data-org-fill="bottom"] .bubble-sub-button-bottom-container *))';
       card._org.pills = opts.toggle ? items(this.config).map((item, i) => look(hass, item.entity ?? entity).on
         ? 'ha-card .bubble-sub-button.bubble-sub-button-' + (i + 1) + ':not([class*="bubble-sub-button-slider-"])' : null).filter(Boolean) : [];
       return "";
@@ -692,10 +700,11 @@ origami_base:
       background-color: var(--org-inset) !important;
       box-shadow: var(--card-ring), var(--org-inset-shadow);
     }
-    ${card._org.fills} .bubble-range-fill {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill {
       position: relative;
     }
-    ${card._org.fills} .bubble-range-fill::after {
+    /* A color slider, such as one for the hue or the color temperature of a light, keeps Bubble Card's own track and cursor without a fill or a mark */
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill::after {
       content: "";
       position: absolute;
       top: 50%;
@@ -707,11 +716,11 @@ origami_base:
       background-color: var(--org-slider-mark);
       opacity: var(--opacity-strong);
     }
-    ${card._org.fills} .bubble-range-fill.fill-orientation-right::after {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill.fill-orientation-right::after {
       right: auto;
       left: var(--ha-space-2);
     }
-    ${card._org.fills} .bubble-range-fill:is(.fill-orientation-top, .fill-orientation-bottom)::after {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill:is(.fill-orientation-top, .fill-orientation-bottom)::after {
       top: auto;
       right: auto;
       left: 50%;
@@ -719,15 +728,26 @@ origami_base:
       width: var(--icon-size-xs);
       height: 5px;
     }
-    ${card._org.fills} .bubble-range-fill.fill-orientation-top::after {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill.fill-orientation-top::after {
       bottom: var(--ha-space-2);
     }
-    ${card._org.fills} .bubble-range-fill.fill-orientation-bottom::after {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill.fill-orientation-bottom::after {
       top: var(--ha-space-2);
     }
-    ${card._org.fills} .bubble-range-fill {
+    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill {
       background-color: var(--org-slider-fill) !important;
       opacity: 1 !important;
+    }
+    ${card._org.fills} .is-color-slider .bubble-color-track {
+      opacity: var(--opacity-strong);
+    }
+    ${card._org.fills} .is-color-slider .bubble-color-cursor {
+      --bubble-color-cursor-indicator-opacity: 0;
+      --bubble-color-cursor-indicator-active-opacity: 0;
+      width: 5px !important;
+      height: var(--icon-size-xs) !important;
+      border-radius: var(--radius-inner);
+      box-shadow: 0 0 0 1px color-mix(in srgb, #000 12%, transparent), 0 1px 3px color-mix(in srgb, #000 25%, transparent);
     }
     :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill {
       border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
@@ -747,6 +767,17 @@ origami_base:
       color: var(--secondary-text-color) !important;
       opacity: 1 !important;
     }
+    ${(() => {
+      // A slider sub-button whose entity is off shows Home Assistant's word for that state, such as Off, instead of 0 %, and an unavailable one shows a dash, as Speaker Select's readout does
+      const org = card._org;
+      return org.items(this.config).map((item, i) => {
+        const st = hass.states[item.entity ?? entity];
+        const on = org.power(st);
+        if (item.sub_button_type !== "slider" || on === true) return "";
+        const sel = "ha-card .bubble-sub-button-slider-" + (i + 1) + " .bubble-range-value";
+        return sel + " { font-size: 0 !important; }\n    " + sel + "::before { font-size: var(--ha-font-size-s); }\n    " + sel + "::after { content: " + org.str(on === null ? "–" : org.word(hass, st)) + "; font-size: var(--ha-font-size-s); }";
+      }).filter(Boolean).join("\n    ");
+    })()}
     ha-card .bubble-sub-slider-wrapper {
       height: var(--bubble-sub-slider-height) !important;
     }
@@ -891,9 +922,13 @@ origami_base:
       gap: var(--ha-space-1) !important;
       margin-inline-start: var(--org-text-gap);
     }
+    ${this.config.show_icon === false ? `.bubble-name-container {
+      margin-inline-start: var(--org-tile-inset);
+    }` : ""}
     .bubble-name,
     .bubble-title {
-      font-size: var(--ha-font-size-m);
+      font-size: ${card._org.opts.large ? "var(--ha-font-size-xl)" : "var(--ha-font-size-m)"};
+      ${card._org.opts.large ? "line-height: 1.25;" : ""}
       font-weight: var(--ha-font-weight-bold);
       white-space: nowrap !important;
       overflow: hidden;
@@ -1032,7 +1067,7 @@ origami_base:
       margin-inline-end: var(--org-toggle-gap) !important;
       inset-inline-end: 0 !important;
     }
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) {
+    ha-card .bubble-sub-button${card._org.key} {
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -1047,7 +1082,7 @@ origami_base:
       box-shadow: var(--card-ring), var(--org-inset-shadow);
       transition: var(--transition-interactive);
     }
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) .bubble-sub-button-icon {
+    ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {
       --mdc-icon-size: var(--org-toggle-knob);
       margin-inline-start: 0px !important;
       opacity: var(--opacity-quiet) !important;
@@ -1062,7 +1097,7 @@ origami_base:
       margin-inline-end: var(--org-tile-inset) !important;
       inset-inline-end: 0 !important;
     }` : ""}
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) {
+    ha-card .bubble-sub-button${card._org.key} {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1076,12 +1111,12 @@ origami_base:
       box-shadow: none !important;
       transition: var(--transition-interactive);
     }
-    ha-card .bubble-sub-button.background-on:not([class*="bubble-sub-button-slider-"]),
-    ha-card .bubble-sub-button.background-off:not([class*="bubble-sub-button-slider-"]) {
+    ha-card .bubble-sub-button.background-on${card._org.key},
+    ha-card .bubble-sub-button.background-off${card._org.key} {
       background-color: var(--org-inset) !important;
       box-shadow: var(--org-inset-shadow) !important;
     }
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) .bubble-sub-button-icon {
+    ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {
       --mdc-icon-size: var(--org-icon-size);
       margin: 0 !important;
       color: var(--primary-text-color) !important;
@@ -1107,7 +1142,7 @@ origami_base:
       margin-top: calc((var(--org-row-height) - var(--org-tile-size)) / 2) !important;
       align-self: flex-start;
     }
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) {
+    ha-card .bubble-sub-button${card._org.key} {
       box-sizing: border-box;
       min-width: var(--org-group-key) !important;
       width: auto !important;
@@ -1117,11 +1152,11 @@ origami_base:
       background: none !important;
       box-shadow: none !important;
     }
-    ha-card .bubble-sub-button.background-on:not([class*="bubble-sub-button-slider-"]),
-    ha-card .bubble-sub-button.background-off:not([class*="bubble-sub-button-slider-"]) {
+    ha-card .bubble-sub-button.background-on${card._org.key},
+    ha-card .bubble-sub-button.background-off${card._org.key} {
       background-color: var(--org-key-bg) !important;
     }
-    ha-card .bubble-sub-button:not([class*="bubble-sub-button-slider-"]) .bubble-sub-button-icon {
+    ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-xs);
       margin: 0 !important;
     }
@@ -1147,7 +1182,8 @@ origami_base:
       const org = card._org;
       // The keys of a play row show their state with dot and disabled, so Base never fills them
       const plays = org.items(this.config).map((item, i) => org.slug(item.css_class) === "play" ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean);
-      const keep = ':not(.is-select):not(.readout):not(.plain):not([class*="bubble-sub-button-slider-"])' + (plays.length ? ":not(:where(.bubble-sub-button-group:has(> :is(" + plays.join(", ") + ")) > *))" : "");
+      // A module that styles the bottom sub-buttons itself, such as Button on a button card, sets data-org-fill="bottom", so Base fills only the main sub-buttons there
+      const keep = ':not(.is-select):not(.readout):not(.plain)' + org.key + (plays.length ? ":not(:where(.bubble-sub-button-group:has(> :is(" + plays.join(", ") + ")) > *))" : "");
       // A module that styles its own sub-buttons sets data-org-fill="own" on the card. There, only a sub-button that sets a value or has accent is filled.
       const auto = 'ha-card:not([data-org-fill="own"])';
       // The pill switches are filled while their entity is on. Otherwise, why() decides for each sub-button, and under the icon only accent fills.

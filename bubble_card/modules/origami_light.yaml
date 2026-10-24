@@ -1,9 +1,10 @@
 origami_light:
   name: "Origami • Light"
-  version: "6.0.1"
+  version: "6.1.0"
   supported:
     - button
-  description: "Light colors the slider of a light card in the state color for lights. In dark mode, the fill stays gray and only its mark takes the color, so the text on the slider stays readable."
+    - sub-buttons
+  description: "Light colors the slider of a light card in the state color for lights, and on a sub-buttons card with Slider, it colors the rows of lamps. In dark mode, the fill stays gray and only its mark takes the color, so the text on the slider stays readable."
   code: |
     ${(() => {
       const org = card._org;

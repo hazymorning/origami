@@ -42,12 +42,18 @@ These changes are in the `next` branch and come with the next release.
 - A card with `bottom_layout: rows` and `rows: auto` grows with its rows. The value on a sub-button slider is in the secondary text color, and a key next to a slider in the same group is as tall as the slider.
 - The Button module has new options for a row of chips. `chips` gives round pills, `segmented` takes the names of groups that become small switches in the row, and a button with `css_class: divider` is a short line between two buttons. With `pending`, a tapped button shows the look it is about to get until its state changes.
 - Header's new `title_action` option lets a tap on the title run the first value's action, and its new `value_size` and `icon_gap` options set the size of the values and the space next to their icons.
-- The Slider module shows slider sub-buttons on a sub-buttons card as rows with their names, such as the speakers of a group.
+- The Slider module shows slider sub-buttons on a sub-buttons card as rows with their names, such as the speakers of a group. Each row has a column for its name, its track and its value, so the value no longer covers the fill. A name that is wider than its column scrolls, and a sub-button for a switch is a row whose track fills while the switch is on. With the Light module, rows of lamps fill in the light color.
+- The Button module also works on button cards, where it styles the bottom sub-buttons and Base draws the rest of the card. With the new `labels: below` option, each button is a large field with its icon and its name under it, as for scenes in a room card. The new `outline` option rings a suggested button, and `start` lets a row begin at a matching button.
+- Header has a new value style, `switch`, which joins the values into one small switch. The value whose tap sets what its entity shows now stands out on it.
+- Base has a new `large` option for a larger name, as on a card at the top of a pop-up.
 - Speaker Select also works on a button card with a slider, so a speaker's whole row can set its volume. Its rows hide Bubble Card's media buttons themselves, and a readout without a tap action of its own passes the tap to the row.
 - Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
 
 ### Bug fixes
 
+- A slider whose entity is off shows Home Assistant's word for off instead of 0 % or Unavailable, and an unavailable one shows a dash.
+- Color sliders, such as those for a light's hue or color temperature, keep Bubble Card's colored track. Before, Base painted its fill and its mark over the colors.
+- On a button card without an icon, the name starts at the same distance from the edge as the rest of the card.
 - A row of buttons with `scroll` starts at its first button again when a button in front of the others appears. The row no longer snaps to its buttons, because the browser kept the row on the button it had snapped to.
 - The Header and Tiles modules now show values exactly as they are. Before, Bubble Card's style cleaner removed the space after a comma or a semicolon, so "Mon, 12:00" became "Mon,12:00", and a value with braces disappeared.
 - On iPhones, the menu now starts below the status bar instead of behind it.
