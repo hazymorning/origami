@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.5.0"
+  version: "3.6.0"
   supported:
     - sub-buttons
     - button
@@ -435,7 +435,7 @@ origami_button:
     ${card._orgB.below ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
       flex-direction: column !important;
       justify-content: flex-start !important;
-      ${card._orgB.cols ? "" : "width: calc(var(--tile-size-lg) + var(--ha-space-5)) !important;"}
+      ${card._orgB.cols ? "" : "width: calc(var(--tile-size-lg) + var(--ha-space-2)) !important;"}
       height: auto !important;
       padding: 0 !important;
       gap: 0 !important;

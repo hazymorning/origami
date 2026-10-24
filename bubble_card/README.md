@@ -741,6 +741,8 @@ sub_button:
 
 A sub-button with an entity that is not a slider, such as a switch or a lamp without a dimmer, is a row too. Its track is filled while the entity is on, and its value is the state in Home Assistant's words. Give it `tap_action` with `action: toggle`, so a tap on the row switches it. With the Light module, the rows of lamps fill in the light color. A slider with `light_slider_type: white_temp` or `hue` sets a lamp's color temperature or color, and its value stays empty.
 
+With `labels: inside` under `origami_slider`, each row is one track with the name at its start and the value at its end, so the rows look alike however long their names are. These rows are 40 px tall, and the track has no mark, because text stands at both of its ends. The name of an entity that is off takes the secondary text color. This layout suits a list of lamps:
+
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
@@ -748,7 +750,7 @@ modules:
   - origami_slider
   - origami_light
 origami_slider:
-  label_width: 96px
+  labels: inside
 sub_button:
   main: []
   bottom:
@@ -977,6 +979,7 @@ The Header module creates a section header. The separator card's name is the tit
 | `value_size` | `var(--ha-font-size-m)` | The option sets the size of the values' text. |
 | `icon_gap` | `var(--ha-space-1)` | The option sets the space between the icon and the name of plain values. Chips keep their own space. |
 | `value_max_width` | | The option sets the maximum width of the values, such as `50%`. Longer values end with an ellipsis. Set `scrolling_effect: false` on these sub-buttons, because otherwise Bubble Card scrolls them. |
+| `scroll` | `false` | The values start 16 px after the title and scroll sideways up to the edge of a pop-up. The header leaves 8 px more space below such a row, because chips are boxes like the cards below them. |
 
 Each sub-button can have its own `origami_header` key with `name`, `icon`, `color`, `name_color` and `background`. As in every module, `color` sets the icon's color, and `name_color` sets the text's color. The icon takes the text's color while neither `color` nor `icon_color` sets one. `background` replaces the chip's background, and `var(--tint)` tints the chip in the value's color. Popup uses the same keys for its values.
 
@@ -1017,7 +1020,7 @@ sub_button:
         action: toggle
 ```
 
-With `value_style: switch`, the values form one small switch, such as one with three icons that choose what the list below the header shows. As in the Button module, the value whose tap sets what its entity shows now stands out on the switch, and a value's own `on` key decides for that value:
+With `value_style: switch`, the values form one small switch, such as one with three icons that choose what the list below the header shows. As in the Button module, the value whose tap sets what its entity shows now stands out on the switch, and a value's own `on` key decides for that value. Chips follow the same rule, so a row of chips with `scroll` can choose the room that the cards below show, and the chosen chip scrolls into view. A chip with only an icon, without a name or a state, is a square with a larger icon:
 
 ```yaml
 type: custom:bubble-card
