@@ -741,7 +741,7 @@ sub_button:
 
 A sub-button with an entity that is not a slider, such as a switch or a lamp without a dimmer, is a row too. Its track is filled while the entity is on, and its value is the state in Home Assistant's words. Give it `tap_action` with `action: toggle`, so a tap on the row switches it. With the Light module, the rows of lamps fill in the light color. A slider with `light_slider_type: white_temp` or `hue` sets a lamp's color temperature or color, and its value stays empty.
 
-With `labels: inside` under `origami_slider`, each row is one track with the name at its start and the value at its end, so the rows look alike however long their names are. These rows are 40 px tall, and the track has no mark, because text stands at both of its ends. The name of an entity that is off takes the secondary text color. This layout suits a list of lamps:
+In a pop-up with one of these cards for each room, give every card the same `label_width`, so the tracks stay in the same place when another room's card shows. Short names, such as Floor lamp instead of Living room floor lamp, fit the column without scrolling. This card lists the lamps of a living room:
 
 ```yaml
 type: custom:bubble-card
@@ -750,7 +750,7 @@ modules:
   - origami_slider
   - origami_light
 origami_slider:
-  labels: inside
+  label_width: 80px
 sub_button:
   main: []
   bottom:
