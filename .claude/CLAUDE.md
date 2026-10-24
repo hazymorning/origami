@@ -8,6 +8,15 @@ A new custom card is often the easiest path for an AI, but it is rarely the righ
 - Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
 - Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
 
+## Compatibility
+
+An update must keep every dashboard working that worked with the release before, without any edits to its cards. People copy the new modules and reload, and most of them never read the upgrade steps.
+
+- Before modules go to the user or into a pull request, test them in the bench against the user's own unchanged cards, not only against the dashboard and cards that were converted for the new version.
+- A change that needs new YAML on existing cards needs a fallback in the modules. If no fallback is possible, it waits for a major release, and the changelog's upgrade steps describe it.
+- Base is a global module (`is_global: true`), because every other module needs it. Bubble Card runs it first on every card, so no card has to list it. Base must stay global, and it must keep doing nothing on cards without an Origami module.
+- A module that needs Base checks `card._org.version` and fails with a clear message. Such a failure is a bug in the update, not something to fix in the user's cards.
+
 ## Names
 
 Anything Claude names itself in this repo gets a small paper or origami reference. One or two words, never at the cost of clarity.
@@ -31,6 +40,7 @@ The docs must read like plain, natural English from a native technical writer. T
 - No bold labels in front of fragments, such as "**Media.** The TV while it's on".
 - Use possessives where a native writer would ("the room's light group", "Google's servers"). Avoid long "of the" chains.
 - Prefer short sentences, but vary how they start.
+- A module's description has 50 words at most, and fewer is better. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
 - Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
 - No AI attribution anywhere: no `Co-Authored-By` trailers, no "Generated with" footers in commits, PRs or comments.
 

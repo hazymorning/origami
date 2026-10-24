@@ -3,8 +3,8 @@
 The README repeats some cards from the dashboard in its YAML sections. A
 comment above each code block names one card by keys and values that the
 card has, such as <!-- dashboard.yaml hash=#popup_tv -->. A dotted key
-reaches into the card, so modules.0=origami_tiles matches a card whose
-first module is origami_tiles. The script copies the card's lines without
+reaches into the card, so modules.1=origami_tiles matches a card whose
+second module is origami_tiles. The script copies the card's lines without
 their indentation, so the comments in the card stay as they are.
 
 Run the script after every change to the dashboard. With --check, it
