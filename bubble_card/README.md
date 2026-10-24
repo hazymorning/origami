@@ -29,14 +29,14 @@ Base is a global module, so Bubble Card runs it first on every card, and no card
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
 | [Base](#base) | `origami_base` | button, media player, cover, climate, select, calendar, separator, sub-buttons, pop-up | Base draws the frame, text styles and color, and it holds the shared options and the helpers that the other modules use. On cover, climate, select and calendar cards, Base only styles the sub-buttons. |
-| [Light](#light) | `origami_light` | button | Light colors the slider of a light card. |
+| [Light](#light) | `origami_light` | button, sub-buttons | Light colors the slider of a light card and rows of lamps. |
 | [Fan](#fan) | `origami_fan` | button | Fan spins the icon at the fan's speed. |
 | [Climate](#climate) | `origami_climate` | button | Climate shows what a thermostat does. |
 | [Media](#media) | `origami_media` | media player | Media shows speakers and TVs. |
 | [Speaker Select](#speaker-select) | `origami_speaker` | media player, button | Speaker Select shows the speaker rows of a music pop-up. |
-| [Slider](#slider) | `origami_slider` | button with a slider, sub-buttons | Slider turns a card into a standalone slider, or slider sub-buttons into rows with names. |
-| [Button](#button) | `origami_button` | sub-buttons | Button shows rows and grids of buttons, segmented bars and rows that scroll sideways. |
-| [Header](#header) | `origami_header` | separator | Header shows a section header with values. |
+| [Slider](#slider) | `origami_slider` | button with a slider, sub-buttons | Slider turns a card into a standalone slider, or sub-buttons into rows with names, tracks and values. |
+| [Button](#button) | `origami_button` | sub-buttons, button | Button shows rows and grids of buttons, segmented bars, tiles with labels and rows that scroll sideways. |
+| [Header](#header) | `origami_header` | separator | Header shows a section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Tiles shows grids and lists of tiles. |
 | [Popup](#popup) | `origami_popup` | pop-up | Popup styles a pop-up's header, backdrop and close button. |
 
@@ -132,10 +132,13 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `group` | `false` | The sub-buttons appear as small buttons in a tray. This option has no effect together with `toggle`. |
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
 | `vertical` | `false` | The name is under the icon, as on the room cards. The section [Name under the icon](#name-under-the-icon) explains this layout. Base hides the state line, and only sub-buttons with `css_class: accent` are filled. This option works on button cards and turns off `toggle` and `group`. |
+| `large` | `false` | The name is larger, as on a card at the top of a pop-up. |
 | `animate` | `false` | The card fades in from below when it appears. |
 | `words` | | The option maps a state or a value to the word that the modules write on the card. The Language section above explains it. |
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
+
+A slider sub-button whose entity is off shows Home Assistant's word for off instead of 0 %, and an unavailable one shows a dash. A color slider, such as one with `light_slider_type: hue` or `white_temp`, keeps Bubble Card's colored track. Base softens its colors and draws its cursor like the mark on other sliders.
 
 Each sub-button can have its own `origami_base` key, which accepts the same values as the keys of the Header and Tiles modules. On separator, sub-buttons and pop-up cards, Base ignores this key, and the Header, Tiles and Popup modules use keys of their own.
 
@@ -251,7 +254,7 @@ The chevron is the only main sub-button. The bottom sub-buttons are the comfort 
 
 ### Light
 
-The Light module colors the sliders of a light card, and it works with Base. Sliders fill with amber, the state color for lights, and the small mark at the end of the fill is also amber. In dark mode, the fill stays gray. Bubble Card draws light text on the fill, and an amber that is dark enough for light text looks brown. Bubble Card writes the state line from `state_content`, such as the state and the brightness in the example.
+The Light module colors the sliders of a light card, and it works with Base. Sliders fill with amber, the state color for lights, and the small mark at the end of the fill is also amber. In dark mode, the fill stays gray. Bubble Card draws light text on the fill, and an amber that is dark enough for light text looks brown. Bubble Card writes the state line from `state_content`, such as the state and the brightness in the example. On a sub-buttons card with the Slider module, Light colors the rows of lamps in the same way, as in the second example of the [Slider](#slider) section.
 
 <img width="800" alt="A light group card with filled buttons and two compact lamps" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-light.webp">
 
@@ -686,7 +689,7 @@ rows: 1
 
 ### Slider
 
-The Slider module turns a card into a standalone slider, so the card itself is the track. It hides the card's icon, name and state, and it works with Base. On a sub-buttons card, it shows each slider sub-button as a row with its name.
+The Slider module turns a card into a standalone slider, so the card itself is the track. It hides the card's icon, name and state, and it works with Base. On a sub-buttons card, it shows each slider sub-button as a row with its name, its track and its value.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
 
@@ -714,7 +717,7 @@ rows: 1
 
 Use `slider_value_position: hidden` to hide the number.
 
-On a sub-buttons card, each slider sub-button with `always_visible: true` is a row with its name before the track, and the names stand in one column. `label_width` under `origami_slider` sets the column's width, and without it the column is as wide as the longest name. The tracks take the card's background, because these rows usually stand on a pop-up. On other separator, sub-buttons and pop-up cards, slider sub-buttons keep Bubble Card's own look.
+On a sub-buttons card, each slider sub-button with `always_visible: true` is a row with three columns. The name stands first, the track follows, and the value stands after the track, so it never covers the fill. `label_width` under `origami_slider` sets the width of the names' column. Without it, the column is as wide as the longest name, up to 30 % of the card. A name that is wider than its column scrolls like Bubble Card's scrolling text. The tracks take the card's background, because these rows usually stand on a pop-up. On other separator, sub-buttons and pop-up cards, slider sub-buttons keep Bubble Card's own look.
 
 ```yaml
 type: custom:bubble-card
@@ -736,11 +739,40 @@ sub_button:
       always_visible: true
 ```
 
+A sub-button with an entity that is not a slider, such as a switch or a lamp without a dimmer, is a row too. Its track is filled while the entity is on, and its value is the state in Home Assistant's words. Give it `tap_action` with `action: toggle`, so a tap on the row switches it. With the Light module, the rows of lamps fill in the light color. A slider with `light_slider_type: white_temp` or `hue` sets a lamp's color temperature or color, and its value stays empty.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_slider
+  - origami_light
+origami_slider:
+  label_width: 96px
+sub_button:
+  main: []
+  bottom:
+    - entity: light.living_room_floor_lamp
+      name: Floor lamp
+      sub_button_type: slider
+      always_visible: true
+    - entity: light.living_room_tv
+      name: TV light
+      sub_button_type: slider
+      always_visible: true
+    - entity: switch.living_room_candles
+      name: Candles
+      show_icon: false
+      show_state: true
+      tap_action:
+        action: toggle
+```
+
 </details>
 
 ### Button
 
-The Button module creates rows and grids of buttons on a sub-buttons card. Put every button into `sub_button: bottom`, and add `show_name: true` to each button that should show its name. The module can also join buttons into segmented bars or let a row scroll sideways, as in the [TV pop-up](../README.md#tv).
+The Button module creates rows and grids of buttons on a sub-buttons card, and it styles the bottom sub-buttons of a button card in the same way. Put every button into `sub_button: bottom`, and add `show_name: true` to each button that should show its name. The module can also join buttons into segmented bars or let a row scroll sideways, as in the [TV pop-up](../README.md#tv).
 
 <img width="800" alt="Scenes with the active scene highlighted, two toggles and a plain text button" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-button.webp">
 
@@ -766,6 +798,9 @@ The Button module creates rows and grids of buttons on a sub-buttons card. Put e
 | `pending` | `false` | After a tap, the button shows the look its tap is about to give it, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, and buttons that only open something and segments never do. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
+| `labels` | `inside` | With `below`, each button is a large field with its icon, and its name stands under the field, as for scenes. The icons are larger, unless `icon_size` sets their size. |
+| `outline` | | The option takes the same values as `active`. Matching buttons that are not active get a ring instead of a fill, which suits a suggestion, such as the scene for the time of day. |
+| `start` | | The option takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end, as in a cycle of scenes for the times of day. |
 
 ```yaml
 type: custom:bubble-card
@@ -799,6 +834,56 @@ sub_button:
 ```
 
 `sensor.living_room_scene` contains the active scene's name, such as `evening`. A value matches a button's name or `css_class` regardless of case, so `Late` matches `late`. A value also matches when it is Bubble Card's class name for that text, so `good-night` matches a button named Good night. A value that is an entity ID, such as `scene.living_room_evening`, matches the button whose tap targets that entity, whatever its label says. A name that is a template cannot match, so such a button matches only through its `css_class` or its tap target.
+
+On a button card, Button styles only the bottom sub-buttons. Base draws the card with its name, its state and its main sub-buttons. Give the card `rows: auto` and `bottom_layout: rows` under `sub_button`, so the card grows with its buttons. With `scroll`, the row scrolls inside the card and reaches its edges. This room card shows the scenes as large fields under the name, begins the row at the scene for the time of day and rings that scene while another one is active:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: light.living_room
+name: Living room
+show_icon: false
+state_content: brightness
+modules:
+  - origami_button
+origami_base:
+  large: true
+origami_button:
+  labels: below
+  scroll: true
+  active: "{{ states('sensor.living_room_scene') }}"
+  outline: "${new Date().getHours() < 17 ? 'Morning' : 'Evening'}"
+  start: "${new Date().getHours() < 17 ? 'Morning' : 'Evening'}"
+rows: auto
+sub_button:
+  bottom_layout: rows
+  main:
+    - icon: mdi:power
+      show_background: true
+      tap_action:
+        action: toggle
+  bottom:
+    - name: Scenes
+      group:
+        - name: Morning
+          icon: mdi:weather-sunset-up
+          show_name: true
+          tap_action:
+            action: perform-action
+            perform_action: scene.turn_on
+            target:
+              entity_id: scene.living_room_morning
+        - name: Evening
+          icon: mdi:weather-sunset-down
+          show_name: true
+          tap_action:
+            action: perform-action
+            perform_action: scene.turn_on
+            target:
+              entity_id: scene.living_room_evening
+        # Night and Dinner work the same way
+```
 
 Besides `active`, a button whose tap sets a value, such as a source, an option, a preset, a speed or an app, is highlighted while its entity has that value. A button with an entity of its own follows Base's rule for sub-buttons. It is highlighted while that entity is on and has a state color, unless it has `show_background: false` or `css_class: plain`, or opens something without `css_class: accent`. The TV pop-up's **TV** button works this way, because its tap selects the speaker's TV source.
 
@@ -883,7 +968,7 @@ The Header module creates a section header. The separator card's name is the tit
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `value_style` | `text` | `text` shows the values as text, and `chip` shows them as pills. A sub-button with `show_background: false` stays plain. |
+| `value_style` | `text` | `text` shows the values as text, and `chip` shows them as pills. A sub-button with `show_background: false` stays plain. `switch` joins the values into one small switch, as described below the example. |
 | `weight` | `bold` | The option sets the font weight of the values, which is `bold`, `medium` or `regular`. With the Origami theme, `medium` looks the same as `regular`. |
 | `icon_color` | | The option sets the icon color of plain values. It accepts a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The option sets the icon size of plain values. Chips use `--icon-size-2xs`, which is 14 px. For a small dot, use `var(--dot-size)`. |
@@ -930,6 +1015,36 @@ sub_button:
           'on': mdi:chevron-up
       tap_action:
         action: toggle
+```
+
+With `value_style: switch`, the values form one small switch, such as one with three icons that choose what the list below the header shows. As in the Button module, the value whose tap sets what its entity shows now stands out on the switch, and a value's own `on` key decides for that value:
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+name: Lamps
+modules:
+  - origami_header
+origami_header:
+  value_style: switch
+sub_button:
+  main:
+    - icon: mdi:brightness-5
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.lamp_view
+        data:
+          option: Brightness
+    - icon: mdi:palette-outline
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.lamp_view
+        data:
+          option: Color
 ```
 
 The header leaves 24 px of space above it and 8 px below it. Popup's `gap` option changes this for the headers in its pop-up. Sections and Bubble Card pop-ups have a gap of 8 px between cards, so the title gets 32 px of space above it and 16 px below it. Inside a vertical stack, Bubble Card uses a gap of 14 px, which gives 38 px and 22 px. The header sets its own height, so it needs no `grid_options`. Bubble Card gives the title no tap action, and only the sub-buttons can have one.

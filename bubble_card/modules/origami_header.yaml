@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.3.0"
+  version: "3.4.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text or as chips. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text, as chips or as one switch. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -15,6 +15,8 @@ origami_header:
               value: text
             - label: Chips
               value: chip
+            - label: Switch
+              value: switch
       default: text
     - name: weight
       label: "Value weight"
@@ -98,10 +100,14 @@ origami_header:
         titled: !!cfg.title_action,
         text,
         gap: gap || "var(--ha-space-1)",
-        chip: cfg.value_style === "chip"
+        chip: cfg.value_style === "chip",
+        // A switch joins the values into one track, and the value whose tap sets what its entity shows now, or whose on key is true, stands out on it
+        switch: cfg.value_style === "switch",
+        picked: []
       };
       const scope = "ha-card .bubble-sub-button-container";
       const list = org.subs(env, this.config, "origami_header");
+      if (card._orgH.switch) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n);
       const rules = org.values(env, this.config, "origami_header", scope, text, list);
       // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state, on either side of the name
       if (!card._orgH.chip) list.forEach(({ n, opt }) => {
@@ -231,4 +237,37 @@ origami_header:
     }
     ` : ""}
     ${card._orgH.chip ? card._org.chips("ha-card .bubble-sub-button-container") : ""}
+    ${card._orgH.switch ? `
+    ha-card .bubble-sub-button-container {
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      margin-inline-start: auto !important;
+      padding: var(--ha-space-1) !important;
+      border-radius: var(--radius-inner) !important;
+      background-color: var(--fill-subtle) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      box-sizing: border-box;
+      justify-content: center !important;
+      min-width: var(--control-height-icon) !important;
+      height: var(--control-height-mini) !important;
+      padding: 0 var(--ha-space-3) !important;
+      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--secondary-text-color) !important;
+      transition: var(--transition-interactive);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      margin: 0 !important;
+      color: inherit !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-action-enabled:active {
+      transform: scale(var(--press-scale));
+    }
+    ${card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
+      background: var(--ha-card-background) !important;
+      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+      color: var(--primary-text-color) !important;
+    }` : ""}` : ""}
     ${card._orgHCss}

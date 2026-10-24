@@ -1,13 +1,13 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.5.0"
+  version: "1.6.0"
   supported:
     - button
     - sub-buttons
-  description: "Slider turns a slider button into a standalone slider without an icon, a name or a state, so the card itself is the track. Set rows to 1. On a sub-buttons card, each slider sub-button becomes a row with its name before the track."
+  description: "Slider turns a slider button into a standalone slider, so the card is the track. On a sub-buttons card, each slider sub-button becomes a row with its name, its track and its value. A sub-button for a switch becomes a row whose track fills while the switch is on."
   editor:
     - name: label_width
-      label: "Name width on a sub-buttons card (the longest name if empty)"
+      label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
       selector:
         text: {}
   code: |
@@ -15,17 +15,45 @@ origami_slider:
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_slider needs origami_base 12 or later");
       if (this.config.card_type === "sub-buttons") {
-        // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name unless label_width sets it
+        // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
+        // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
         const env = { hass, renderTemplate };
         const width = String(this.config.origami_slider?.label_width ?? "").trim();
+        const gap = "\u00a0".repeat(6);
+        const rows = org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider" || (item.entity && (item.sub_button_type ?? "default") === "default"))
+          .map(({ n, item, entity }) => {
+            const name = org.name(hass, entity, item.name, env);
+            const text = org.rename(name) ?? name;
+            const slider = item.sub_button_type === "slider";
+            return { n, text, slider, on: !slider && org.power(hass.states[entity]) === true, word: slider ? "" : org.power(hass.states[entity]) === null ? "–" : org.word(hass, hass.states[entity]),
+              sel: slider ? "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")" : "ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-sub-button-" + n };
+          });
         card._orgSl = {
-          width: width || "max-content",
-          names: org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider")
-            .map(({ n, item, entity }) => {
-              const name = org.name(hass, entity, item.name, env);
-              return "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")::before { content: " + org.str(org.rename(name) ?? name) + "; }";
-            }).join("\n    ")
+          width: width || "fit-content(30%)",
+          names: rows.map((r) => r.sel + " { --org-name: " + org.str(r.text) + "; --org-name-loop: " + org.str(r.text + gap + r.text) + "; }").join("\n    "),
+          toggles: rows.filter((r) => !r.slider).map((r) => r.sel),
+          // The rows that show a name in their first column, which scrolls when it is too wide
+          rows: ":is(ha-card .bubble-sub-slider-wrapper.inline" + rows.filter((r) => !r.slider).map((r) => ", " + r.sel).join("") + ")",
+          lit: rows.filter((r) => !r.slider && r.on).map((r) => r.sel + " > .bubble-sub-button-name-container"),
+          words: rows.filter((r) => !r.slider).map((r) => r.sel + "::after { content: " + org.str(r.word) + "; }").join("\n    ")
         };
+        // A name wider than its column scrolls like Bubble Card's scrolling text, at the same speed. The fonts and the column width are known only after layout, so the rows are measured in the next frame.
+        requestAnimationFrame(() => {
+          const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
+          rows.forEach((r) => {
+            const el = card.querySelector(r.sel.replace(/^ha-card /, ""));
+            if (!el) return;
+            const cs = getComputedStyle(el, "::before");
+            pen.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+            const room = parseFloat(cs.width);
+            const wide = pen.measureText(r.text).width;
+            if (!(room > 0) || wide <= room + 0.5) return el.removeAttribute("data-org-scroll");
+            const shift = wide + pen.measureText(gap).width;
+            el.style.setProperty("--org-name-shift", (-shift).toFixed(1) + "px");
+            el.style.setProperty("--org-name-time", Math.max(1, shift / 8).toFixed(2) + "s");
+            if (!el.hasAttribute("data-org-scroll")) el.setAttribute("data-org-scroll", "");
+          });
+        });
         return "";
       }
       card._orgSl = null;
@@ -52,8 +80,8 @@ origami_slider:
       position: static !important;
       inset: auto !important;
       display: grid !important;
-      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
-      gap: var(--ha-space-2) var(--ha-space-3) !important;
+      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr) minmax(var(--ha-space-11, 44px), max-content);
+      gap: var(--ha-space-2) var(--ha-space-4) !important;
       width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
@@ -66,10 +94,90 @@ origami_slider:
       grid-column: 1 / -1;
       display: grid !important;
       grid-template-columns: subgrid;
+      gap: normal !important;
       align-items: center;
       width: auto !important;
     }
-    ha-card .bubble-sub-slider-wrapper.inline::before {
+    /* Each row has three columns: the name, the track and the value, so the value never sits on the fill */
+    ha-card .bubble-sub-slider-wrapper.inline > [class*="bubble-sub-button-slider-"] {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-slider {
+      grid-area: 1 / 2;
+      position: relative !important;
+      box-sizing: border-box;
+      height: var(--bubble-sub-slider-height);
+      overflow: hidden;
+      border-radius: var(--radius-small);
+      background-color: var(--ha-card-background);
+      box-shadow: var(--card-ring);
+    }
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper {
+      grid-area: 1 / 3;
+      display: flex !important;
+      justify-content: flex-end;
+      min-width: 0;
+      padding: 0 !important;
+      opacity: 1 !important;
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-value {
+      position: static !important;
+      display: block !important;
+      height: auto !important;
+      padding: 0 !important;
+      transform: none !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    ${card._orgSl.toggles.length ? card._orgSl.toggles.join(",\n    ") + ` {
+      grid-column: 1 / -1;
+      display: grid !important;
+      grid-template-columns: subgrid;
+      align-items: center;
+      width: auto !important;
+      min-width: 0 !important;
+      height: var(--bubble-sub-slider-height) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+    ` + card._orgSl.toggles.map((s) => s + " > :not(.bubble-sub-button-name-container)").join(",\n    ") + ` {
+      display: none !important;
+    }
+    ` + card._orgSl.toggles.map((s) => s + " > .bubble-sub-button-name-container").join(",\n    ") + ` {
+      grid-area: 1 / 2;
+      display: flex !important;
+      align-items: center;
+      box-sizing: border-box;
+      height: 100%;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: var(--radius-small);
+      background-color: var(--ha-card-background);
+      box-shadow: var(--card-ring);
+      font-size: 0 !important;
+      transition: background-color var(--duration-normal) ease;
+    }
+    ` + card._orgSl.toggles.map((s) => s + "::after").join(",\n    ") + ` {
+      grid-area: 1 / 3;
+      justify-self: end;
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--secondary-text-color);
+      white-space: nowrap;
+    }` : ""}
+    ${card._orgSl.lit.length ? card._orgSl.lit.join(",\n    ") + ` {
+      background-color: var(--org-slider-fill);
+    }` : ""}
+    ${card._orgSl.words}
+    ${card._orgSl.rows}::before {
+      content: var(--org-name, "");
+      grid-area: 1 / 1;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -77,6 +185,26 @@ origami_slider:
       font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-bold);
       color: var(--primary-text-color);
+    }
+    ${card._orgSl.rows}[data-org-scroll]::before {
+      content: var(--org-name-loop, "");
+      text-overflow: clip;
+      mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent);
+      animation: origami-name-scroll var(--org-name-time) linear infinite;
+    }
+    ${card._orgSl.rows}[data-org-scroll]:dir(rtl)::before {
+      mask-image: linear-gradient(to left, transparent 0, black 8px, black calc(100% - 8px), transparent);
+    }
+    @keyframes origami-name-scroll {
+      from { text-indent: 0; }
+      to { text-indent: var(--org-name-shift); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ${card._orgSl.rows}[data-org-scroll]::before {
+        animation: none;
+        content: var(--org-name, "");
+        text-overflow: ellipsis;
+      }
     }
     ha-card [class*="bubble-sub-button-slider-"] {
       --org-inset: var(--ha-card-background);
