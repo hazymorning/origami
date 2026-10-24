@@ -1,24 +1,13 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.7.0"
+  version: "1.8.0"
   supported:
     - button
     - sub-buttons
   description: "Slider turns a slider button into a standalone slider, so the card is the track. On a sub-buttons card, each slider sub-button becomes a row with its name, its track and its value. A sub-button for a switch becomes a row whose track fills while the switch is on."
   editor:
-    - name: labels
-      label: "Names on a sub-buttons card"
-      selector:
-        select:
-          mode: dropdown
-          options:
-            - label: Before the track
-              value: before
-            - label: Inside the track
-              value: inside
-      default: before
     - name: label_width
-      label: "Name width before the track (the longest name, up to 30 %, if empty)"
+      label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
       selector:
         text: {}
   code: |
@@ -36,13 +25,10 @@ origami_slider:
             const name = org.name(hass, entity, item.name, env);
             const text = org.rename(name) ?? name;
             const slider = item.sub_button_type === "slider";
-            return { n, text, slider, on: org.power(hass.states[entity]) === true, word: slider ? "" : org.power(hass.states[entity]) === null ? "–" : org.word(hass, hass.states[entity]),
+            return { n, text, slider, on: !slider && org.power(hass.states[entity]) === true, word: slider ? "" : org.power(hass.states[entity]) === null ? "–" : org.word(hass, hass.states[entity]),
               sel: slider ? "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")" : "ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-sub-button-" + n };
           });
         card._orgSl = {
-          // With labels inside, each row is one track with the name at its start and the value at its end, so rows look alike whatever their names
-          inside: this.config.origami_slider?.labels === "inside",
-          dim: rows.filter((r) => !r.on).map((r) => r.sel + "::before"),
           width: width || "fit-content(30%)",
           names: rows.map((r) => r.sel + " { --org-name: " + org.str(r.text) + "; --org-name-loop: " + org.str(r.text + gap + r.text) + "; }").join("\n    "),
           toggles: rows.filter((r) => !r.slider).map((r) => r.sel),
@@ -225,37 +211,6 @@ origami_slider:
       height: 100% !important;
     }
     ${card._orgSl.names}
-    ${card._orgSl.inside ? `
-    ha-card {
-      --bubble-sub-slider-height: var(--control-height-icon);
-    }
-    ha-card .bubble-sub-button-bottom-container {
-      grid-template-columns: minmax(0, 1fr) !important;
-    }
-    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-slider,
-    ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper` + card._orgSl.toggles.map((s) => ",\n    " + s + " > .bubble-sub-button-name-container").join("") + ` {
-      grid-area: 1 / 1 !important;
-    }
-    ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper` + card._orgSl.toggles.map((s) => ",\n    " + s + "::after").join("") + ` {
-      grid-area: 1 / 1 !important;
-      z-index: 1;
-      justify-self: end;
-      padding-inline-end: var(--ha-space-4) !important;
-      pointer-events: none;
-    }
-    ${card._orgSl.rows}::before {
-      z-index: 1;
-      justify-self: start;
-      max-width: calc(100% - var(--ha-space-4) - 72px);
-      margin-inline-start: var(--ha-space-4);
-      pointer-events: none;
-    }
-    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-slider > .bubble-range-fill::after {
-      display: none !important;
-    }
-    ${card._orgSl.dim.length ? card._orgSl.dim.join(",\n    ") + ` {
-      color: var(--secondary-text-color) !important;
-    }` : ""}` : ""}
     ` : `
     ha-card {
       --org-row-height: var(--control-height-icon);

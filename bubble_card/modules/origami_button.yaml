@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.6.0"
+  version: "3.6.1"
   supported:
     - sub-buttons
     - button
@@ -156,6 +156,8 @@ origami_button:
       const segNames = seg ? [] : [].concat(segRaw ?? []).flatMap((v) => String(v).split(",")).map(low).filter((v) => v && v !== "false");
       // Bubble Card numbers the sub-buttons of the groups first, in their order. On a button card, the main sub-buttons come before the bottom ones, and Button leaves them to Base.
       const own = this.config.card_type === "sub-buttons";
+      // On a button card, Base 12.4 and later leaves the bottom sub-buttons to Button. An older Base would fill them like the main sub-buttons.
+      if (!own && !org.key) throw new Error("origami_button needs origami_base 12.4 or later on a button card");
       const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
       const grouped = bottom.filter((g) => Array.isArray(g?.group));
       const loose = bottom.filter((g) => g && !Array.isArray(g.group));
