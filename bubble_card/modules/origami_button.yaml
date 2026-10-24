@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.4.0"
+  version: "3.4.1"
   supported:
     - sub-buttons
   description: "Button turns a sub-buttons card into rows, grids, chips, segmented bars or a row that scrolls sideways. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
@@ -187,8 +187,8 @@ origami_button:
       // A small segmented switch is a track around its group, and its active segment takes the stronger fill
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
-      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle); scroll-snap-align: start; scroll-margin-inline-start: var(--scroller-bleed); }\n    "
-        + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; scroll-snap-align: none; }").join("\n    ");
+      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle);}\n    "
+        + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; }").join("\n    ");
       const barOn = bars.flatMap((g) => g.n.filter((n) => active.includes(n)).map((n) => bar(g) + " > .bubble-sub-button.bubble-sub-button-" + n));
       // A divider is a short line between two buttons, and it shows while its group shows
       const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => base + ".bubble-sub-button-" + n);
@@ -418,16 +418,11 @@ origami_button:
       padding: ${card._orgB.chips ? "var(--scroller-bleed)" : "var(--scroller-padding)"} !important;
       overflow-x: auto;
       overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
       scrollbar-width: none;
       mask-image: var(--scroller-mask);
     }
     ha-card:dir(rtl) .bubble-sub-button-bottom-container {
       mask-image: linear-gradient(to left, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
-    }
-    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
-      scroll-snap-align: start;
-      scroll-margin-inline-start: var(--scroller-bleed);
     }` : ""}
     ${card._orgB.on("")} {
       ${card._orgB.seg ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : card._orgB.bg ? "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;" : ""}
