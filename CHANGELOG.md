@@ -48,6 +48,7 @@ These changes are in the `next` branch and come with the next release.
 
 ### Bug fixes
 
+- A row of buttons with `scroll` starts at its first button again when a button in front of the others appears. The row no longer snaps to its buttons, because the browser kept the row on the button it had snapped to.
 - The Header and Tiles modules now show values exactly as they are. Before, Bubble Card's style cleaner removed the space after a comma or a semicolon, so "Mon, 12:00" became "Mon,12:00", and a value with braces disappeared.
 - On iPhones, the menu now starts below the status bar instead of behind it.
 - Base no longer replaces a card's state line with On, Off or Error. A sensor card now shows its value.
