@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.4.0"
+  version: "3.5.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text, as chips or as one switch. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -69,6 +69,11 @@ origami_header:
       selector:
         text: {}
       default: "var(--ha-space-1)"
+    - name: scroll
+      label: "The values scroll sideways next to the title"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
@@ -101,13 +106,29 @@ origami_header:
         text,
         gap: gap || "var(--ha-space-1)",
         chip: cfg.value_style === "chip",
-        // A switch joins the values into one track, and the value whose tap sets what its entity shows now, or whose on key is true, stands out on it
+        // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
         switch: cfg.value_style === "switch",
-        picked: []
+        picked: [],
+        // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
+        scroll: !!cfg.scroll
       };
       const scope = "ha-card .bubble-sub-button-container";
       const list = org.subs(env, this.config, "origami_header");
-      if (card._orgH.switch) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n);
+      // A chip that has nothing to show but its icon, with no name, no state and no name key, is a square with a larger icon
+      card._orgH.bare = card._orgH.chip ? list.filter(({ item, opt }) => item.show_background !== false && !(opt && "name" in opt) && !(item.show_name && org.has(item.name))
+        && !["show_state", "state_content", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false)).map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n) : [];
+      if (card._orgH.switch || card._orgH.chip) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n);
+      // In a row that scrolls, a newly chosen value scrolls into view, such as the chip of the room a pop-up opens on
+      const pick = card._orgH.scroll ? card._orgH.picked[0] ?? "" : "";
+      if (pick && pick !== card._orgHPick) requestAnimationFrame(() => {
+        const row = card.querySelector(scope.replace(/^ha-card /, ""));
+        const chip = card.querySelector(pick.replace(/^ha-card /, ""));
+        if (!row || !chip || !row.clientWidth) return;
+        card._orgHPick = pick;
+        const start = chip.offsetLeft - row.offsetLeft;
+        if (start < row.scrollLeft || start + chip.offsetWidth > row.scrollLeft + row.clientWidth - 48) row.scrollTo({ left: Math.max(0, start - 8), behavior: card._orgHSeen ? "smooth" : "auto" });
+        card._orgHSeen = true;
+      });
       const rules = org.values(env, this.config, "origami_header", scope, text, list);
       // A name next to a plain icon needs the gap that Bubble Card leaves out when the sub-button shows no state, on either side of the name
       if (!card._orgH.chip) list.forEach(({ n, opt }) => {
@@ -120,6 +141,8 @@ origami_header:
       return "";
     })()}
     ha-card {
+      /* A chosen value stands on the card background, and in dark mode on a lighter surface, as on a switch */
+      --org-header-pick: ${card._org.opts.dark ? "color-mix(in srgb, var(--primary-text-color) 22%, var(--ha-card-background))" : "var(--ha-card-background)"};
       --org-header-weight: ${card._orgH.weight};
       --org-header-icon-color: ${card._orgH.color};
       --org-header-icon-size: ${card._orgH.size};
@@ -237,6 +260,42 @@ origami_header:
     }
     ` : ""}
     ${card._orgH.chip ? card._org.chips("ha-card .bubble-sub-button-container") : ""}
+    ${card._orgH.bare.length ? card._orgH.bare.join(",\n    ") + ` {
+      justify-content: center !important;
+      min-width: var(--control-height-mini) !important;
+      padding: 0 !important;
+    }
+    ` + card._orgH.bare.map((s) => s + " .bubble-sub-button-icon:not(.hidden)").join(",\n    ") + ` {
+      --mdc-icon-size: var(--icon-size-xs) !important;
+    }` : ""}
+    ${card._orgH.chip && card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
+      background-color: var(--org-header-pick) !important;
+      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+    }` : ""}
+    ${card._orgH.scroll ? `
+    /* A row of chips is a row of boxes, so it keeps more space from the cards below it than a title alone */
+    ha-card .bubble-container {
+      padding-bottom: calc(var(--org-header-below, var(--ha-space-2)) + var(--ha-space-2)) !important;
+    }
+    ha-card .bubble-sub-button-container {
+      flex: 1 1 0% !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      margin-block: calc(-1 * var(--ha-space-1)) !important;
+      margin-inline: var(--ha-space-2) calc(-1 * var(--scroller-bleed, 0px)) !important;
+      padding-block: var(--ha-space-1) !important;
+      padding-inline: var(--ha-space-2) var(--scroller-bleed, 0px) !important;
+      mask-image: linear-gradient(to right, transparent 0px, black var(--ha-space-2), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
+    }
+    ha-card:dir(rtl) .bubble-sub-button-container {
+      mask-image: linear-gradient(to left, transparent 0px, black var(--ha-space-2), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+    }` : ""}
     ${card._orgH.switch ? `
     ha-card .bubble-sub-button-container {
       flex: 0 0 auto !important;
@@ -266,7 +325,7 @@ origami_header:
       transform: scale(var(--press-scale));
     }
     ${card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
-      background: var(--ha-card-background) !important;
+      background: var(--org-header-pick) !important;
       box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
       color: var(--primary-text-color) !important;
     }` : ""}` : ""}
