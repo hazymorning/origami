@@ -817,7 +817,7 @@ A button with `content_layout: icon-top` or `icon-bottom` stacks its icon and na
 
 With `segmented: true`, each group under `sub_button: bottom` becomes one bar. Buttons outside a group each form a bar of their own when the card also has groups, and they share one bar when it has none. The TV pop-up's input and volume buttons are two groups, so they form two bars in one row.
 
-A button with `css_class: divider` is a short line between its neighbors, and it shows while its group shows. The chip row of a music pop-up uses chips, a divider and a small switch between two speakers. Each segment is highlighted while the speaker helper has its option:
+A button with `css_class: divider` is a short line between its neighbors, and it shows while its group shows. A row of chips can also hold a divider and a small switch, such as one between two speakers. In this example, each segment is highlighted while the speaker helper has its option:
 
 ```yaml
 type: custom:bubble-card
