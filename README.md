@@ -104,7 +104,7 @@ Open each repository in HACS. If HACS asks you to add the repository, select **A
 | Repository | Used for | Link |
 | --- | --- | --- |
 | [Origami](https://github.com/hazymorning/origami) | The theme | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme) |
-| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the climate table and the fan pop-up | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
+| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the climate table and the fan pop-up | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
 | [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers, the room cards and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
 | [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) | Loading the Bubble Card modules | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration) |
 | [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
@@ -363,15 +363,9 @@ The menu comes from [Origami Header](https://github.com/hazymorning/origami_head
 <br>
 
 - The menu is an Origami Header card with `mode: menu`, and you decide what it contains. This example contains a server card and buttons for the File editor app, automations, the sidebar and edit mode. If you do not use the File editor app, change or delete the **Files** button.
-- The server card shows a status, the uptime, the processor load and the memory use. Tap the processor or memory value to open its details. Tap anywhere else on the card to open the server pop-up, which is not included yet.
-- The status consists of an icon and a short message. The icon shows the overall state, and the message gives the reason, for example **Backup due**.
-
-  | Icon | Meaning |
-  | --- | --- |
-  | Green check | Everything is fine. |
-  | Arrow in the accent color | Updates are available. |
-  | Orange | The disk is more than 80% full, the memory use is above 85%, the processor load is above 80%, the last automatic backup is older than 3 days, or System Monitor sends no data. |
-  | Red | The disk is more than 90% full, the memory use or processor load is above 95%, or the last automatic backup is older than 7 days. |
+- The server card is a Bubble card with the Base module, so it has the same tile and text styles as the other Bubble cards. It shows a short status message, the uptime, the processor load and the memory use. Tap the processor or memory value to open its details. Tap anywhere else on the card to open the server pop-up, which is not included yet.
+- The message names the most urgent problem, for example **Backup due**. A disk that is more than 90% full comes first. Next come a memory use or processor load above 95% and a last automatic backup that is older than 3 days. After these, the message names a disk above 80%, a memory use above 85% or a processor load above 80%. Without data from System Monitor, it says **No data**. Otherwise, it names the number of available updates or says **All good**.
+- The card's own styles place each value above its label, in the sizes of the card's name and state line.
 
 </details>
 
@@ -392,7 +386,7 @@ The menu comes from [Origami Header](https://github.com/hazymorning/origami_head
 
 <br>
 
-The menu is one Origami Header card with a Paper Buttons Row inside. It needs Origami Header, which step 5 of the [setup](#setup) installs, and Paper Buttons Row.
+The menu is one Origami Header card with a Bubble card inside. It needs Origami Header, which step 5 of the [setup](#setup) installs, and Bubble Card with the Origami modules.
 
 <!-- dashboard.yaml type=custom:origami-header-card -->
 
@@ -420,171 +414,90 @@ buttons:
     icon: mdi:pencil-outline
     special: edit
 cards:
-  type: custom:paper-buttons-row
-  extra_styles: '.flex-box:active { transform: scale(var(--press-scale)) }'
-  styles:
-    position: relative
-    gap: var(--ha-space-3)
-    padding: var(--ha-space-4) var(--ha-space-5) var(--ha-space-4) var(--ha-space-4)
-    background-color: var(--ha-card-background)
-    border-radius: var(--ha-card-border-radius)
-    box-shadow: var(--ha-card-box-shadow)
-  base_config:
-    layout: name|state
-    tooltip: false
-    styles:
-      button:
-        flex-direction: column
-        padding: 0px
-      name:
-        padding: 0px
-        white-space: nowrap
-        font-weight: var(--ha-font-weight-bold)
-        line-height: var(--ha-line-height-normal)
-      state:
-        padding: 0px
-        margin-top: var(--ha-space-1)
-        white-space: nowrap
-        font-size: 12px
-        font-weight: var(--ha-font-weight-medium)
-        line-height: var(--ha-line-height-condensed)
-        color: var(--secondary-text-color)
-  buttons:
-    # An invisible overlay opens the server pop-up when the card is tapped. CPU and RAM have their own tap actions.
-    - layout: name
-      name: ' '
-      tap_action:
-        action: navigate
-        navigation_path: '#popup_server'
-      styles:
-        button:
-          position: absolute
-          inset: 0px
-    # Status icon for ok, info (updates), warn and crit
-    - layout: icon
-      icon: mdi:check-bold
-      state: >-
-        {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
-        {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
-        {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
-        {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
-        {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
-        {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
-        {%- if s > 90 or r > 95 or c > 95 or a > 604800 -%}crit
-        {%- elif s > 80 or r > 85 or c > 80 or a > 259200 or (c < 0 and r < 0 and s < 0) -%}warn
-        {%- elif u > 0 -%}info
-        {%- else -%}ok
-        {%- endif -%}
-      state_icons:
-        info: mdi:arrow-up-thick
-        warn: mdi:exclamation-thick
-        crit: mdi:close-thick
-      state_styles:
-        info:
-          button:
-            color: var(--accent-color)
-        warn:
-          button:
-            color: var(--warning-color)
-        crit:
-          button:
-            color: var(--error-color)
-      tap_action:
-        action: none
-      styles:
-        button:
-          color: var(--success-color)
-          pointer-events: none
-        icon:
-          display: flex
-          align-items: center
-          justify-content: center
-          width: var(--control-height-icon)
-          height: var(--control-height-icon)
-          border-radius: var(--radius-inner)
-          background-color: currentColor
-          box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 12%, transparent)
-          --mdc-icon-size: var(--icon-size-xs)
-          --icon-primary-color: var(--text-color-active)
-    # Status text and uptime
-    - name: >-
-        {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
-        {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
-        {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
-        {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
-        {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
-        {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
-        {%- if s > 90 -%}Disk almost full
-        {%- elif r > 95 -%}Memory low
-        {%- elif c > 95 -%}CPU high
-        {%- elif a > 259200 -%}Backup due
-        {%- elif s > 80 -%}Disk almost full
-        {%- elif r > 85 -%}Memory low
-        {%- elif c > 80 -%}CPU high
-        {%- elif c < 0 and r < 0 and s < 0 -%}No data
-        {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
-        {%- else -%}All good
-        {%- endif -%}
-      state: >-
-        {%- set n = as_timestamp(states('sensor.system_monitor_last_boot'), default=none) -%}
-        {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
-        {%- if d < 0 -%}Uptime unknown
-        {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
-        {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
-        {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
-        {%- endif -%}
-      tap_action:
-        action: none
-      styles:
-        button:
-          flex: 1
-          min-width: 0px
-          align-items: flex-start
-          pointer-events: none
-        name:
-          max-width: 100%
-          overflow: hidden
-          text-overflow: ellipsis
-          font-size: var(--ha-font-size-l)
-        state:
-          max-width: 100%
-          overflow: hidden
-          text-overflow: ellipsis
-    # CPU and memory, colored when high
-    - name: >-
-        {%- set v = states('sensor.system_monitor_processor_use') | float(none) -%}
-        {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
-      state: CPU
-      tap_action:
-        action: more-info
-        entity: sensor.system_monitor_processor_use
-      styles:
-        button:
-          min-width: 44px
-          align-items: flex-end
-        name:
-          font-size: var(--ha-font-size-m)
-          font-variant-numeric: tabular-nums
-          color: >-
-            {%- set v = states('sensor.system_monitor_processor_use') | float(0) -%}
-            {{ 'var(--error-color)' if v > 95 else ('var(--warning-color)' if v > 80 else 'var(--primary-text-color)') }}
-    - name: >-
-        {%- set v = states('sensor.system_monitor_memory_usage') | float(none) -%}
-        {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
-      state: RAM
-      tap_action:
-        action: more-info
-        entity: sensor.system_monitor_memory_usage
-      styles:
-        button:
-          min-width: 44px
-          align-items: flex-end
-        name:
-          font-size: var(--ha-font-size-m)
-          font-variant-numeric: tabular-nums
-          color: >-
-            {%- set v = states('sensor.system_monitor_memory_usage') | float(0) -%}
-            {{ 'var(--error-color)' if v > 95 else ('var(--warning-color)' if v > 85 else 'var(--primary-text-color)') }}
+  # The server card. Its name gives the most urgent problem, and the line below it gives the uptime.
+  # A tap on CPU or RAM opens its details, and a tap anywhere else opens the server pop-up.
+  type: custom:bubble-card
+  card_type: button
+  button_type: state
+  entity: sensor.system_monitor_last_boot
+  icon: mdi:server
+  name: >-
+    {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
+    {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
+    {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
+    {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
+    {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
+    {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
+    {%- if s > 90 -%}Disk almost full
+    {%- elif r > 95 -%}Memory low
+    {%- elif c > 95 -%}CPU high
+    {%- elif a > 259200 -%}Backup due
+    {%- elif s > 80 -%}Disk almost full
+    {%- elif r > 85 -%}Memory low
+    {%- elif c > 80 -%}CPU high
+    {%- elif c < 0 and r < 0 and s < 0 -%}No data
+    {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
+    {%- else -%}All good
+    {%- endif -%}
+  state_content: >-
+    {%- set n = as_timestamp(states('sensor.system_monitor_last_boot'), default=none) -%}
+    {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
+    {%- if d < 0 -%}Uptime unknown
+    {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
+    {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
+    {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
+    {%- endif -%}
+  scrolling_effect: false
+  modules:
+    - origami_base
+  tap_action:
+    action: navigate
+    navigation_path: '#popup_server'
+  button_action:
+    tap_action:
+      action: navigate
+      navigation_path: '#popup_server'
+  sub_button:
+    main:
+      - entity: sensor.system_monitor_processor_use
+        name: >-
+          {%- set v = states('sensor.system_monitor_processor_use') | float(none) -%}
+          {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
+        show_name: true
+        show_icon: false
+        show_background: false
+        tap_action:
+          action: more-info
+      - entity: sensor.system_monitor_memory_usage
+        name: >-
+          {%- set v = states('sensor.system_monitor_memory_usage') | float(none) -%}
+          {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
+        show_name: true
+        show_icon: false
+        show_background: false
+        tap_action:
+          action: more-info
+  # Each value stands above its label, in the sizes of the card's name and state line
+  styles: |-
+    .bubble-sub-button {
+      flex-direction: column;
+      justify-content: center;
+    }
+    .bubble-sub-button-name-container {
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-bold);
+    }
+    .bubble-sub-button::after {
+      margin-top: var(--ha-space-1);
+      font-size: var(--ha-font-size-s);
+      color: var(--secondary-text-color);
+    }
+    .bubble-sub-button-1::after {
+      content: "CPU";
+    }
+    .bubble-sub-button-2::after {
+      content: "RAM";
+    }
 css: |-
   .scrim {
     backdrop-filter: blur(14px);
@@ -4219,7 +4132,7 @@ The group badge on the cover scales with this variable.
 
 <br>
 
-Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the climate table. The climate table and the server card are each a single Paper Buttons Row.
+Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the climate table. The climate table is a single Paper Buttons Row.
 
 ```yaml
 type: custom:paper-buttons-row
@@ -4229,38 +4142,6 @@ styles:
   border-radius: var(--ha-card-border-radius)
 buttons:
   - entity: light.living_room
-```
-
-</details>
-
-<details>
-<summary>One tap target for each card</summary>
-
-<br>
-
-Give the row `position: relative`. An invisible first button with `position: absolute` and `inset: 0px` covers the whole row and receives every tap that no other button takes. Buttons without a tap action of their own get `pointer-events: none`, so a tap on them reaches the invisible button. The server card in the menu works this way, and its CPU and RAM values keep their own tap actions.
-
-```yaml
-type: custom:paper-buttons-row
-styles:
-  position: relative
-buttons:
-  - layout: name
-    name: ' '
-    tap_action:
-      action: navigate
-      navigation_path: '#popup_server'
-    styles:
-      button:
-        position: absolute
-        inset: 0px
-  - layout: icon
-    icon: mdi:check-bold
-    tap_action:
-      action: none
-    styles:
-      button:
-        pointer-events: none
 ```
 
 </details>

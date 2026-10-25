@@ -48,6 +48,7 @@ These changes are in the `next` branch and come with the next release.
 - Base has a new `large` option for a larger name, as on a card at the top of a pop-up.
 - Speaker Select also works on a button card with a slider, so a speaker's whole row can set its volume. Its rows hide Bubble Card's media buttons themselves, and a readout without a tap action of its own passes the tap to the row.
 - Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
+- The server card in the menu is a Bubble card with the Base module instead of Paper Buttons Row. It takes the same tile and text styles as the other Bubble cards, so its icon no longer changes its color with the status. The message still names the most urgent problem.
 
 ### Bug fixes
 
@@ -109,6 +110,7 @@ Every module changed, and several options changed their names or their meaning. 
 18. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
 19. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
 20. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
+21. To use the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
 
 ## 2.0 · The Unfolding
 
