@@ -324,7 +324,7 @@ cards:
       .texts { min-height: calc(var(--origami-tile) + 2 * var(--origami-pad)); }
       .slide { gap: var(--ha-space-1); }
       .icon {
-        border-radius: var(--radius-inner);
+        border-radius: calc(var(--origami-tile) * var(--radius-ratio, 0.35));
         background: color-mix(in srgb, var(--tile-color) var(--tint-strength), var(--ha-card-background, var(--card-background-color)));
         box-shadow: var(--ha-card-box-shadow, none);
       }
@@ -3890,9 +3890,9 @@ The name Origami comes from Paper Buttons Row, because origami is folded paper. 
 | Token | Purpose |
 | --- | --- |
 | `ha-space-1` … `ha-space-5` | Spacing from 4 to 20 px |
-| `ha-card-border-radius` | The card corner radius, 22 px. `radius-inner` is this value divided by 1.3, about 17 px. `radius-small` is 8 px. |
+| `ha-card-border-radius`, `radius-ratio`, `radius-small`, `radius-control`, `radius-inner` | Every corner follows one rule. A shape's radius is its height times `radius-ratio`, which is 0.35, and no shape is rounder than a card, whose radius is 22 px. `radius-small`, `radius-control` and `radius-inner` are the radii of shapes that are 32, 40 and 48 px tall, such as a chip, a button and an icon's background. A shape close inside another shape takes the outer radius less the space between them, so their corners run in parallel. Switches, dots and rings are round. |
 | `border-width`, `border-contrast` | Card outlines, which are off by default |
-| `card-shadow`, `card-shadow-flat`, `chip-shadow`, `shadow-edge`, `shadow-lift`, `shadow-elevated` | Shadows for each mode. `shadow-edge` is a fine edge with a line under it, and the short shadows below cards and icons take the warm `shadow-lift` color. `card-shadow-flat` only has the edge, `chip-shadow` is the smaller shadow for icons, switches and keys, and the card above the navigation bar uses `shadow-elevated`. |
+| `card-shadow`, `card-shadow-flat`, `chip-shadow`, `shadow-edge`, `shadow-tint`, `shadow-elevated` | Shadows for each mode. Each shadow has a fine edge, which is `shadow-edge`, a contact shadow and a soft drop below, all in `shadow-tint`, a dark tone of the background's warm hue. `card-shadow-flat` has the edge and the contact shadow, `chip-shadow` is the smaller shadow for icons, switches and keys, and the card above the navigation bar uses `shadow-elevated`. |
 | `fill-subtle`, `fill-strong`, `fill-loud` | Neutral surfaces, mixed from `fill-base` so that they stay warm |
 | `fill-contrast` | The strength of `fill-subtle`, 8% in light mode and 5% in dark mode |
 | `fill-active`, `toggle-on` | The text color at 85% on the card background, for switch tracks and active buttons |

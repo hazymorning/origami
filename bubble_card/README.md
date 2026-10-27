@@ -61,8 +61,8 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a pill in the active color with the size of a button in a Button row. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state, and an option that is not an entity ID, such as None, keeps its text. Base's `words` option renames the entities, with the entity ID or the name as the key.
-- In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. The chosen option has the active color.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. The chosen option has the active color, also while it has the focus. The open menu shows that the dropdown is open, so Bubble Card's ring in the accent color is hidden.
 
 </details>
 
@@ -561,7 +561,7 @@ sub_button:
       show_icon: false
 ```
 
-The dropdown's options in this example are the entity IDs of the speakers. Base therefore shows the dropdown as a pill with the chosen speaker's name, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
+The dropdown's options in this example are the entity IDs of the speakers. Base therefore shows the dropdown as a chip with the chosen speaker's name, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
 
 #### Play row
 
@@ -847,8 +847,8 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and i
 | `icon_size` | `var(--icon-size-2xs)` | The option sets the size of the icons. |
 | `padding` | `0` | The option sets the space around the buttons. |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
-| `segmented` | `false` | With `true`, the buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button shows a filled pill. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. With the names of groups instead, only those groups become small switches, which can stand in any row, also in one that scrolls. In a row that does not scroll, a switch fills the free width. |
-| `chips` | `false` | The buttons are round pills with the label in the text color and the icon in the secondary color. A chip with only an icon is a circle. An active button has a bold label with every style. |
+| `segmented` | `false` | With `true`, the buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button is filled. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. With the names of groups instead, only those groups become small switches, which can stand in any row, also in one that scrolls. In a row that does not scroll, a switch fills the free width. |
+| `chips` | `false` | The buttons are chips with the label in the text color and the icon in the secondary color. A chip with only an icon is a square. An active button has a bold label with every style. |
 | `pending` | `false` | After a tap, the button shows the look its tap is about to give it, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, and buttons that only open something and segments never do. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
@@ -1022,7 +1022,7 @@ The Header module creates a section header. The separator card's name is the tit
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `value_style` | `text` | `text` shows the values as text, and `chip` shows them as pills. A sub-button with `show_background: false` stays plain. `switch` joins the values into one small switch, as described below the example. |
+| `value_style` | `text` | `text` shows the values as text, and `chip` shows them as chips. A sub-button with `show_background: false` stays plain. `switch` joins the values into one small switch, as described below the example. |
 | `weight` | `bold` | The option sets the font weight of the values, which is `bold`, `medium` or `regular`. With the Origami theme, `medium` looks the same as `regular`. |
 | `icon_color` | | The option sets the icon color of plain values. It accepts a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The option sets the icon size of plain values. Chips use `--icon-size-2xs`, which is 14 px. For a small dot, use `var(--dot-size)`. |
@@ -1202,8 +1202,10 @@ A tile whose entity is unavailable is dimmed. More tile examples are in the Favo
 With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. As on a tile, the row's icon stands on the card background and takes the state color while its entity is on. The state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
-- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on Base's compact pill switch, which is as wide as the icon's background.
-- A row that runs a script, a scene or another action shows a square key as large as the icon's background. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows a switch, which is filled while the entity is on.
+- A row that runs a script, a scene or another action shows a play sign. With `script.toggle`, it shows a stop sign while the script runs, because a second tap stops the script.
+
+The signs are icons of one size in one column at the row's end. They are muted, and a sign takes the text color while what it controls is on or runs, by the same rule that fills a sub-button.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 
@@ -1265,7 +1267,7 @@ sub_button:
           state_not: ['off', standby, unavailable, unknown]
 ```
 
-A row's icon has the size and the background of a card's icon, so all rows have the same height, with or without a state line. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. A row whose entity is unavailable is dimmed.
+A row's icon has the size and the background of a card's icon, so all rows have the same height. The signs' column at the row's end is as wide as the icons' column and as far from the edge. A row without an entity has no state, and its `state` key can give it a line, such as a short description, so every row has two lines. A row whose entity is unavailable is dimmed.
 
 </details>
 

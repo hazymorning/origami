@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.7.0"
+  version: "3.7.1"
   supported:
     - sub-buttons
     - button
@@ -278,7 +278,7 @@ origami_button:
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
       --org-btn-lamp: ${card._orgB.lamp};
-      --org-btn-radius: ${!card._orgB.chips ? "var(--radius-inner)" : card._orgB.bg || card._orgB.seg ? "calc(var(--org-btn-height) / 2)" : "calc(var(--control-height-icon) / 2)"};
+      --org-btn-radius: calc(${card._orgB.seg ? "var(--control-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
     }
     ${card._orgB.lamps}
     ${card._orgB.values}
@@ -363,12 +363,12 @@ origami_button:
       margin: 0 !important;
     }
     ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:first-child, :nth-child(1 of .bubble-sub-button:not(.hidden))) {
-      border-start-start-radius: var(--radius-inner) !important;
-      border-end-start-radius: var(--radius-inner) !important;
+      border-start-start-radius: var(--org-btn-radius) !important;
+      border-end-start-radius: var(--org-btn-radius) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
-      border-start-end-radius: var(--radius-inner) !important;
-      border-end-end-radius: var(--radius-inner) !important;
+      border-start-end-radius: var(--org-btn-radius) !important;
+      border-end-end-radius: var(--org-btn-radius) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(:is(:last-child, :nth-last-child(1 of .bubble-sub-button-group:not(.hidden)))) > .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
       margin-inline-end: var(--ha-space-3);
@@ -387,7 +387,7 @@ origami_button:
       position: absolute;
       inset: var(--org-btn-inset);
       z-index: -1;
-      border-radius: calc(var(--radius-inner) - var(--org-btn-inset));
+      border-radius: calc(var(--org-btn-radius) - var(--org-btn-inset));
       background-color: var(--fill-active);
       opacity: 0;
       transition: opacity var(--duration-normal) ease;
@@ -434,7 +434,7 @@ origami_button:
       width: 100% !important;
       height: var(--tile-size-lg) !important;
       margin: 0 !important;
-      border-radius: var(--radius-inner);
+      border-radius: min(calc(var(--tile-size-lg) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
       background: var(--org-value-chip, var(--org-btn-bg));
       transition: var(--transition-interactive);
     }

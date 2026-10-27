@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.5.0"
+  version: "4.5.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. On a header that shows only a name, the sub-buttons become values below the title or beside it, as text or as chips, with the same keys as in Header."
@@ -90,7 +90,7 @@ origami_popup:
     }
     .bubble-close-button {
       display: flex;
-      border-radius: var(--radius-inner) !important;
+      border-radius: var(--radius-control, 14px) !important;
       background-color: transparent !important;
       opacity: var(--opacity-quiet);
       font-weight: var(--ha-font-weight-medium) !important;

@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.6.0"
+  version: "3.6.1"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -317,7 +317,7 @@ origami_header:
       gap: 0 !important;
       margin-inline-start: auto !important;
       padding: var(--ha-space-1) !important;
-      border-radius: var(--radius-inner) !important;
+      border-radius: var(--radius-control, 14px) !important;
       background-color: var(--fill-subtle) !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button {
@@ -326,7 +326,7 @@ origami_header:
       min-width: var(--control-height-icon) !important;
       height: var(--control-height-mini) !important;
       padding: 0 var(--ha-space-3) !important;
-      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
+      border-radius: calc(var(--radius-control, 14px) - var(--ha-space-1)) !important;
       background: transparent !important;
       box-shadow: none !important;
       color: var(--secondary-text-color) !important;

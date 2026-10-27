@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.8.1"
+  version: "1.8.2"
   supported:
     - button
     - sub-buttons
@@ -215,14 +215,14 @@ origami_slider:
     }
     .bubble-container {
       overflow: hidden;
-      border-radius: var(--radius-small) !important;
+      border-radius: var(--radius-control, 14px) !important;
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
     .bubble-range-slider,
     .bubble-background,
     .card-content {
-      border-radius: var(--radius-small) !important;
+      border-radius: var(--radius-control, 14px) !important;
     }
     .bubble-range-value {
       inset-inline-end: var(--ha-space-2) !important;

@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.2.0"
+  version: "3.3.0"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In a list, a sign at each row's end shows what a tap does, such as a switch, a key that runs something or a chevron."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In a list, an icon at each row's end shows what a tap does, such as a chevron, a play sign or a switch."
   editor:
     - name: layout
       label: "Layout"
@@ -84,10 +84,10 @@ origami_tiles:
         at,
         all: "open run running stop switch on",
         chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
-        playMask: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
-        stopMask: mask("M18,18H6V6H18V18Z"),
-        // The knob is the circle that Base's pill switch uses
-        knob: mask("M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z")
+        play: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
+        stop: mask("M18,18H6V6H18V18Z"),
+        off: mask("M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"),
+        on: mask("M17,7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7M17,15A3,3 0 0,1 14,12A3,3 0 0,1 17,9A3,3 0 0,1 20,12A3,3 0 0,1 17,15Z")
       };
       return "";
     })()}
@@ -167,13 +167,7 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    /* The switch is Base's compact pill switch. It is as wide as an icon's background, so switches and keys share one column at the row's end. */
-    ha-card {
-      --org-toggle-w: var(--tile-size);
-      --org-toggle-h: var(--icon-size-l);
-      --org-toggle-knob: var(--icon-size-s);
-    }
-    /* A row holds an icon's background, as a card does, so all rows have the same height, with or without a state line */
+    /* A row holds an icon's background, as a card does, so all rows have the same height */
     .bubble-sub-button-group:not(.hidden) {
       gap: var(--ha-space-1) !important;
       box-sizing: border-box;
@@ -193,76 +187,44 @@ origami_tiles:
     .bubble-sub-button-name-container::after {
       margin-top: 2px;
     }
+    /* The sign at a row's end is an icon in the middle of a column as wide as the icons' column on the other side. It is quiet, and it stands out while what it controls is on or runs. */
     ${card._orgTilesSign.at(card._orgTilesSign.all)} {
-      padding-inline-end: calc(2 * var(--ha-space-2) + var(--org-toggle-w)) !important;
+      padding-inline-end: calc(2 * var(--ha-space-2) + var(--tile-size)) !important;
     }
-    ${card._orgTilesSign.at(card._orgTilesSign.all, "::before")},
     ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
       content: "";
       position: absolute;
       top: 50%;
-      translate: 0 -50%;
-      pointer-events: none;
-    }
-    /* A switch and a key stand on the card background, and they are filled while they are on or while their script runs */
-    ${card._orgTilesSign.at("run running stop switch on", "::before")} {
-      inset-inline-end: var(--ha-space-2);
-      width: var(--org-toggle-w);
-      height: var(--org-toggle-h);
-      border-radius: var(--radius-inner);
-      background-color: var(--tile-chip-background, var(--ha-card-background));
-      box-shadow: var(--card-ring), var(--tile-chip-shadow, var(--ha-card-box-shadow));
-      transition: var(--transition-interactive);
-    }
-    /* A key is a square as large as an icon's background, and its sign is as large as the icon */
-    ${card._orgTilesSign.at("run running stop", "::before")} {
-      height: var(--tile-size);
-    }
-    ${card._orgTilesSign.at("running stop on", "::before")} {
-      background-color: var(--fill-active);
-    }
-    ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
-      -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
-      mask: var(--org-sign-icon) center / contain no-repeat;
-    }
-    /* The chevron stands in the middle of the signs' column, as the icon stands in the middle of its background on the other side */
-    ${card._orgTilesSign.at("open", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.chevron};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
+      inset-inline-end: calc(var(--ha-space-2) + (var(--tile-size) - var(--icon-size-m)) / 2);
       width: var(--icon-size-m);
       height: var(--icon-size-m);
+      translate: 0 -50%;
+      -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
+      mask: var(--org-sign-icon) center / contain no-repeat;
       background-color: var(--secondary-text-color);
       opacity: var(--opacity-muted);
+      pointer-events: none;
+      transition: background-color var(--duration-normal) ease, opacity var(--duration-normal) ease;
+    }
+    ${card._orgTilesSign.at("open", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.chevron};
     }
     ${card._orgTilesSign.at("open", "::after", "ha-card:dir(rtl) ")} {
       scale: -1 1;
     }
-    ${card._orgTilesSign.at("run running stop", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.playMask};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
-      width: var(--icon-size-m);
-      height: var(--icon-size-m);
-      background-color: var(--primary-text-color);
-      opacity: var(--opacity-strong);
+    ${card._orgTilesSign.at("run running", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.play};
     }
     ${card._orgTilesSign.at("stop", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.stopMask};
+      --org-sign-icon: ${card._orgTilesSign.stop};
     }
-    ${card._orgTilesSign.at("running stop", "::after")} {
-      background-color: var(--text-color-active);
-      opacity: 1;
-    }
-    ${card._orgTilesSign.at("switch on", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.knob};
-      inset-inline-end: calc(var(--ha-space-2) + var(--org-toggle-w) - var(--ha-space-1) - var(--org-toggle-knob));
-      width: var(--org-toggle-knob);
-      height: var(--org-toggle-knob);
-      background-color: var(--primary-text-color);
-      opacity: var(--opacity-quiet);
-      transition: inset-inline-end var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) ease;
+    ${card._orgTilesSign.at("switch", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.off};
     }
     ${card._orgTilesSign.at("on", "::after")} {
-      inset-inline-end: calc(var(--ha-space-2) + var(--ha-space-1));
-      background-color: var(--text-color-active);
+      --org-sign-icon: ${card._orgTilesSign.on};
+    }
+    ${card._orgTilesSign.at("running stop on", "::after")} {
+      background-color: var(--primary-text-color);
       opacity: 1;
     }` : ""}

@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.0.0"
+  version: "1.0.1"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show."
@@ -213,7 +213,7 @@ origami_table:
       height: var(--org-cell) !important;
       margin: 0 !important;
       padding: 0 6px !important;
-      border-radius: var(--radius-inner) !important;
+      border-radius: calc(var(--org-cell) * var(--radius-ratio, 0.35)) !important;
       background: var(--org-value-chip, var(--org-cell-bg, transparent)) !important;
       box-shadow: none !important;
       color: var(--secondary-text-color) !important;

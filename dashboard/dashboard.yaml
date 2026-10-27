@@ -252,7 +252,7 @@ views:
                   .texts { min-height: calc(var(--origami-tile) + 2 * var(--origami-pad)); }
                   .slide { gap: var(--ha-space-1); }
                   .icon {
-                    border-radius: var(--radius-inner);
+                    border-radius: calc(var(--origami-tile) * var(--radius-ratio, 0.35));
                     background: color-mix(in srgb, var(--tile-color) var(--tint-strength), var(--ha-card-background, var(--card-background-color)));
                     box-shadow: var(--ha-card-box-shadow, none);
                   }

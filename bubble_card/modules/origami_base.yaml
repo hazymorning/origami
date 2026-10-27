@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.6.0"
+  version: "12.6.1"
   is_global: true
   supported:
     - button
@@ -629,7 +629,7 @@ origami_base:
         chips: (scope) => {
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
           return scope + " { gap: var(--ha-space-2) !important; }\n"
-            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) !important; border-radius: var(--radius-inner) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
+            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
             + chip.map((c) => c + " .bubble-sub-button-icon:not(.hidden)").join(", ") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
             + chip.map((c) => c + " .bubble-sub-button-name-container:empty").join(", ") + " { display: none !important; }";
         },
@@ -853,7 +853,7 @@ origami_base:
       --org-toggle-gap: calc(var(--ha-space-4) + var(--ha-space-2));
       ${card._org.opts.compact ? "--org-row-height: var(--control-height);" : ""}
       ${card._org.opts.compact ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._org.opts.compact ? "--org-tile-radius: calc(var(--radius-small) + 2px);" : ""}
+      ${card._org.opts.compact ? "--org-tile-radius: var(--radius-small);" : ""}
       ${card._org.opts.compact ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
       ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-xs);" : ""}
       ${card._org.opts.compact ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
@@ -1132,7 +1132,7 @@ origami_base:
       width: var(--org-toggle-w) !important;
       height: var(--org-toggle-h) !important;
       padding: var(--ha-space-1);
-      border-radius: var(--radius-inner) !important;
+      border-radius: calc(var(--org-toggle-h) / 2) !important;
       color: var(--primary-text-color);
       background-color: var(--org-inset) !important;
       box-shadow: var(--card-ring), var(--org-inset-shadow);
@@ -1162,7 +1162,7 @@ origami_base:
       width: auto !important;
       height: var(--org-tile-size) !important;
       padding: 0 var(--ha-space-2) !important;
-      border-radius: var(--radius-inner) !important;
+      border-radius: var(--org-tile-radius) !important;
       background: none !important;
       box-shadow: none !important;
       transition: var(--transition-interactive);
@@ -1191,7 +1191,7 @@ origami_base:
       gap: var(--ha-space-1) !important;
       background-color: var(--org-inset) !important;
       box-shadow: var(--org-inset-shadow);
-      border-radius: var(--radius-inner) !important;
+      border-radius: var(--org-tile-radius) !important;
     }
     ha-card .with-bottom-buttons .bubble-sub-button-container.fixed-top {
       height: var(--org-tile-size) !important;
@@ -1204,7 +1204,7 @@ origami_base:
       width: auto !important;
       height: var(--org-group-key) !important;
       padding: 0 var(--ha-space-1) !important;
-      border-radius: var(--radius-small) !important;
+      border-radius: calc(var(--org-tile-radius) - var(--org-group-pad)) !important;
       background: none !important;
       box-shadow: none !important;
     }
@@ -1229,10 +1229,17 @@ origami_base:
       // A sub-button is a dropdown with sub_button_type: select, or without a type when its entity is a select or an input_select or when it has a select_attribute
       const drop = ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute));
       const drops = list.filter(drop);
-      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. The chosen option has the active color, as a filled sub-button does.
-      if (drops.length) rules.push("ha-card :is(ha-dropdown-item, mwc-list-item) { border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); --ha-color-fill-primary-quiet-resting: var(--fill-active); --ha-color-fill-primary-quiet-hover: var(--fill-active); background-color: var(--fill-active) !important; color: var(--text-color-active) !important; }",
+      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. The chosen option has the active color, as a filled sub-button does. Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
+      if (drops.length) rules.push("ha-card { --bubble-select-list-item-accent-color: var(--fill-active); }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item) { border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; }",
         "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }");
+      // A speaker in a dropdown's menu shows a speaker icon for what it does, such as a pause sign while it plays, and other entities show Home Assistant's icon for their state
+      const speaker = (st) => {
+        if (st.entity_id.split(".")[0] !== "media_player" || st.attributes.device_class === "tv") return undefined;
+        const kind = !org.power(st) ? "off" : org.input(st.attributes.source) ?? (["playing", "buffering"].includes(st.state) ? "playing" : "");
+        return { off: "mdi:speaker-off", playing: "mdi:speaker-pause", bluetooth: "mdi:speaker-bluetooth", tv: "mdi:television-speaker" }[kind] ?? "mdi:speaker";
+      };
       // A dropdown that picks an entity, such as a helper whose options are the entity IDs of speakers, shows the entities' names, as the card's words rename them, and its menu shows each entity's icon for its state. An option that is not an entity, such as None, stays as it is.
       drops.forEach(({ n, item, entity: id, opt }) => {
         const options = hass.states[id]?.attributes?.options;
@@ -1241,10 +1248,12 @@ origami_base:
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
         if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--ha-font-size-s)"));
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { height: var(--control-height-icon) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: calc(var(--control-height-icon) / 2) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        rules.push(sel + org.key + " { height: var(--control-height-icon) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: var(--radius-control, 14px) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; margin-inline-start: var(--ha-space-1); }",
-          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-xs); width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; color: inherit !important; }");
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-xs); width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; color: inherit !important; }",
+          // The open menu is the sign that the dropdown is open, so Bubble Card's ring in the accent color stays hidden
+          sel + " .bubble-dropdown-inner-border { display: none !important; }");
         // Bubble Card builds the menu's items again when the options change, so they are written after each update
         const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
           const st = hass.states[el.dataset.bubbleValue ?? el.value];
@@ -1260,6 +1269,7 @@ origami_base:
           }
           icon.hass = hass;
           icon.stateObj = st;
+          icon.icon = speaker(st);
         });
         write();
         requestAnimationFrame(write);
