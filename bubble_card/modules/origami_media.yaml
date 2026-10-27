@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.6.0"
+  version: "5.6.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, in the icon, above the name or behind the whole card, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress."
@@ -220,7 +220,7 @@ origami_media:
     ha-card {
       --org-color: ${card._orgM.m.color};
       --org-chip-bg: ${card._orgM.on && !card._orgM.ink ? "var(--org-field)" : "var(--org-inset)"};
-      --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)")};
+      --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--org-chip-rest, var(--primary-text-color))")};
     }
     ${card._orgM.members.length ? `${card._orgM.members.join(", ")} {
       gap: 0 !important;

@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.8.1"
+  version: "12.9.0"
   is_global: true
   supported:
     - button
@@ -469,8 +469,8 @@ origami_base:
         }
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), and 12.8 added the card padding in --org-pad.
-        version: 12.8,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, and 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest.
+        version: 12.9,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -927,7 +927,9 @@ origami_base:
       --org-inset-shadow: ${card._org.opts.tile ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
       --org-field: ${card._org.opts.tile ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
       --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-inset)"};
-      --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--primary-text-color)"};
+      /* An icon that is not lit takes the text color, and on a compact card the secondary text color, as in a slim list */
+      --org-chip-rest: ${card._org.opts.compact ? "var(--secondary-text-color)" : "var(--primary-text-color)"};
+      --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--org-chip-rest)"};
       --org-key-bg: ${card._org.opts.tile ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
       /* The padding option sets the space between the card's edge and its content, and the row is as tall as the icon plus this space above and below it */
       --org-pad: ${card._org.opts.pad || "var(--ha-space-4)"};
@@ -940,16 +942,19 @@ origami_base:
       --org-tile-radius: calc(var(--org-tile-size) * var(--radius-ratio, 0.35));
       --org-icon-size: var(--icon-size-m);
       --org-text-gap: var(--ha-space-3);
-      --org-toggle-gap: calc(var(--org-pad) + var(--ha-space-2));
+      /* Every control at the end of a row ends at the padding, where the icon starts on the other side */
+      --org-toggle-gap: var(--org-pad);
+      /* The end column is as wide as a tray with three keys. A compact card's side slider fills it, so it lines up with the trays of other cards. */
+      --org-end-col: calc(3 * var(--control-height-mini) + 2 * (var(--tile-size) - var(--control-height-mini)));
       ${card._org.opts.compact ? "--org-row-height: var(--control-height);" : ""}
       ${card._org.opts.compact ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._org.opts.compact ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
-      ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-xs);" : ""}
-      ${card._org.opts.compact ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
+      ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-s);" : ""}
+      ${card._org.opts.compact ? "/* A compact card's icon has no background, so the icon itself starts at the padding and the name starts 12 px after it, as in a slim list */" : ""}
+      ${card._org.opts.compact ? "--org-tile-inset: calc(var(--org-pad) - (var(--org-tile-size) - var(--org-icon-size)) / 2);" : ""}
+      ${card._org.opts.compact ? "--org-text-gap: calc(var(--ha-space-3) - (var(--org-tile-size) - var(--org-icon-size)) / 2 - var(--ha-space-1));" : ""}
       ${card._org.opts.compact ? "--org-toggle-w: var(--tile-size);" : ""}
       ${card._org.opts.compact ? "--org-toggle-h: var(--icon-size-l);" : ""}
       ${card._org.opts.compact ? "--org-toggle-knob: var(--icon-size-s);" : ""}
-      ${card._org.opts.compact ? "--org-toggle-gap: calc((var(--org-row-height) - var(--org-toggle-h)) / 2);" : ""}
       ${card._org.opts.vertical ? "--org-row-height: auto; --org-tile-inset: 0px;" : ""}
     }
     .bubble-sub-button-icon {
@@ -1049,7 +1054,7 @@ origami_base:
       margin-inline-start: var(--org-text-gap);
     }
     ${this.config.show_icon === false ? `.bubble-name-container {
-      margin-inline-start: var(--org-tile-inset);
+      margin-inline-start: ${card._org.opts.compact ? "var(--org-pad)" : "var(--org-tile-inset)"};
     }` : ""}
     .bubble-name,
     .bubble-title {
@@ -1073,12 +1078,17 @@ origami_base:
       text-overflow: ellipsis;
     }
     ${card._org.opts.compact ? `
-    /* On a compact card, a slider among the main sub-buttons stands in for the pill switch. It is as tall as the switch, shows no value and takes 40 % of the card, so the name keeps the larger part, unless Bubble Card's width option sets its width. */
+    /* A compact card's icon stands without a background, as in a slim list, and its row has no shadow around the icon */
+    ha-card .bubble-icon-container {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+    /* On a compact card, a slider among the main sub-buttons stands in for the pill switch. It is as tall as the switch, shows no value and fills the end column, so it lines up with the trays of other cards, unless Bubble Card's width option sets its width. */
     ha-card .bubble-sub-button-container {
       --bubble-sub-slider-height: var(--org-sub-h, var(--org-toggle-h));
     }
     ha-card .bubble-sub-button-container:has(.bubble-sub-slider-wrapper.inline:not(.has-custom-width)) {
-      flex: 0 0 40%;
+      flex: 0 0 var(--org-end-col);
     }
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
       flex: 1 1 auto;
@@ -1242,7 +1252,7 @@ origami_base:
     }` : ""}` : `
     ${card._org.opts.frame ? `
     ha-card .bubble-sub-button-container {
-      margin-inline-end: var(--org-tile-inset) !important;
+      margin-inline-end: var(--org-pad) !important;
       inset-inline-end: 0 !important;
     }` : ""}
     /* A key is as tall as the card's icon, or as the sub-button height option says. Bubble Card's custom_height on one sub-button wins over both, and the corners follow the height. */
@@ -1277,16 +1287,22 @@ origami_base:
     ha-card {
       --org-group-key: min(var(--control-height-mini), var(--org-tile-size));
       --org-group-pad: calc((var(--org-tile-size) - var(--org-group-key)) / 2);
+      /* The keys in a tray are as far apart as they are from its edge, and at least 4 px, so a tray with three keys fills the end column */
+      --org-group-gap: max(var(--ha-space-1), var(--org-group-pad));
     }
     ha-card .bubble-sub-button-container {
       --bubble-sub-button-outline: none;
       height: var(--org-tile-size) !important;
       align-items: center;
       padding: 0 var(--org-group-pad) !important;
-      gap: var(--ha-space-1) !important;
+      gap: var(--org-group-gap) !important;
       background-color: var(--org-inset) !important;
       box-shadow: var(--org-inset-shadow);
       border-radius: var(--org-tile-radius) !important;
+    }
+    /* Bubble Card puts the keys of a card with rows below its own row into a group of their own, which takes the tray's spacing */
+    ha-card .bubble-sub-button-container > .bubble-sub-button-group {
+      gap: var(--org-group-gap) !important;
     }
     ha-card .with-bottom-buttons .bubble-sub-button-container.fixed-top {
       height: var(--org-tile-size) !important;
@@ -1327,7 +1343,7 @@ origami_base:
       // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. A row is as tall as the dropdown's chip, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
       if (drops.length) rules.push("ha-card { --bubble-select-list-item-accent-color: var(--fill-active); }",
         "ha-card :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--icon-size-xs); }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--org-icon-size); }",
         "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; font-weight: var(--ha-font-weight-bold) !important; }",
         "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }");
       // A speaker in a dropdown's menu shows a speaker icon for what it does, such as a pause sign while it plays, and other entities show Home Assistant's icon for their state
@@ -1343,11 +1359,11 @@ origami_base:
         const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
         if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--org-sub-text, var(--ha-font-size-s))"));
-        // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--control-height-icon))); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The arrow is as large as the card's icons, as on a key. The chevron fills less than half of its icon, so the chip's end has less padding, and the chevron ends about as far from the edge as the name starts. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
+        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--control-height-icon))); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
-          sel + " .bubble-dropdown-container { width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; margin-inline-start: var(--ha-space-1); }",
-          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-xs); width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; color: inherit !important; }",
+          sel + " .bubble-dropdown-container { width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; margin-inline-start: var(--ha-space-1); }",
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--org-icon-size); width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; color: inherit !important; }",
           // The open menu is the sign that the dropdown is open, so Bubble Card's ring in the accent color stays hidden
           sel + " .bubble-dropdown-inner-border { display: none !important; }");
         // Bubble Card builds the menu's items again when the options change, so they are written after each update

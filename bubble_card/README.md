@@ -61,7 +61,7 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. Its arrow is as large as the card's icons, as an icon on a key is. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
 - In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. A row is as tall as the dropdown's chip, which is 40 px, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color and bold text, also while it has the focus. The open menu shows that the dropdown is open, so Bubble Card's ring in the accent color is hidden.
 
 </details>
@@ -132,9 +132,9 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `compact` | `false` | The card is a slim row with a small icon and no state line. A slider among its main sub-buttons is as tall as the pill switch and takes 40 % of the card. |
+| `compact` | `false` | The card is a slim row without a state line. Its icon has no background, as in a slim list. A slider among its main sub-buttons is as tall as the pill switch and as wide as a tray with three keys. |
 | `toggle` | `false` | Every sub-button becomes a pill switch that shows whether its entity is on. A sub-button without an entity shows the card's entity. Give one sub-button a tap action with `action: toggle`, as in the example below. |
-| `group` | `false` | The sub-buttons appear as small buttons in a tray. This option has no effect together with `toggle`. |
+| `group` | `false` | The sub-buttons appear as small buttons in a tray. The keys are as far apart as they are from the tray's edge. This option has no effect together with `toggle`. |
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
 | `vertical` | `false` | The name is under the icon, as on the room cards. The section [Name under the icon](#name-under-the-icon) explains this layout. Base hides the state line, and only sub-buttons with `css_class: accent` are filled. This option works on button cards and turns off `toggle` and `group`. |
 | `large` | `false` | The name is larger, as on a card at the top of a pop-up. |
@@ -207,7 +207,7 @@ sub_button:
 rows: 1
 ```
 
-On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. The slider is as tall as the switch, ends where the switch ends and takes 40 % of the card, so the name keeps the larger part. Like the switch, it shows no value, and its fill shows the level. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
+On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. The slider is as tall as the switch, ends where the switch ends and is as wide as a tray with three keys, so the name keeps the larger part. Like the switch, it shows no value, and its fill shows the level. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
 
 ```yaml
 # Compact row with a slider
@@ -232,6 +232,10 @@ rows: 1
 ```
 
 </details>
+
+#### Controls at the end of a row
+
+The controls at the end of a card's row line up from card to card. Each one ends at the card's padding, so it is as far from the card's edge as the icon is from the other edge. This also applies to a compact card and to a pill switch. In a tray, the keys are as far apart as they are from the tray's edge, so a tray with three keys is 128 px wide. The side slider of a compact card has the same width. When a pop-up shows a speaker and a thermostat with three keys each and lamps on compact cards with sliders, the keys and the sliders therefore start on one line. A tray with more keys, such as a fan's power and speed keys, is wider, and a tray with fewer keys is narrower.
 
 #### Name under the icon
 
@@ -1478,7 +1482,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Climate shows how a module writes the state line, Media shows how it writes the name line too, Tiles shows how a module turns a sub-buttons card into a grid of tiles, and Speaker Select shows how a module reads a media player with Base's `media()` helper.
 
-Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`, 12.6 from Base 12.6 on, which added `backdrop()`, and 12.8 from Base 12.8 on, which sets the card's padding in the `--org-pad` variable. These are the helpers:
+Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`, 12.6 from Base 12.6 on, which added `backdrop()`, 12.8 from Base 12.8 on, which sets the card's padding in the `--org-pad` variable, and 12.9 from Base 12.9 on, which sets the width of a tray with three keys in `--org-end-col` and the color of an icon that is not lit in `--org-chip-rest`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
