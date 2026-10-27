@@ -129,7 +129,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `compact` | `false` | The card is a slim row with a small icon and no state line. |
+| `compact` | `false` | The card is a slim row with a small icon and no state line. A slider among its main sub-buttons is as tall as the pill switch and takes half of the card. |
 | `toggle` | `false` | Every sub-button becomes a pill switch that shows whether its entity is on. A sub-button without an entity shows the card's entity. Give one sub-button a tap action with `action: toggle`, as in the example below. |
 | `group` | `false` | The sub-buttons appear as small buttons in a tray. This option has no effect together with `toggle`. |
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
@@ -198,6 +198,30 @@ sub_button:
       show_background: true
       tap_action:
         action: toggle
+rows: 1
+```
+
+On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. It is as tall as the switch, its value stands after the track, and together they take half of the card. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
+
+```yaml
+# Compact row with a slider
+type: custom:bubble-card
+card_type: button
+button_type: switch
+entity: light.living_room_floor_lamp
+name: Floor lamp
+icon: mdi:floor-lamp
+modules:
+  - origami_base
+  - origami_light
+origami_base:
+  compact: true
+  tile: true
+sub_button:
+  main:
+    - entity: light.living_room_floor_lamp
+      sub_button_type: slider
+      always_visible: true
 rows: 1
 ```
 
@@ -297,7 +321,7 @@ state_content:
 rows: 1.375
 ```
 
-To show a lamp as a compact row, use Base's compact example with a light entity.
+To show a lamp as a compact row, use one of Base's compact examples with a light entity. The example with a slider sets the lamp's brightness, and Light colors its fill.
 
 </details>
 
