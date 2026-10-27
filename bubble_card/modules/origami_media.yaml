@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.5.0"
+  version: "5.5.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, in the icon or behind the whole card, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress."
@@ -131,6 +131,8 @@ origami_media:
         state: this.config.show_state === false || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
       };
       const c = card._orgM;
+      // A cover that goes fades out, so the card keeps the last cover until another one comes
+      if (c.art) card._orgMArt = c.art;
       // With Filled play and power buttons, the play button is filled while media plays and the power button while the device is on
       c.filled = c.solid ? [c.playing ? ".bubble-play-pause-button" : "", c.powered ? ".bubble-power-button" : ""].filter(Boolean) : [];
       // With Keep name, the name line always shows the card's name, and the state line shows the title and the artist while music plays
@@ -344,7 +346,7 @@ origami_media:
     ha-card .bubble-background {
       overflow: hidden;
     }
-    ${card._org.backdrop("ha-card .bubble-background::before", card._orgM.art, card._orgM.mix, card._orgM.blur, "0px")}
+    ${card._org.backdrop("ha-card .bubble-background::before", card._orgMArt, card._orgM.art ? card._orgM.mix : 0, card._orgM.blur, "0px")}
     ${card._orgM.art ? `ha-card {
       --org-inset: color-mix(in srgb, var(--ha-card-background) 70%, transparent);
     }` : ""}

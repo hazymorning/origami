@@ -62,7 +62,7 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
 - A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
-- In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. The chosen option has the active color, also while it has the focus. The open menu shows that the dropdown is open, so Bubble Card's ring in the accent color is hidden.
+- In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. A row is as tall as the dropdown's chip, which is 40 px, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color and bold text, also while it has the focus. The open menu shows that the dropdown is open, so Bubble Card's ring in the accent color is hidden.
 
 </details>
 
@@ -138,7 +138,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
 | `vertical` | `false` | The name is under the icon, as on the room cards. The section [Name under the icon](#name-under-the-icon) explains this layout. Base hides the state line, and only sub-buttons with `css_class: accent` are filled. This option works on button cards and turns off `toggle` and `group`. |
 | `large` | `false` | The name is larger, as on a card at the top of a pop-up. |
-| `animate` | `false` | The card fades in from below when it appears. |
+| `animate` | `false` | The card fades in from below when it appears, and it glides to a new height when its content changes. The section [Fade in and glide](#fade-in-and-glide) explains this. |
 | `words` | | The option maps a state or a value to the word that the modules write on the card. The Language section above explains it. |
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
@@ -280,6 +280,23 @@ sub_button:
 ```
 
 The chevron is the only main sub-button. The bottom sub-buttons are the comfort dot, the window icon, the temperature and the humidity. A sub-button that shows only text needs `show_icon: false`. The temperature and the humidity are two sub-buttons, so that each one can move to its own line on a narrow phone. Base hides the state line on a card with `vertical`. While the climate sensor has no `color_code`, the dot is transparent.
+
+#### Fade in and glide
+
+With `animate: true`, a card fades in from below when it appears, such as a card that a conditional card shows. On a button card, a media player card and a pop-up, the option also lets the card glide to its new height when its content changes. When a media card hides its play row because the speaker stops, for example, the card shrinks gradually instead of at once, and the cards below it move with its edge.
+
+In a pop-up, each card with `animate` glides for its own rows, and the pop-up glides for the cards that appear or go. A pop-up whose views are conditional cards, such as a music pop-up with a view for grouping, therefore changes its height in one motion. The option works on the pop-up and on each card separately, so a pop-up with views needs it on both. The glide takes the theme's `duration-slow` and follows its `ease-standard` curve, and nothing glides while the device asks for less motion.
+
+```yaml
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_music'
+modules:
+  - origami_base
+  - origami_popup
+origami_base:
+  animate: true
+```
 
 ### Light
 
@@ -545,7 +562,7 @@ A `leader` template returns nothing while the speaker is not in a group, because
 
 #### Cover as background
 
-With `cover: background`, the cover fills the card. `cover_mix` sets the cover's share in percent, and the card's color makes up the rest. The cover is therefore lighter in light mode and darker in dark mode, and the default share of 25 % keeps the text readable on a busy cover. With `cover_blur: true`, the cover is blurred, so only its colors remain. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
+With `cover: background`, the cover fills the card. `cover_mix` sets the cover's share in percent, and the card's color makes up the rest. The cover is therefore lighter in light mode and darker in dark mode, and the default share of 25 % keeps the text readable on a busy cover. With `cover_blur: true`, the cover is blurred, so only its colors remain. When the cover goes, such as when the speaker stops, it fades out, and a cover that comes back fades in. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
 
 ```yaml
 show_icon: false
@@ -1203,9 +1220,9 @@ With `layout: list`, the card is one list with a row for each sub-button, as in 
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
 - A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows a switch, which is filled while the entity is on.
-- A row that runs a script, a scene or another action shows a play sign. With `script.toggle`, it shows a stop sign while the script runs, because a second tap stops the script.
+- A row that runs a script, a scene or another action shows a play sign. With `script.toggle`, it shows a stop sign while the script runs, because a second tap stops the script. A row with `action: toggle` and `sign: run` also shows a stop sign while its entity is on.
 
-The signs are icons of one size in one column at the row's end. They are muted, and a sign takes the text color while what it controls is on or runs, by the same rule that fills a sub-button.
+The signs are icons of one size in one column at the row's end. They are muted, and a sign takes the text color while what it controls is on or runs, by the same rule that fills a sub-button. The rows touch, so two icons are as far apart as an icon is from the list's edge. No space inside the list is wider than the list's padding, as the theme's rule for space asks.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 

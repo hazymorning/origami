@@ -3,6 +3,7 @@
 Origami:
 
   # Space
+  # A space between the parts inside a container is never wider than the container's padding, so the parts read as one group. In a list, the rows touch, and two icons are as far apart as an icon is from the list's edge.
   ha-space-1: '4px'
   ha-space-2: '8px'
   ha-space-3: '12px'

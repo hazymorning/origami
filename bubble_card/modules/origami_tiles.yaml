@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.3.0"
+  version: "3.3.1"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In a list, an icon at each row's end shows what a tap does, such as a chevron, a play sign or a switch."
@@ -57,7 +57,8 @@ origami_tiles:
         if (list) {
           // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
           const tap = org.act(item);
-          const [domain, verb] = org.service(item).split(".");
+          // A tap with action: toggle counts as a toggle, so a play sign set by the sign key shows a stop sign while the entity is on
+          const [domain, verb] = (tap.action === "toggle" ? "homeassistant.toggle" : org.service(item)).split(".");
           // The sign follows the entity that the tap acts on
           const target = org.targets(item)[0];
           const id = (target === "entity" ? null : target) ?? entity;
@@ -167,9 +168,9 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    /* A row holds an icon's background, as a card does, so all rows have the same height */
+    /* A row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. */
     .bubble-sub-button-group:not(.hidden) {
-      gap: var(--ha-space-1) !important;
+      gap: 0 !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
       border-radius: var(--ha-card-border-radius);

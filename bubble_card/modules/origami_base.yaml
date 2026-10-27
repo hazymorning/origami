@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.6.1"
+  version: "12.7.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, a fade in and the card's own words."
+  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, fades and glides, and the card's own words."
   editor:
     - name: compact
       label: "Compact"
@@ -45,7 +45,7 @@ origami_base:
         boolean: {}
       default: false
     - name: animate
-      label: "Fade in"
+      label: "Fade in and glide"
       selector:
         boolean: {}
       default: false
@@ -458,7 +458,7 @@ origami_base:
       };
       card._org = {
         // The version is the version of these helpers. 12.5 added unframe() and shows().
-        version: 12.6,
+        version: 12.7,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -694,6 +694,64 @@ origami_base:
         dark: !!hass.themes?.darkMode
       };
       card._org.me = look(hass, entity);
+      // With animate, a card on the page also glides to its new height when its content changes, such as a row of controls that appears or goes. A button or media player card glides, and so does a pop-up. Base watches the box that holds the content, and it ignores the changes that the glide itself causes. For each frame, Base holds the height in the element's own style, because a style there wins over the modules' fixed heights.
+      const pop = type === "pop-up";
+      const box = opts.animate && (opts.frame || pop) && typeof ResizeObserver === "function" ? (pop ? card : card.querySelector(".bubble-container")) : null;
+      const rows = box?.querySelector(pop ? ".bubble-cards-container" : ":scope > .bubble-wrapper") ?? null;
+      if ((card._orgGlide?.rows ?? null) !== rows) {
+        card._orgGlide?.disconnect();
+        card._orgGlide = null;
+      }
+      if (rows && !card._orgGlide) {
+        // hold() keeps the element at a height, and hold() without a height gives the height back to the content
+        const hold = (h) => Object.entries({ height: h + "px", "min-height": "0", "max-height": "none" }).forEach(([p, v]) => h === undefined ? box.style.removeProperty(p) : box.style.setProperty(p, v, "important"));
+        // The page keeps a list of the glides that run, so a pop-up knows the height that its cards glide to and glides only for the rest of a change
+        const runs = globalThis.__origamiGlides ?? (globalThis.__origamiGlides = new Set());
+        const inside = (el) => {
+          for (let n = el; n; n = n.parentNode ?? n.host) if (n === box) return true;
+          return false;
+        };
+        let last = null;
+        let run = null;
+        card._orgGlide = new ResizeObserver(() => {
+          const from = run ? box.getBoundingClientRect().height : last;
+          hold();
+          let to = box.getBoundingClientRect().height;
+          runs.forEach((r) => {
+            if (r !== run && inside(r.box)) to += r.to - r.box.getBoundingClientRect().height;
+          });
+          // A box that follows the height during a glide does not start a new glide
+          if (run && Math.abs(to - run.to) < 1) return hold(from);
+          last = to;
+          runs.delete(run);
+          run = null;
+          // A card that appears or goes has no height on one side, so it only fades. A pop-up that opens or closes slides, so it does not glide.
+          if (!from || !to || Math.abs(to - from) < 1 || matchMedia("(prefers-reduced-motion: reduce)").matches || box.getAnimations().some((a) => a.transitionProperty === "transform")) return;
+          // A theme that sets the duration to 0 turns the glide off
+          const time = getComputedStyle(card).getPropertyValue("--duration-slow").trim();
+          const ms = time ? parseFloat(time) * (time.endsWith("ms") ? 1 : 1000) : 350;
+          if (!(ms > 0)) return;
+          const go = run = { box, to, ms };
+          runs.add(go);
+          // The glide starts with the next frame, and the height follows the quintic ease-out curve, which the theme's --ease-standard approximates as a cubic Bézier curve
+          const step = (now) => {
+            if (run !== go) return;
+            go.start ??= now;
+            const t = Math.min(1, (now - go.start) / go.ms);
+            if (t === 1) {
+              runs.delete(go);
+              run = null;
+              return hold();
+            }
+            hold(from + (to - from) * (1 - (1 - t) ** 5));
+            requestAnimationFrame(step);
+          };
+          hold(from);
+          requestAnimationFrame(step);
+        });
+        card._orgGlide.rows = rows;
+        card._orgGlide.observe(rows);
+      }
       // On the cards that Base frames, and on separator, sub-buttons and pop-up cards with the Slider module, sliders take Origami's look. Other cards keep Bubble Card's sliders.
       card._org.fills = !opts.bare ? "ha-card" : [].concat(this.config.modules ?? []).includes("origami_slider") ? 'ha-card [class*="bubble-sub-button-slider-"]' : null;
       // Each pill switch shows the state of its own entity
@@ -1045,11 +1103,14 @@ origami_base:
     ha-card .with-bottom-buttons {
       height: auto !important;
     }
+    /* While the card glides to a smaller height, the rows fill the card from the top, so the background and the cover reach the card's edge */
     ha-card .with-bottom-buttons > .bubble-wrapper {
       position: relative !important;
       height: auto !important;
+      min-height: 100%;
       flex-wrap: wrap !important;
       align-items: flex-start !important;
+      align-content: flex-start;
     }
     /* A long name shrinks and scrolls, so the sub-buttons keep their place in the card's own row */
     ha-card .with-bottom-buttons > .bubble-wrapper > .bubble-content-container {
@@ -1229,10 +1290,11 @@ origami_base:
       // A sub-button is a dropdown with sub_button_type: select, or without a type when its entity is a select or an input_select or when it has a select_attribute
       const drop = ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute));
       const drops = list.filter(drop);
-      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. The chosen option has the active color, as a filled sub-button does. Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
+      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. A row is as tall as the dropdown's chip, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
       if (drops.length) rules.push("ha-card { --bubble-select-list-item-accent-color: var(--fill-active); }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item) { border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--icon-size-xs); }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; font-weight: var(--ha-font-weight-bold) !important; }",
         "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }");
       // A speaker in a dropdown's menu shows a speaker icon for what it does, such as a pause sign while it plays, and other entities show Home Assistant's icon for their state
       const speaker = (st) => {
