@@ -146,7 +146,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
 
-A slider sub-button whose entity is off shows Home Assistant's word for off instead of 0 %, and an unavailable one shows a dash. A color slider, such as one with `light_slider_type: hue` or `white_temp`, keeps Bubble Card's colored track. Base softens its colors and draws its cursor like the mark on other sliders.
+A slider sub-button whose entity is off shows Home Assistant's word for off instead of 0 %, and an unavailable one shows a dash. A slider that only shows a value has no mark at the end of its fill, because it cannot be moved. Bubble Card's sliders only show the value of a sensor, of another entity that they cannot set and of a slider with `read_only_slider: true`. A color slider, such as one with `light_slider_type: hue` or `white_temp`, keeps Bubble Card's colored track. Base softens its colors and draws its cursor like the mark on other sliders.
 
 Each sub-button can have its own `origami_base` key, which accepts the same values as the keys of the Header and Tiles modules. On separator, sub-buttons and pop-up cards, Base ignores this key, and the Header, Tiles and Popup modules use keys of their own.
 
@@ -804,7 +804,7 @@ rows: 1
 
 Use `slider_value_position: hidden` to hide the number.
 
-On a sub-buttons card, each slider sub-button with `always_visible: true` is a row with three columns. The name stands first, the track follows, and the value stands after the track, so it never covers the fill. `label_width` under `origami_slider` sets the width of the names' column. Without it, the column is as wide as the longest name, up to 30 % of the card. A name that is wider than its column scrolls like Bubble Card's scrolling text. The tracks take the card's background, because these rows usually stand on a pop-up. On other separator, sub-buttons and pop-up cards, slider sub-buttons keep Bubble Card's own look.
+On a sub-buttons card, each slider sub-button with `always_visible: true` is a row with three columns. The name stands first, the track follows, and the value stands after the track, so it never covers the fill. `label_width` under `origami_slider` sets the width of the names' column. Without it, the column is as wide as the longest name, up to 30 % of the card. A name that is wider than its column scrolls like Bubble Card's scrolling text. The tracks take the card's background, because these rows usually stand on a pop-up. A slider for a sensor only shows its value, such as the load of a server in percent. For a sensor without a percentage, Bubble Card's `min_value` and `max_value` set the values at the ends of the track. On other separator, sub-buttons and pop-up cards, slider sub-buttons keep Bubble Card's own look.
 
 ```yaml
 type: custom:bubble-card
@@ -1307,7 +1307,7 @@ A row's icon has the size and the background of a card's icon, so all rows have 
 
 #### Slim list
 
-With `slim: true`, a list has low rows for facts and settings, such as a server's load. A slim row has the same padding as a regular row, around one line of text instead of an icon's background, so it is 40 px tall, as tall as a button. Its icon has no background and is 20 px, its name is medium, and its state stands at its end in bold. The name keeps at least 40 % of the line, and a long name or state ends with an ellipsis. The icon starts as far from the card's edge as the state or the sign ends, and the signs are as small as the icons.
+With `slim: true`, a list has low rows for facts and settings, such as a server's load. A slim row has the same padding as a regular row, around one line of text instead of an icon's background, so it is 40 px tall, as tall as a button. Its icon has no background and is 20 px, its name is medium, and its state stands at its end in bold. The name keeps at least 40 % of the line, or less when the name itself is shorter, so a long state can use the space that a short name leaves. A long name or state ends with an ellipsis. The icon starts as far from the card's edge as the state or the sign ends, and the signs are as small as the icons.
 
 With `dividers: true`, a line divides the rows of a list, in both styles. The line spans the rows' content, from the icons' edge to the signs' edge, and a row keeps the same space to the line above it as to the line below it. A hidden row takes no space and draws no line, and an unavailable row dims its content but not its line. In a list with lines, the rows keep their order from the YAML, so `order` has no effect there.
 

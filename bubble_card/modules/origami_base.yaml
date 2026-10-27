@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.8.0"
+  version: "12.8.1"
   is_global: true
   supported:
     - button
@@ -885,13 +885,20 @@ origami_base:
     ${(() => {
       // A slider sub-button whose entity is off shows Home Assistant's word for that state, such as Off, instead of 0 %, and an unavailable one shows a dash, as Speaker Select's readout does
       const org = card._org;
-      return org.items(this.config).map((item, i) => {
+      // Bubble Card's sliders move only these entities. A slider for any other entity, such as a sensor, or one with read_only_slider only shows a value, so it has no mark.
+      const moves = ["light", "media_player", "cover", "input_number", "number", "fan", "climate"];
+      const fixed = (cfg, id) => cfg.read_only_slider === true || !moves.includes(String(id ?? "").split(".")[0]);
+      const rules = this.config.button_type === "slider" && fixed(this.config, entity) ? ["ha-card .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill::after { display: none; }"] : [];
+      org.items(this.config).forEach((item, i) => {
+        if (item.sub_button_type !== "slider") return;
         const st = hass.states[item.entity ?? entity];
         const on = org.power(st);
-        if (item.sub_button_type !== "slider" || on === true) return "";
+        if (fixed(item, item.entity ?? entity)) rules.push("ha-card .bubble-sub-button-slider-" + (i + 1) + " .bubble-range-fill::after { display: none; }");
+        if (on === true) return;
         const sel = "ha-card .bubble-sub-button-slider-" + (i + 1) + " .bubble-range-value";
-        return sel + " { font-size: 0 !important; }\n    " + sel + "::before { font-size: var(--org-sub-text, var(--ha-font-size-s)); }\n    " + sel + "::after { content: " + org.str(on === null ? "–" : org.word(hass, st)) + "; font-size: var(--org-sub-text, var(--ha-font-size-s)); }";
-      }).filter(Boolean).join("\n    ");
+        rules.push(sel + " { font-size: 0 !important; }", sel + "::before { font-size: var(--org-sub-text, var(--ha-font-size-s)); }", sel + "::after { content: " + org.str(on === null ? "–" : org.word(hass, st)) + "; font-size: var(--org-sub-text, var(--ha-font-size-s)); }");
+      });
+      return rules.join("\n    ");
     })()}
     ha-card .bubble-sub-slider-wrapper {
       height: var(--bubble-sub-slider-height) !important;

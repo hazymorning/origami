@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.4.0"
+  version: "3.4.1"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
@@ -67,12 +67,14 @@ origami_tiles:
       const signKeys = ["open", "run", "switch", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
+      const named = [];
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
         const sel = ".bubble-sub-button.bubble-sub-button-" + n;
         const rules0 = [];
         const o = opt ?? {};
         const obj = hass.states[entity];
         const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
+        if (card._orgTilesSlim) named.push([n, String(name)]);
         // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
         const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
         const state = org.has(o.state) ? o.state : obj ? org.state(hass, entity, parts) : "";
@@ -111,6 +113,18 @@ origami_tiles:
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
+      // A slim row's name keeps at least 40 % of the line, or its own width if that is less, so a short name leaves the rest of the line to the state. The fonts and the widths are known only after layout, so the names are measured in the next frame, as Slider measures its names.
+      if (named.length) requestAnimationFrame(() => {
+        const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
+        named.forEach(([n, text]) => {
+          const el = card.querySelector(".bubble-sub-button-" + n + " > .bubble-sub-button-name-container");
+          if (!el) return;
+          const cs = getComputedStyle(el, "::before");
+          pen.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+          const w = Math.ceil(pen.measureText(text).width) + 1 + "px";
+          if (el.style.getPropertyValue("--org-name-w") !== w) el.style.setProperty("--org-name-w", w);
+        });
+      });
       // at() returns a selector list for the rows with these signs, with the same ending on each selector
       const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
       // The signs are icons from Material Design Icons, drawn as masks in the text color. Only the list builds them.
@@ -291,10 +305,10 @@ origami_tiles:
       background-color: transparent;
       color: var(--org-tile-color, var(--secondary-text-color)) !important;
     }
-    /* The name and the state share one line. The name keeps at least 40 % of it, and the state takes at most the rest. Bubble Card's own state text has a row of no height below them. */
+    /* The name and the state share one line. The name keeps at least 40 % of it, or its measured width if that is less, and the state takes at most the rest. Bubble Card's own state text has a row of no height below them. */
     .bubble-sub-button-name-container {
       display: grid !important;
-      grid-template-columns: minmax(40%, 1fr) minmax(0, max-content);
+      grid-template-columns: minmax(min(40%, var(--org-name-w, 40%)), 1fr) minmax(0, max-content);
       grid-auto-rows: 0;
       align-items: center;
       line-height: var(--ha-line-height-normal) !important;
