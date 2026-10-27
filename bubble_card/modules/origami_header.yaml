@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.5.0"
+  version: "3.6.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values on the right, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -74,6 +74,17 @@ origami_header:
       selector:
         boolean: {}
       default: false
+    - name: value_position
+      label: "Values"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Beside the title
+              value: beside
+            - label: Above the title
+              value: above
+      default: beside
   code: |
     ${(() => {
       // A header is taller than the separator's default 0.8 grid rows, so it asks for auto height until rows are set. Once rows are set, Bubble Card's own grid options apply again.
@@ -86,7 +97,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_header needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_header needs origami_base 12.5 or later");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
       const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
@@ -110,13 +121,14 @@ origami_header:
         switch: cfg.value_style === "switch",
         picked: [],
         // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
-        scroll: !!cfg.scroll
+        scroll: !!cfg.scroll,
+        // Above the title, the values form one small line, such as the next event above a greeting
+        above: cfg.value_position === "above"
       };
       const scope = "ha-card .bubble-sub-button-container";
       const list = org.subs(env, this.config, "origami_header");
       // A chip that has nothing to show but its icon, with no name, no state and no name key, is a square with a larger icon
-      card._orgH.bare = card._orgH.chip ? list.filter(({ item, opt }) => item.show_background !== false && !(opt && "name" in opt) && !(item.show_name && org.has(item.name))
-        && !["show_state", "state_content", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false)).map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n) : [];
+      card._orgH.bare = card._orgH.chip ? list.filter(({ item, opt }) => item.show_background !== false && !(opt && "name" in opt) && !org.shows(item)).map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n) : [];
       if (card._orgH.switch || card._orgH.chip) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => scope + " .bubble-sub-button.bubble-sub-button-" + n);
       // In a row that scrolls, a newly chosen value scrolls into view, such as the chip of the room a pop-up opens on
       const pick = card._orgH.scroll ? card._orgH.picked[0] ?? "" : "";
@@ -270,7 +282,7 @@ origami_header:
     }` : ""}
     ${card._orgH.chip && card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
       background-color: var(--org-header-pick) !important;
-      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
     }` : ""}
     ${card._orgH.scroll ? `
     /* A row of chips is a row of boxes, so it keeps more space from the cards below it than a title alone */
@@ -326,7 +338,35 @@ origami_header:
     }
     ${card._orgH.picked.length ? card._orgH.picked.join(",\n    ") + ` {
       background: var(--org-header-pick) !important;
-      box-shadow: 0 1px 3px color-mix(in srgb, #000 14%, transparent) !important;
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
       color: var(--primary-text-color) !important;
     }` : ""}` : ""}
+    ${card._orgH.above ? `
+    /* The values stand above the title. The header fills the height of its place, such as a cell in a grid next to a taller card, and centers its two lines in it. */
+    :host {
+      display: block;
+      height: 100%;
+    }
+    ha-card,
+    ha-card .card-content {
+      height: 100%;
+    }
+    ha-card .bubble-container {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      gap: var(--ha-space-1) !important;
+      height: 100% !important;
+      padding: 0 !important;
+    }
+    ha-card .bubble-container > .bubble-name {
+      max-width: 100%;
+    }
+    ha-card .bubble-sub-button-container {
+      order: -1;
+      flex: 0 0 auto !important;
+      justify-content: flex-start !important;
+      max-width: ${card._orgH.max || "100%"} !important;
+      margin: 0 !important;
+    }` : ""}
     ${card._orgHCss}

@@ -43,7 +43,7 @@ Origami:
   # A tile is a flat surface without a shadow. Its icon background uses the card background and a shadow.
   tile-background: 'var(--fill-subtle)'
   tile-chip-background: 'var(--ha-card-background)'
-  tile-chip-shadow: 'var(--ha-card-box-shadow)'
+  tile-chip-shadow: 'var(--chip-shadow)'
 
   # Opacity
   opacity-disabled: '.3'
@@ -380,11 +380,13 @@ Origami:
       lamp-field: '#F7E8CA'
       lamp-ink: 'var(--primary-text-color)'
 
-      # Each shadow combines a small contact shadow with a softer main shadow. The blur is about three times the offset, and no shadow reaches upward.
+      # A shadow has a fine edge, a line under that edge and a short shadow below, all in warm browns. Icons on tiles get a smaller shadow than cards. No shadow reaches upward.
       shadow-tint: '60, 50, 40'
-      shadow-contact: '0 1px 2px rgba(var(--shadow-tint), 0.04)'
-      card-shadow: 'var(--shadow-contact), 0 4px 12px -4px rgba(var(--shadow-tint), 0.07)'
-      card-shadow-flat: 'var(--shadow-contact)'
+      shadow-edge: '0 0 0 0.5px rgba(90, 70, 45, 0.09), 0 1px 0 rgba(90, 70, 45, 0.08)'
+      shadow-lift: '150, 105, 50'
+      card-shadow: 'var(--shadow-edge), 0 5px 12px -5px rgba(var(--shadow-lift), 0.14)'
+      card-shadow-flat: 'var(--shadow-edge)'
+      chip-shadow: 'var(--shadow-edge), 0 3px 7px -3px rgba(var(--shadow-lift), 0.16)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.15)'
       card-item-shadow: '0 1px 2px rgba(var(--shadow-tint), 0.1)'
       shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 16px 40px -12px rgba(var(--shadow-tint), 0.22)'
@@ -484,12 +486,14 @@ Origami:
       lamp-field: 'color-mix(in srgb, var(--state-light-active-color) var(--tint-strength), var(--ha-card-background))'
       lamp-ink: 'var(--state-light-active-color)'
 
-      # Shadows. In dark mode, a card's lighter tone shows its height, and the shadow only supports it.
+      # Shadows. In dark mode, a card's lighter tone shows its height. A light hairline marks the top edge, a dark hairline marks the other edges, and a short shadow falls below.
       shadow-tint: '0, 0, 0'
       shadow-hairline: 'inset 0 1px 0 rgba(255, 255, 255, 0.03)'
-      shadow-contact: '0 1px 2px rgba(var(--shadow-tint), 0.35)'
-      card-shadow: 'var(--shadow-hairline), var(--shadow-contact), 0 6px 16px -6px rgba(var(--shadow-tint), 0.45)'
-      card-shadow-flat: 'var(--shadow-hairline), var(--shadow-contact)'
+      shadow-edge: 'inset 0 0.5px 0 rgba(255, 240, 220, 0.09), 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(0, 0, 0, 0.35)'
+      shadow-lift: '20, 10, 0'
+      card-shadow: 'var(--shadow-edge), 0 6px 14px -6px rgba(var(--shadow-lift), 0.6)'
+      card-shadow-flat: 'var(--shadow-edge)'
+      chip-shadow: 'var(--shadow-edge), 0 3px 7px -3px rgba(var(--shadow-lift), 0.55)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.65)'
       card-item-shadow: 'var(--shadow-hairline), 0 1px 2px rgba(var(--shadow-tint), 0.4)'
       shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 20px 48px -12px rgba(var(--shadow-tint), 0.7)'

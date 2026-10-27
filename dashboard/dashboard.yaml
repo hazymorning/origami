@@ -608,8 +608,6 @@ views:
                       'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
                     state:
                       'on': Running
-                    name_color:
-                      'on': initial
                   tap_action:
                     action: toggle
                   hold_action:

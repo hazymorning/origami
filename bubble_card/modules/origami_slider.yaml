@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.8.0"
+  version: "1.8.1"
   supported:
     - button
     - sub-buttons
@@ -13,7 +13,7 @@ origami_slider:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_slider needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_slider needs origami_base 12.5 or later");
       if (this.config.card_type === "sub-buttons") {
         // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
         // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
@@ -62,30 +62,11 @@ origami_slider:
       return "";
     })()}
     ${card._orgSl ? `
-    ha-card .bubble-container {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      padding: 0 !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-    ha-card .bubble-container > .bubble-sub-button-container {
-      display: none !important;
-    }
+    ${card._org.unframe()}
     ha-card .bubble-sub-button-bottom-container {
-      position: static !important;
-      inset: auto !important;
       display: grid !important;
       grid-template-columns: ${card._orgSl.width} minmax(0, 1fr) minmax(var(--ha-space-11, 44px), max-content);
       gap: var(--ha-space-2) var(--ha-space-4) !important;
-      width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      pointer-events: auto !important;
     }
     ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {
       display: contents !important;

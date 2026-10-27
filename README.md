@@ -949,8 +949,6 @@ sub_button:
           'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
         state:
           'on': Running
-        name_color:
-          'on': initial
       tap_action:
         action: toggle
       hold_action:
@@ -3894,11 +3892,11 @@ The name Origami comes from Paper Buttons Row, because origami is folded paper. 
 | `ha-space-1` … `ha-space-5` | Spacing from 4 to 20 px |
 | `ha-card-border-radius` | The card corner radius, 22 px. `radius-inner` is this value divided by 1.3, about 17 px. `radius-small` is 8 px. |
 | `border-width`, `border-contrast` | Card outlines, which are off by default |
-| `card-shadow`, `card-shadow-flat`, `shadow-elevated` | Shadows for each mode. `card-shadow-flat` only has the small contact shadow, and the card above the navigation bar uses `shadow-elevated`. |
+| `card-shadow`, `card-shadow-flat`, `chip-shadow`, `shadow-edge`, `shadow-lift`, `shadow-elevated` | Shadows for each mode. `shadow-edge` is a fine edge with a line under it, and the short shadows below cards and icons take the warm `shadow-lift` color. `card-shadow-flat` only has the edge, `chip-shadow` is the smaller shadow for icons, switches and keys, and the card above the navigation bar uses `shadow-elevated`. |
 | `fill-subtle`, `fill-strong`, `fill-loud` | Neutral surfaces, mixed from `fill-base` so that they stay warm |
 | `fill-contrast` | The strength of `fill-subtle`, 8% in light mode and 5% in dark mode |
 | `fill-active`, `toggle-on` | The text color at 85% on the card background, for switch tracks and active buttons |
-| `tile-background`, `tile-chip-background`, `tile-chip-shadow` | A tile's background, and the background and shadow behind icons, switches and keys on gray surfaces such as tiles and lists. With `tile-chip-background: var(--fill-subtle)` and `tile-chip-shadow: none`, these backgrounds are muted and flat. |
+| `tile-background`, `tile-chip-background`, `tile-chip-shadow` | A tile's background, and the background and shadow behind icons, switches and keys on gray surfaces such as tiles and lists. `tile-chip-shadow` is `chip-shadow`. With `tile-chip-background: var(--fill-subtle)` and `tile-chip-shadow: none`, these backgrounds are muted and flat. |
 | `opacity-disabled`, `opacity-quiet`, `opacity-muted`, `opacity-strong` | Opacity levels of 0.3, 0.45, 0.6 and 0.8 |
 | `control-height-mini`, `-icon`, `-row`, `-list`, `-sm`, `control-height`, `-lg` | Fixed control heights of 32, 40, 44, 48, 52, 56 and 64 px |
 | `tile-size`, `tile-size-lg`, `dot-size` | Icon backgrounds of 48 and 80 px, and dots of 12 px |

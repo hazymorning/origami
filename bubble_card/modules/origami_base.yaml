@@ -457,7 +457,8 @@ origami_base:
         }
       };
       card._org = {
-        version: 12,
+        // The version is the version of these helpers. 12.5 added unframe() and shows().
+        version: 12.5,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -529,6 +530,33 @@ origami_base:
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {
           if (slug(item.css_class) === cls) card._org.write(card.querySelector(".bubble-sub-button-" + (i + 1) + " .bubble-sub-button-name-container"), text(hass.states[item.entity ?? entity]));
         }),
+        // shows() tells whether a sub-button shows a text of its own, which is its name or a state
+        shows: (item) => (!!item.show_name && has(item.name)) || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => has(item[k]) && item[k] !== false),
+        // unframe() returns the rules that remove Bubble Card's frame from a sub-buttons card, so the bottom sub-buttons fill the card, as in Button, Slider, Table and Tiles. pad is the space around them.
+        unframe: (pad = "0") => `
+    ha-card .bubble-container {
+      display: block !important;
+      box-sizing: border-box !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: ${pad} !important;
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    ha-card .bubble-container > .bubble-sub-button-container {
+      display: none !important;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      position: static !important;
+      inset: auto !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: auto !important;
+    }`,
         // subs() returns each sub-button with its number, its entity and the values of its own key, such as origami_header
         subs: (env, cfg, key) => items(cfg).map((item, i) => {
           const entity = item.entity ?? cfg.entity;
@@ -686,6 +714,9 @@ origami_base:
       --org-toggle-knob: var(--icon-size-m);
       --org-inset: var(--fill-subtle);
       --org-inset-shadow: 0 0 #0000;
+      /* Every line that divides, such as between the rows of a list or the segments of a bar, has this width and color */
+      --org-line-width: 2px;
+      --org-line-color: var(--fill-loud);
     }
     ${card._org.fills === null ? "" : `
     ha-card {

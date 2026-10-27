@@ -38,7 +38,7 @@ origami_tiles:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_tiles needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_tiles needs origami_base 12.5 or later");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_tiles ?? {};
       const list = cfg.layout === "list";
@@ -104,22 +104,7 @@ origami_tiles:
       };
       return "";
     })()}
-    .bubble-container {
-      height: auto !important;
-      overflow: visible !important;
-      border: none !important;
-      border-radius: 0 !important;
-      background: none !important;
-      box-shadow: none !important;
-    }
-    .bubble-sub-button-container {
-      display: none !important;
-    }
-    .bubble-sub-button-bottom-container {
-      position: static !important;
-      width: 100% !important;
-      margin: 0 !important;
-    }
+    ${card._org.unframe()}
     .bubble-sub-button-group:not(.hidden) {
       display: grid !important;
       grid-template-columns: repeat(${card._orgTilesCols}, minmax(0, 1fr));
@@ -195,17 +180,18 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    /* A row is as tall as a compact card, so its switch is Base's compact pill switch */
+    /* The switch is Base's compact pill switch. It is as wide as an icon's background, so switches and keys share one column at the row's end. */
     ha-card {
       --org-toggle-w: var(--tile-size);
       --org-toggle-h: var(--icon-size-l);
       --org-toggle-knob: var(--icon-size-s);
     }
+    /* A row holds an icon's background as a card does, and the list's padding surrounds it. A key is a square as large as the icon's background, and its sign is as large as the icon. */
     .bubble-sub-button-group:not(.hidden) {
-      --org-list-row: var(--control-height);
-      --org-list-icon: var(--control-height-icon);
-      /* A key is a square as large as the icon's background */
-      --org-list-key: var(--org-list-icon);
+      --org-list-row: calc(var(--tile-size) + 2 * var(--ha-space-2));
+      --org-list-key: var(--tile-size);
+      --org-list-key-radius: var(--radius-inner);
+      --org-list-glyph: var(--icon-size-m);
       gap: var(--ha-space-1) !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
@@ -222,38 +208,32 @@ origami_tiles:
     .bubble-sub-button.bubble-action-enabled:active {
       background-color: var(--fill-subtle) !important;
     }
-    .bubble-sub-button-icon,
-    .bubble-sub-button-image {
-      width: var(--org-list-icon) !important;
-      min-width: var(--org-list-icon) !important;
-      height: var(--org-list-icon) !important;
-      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
-    }
     .bubble-sub-button-icon {
-      --mdc-icon-size: var(--icon-size-s) !important;
+      --mdc-icon-size: var(--org-list-glyph) !important;
     }
     .bubble-sub-button-name-container::after {
       margin-top: 2px;
     }
     ${card._orgTilesSlim ? `
-    /* A slim row is lower, and its icon has no background. The icon keeps its place, so the text starts where it starts in a regular list. */
+    /* A slim row is lower, its icon has no background and its icon and keys are smaller. The icon keeps its column, so the text starts where it starts in a regular list. */
     .bubble-sub-button-group:not(.hidden) {
-      --org-list-row: var(--control-height-list);
+      --org-list-row: var(--control-height);
       --org-list-key: var(--control-height-mini);
+      --org-list-key-radius: var(--radius-small);
+      --org-list-glyph: var(--icon-size-s);
     }
     .bubble-sub-button-icon {
-      --mdc-icon-size: var(--icon-size-m) !important;
       background-color: transparent;
       box-shadow: none;
       color: var(--org-tile-color, var(--secondary-text-color)) !important;
     }` : ""}
     ${card._orgTilesLines ? `
-    /* The rows meet, and a line across the whole row separates them. Hidden rows take no space, so each line lies where two rows meet. */
+    /* Each line lies in the middle of a gap between two rows and spans the rows' full width. Hidden rows take no space, so every line stays between two rows. */
     .bubble-sub-button-group:not(.hidden) {
-      gap: 0 !important;
-      background-image: repeating-linear-gradient(to bottom, var(--fill-strong) 0 1px, transparent 1px var(--org-list-row));
+      --org-list-gap: calc(2 * var(--ha-space-1) + var(--org-line-width));
+      gap: var(--org-list-gap) !important;
+      background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--org-list-row) + var(--ha-space-1)), var(--org-line-color) 0 calc(var(--org-list-row) + var(--ha-space-1) + var(--org-line-width)), transparent 0 calc(var(--org-list-row) + var(--org-list-gap)));
       background-size: 100% calc(100% - var(--org-list-row));
-      background-position: 0 var(--org-list-row);
       background-origin: content-box;
       background-repeat: no-repeat;
     }` : ""}
@@ -278,9 +258,10 @@ origami_tiles:
       transition: var(--transition-interactive);
     }
     ${card._orgTilesSign.at("run running stop", "::before")} {
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--org-list-key)) / 2);
       width: var(--org-list-key);
       height: var(--org-list-key);
-      border-radius: calc(var(--radius-inner) - var(--ha-space-1));
+      border-radius: var(--org-list-key-radius);
     }
     ${card._orgTilesSign.at("running stop on", "::before")} {
       background-color: var(--fill-active);
@@ -289,10 +270,10 @@ origami_tiles:
       -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
       mask: var(--org-sign-icon) center / contain no-repeat;
     }
-    /* The chevron's tip ends where switches and keys end. The icon leaves a third of its width after the tip. */
+    /* The chevron stands in the middle of the signs' column, as the icon stands in the middle of its background on the other side */
     ${card._orgTilesSign.at("open", "::after")} {
       --org-sign-icon: ${card._orgTilesSign.chevron};
-      inset-inline-end: calc(var(--ha-space-2) - var(--icon-size-m) / 3);
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
       width: var(--icon-size-m);
       height: var(--icon-size-m);
       background-color: var(--secondary-text-color);
@@ -303,9 +284,9 @@ origami_tiles:
     }
     ${card._orgTilesSign.at("run running stop", "::after")} {
       --org-sign-icon: ${card._orgTilesSign.playMask};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-list-key) - var(--icon-size-s)) / 2);
-      width: var(--icon-size-s);
-      height: var(--icon-size-s);
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--org-list-glyph)) / 2);
+      width: var(--org-list-glyph);
+      height: var(--org-list-glyph);
       background-color: var(--primary-text-color);
       opacity: var(--opacity-strong);
     }

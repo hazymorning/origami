@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.6.2"
+  version: "3.7.0"
   supported:
     - sub-buttons
     - button
@@ -124,7 +124,7 @@ origami_button:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_button needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_button needs origami_base 12.5 or later");
       const cfg = this.config.origami_button ?? {};
       const lang = hass.locale?.language ?? hass.language ?? "en";
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
@@ -156,8 +156,6 @@ origami_button:
       const segNames = seg ? [] : [].concat(segRaw ?? []).flatMap((v) => String(v).split(",")).map(low).filter((v) => v && v !== "false");
       // Bubble Card numbers the sub-buttons of the groups first, in their order. On a button card, the main sub-buttons come before the bottom ones, and Button leaves them to Base.
       const own = this.config.card_type === "sub-buttons";
-      // On a button card, Base 12.4 and later leaves the bottom sub-buttons to Button. An older Base would fill them like the main sub-buttons.
-      if (!own && !org.key) throw new Error("origami_button needs origami_base 12.4 or later on a button card");
       const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
       const grouped = bottom.filter((g) => Array.isArray(g?.group));
       const loose = bottom.filter((g) => g && !Array.isArray(g.group));
@@ -285,27 +283,10 @@ origami_button:
     ${card._orgB.lamps}
     ${card._orgB.values}
     ${card._orgB.order}
-    ${card._orgB.own ? `ha-card .bubble-container {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      padding: ${card._orgB.pad} !important;
-      box-sizing: border-box !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-    ha-card .bubble-container > .bubble-sub-button-container {
-      display: none !important;
-    }` : ""}
+    ${card._orgB.own ? card._org.unframe(card._orgB.pad) : ""}
     ha-card .bubble-sub-button-bottom-container {
       position: static !important;
       inset: auto !important;
-      ${card._orgB.own ? `width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;` : ""}
       gap: ${card._orgB.seg ? "0" : "var(--ha-space-2)"} !important;
       pointer-events: auto !important;
       ${card._orgB.cols ? `display: grid !important;
@@ -397,8 +378,8 @@ origami_button:
       position: absolute;
       inset-block: 25%;
       inset-inline-start: 0;
-      width: 2px;
-      background-color: var(--fill-loud);
+      width: var(--org-line-width);
+      background-color: var(--org-line-color);
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button::before {
       --org-btn-inset: calc((var(--control-height) - var(--control-height-row)) / 2);
@@ -464,7 +445,7 @@ origami_button:
     }` : ""}
     ${card._orgB.rings.length ? card._orgB.each(card._orgB.rings, "") + ` {
       background: transparent !important;
-      box-shadow: inset 0 0 0 2px var(--fill-loud) !important;
+      box-shadow: inset 0 0 0 var(--org-line-width) var(--org-line-color) !important;
     }` : ""}
     ${card._orgB.bars}
     ${card._orgB.each(card._orgB.barOn, "")} {
@@ -475,15 +456,15 @@ origami_button:
       font-weight: var(--ha-font-weight-bold) !important;
     }
     ${card._orgB.dividers.length ? card._orgB.each(card._orgB.dividers, "") + ` {
-      flex: 0 0 1px !important;
-      width: 1px !important;
-      min-width: 1px !important;
+      flex: 0 0 var(--org-line-width) !important;
+      width: var(--org-line-width) !important;
+      min-width: var(--org-line-width) !important;
       height: var(--icon-size-s) !important;
       align-self: center;
       margin-inline: var(--ha-space-1) !important;
       padding: 0 !important;
       border-radius: 0 !important;
-      background: var(--fill-strong) !important;
+      background: var(--org-line-color) !important;
       pointer-events: none;
     }
     ` + card._orgB.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {

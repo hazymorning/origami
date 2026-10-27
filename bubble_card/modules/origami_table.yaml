@@ -107,7 +107,7 @@ origami_table:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_table needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_table needs origami_base 12.5 or later");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_table ?? {};
       // columns is a list. Each column has a name, a width, an alignment and values for its cells.
@@ -144,8 +144,7 @@ origami_table:
         const first = n === 1;
         const side = col?.align ?? (first ? "start" : "center");
         const item = s.item;
-        const text = org.has(opt.name) || (!!item.show_name && org.has(item.name))
-          || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false);
+        const text = org.has(opt.name) || org.shows(item);
         const look = org.look(hass, s.entity);
         // The on value decides whether the cell stands out, even while it is empty. Without it, a cell whose entity is on takes its state color.
         const on = sets(from("on"), "on") ? org.yes(pick(from("on"), "on")) : null;
@@ -178,34 +177,15 @@ origami_table:
     ha-card {
       --org-cell: var(--icon-size-m);
     }
-    ha-card .bubble-container {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      padding: 0 !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-    ha-card .bubble-container > .bubble-sub-button-container {
-      display: none !important;
-    }
+    ${card._org.unframe()}
     ha-card .bubble-sub-button-bottom-container {
-      position: static !important;
-      inset: auto !important;
       display: grid !important;
       grid-template-columns: ${card._orgT.template};
       justify-content: normal !important;
       gap: 0 var(--ha-space-1) !important;
       box-sizing: border-box;
-      width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
       overflow: hidden;
       border-radius: var(--ha-card-border-radius);
-      pointer-events: auto !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
       display: contents !important;

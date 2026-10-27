@@ -986,7 +986,7 @@ sub_button:
 
 ### Header
 
-The Header module creates a section header. The separator card's name is the title, and its sub-buttons are the values on the right. This module is not related to the Origami Header card from the dashboard setup.
+The Header module creates a section header. The separator card's name is the title, and its sub-buttons are the values beside it or above it. This module is not related to the Origami Header card from the dashboard setup.
 
 <img width="800" alt="Headers with text, a colored dot and chips" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-header.webp">
 
@@ -1007,6 +1007,7 @@ The Header module creates a section header. The separator card's name is the tit
 | `icon_gap` | `var(--ha-space-1)` | The option sets the space between the icon and the name of plain values. Chips keep their own space. |
 | `value_max_width` | | The option sets the maximum width of the values, such as `50%`. Longer values end with an ellipsis. Set `scrolling_effect: false` on these sub-buttons, because otherwise Bubble Card scrolls them. |
 | `scroll` | `false` | The values start 16 px after the title and scroll sideways up to the edge of a pop-up. The header leaves 8 px more space below such a row, because chips are boxes like the cards below them. |
+| `value_position` | `beside` | With `above`, the values form one small line above the title, as described below the examples. |
 
 Each sub-button can have its own `origami_header` key with `name`, `icon`, `color`, `name_color` and `background`. As in every module, `color` sets the icon's color, and `name_color` sets the text's color. The icon takes the text's color while neither `color` nor `icon_color` sets one. `background` replaces the chip's background, and `var(--tint)` tints the chip in the value's color. Popup uses the same keys for its values.
 
@@ -1075,6 +1076,29 @@ sub_button:
           entity_id: input_select.lamp_view
         data:
           option: Color
+```
+
+With `value_position: above`, a small line stands above the title, such as the next event above a greeting. The header then fills the height of its place and leaves no space above or below it, so in a grid next to a taller card, its two lines stand in the middle of their cell. A value whose `name` comes from a template leaves no line while the template is empty, such as a calendar without upcoming events. As on every Bubble card, the title can be Jinja:
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+name: "{{ (states('sensor.greetings')[:1] | upper) ~ states('sensor.greetings')[1:] }}"
+modules:
+  - origami_base
+  - origami_header
+origami_header:
+  value_position: above
+  value_size: var(--ha-font-size-s)
+  value_max_width: 100px
+sub_button:
+  main:
+    - entity: calendar.household
+      show_icon: false
+      origami_header:
+        name: ${attr.message}
+      tap_action:
+        action: none
 ```
 
 The header leaves 24 px of space above it and 8 px below it. Popup's `gap` option changes this for the headers in its pop-up. Sections and Bubble Card pop-ups have a gap of 8 px between cards, so the title gets 32 px of space above it and 16 px below it. Inside a vertical stack, Bubble Card uses a gap of 14 px, which gives 38 px and 22 px. The header sets its own height, so it needs no `grid_options`. Bubble Card gives the title no tap action, and only the sub-buttons can have one.
@@ -1151,7 +1175,7 @@ A tile whose entity is unavailable is dimmed. More tile examples are in the Favo
 With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. As on a tile, the row's icon stands on the card background and takes the state color while its entity is on. The state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
-- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on a pill switch. A row is as tall as a compact card, so the switch is Base's compact pill switch.
+- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on Base's compact pill switch, which is as wide as the icon's background.
 - A row that runs a script, a scene or another action shows a square key as large as the icon's background. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
@@ -1214,7 +1238,7 @@ sub_button:
           state_not: ['off', standby, unavailable, unknown]
 ```
 
-The signs end as far from the row's edge as the icon starts on the other side. With `slim: true`, the icons have no background, the rows are lower and the keys are smaller. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their place, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` draws a thin line across the full width between the rows, and the rows meet without a gap. A regular list ignores `dividers`.
+A row's icon has the size and the background of a card's icon. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. With `slim: true`, the icons have no background and are smaller, the rows are as tall as a compact card and the keys are smaller. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their column, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` adds space between the rows and draws a line in the middle of it, across the rows' full width. The line has the width and the color of every line in Origami, such as the lines in Button's segmented bars. A regular list ignores `dividers`.
 
 ```yaml
 type: custom:bubble-card
@@ -1378,7 +1402,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Climate shows how a module writes the state line, Media shows how it writes the name line too, Tiles shows how a module turns a sub-buttons card into a grid of tiles, and Speaker Select shows how a module reads a media player with Base's `media()` helper.
 
-Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. These are the helpers:
+Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1401,6 +1425,7 @@ Base puts its helpers on `card._org`, so every module that runs after Base can u
 | `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text, class)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text. `write()` writes text into an element that Bubble Card does not hand over, such as a sub-button's readout, and `readouts()` writes a text into every sub-button with `css_class: readout`, or with the class given as `class`. The function `text` makes each text from that sub-button's own entity. |
 | `rename(text)` | It returns the word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` | It returns a CSS string that Bubble Card's cleaner leaves as it is. |
+| `shows(item)` and `unframe(pad)` | `shows()` tells whether a sub-button shows a text of its own, which is its name or a state. `unframe()` returns the rules that remove Bubble Card's frame from a sub-buttons card, so the bottom sub-buttons fill the card with the space `pad` around them. Button, Slider, Table and Tiles use it. |
 
 Bubble Card hands the state line to a module whose code contains `card.querySelector('.bubble-state').textContent =` word for word, and the name line to one whose code contains `card.querySelector('.bubble-name').textContent =`. The same assignment with `innerText` or `innerHTML` also counts. Bubble Card then stops writing that line and keeps scrolling long text. So a module that writes a line uses this exact assignment in its own code and takes the text from `word()`, `state()` or `name()`. Bubble Card skips a write that repeats the line's text, so the module can write the line on every render, and the scrolling goes on.
 
