@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.4.0"
+  version: "5.5.0"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, in the icon or behind the whole card, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress."
@@ -79,10 +79,25 @@ origami_media:
             - label: As the card's background
               value: background
       default: icon
+    - name: cover_mix
+      label: "Cover mix (the cover's share in percent, behind the card)"
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 5
+          mode: slider
+          unit_of_measurement: "%"
+      default: 25
+    - name: cover_blur
+      label: "Cover blur (behind the card)"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.6)) throw new Error("origami_media needs origami_base 12.6 or later");
       const own = this.config.origami_media ?? {};
       // Origami 2 named a TV's players art_entity and app_entity, and those still work as the TV layout with these players
       const old = [own.art_entity, own.app_entity].filter(Boolean);
@@ -106,8 +121,10 @@ origami_media:
         powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
-        // With cover: background, the cover fills the card instead of the icon
+        // With cover: background, the cover fills the card instead of the icon. Cover mix sets its share in a mix with the card's color, and Cover blur blurs it.
         back: cfg.cover === "background",
+        mix: cfg.cover_mix ?? 25,
+        blur: org.yes(cfg.cover_blur),
         // Origami 2 kept Filled play and power buttons under origami_base, and that place still works
         solid: !!(cfg.solid_controls ?? this.config.origami_base?.solid_controls),
         // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
@@ -323,22 +340,14 @@ origami_media:
     ` : ""}
     ${card._org.cover(card._orgM.back ? null : card._orgM.art, "1")}
     ${card._orgM.back ? `
-    /* The cover fills the card behind a veil in the card's color, so it is lighter in light mode and darker in dark mode. The veil is a little stronger behind the name and the state line, so the text stays readable. Without a cover, the card keeps its own background. */
-    ha-card {
-      --org-cover-veil: color-mix(in srgb, var(--ha-card-background) 58%, transparent);
-      --org-cover-top: color-mix(in srgb, var(--ha-card-background) 48%, transparent);
-    }
+    /* On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. */
     ha-card .bubble-background {
       overflow: hidden;
     }
-    ha-card .bubble-background::before {
-      content: ${card._orgM.art ? '""' : "none"};
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: ${card._orgM.art ? "linear-gradient(to bottom, var(--org-cover-top), transparent 48%), linear-gradient(var(--org-cover-veil), var(--org-cover-veil)), url(" + card._org.str(card._orgM.art) + ") center / cover no-repeat" : "none"};
-      pointer-events: none;
-    }
+    ${card._org.backdrop("ha-card .bubble-background::before", card._orgM.art, card._orgM.mix, card._orgM.blur, "0px")}
+    ${card._orgM.art ? `ha-card {
+      --org-inset: color-mix(in srgb, var(--ha-card-background) 70%, transparent);
+    }` : ""}
     ` : ""}
     .bubble-name-container {
       display: flex !important;

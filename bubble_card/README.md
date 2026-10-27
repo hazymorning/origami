@@ -61,7 +61,8 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a small chip in the active color. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state, and an option that is not an entity ID, such as None, keeps its text. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a pill in the active color with the size of a button in a Button row. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state, and an option that is not an entity ID, such as None, keeps its text. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. The chosen option has the active color.
 
 </details>
 
@@ -461,6 +462,8 @@ The Media options go under `origami_media:`.
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
 | `icon_color` | | The option maps the same keys as `icons` to a color for the icon, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
 | `cover` | `icon` | With `background`, the cover fills the card instead of the icon, as described below the examples. |
+| `cover_mix` | `25` | With `cover: background`, the option sets the cover's share in percent. The card's color makes up the rest. |
+| `cover_blur` | `false` | With `cover: background`, the cover is blurred, so only its colors remain. |
 
 Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` also shows while the player reports no title, because the option itself decides when there is a cover. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
 
@@ -542,7 +545,7 @@ A `leader` template returns nothing while the speaker is not in a group, because
 
 #### Cover as background
 
-With `cover: background`, the cover fills the card behind a veil in the card's color. The cover is therefore lighter in light mode and darker in dark mode, and it is not blurred. The veil is a little stronger at the top, behind the name and the state line, so the text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
+With `cover: background`, the cover fills the card. `cover_mix` sets the cover's share in percent, and the card's color makes up the rest. The cover is therefore lighter in light mode and darker in dark mode, and the default share of 25 % keeps the text readable on a busy cover. With `cover_blur: true`, the cover is blurred, so only its colors remain. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
 
 ```yaml
 show_icon: false
@@ -558,7 +561,7 @@ sub_button:
       show_icon: false
 ```
 
-The dropdown's options in this example are the entity IDs of the speakers. Base therefore shows the dropdown as a small chip with the chosen speaker's name, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
+The dropdown's options in this example are the entity IDs of the speakers. Base therefore shows the dropdown as a pill with the chosen speaker's name, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
 
 #### Play row
 
@@ -1358,9 +1361,9 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 `value_style` can be `text` (the default) or `chip`. The image at the top of this page shows a pop-up with `text`. Each sub-button can have an `origami_popup` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as in the Header module. A value with a `name` of its own and no visibility conditions always shows. The row under the title appears only while at least one value shows.
 
-`value_position` places the values `below` the title, which is the default, or `beside` it. Beside the title, the values stand between the title and the close button, and they are small text with a larger icon. A value there can open another part of the pop-up, such as a view that groups speakers.
+`value_position` places the values `below` the title, which is the default, or `beside` it. Beside the title, the values stand between the title and the close button as small text, and their icons have the same size as below the title. A value there can open another part of the pop-up, such as a view that groups speakers.
 
-`art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template that returns one, such as the cover of the speaker that the pop-up controls. While the value is empty, the last cover fades out.
+`art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template that returns one, such as the cover of the speaker that the pop-up controls. While the value is empty, the last cover fades out. `cover_mix` and `cover_blur` work as in the Media module. Here, the cover's share is 16 % by default, and the cover is blurred unless `cover_blur` is `false`.
 
 `gap` sets the space between the cards of a vertical stack in the pop-up, such as `var(--ha-space-4)`. A Header separator in that stack then has twice the gap above its title and the gap once below it. Without `gap`, Bubble Card's 14 px apply.
 
@@ -1402,7 +1405,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Climate shows how a module writes the state line, Media shows how it writes the name line too, Tiles shows how a module turns a sub-buttons card into a grid of tiles, and Speaker Select shows how a module reads a media player with Base's `media()` helper.
 
-Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`. These are the helpers:
+Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`, and 12.6 from Base 12.6 on, which added `backdrop()`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1426,6 +1429,7 @@ Base puts its helpers on `card._org`, so every module that runs after Base can u
 | `rename(text)` | It returns the word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` | It returns a CSS string that Bubble Card's cleaner leaves as it is. |
 | `shows(item)` and `unframe(pad)` | `shows()` tells whether a sub-button shows a text of its own, which is its name or a state. `unframe()` returns the rules that remove Bubble Card's frame from a sub-buttons card, so the bottom sub-buttons fill the card with the space `pad` around them. Button, Slider, Table and Tiles use it. |
+| `backdrop(selector, address, mix, blur, round)` | It returns the rules that show a cover as a layer behind a card's content. `mix` is the cover's share from 0 to 100 in a mix with the color below the layer, and `blur` blurs the cover. A blurred cover reaches past the layer, so the blur does not fade at the edges, and `round` rounds the corners of the part that shows. Media's cover background and Popup's art use it. |
 
 Bubble Card hands the state line to a module whose code contains `card.querySelector('.bubble-state').textContent =` word for word, and the name line to one whose code contains `card.querySelector('.bubble-name').textContent =`. The same assignment with `innerText` or `innerHTML` also counts. Bubble Card then stops writing that line and keeps scrolling long text. So a module that writes a line uses this exact assignment in its own code and takes the text from `word()`, `state()` or `name()`. Bubble Card skips a write that repeats the line's text, so the module can write the line on every render, and the scrolling goes on.
 

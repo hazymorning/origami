@@ -57,11 +57,11 @@ These changes are in the `next` branch and come with the next release.
 - All dividing lines have the same width and color, and Base sets both. The color is the theme's `fill-strong`, as in the theme's `separator` token, so the lines are quiet. Button's segmented bars, its dividers and its outlined buttons use them, and so does the line in the fan pop-up's speed row. Button's dividers are therefore 2 px wide now, and the lines in segmented bars are lighter.
 - Header's new `value_position: above` puts the values in a small line above the title, such as the next event above a greeting. The header then fills the height of its place and centers its lines.
 - Header writes the title itself, as Media writes its lines. A title with a template in `${ }` reads the states at once, so it is there when the header first shows, and nothing moves. A Jinja title still gets its result from Home Assistant a moment later.
-- Media's new `cover: background` fills the card with the cover behind a veil in the card's color. The cover is lighter in light mode and darker in dark mode, and it is not blurred. The veil is a little stronger behind the name and the state line, so the text stays readable.
-- A dropdown whose options are entity IDs, such as a helper that picks a speaker, is a small chip in the active color with the chosen entity's name. Its menu shows each entity's name and its icon for its state, and Base's `words` option renames them. An option that is not an entity ID, such as None, keeps its text. In every dropdown's menu, the chosen option has the quiet fill of a pressed row instead of the theme's accent color.
-- Popup's new `value_position: beside` puts the values beside the title, before the close button, as small text with a larger icon.
+- Media's new `cover: background` fills the card with the cover. `cover_mix` sets the cover's share in a mix with the card's color, which is 25 % by default, and `cover_blur` blurs the cover. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable.
+- A dropdown whose options are entity IDs, such as a helper that picks a speaker, is a pill in the active color with the chosen entity's name, and it has the size of a button in a Button row. Its menu shows each entity's name and its icon for its state, and Base's `words` option renames them. An option that is not an entity ID, such as None, keeps its text. On Origami cards, the options in every dropdown's menu are the rows of a list, whose corners follow the menu's corners, and the chosen option has the active color. On other cards, the theme gives the chosen option a quiet fill instead of the accent color.
+- Popup's new `value_position: beside` puts the values beside the title, before the close button, as small text. Popup's art takes Media's `cover_mix` and `cover_blur` options, and a blurred cover no longer fades at the pop-up's edges.
 - The chosen chip in Header's chips and switches takes the theme's chip shadow instead of a black one.
-- Base has two new helpers for people who write modules. `shows()` tells whether a sub-button shows a text of its own, and `unframe()` returns the rules that remove Bubble Card's frame from a sub-buttons card. Button, Slider, Table and Tiles share these rules instead of four copies.
+- Base has three new helpers for people who write modules. `shows()` tells whether a sub-button shows a text of its own. `unframe()` returns the rules that remove Bubble Card's frame from a sub-buttons card, and Button, Slider, Table and Tiles share these rules instead of four copies. `backdrop()` returns the rules that show a cover behind a card's content, and Media and Popup share them.
 
 ### Bug fixes
 
@@ -126,7 +126,7 @@ Every module changed, and several options changed their names or their meaning. 
 20. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
 21. To use the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
 22. To use the new climate table, replace the grid card with the climate table in your dashboard with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
-23. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows and the chosen option in a dropdown's menu gets its quiet fill. A copy of the theme under a new name keeps its old shadows until it gets the shadow tokens of the new theme.
+23. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under a new name keeps its old shadows until it gets the shadow tokens of the new theme.
 
 ## 2.0 · The Unfolding
 

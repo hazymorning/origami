@@ -1,13 +1,13 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.4.0"
+  version: "4.5.0"
   supported:
     - pop-up
-  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover blurred behind the content. On a header that shows only a name, the sub-buttons become values below the title or beside it, as text or as chips, with the same keys as in Header."
+  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. On a header that shows only a name, the sub-buttons become values below the title or beside it, as text or as chips, with the same keys as in Header."
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_popup needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.6)) throw new Error("origami_popup needs origami_base 12.6 or later");
       const cfg = this.config.origami_popup ?? {};
       // Origami 2 named this option subtitle_style, and that name still works
       const chip = (cfg.value_style ?? cfg.subtitle_style) === "chip";
@@ -25,8 +25,10 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
-        // The Art option shows a cover blurred behind the pop-up's content. While its value is empty, the last cover fades out.
+        // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. While its value is empty, the last cover fades out.
         art: cfg.art === undefined ? null : org.picture(org.value({ hass, renderTemplate }, cfg.art, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} })) ?? "",
+        mix: cfg.cover_mix ?? 16,
+        cover: cfg.cover_blur === undefined || org.yes(cfg.cover_blur),
         css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
@@ -65,18 +67,9 @@ origami_popup:
       --bubble-pop-up-mask-top-stop: var(--org-popup-pad) !important;
       --bubble-pop-up-mask-bottom-stop: var(--org-popup-pad) !important;
     }
-    ${card._orgP.art === null ? "" : `.bubble-pop-up-background::after {
-      content: "";
-      position: absolute;
-      inset: 0;
+    ${card._orgP.art === null ? "" : card._org.backdrop(".bubble-pop-up-background::after", card._orgPArt, card._orgP.art ? card._orgP.mix : 0, card._orgP.cover, "var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0") + `
+    .bubble-pop-up-background::after {
       z-index: 0;
-      border-radius: inherit;
-      background: ${card._orgPArt ? "url(" + card._org.str(card._orgPArt) + ") center / cover no-repeat" : "none"};
-      filter: blur(50px) saturate(170%);
-      opacity: ${card._orgP.art ? "0.16" : "0"};
-      pointer-events: none;
-      clip-path: inset(0 round var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0);
-      transition: opacity var(--duration-normal) ease;
     }
     .bubble-pop-up-container > * {
       position: relative;
@@ -143,7 +136,7 @@ origami_popup:
       -webkit-line-clamp: 1 !important;
     }
     ${card._orgP.beside ? `
-    /* Beside the title, the values are small text with a large icon, as in a header with a large title */
+    /* Beside the title, the values are small text */
     div.bubble-header .bubble-sub-button-container {
       position: relative !important;
       inset: auto !important;
@@ -155,15 +148,6 @@ origami_popup:
     }
     div.bubble-header .bubble-sub-button {
       font-size: var(--ha-font-size-s) !important;
-    }
-    div.bubble-header .bubble-sub-button-icon:not(.hidden) {
-      --mdc-icon-size: var(--icon-size-m) !important;
-      margin: 0 !important;
-      margin-inline-end: var(--ha-space-2) !important;
-    }
-    div.bubble-header .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-      margin: 0 !important;
-      margin-inline-start: var(--ha-space-2) !important;
     }` : `
     .bubble-header-container:has(${card._orgP.any}) {
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon) + var(--control-height-mini)) !important;
@@ -210,6 +194,9 @@ origami_popup:
       margin-inline-end: var(--ha-space-1) !important;
       opacity: var(--opacity-muted);
     }
+    div.bubble-header .bubble-sub-button.content-icon-right .bubble-sub-button-icon {
+      margin-inline: var(--ha-space-1) 0 !important;
+    }
     ` : ""}
     ${card._orgP.css}
   editor:
@@ -235,9 +222,24 @@ origami_popup:
               value: beside
       default: below
     - name: art
-      label: "Art (a cover's address or a template, blurred behind the content)"
+      label: "Art (a cover's address or a template, behind the content)"
       selector:
         text: {}
+    - name: cover_mix
+      label: "Cover mix (the art's share in percent)"
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 2
+          mode: slider
+          unit_of_measurement: "%"
+      default: 16
+    - name: cover_blur
+      label: "Cover blur"
+      selector:
+        boolean: {}
+      default: true
     - name: gap
       label: "Space between the cards in a vertical stack (for example var(--ha-space-4))"
       selector:

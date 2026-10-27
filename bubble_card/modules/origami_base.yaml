@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.5.0"
+  version: "12.6.0"
   is_global: true
   supported:
     - button
@@ -458,7 +458,7 @@ origami_base:
       };
       card._org = {
         // The version is the version of these helpers. 12.5 added unframe() and shows().
-        version: 12.5,
+        version: 12.6,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -619,6 +619,12 @@ origami_base:
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
       opacity: ${art ? "0" : opacity} !important;
     }`,
+        // backdrop() returns the rules that show a cover behind a card's content, for Media's cover background and Popup's art. mix is the cover's share from 0 to 100 in a mix with the color below it, and blur blurs the cover. A blurred cover reaches past its layer, so the blur does not fade at the edges, and round rounds the corners of the part that shows.
+        backdrop: (sel, art, mix, blur, round) => {
+          const share = Math.min(100, Math.max(0, Number.parseFloat(mix)));
+          const bleed = blur ? "100px" : "0px";
+          return sel + " { content: " + (art ? '""' : "none") + "; position: absolute; inset: -" + bleed + "; background: " + (art ? "url(" + str(art) + ") center / cover no-repeat" : "none") + "; opacity: " + (Number.isFinite(share) ? share / 100 : 0.25) + "; filter: " + (blur ? "blur(50px) saturate(170%)" : "none") + "; clip-path: inset(" + bleed + " round " + round + "); pointer-events: none; transition: opacity var(--duration-normal) ease; }";
+        },
         // chips() returns the rules that turn the values in a container into chips, for Header and Popup. A value with show_background turned off stays plain.
         chips: (scope) => {
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
@@ -1220,19 +1226,25 @@ origami_base:
       const env = { hass, renderTemplate };
       const list = card._orgSubs = org.subs(env, this.config, "origami_base");
       const rules = [];
+      // A sub-button is a dropdown with sub_button_type: select, or without a type when its entity is a select or an input_select or when it has a select_attribute
+      const drop = ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute));
+      const drops = list.filter(drop);
+      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. The chosen option has the active color, as a filled sub-button does.
+      if (drops.length) rules.push("ha-card :is(ha-dropdown-item, mwc-list-item) { border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); --ha-color-fill-primary-quiet-resting: var(--fill-active); --ha-color-fill-primary-quiet-hover: var(--fill-active); background-color: var(--fill-active) !important; color: var(--text-color-active) !important; }",
+        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }");
       // A dropdown that picks an entity, such as a helper whose options are the entity IDs of speakers, shows the entities' names, as the card's words rename them, and its menu shows each entity's icon for its state. An option that is not an entity, such as None, stays as it is.
-      list.forEach(({ n, item, entity: id, opt }) => {
+      drops.forEach(({ n, item, entity: id, opt }) => {
         const options = hass.states[id]?.attributes?.options;
-        const select = item.sub_button_type === "select" || (!item.sub_button_type && ["input_select", "select"].includes(String(id ?? "").split(".")[0]));
-        if (!select || item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
+        if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
         const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
         if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--ha-font-size-s)"));
-        // The dropdown is a small chip in the active color, with its arrow after the name. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { height: var(--control-height-mini) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-3) var(--ha-space-2) !important; border-radius: var(--radius-inner) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
+        rules.push(sel + org.key + " { height: var(--control-height-icon) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: calc(var(--control-height-icon) / 2) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
-          sel + " .bubble-dropdown-container { width: var(--icon-size-s) !important; height: var(--icon-size-s) !important; margin-inline-start: var(--ha-space-1); }",
-          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-s); width: var(--icon-size-s) !important; height: var(--icon-size-s) !important; color: inherit !important; }");
+          sel + " .bubble-dropdown-container { width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; margin-inline-start: var(--ha-space-1); }",
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-xs); width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; color: inherit !important; }");
         // Bubble Card builds the menu's items again when the options change, so they are written after each update
         const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
           const st = hass.states[el.dataset.bubbleValue ?? el.value];
@@ -1253,9 +1265,9 @@ origami_base:
         requestAnimationFrame(write);
       });
       // Under the icon, a sub-button without an action of its own passes the tap to the card
-      if (org.opts.vertical) list.forEach(({ n, item, entity }) => {
-        const select = item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(entity ?? "").split(".")[0]) || item.select_attribute));
-        if (!select && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push("ha-card .bubble-sub-button.bubble-sub-button-" + n + " { pointer-events: none !important; }");
+      if (org.opts.vertical) list.forEach((sub) => {
+        const { n, item } = sub;
+        if (!drop(sub) && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push("ha-card .bubble-sub-button.bubble-sub-button-" + n + " { pointer-events: none !important; }");
       });
       // Each sub-button's own origami_base key works the same as a value in Header and Popup
       return [...rules, ...org.values(env, this.config, "origami_base", "ha-card", "var(--ha-font-size-s)", list)].join("\n");
