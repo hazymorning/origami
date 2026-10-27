@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.9.0"
+  version: "12.9.1"
   is_global: true
   supported:
     - button
@@ -1303,6 +1303,22 @@ origami_base:
     /* Bubble Card puts the keys of a card with rows below its own row into a group of their own, which takes the tray's spacing */
     ha-card .bubble-sub-button-container > .bubble-sub-button-group {
       gap: var(--org-group-gap) !important;
+    }
+    /* A tray with a value between its keys, such as a thermostat's target, fills the end column. The value takes the space between the keys, so a target such as 20.5° leaves the tray's width and the keys' places as they are. The keys stay at least 4 px from the value, and only a longer value widens the tray. */
+    ha-card .bubble-sub-button-container:has(.bubble-sub-button.readout) {
+      box-sizing: border-box;
+      flex-shrink: 0;
+      min-width: var(--org-end-col);
+      gap: var(--ha-space-1) !important;
+    }
+    ha-card .bubble-sub-button-container:has(.bubble-sub-button.readout) > .bubble-sub-button-group {
+      flex: 1 1 auto;
+      gap: var(--ha-space-1) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.readout${card._org.key} {
+      flex: 1 1 auto;
+      min-width: max-content !important;
+      padding-inline: 0 !important;
     }
     ha-card .with-bottom-buttons .bubble-sub-button-container.fixed-top {
       height: var(--org-tile-size) !important;

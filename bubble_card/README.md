@@ -235,7 +235,7 @@ rows: 1
 
 #### Controls at the end of a row
 
-The controls at the end of a card's row line up from card to card. Each one ends at the card's padding, so it is as far from the card's edge as the icon is from the other edge. This also applies to a compact card and to a pill switch. In a tray, the keys are as far apart as they are from the tray's edge, so a tray with three keys is 128 px wide. The side slider of a compact card has the same width. When a pop-up shows a speaker and a thermostat with three keys each and lamps on compact cards with sliders, the keys and the sliders therefore start on one line. A tray with more keys, such as a fan's power and speed keys, is wider, and a tray with fewer keys is narrower.
+The controls at the end of a card's row line up from card to card. Each one ends at the card's padding, so it is as far from the card's edge as the icon is from the other edge. This also applies to a compact card and to a pill switch. In a tray, the keys are as far apart as they are from the tray's edge, so a tray with three keys is 128 px wide. The side slider of a compact card has the same width. A value in a tray, such as a thermostat's target between its minus and plus keys, takes the space that the keys leave, so the tray keeps its width when the target changes from 20° to 20.5°. The keys stay at least 4 px from the value, and only a longer value, such as a range from 19° to 23°, makes the tray wider. When a pop-up shows a speaker and a thermostat with three keys each and lamps on compact cards with sliders, the keys and the sliders therefore start on one line. A tray with more keys, such as a fan's power and speed keys, is wider, and a tray with fewer keys is narrower.
 
 #### Name under the icon
 
@@ -416,7 +416,7 @@ The Climate module shows what a thermostat is doing, and it works with Base. Whi
 
 <br>
 
-Add a sub-button with `css_class: readout` for the target temperature. The module writes the target of the sub-button's own thermostat into it, in the number format of your Home Assistant profile, such as 21.5°. For a thermostat with a low and a high target, it writes both, and without a target it writes a dash.
+Add a sub-button with `css_class: readout` for the target temperature. The module writes the target of the sub-button's own thermostat into it, in the number format of your Home Assistant profile, such as 21.5°. For a thermostat with a low and a high target, it writes both, and without a target it writes a dash. With Base's `group` option, the target takes the space between the minus and plus keys, so the tray keeps its width when the target changes.
 
 The `icons` option is a map from an action or a state to an icon. A card without an icon of its own shows Home Assistant's icon for each action, such as a flame while the thermostat heats, and the thermostat's own icon at other times. A card with its own icon keeps it, and only the `icons` option replaces it. The example dashboard uses radiators.
 
