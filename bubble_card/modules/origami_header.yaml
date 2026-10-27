@@ -100,7 +100,10 @@ origami_header:
       if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_header needs origami_base 12.5 or later");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_header ?? {};
-      const raw = org.value(env, cfg.icon_color, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} });
+      const ctx = { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} };
+      // Header writes the title, as Bubble Card would. A title in ${ } reads the states at once, so it is there when the header first shows. Jinja in {{ }} comes from Home Assistant a moment later, and a header without a name shows its entity's name.
+      card.querySelector('.bubble-name').textContent = org.has(this.config.name) ? String(org.value(env, this.config.name, ctx) ?? "") : org.name(hass, entity, undefined, env);
+      const raw = org.value(env, cfg.icon_color, ctx);
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
       const text = String(cfg.value_size ?? "").trim() || "var(--ha-font-size-m)";

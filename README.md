@@ -3417,7 +3417,7 @@ cards:
               background-color: var(--fill-subtle)
               border-radius: 0px
               box-shadow: none
-              background-image: linear-gradient(var(--fill-loud), var(--fill-loud))
+              background-image: linear-gradient(var(--fill-strong), var(--fill-strong))
               background-repeat: no-repeat
               background-size: 2px 50%
               background-position: left center

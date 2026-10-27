@@ -1,9 +1,9 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.3.1"
+  version: "5.4.0"
   supported:
     - media-player
-  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress. Options name other players, a group leader, a cover and icons."
+  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, in the icon or behind the whole card, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress."
   editor:
     - name: layout
       label: "Layout"
@@ -68,6 +68,17 @@ origami_media:
       label: "Icon colors (a map from a state or an input to a color)"
       selector:
         object: {}
+    - name: cover
+      label: "Cover"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: In the icon
+              value: icon
+            - label: As the card's background
+              value: background
+      default: icon
   code: |
     ${(() => {
       const org = card._org;
@@ -95,6 +106,8 @@ origami_media:
         powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
+        // With cover: background, the cover fills the card, and the icon is a plain sign at the top left
+        back: cfg.cover === "background",
         // Origami 2 kept Filled play and power buttons under origami_base, and that place still works
         solid: !!(cfg.solid_controls ?? this.config.origami_base?.solid_controls),
         // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
@@ -308,7 +321,101 @@ origami_media:
       display: none !important;
     }
     ` : ""}
-    ${card._org.cover(card._orgM.art, "1")}
+    ${card._org.cover(card._orgM.back ? null : card._orgM.art, "1")}
+    ${card._orgM.back ? `
+    /* The cover fills the card. It keeps its colors and takes a lightness close to the card's, and a veil in the card's color softens it. So a cover is light in light mode and dark in dark mode, even a cover that is black or white, and the text keeps its contrast. Without a cover, the card keeps its own background. */
+    ha-card {
+      --org-cover-light: color-mix(in srgb, var(--ha-card-background) 85%, var(--primary-text-color));
+      --org-cover-veil: color-mix(in srgb, var(--ha-card-background) 50%, transparent);
+    }
+    ha-card .bubble-background {
+      overflow: hidden;
+    }
+    ha-card .bubble-background::before {
+      content: ${card._orgM.art ? '""' : "none"};
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: ${card._orgM.art ? "linear-gradient(var(--org-cover-veil), var(--org-cover-veil)), linear-gradient(var(--org-cover-light), var(--org-cover-light)), url(" + card._org.str(card._orgM.art) + ") center / cover no-repeat" : "none"};
+      background-blend-mode: normal, luminosity, normal;
+      pointer-events: none;
+    }
+    /* The icon is a plain sign at the top left, and the name and the state line stand below it. The main sub-buttons stand at the top right, in rows with main_layout: rows. */
+    ha-card .bubble-wrapper {
+      display: grid !important;
+      grid-template: "icon more" var(--control-height-mini) "name more" auto "rows rows" auto / minmax(0, 1fr) auto;
+      gap: var(--ha-space-3) var(--ha-space-3) !important;
+      align-items: center !important;
+      box-sizing: border-box;
+      height: auto !important;
+      padding: var(--ha-space-4) !important;
+    }
+    ha-card .bubble-content-container {
+      display: contents !important;
+    }
+    ha-card .bubble-main-icon-container {
+      grid-area: icon;
+      align-self: center !important;
+      justify-self: start;
+      width: var(--icon-size-l) !important;
+      min-width: 0 !important;
+      height: var(--icon-size-l) !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+    ha-card .bubble-main-icon-container .bubble-icon {
+      --mdc-icon-size: var(--icon-size-l);
+      opacity: 1 !important;
+    }
+    ha-card .bubble-name-container {
+      grid-area: name;
+      margin: 0 !important;
+    }
+    ha-card .bubble-sub-button-container {
+      grid-area: more;
+      align-self: start;
+      position: static !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      justify-content: flex-start !important;
+      gap: var(--ha-space-3) !important;
+      height: auto !important;
+      margin: 0 !important;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      grid-area: rows;
+      width: 100% !important;
+      margin: var(--ha-space-1) 0 0 !important;
+    }
+    /* A dropdown at the top right, such as a speaker picker, is a small chip in the active color */
+    ha-card .bubble-sub-button-container .bubble-sub-button.is-select {
+      height: var(--control-height-mini) !important;
+      min-width: 0 !important;
+      width: auto !important;
+      padding: 0 var(--ha-space-2) 0 var(--ha-space-3) !important;
+      border-radius: var(--radius-inner) !important;
+      background-color: var(--fill-active) !important;
+      box-shadow: none !important;
+      color: var(--text-color-active) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.is-select .bubble-sub-button-name-container {
+      font-weight: var(--ha-font-weight-bold) !important;
+      color: inherit !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.is-select .bubble-dropdown-container {
+      width: var(--icon-size-s) !important;
+      height: var(--icon-size-s) !important;
+      margin-inline-start: var(--ha-space-1);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.is-select .bubble-dropdown-arrow {
+      --mdc-icon-size: var(--icon-size-s);
+      width: var(--icon-size-s) !important;
+      height: var(--icon-size-s) !important;
+      color: inherit !important;
+    }
+    ` : ""}
     .bubble-name-container {
       display: flex !important;
     }

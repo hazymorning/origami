@@ -716,7 +716,7 @@ origami_base:
       --org-inset-shadow: 0 0 #0000;
       /* Every line that divides, such as between the rows of a list or the segments of a bar, has this width and color */
       --org-line-width: 2px;
-      --org-line-color: var(--fill-loud);
+      --org-line-color: var(--fill-strong);
     }
     ${card._org.fills === null ? "" : `
     ha-card {
@@ -1220,6 +1220,32 @@ origami_base:
       const env = { hass, renderTemplate };
       const list = card._orgSubs = org.subs(env, this.config, "origami_base");
       const rules = [];
+      // A dropdown whose options are entity IDs, such as a helper that picks a speaker, shows the entities' names, as the card's words rename them. Its menu also shows each entity's icon for its state.
+      list.forEach(({ n, item, entity: id, opt }) => {
+        const options = hass.states[id]?.attributes?.options;
+        const select = item.sub_button_type === "select" || (!item.sub_button_type && ["input_select", "select"].includes(String(id ?? "").split(".")[0]));
+        if (!select || item.select_attribute || !Array.isArray(options) || !options.length || !options.every((o) => hass.states[o])) return;
+        const label = (o) => org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o);
+        if (!org.has(opt?.name)) rules.push(...org.text("ha-card .bubble-sub-button.bubble-sub-button-" + n, item, label(hass.states[id].state), "var(--ha-font-size-s)"));
+        // Bubble Card builds the menu's items again when the options change, so they are written after each update
+        const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
+          const st = hass.states[el.dataset.bubbleValue ?? el.value];
+          if (!st) return;
+          const text = [...el.childNodes].reverse().find((c) => c.nodeType === 3);
+          if (text && text.nodeValue !== label(st.entity_id)) text.nodeValue = label(st.entity_id);
+          let icon = el.querySelector(":scope > ha-state-icon");
+          if (!icon) {
+            icon = document.createElement("ha-state-icon");
+            icon.slot = el.localName === "mwc-list-item" ? "graphic" : "icon";
+            if (el.localName === "mwc-list-item") el.graphic = "icon";
+            el.prepend(icon);
+          }
+          icon.hass = hass;
+          icon.stateObj = st;
+        });
+        write();
+        requestAnimationFrame(write);
+      });
       // Under the icon, a sub-button without an action of its own passes the tap to the card
       if (org.opts.vertical) list.forEach(({ n, item, entity }) => {
         const select = item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(entity ?? "").split(".")[0]) || item.select_attribute));

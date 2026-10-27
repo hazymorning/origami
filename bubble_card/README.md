@@ -61,6 +61,7 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 
@@ -459,6 +460,7 @@ The Media options go under `origami_media:`.
 | `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
 | `icon_color` | | The option maps the same keys as `icons` to a color for the icon, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
+| `cover` | `icon` | With `background`, the cover fills the card instead of the icon, as described below the examples. |
 
 Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` also shows while the player reports no title, because the option itself decides when there is a cover. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
 
@@ -537,6 +539,39 @@ origami_media:
 ```
 
 A `leader` template returns nothing while the speaker is not in a group, because a speaker whose leader is its own entity ID counts as a group leader.
+
+#### Cover as background
+
+With `cover: background`, the cover fills the card. It keeps its colors and takes a lightness close to the card's, and a veil in the card's color softens it, so the card stays light in light mode and dark in dark mode, even with a black or a white cover. The text keeps its contrast, and the cover is not blurred. Without a cover, the card keeps its own background.
+
+The icon then has no background and stands at the top left. It shows what plays through the `icons` option, such as a note while music plays, and a tap on it runs the card's `tap_action`. The name and the state line stand below the icon. The main sub-buttons stand at the top right, and with `main_layout: rows` under `sub_button`, each main group is a row. A dropdown there is a small chip in the active color, such as a speaker picker above a group button:
+
+```yaml
+origami_base:
+  words:
+    media_player.living_room: Living
+origami_media:
+  cover: background
+  icons:
+    playing: mdi:music-note
+sub_button:
+  main_layout: rows
+  bottom_layout: rows
+  main:
+    - name: Speaker
+      group:
+        - entity: input_select.speaker
+          sub_button_type: select
+          show_icon: false
+    - name: Group
+      group:
+        - icon: mdi:speaker-multiple
+          css_class: members
+          show_name: true
+          show_background: true
+```
+
+The dropdown's options in this example are the entity IDs of the speakers, so Base shows their names, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
 
 #### Play row
 
@@ -1078,12 +1113,14 @@ sub_button:
           option: Color
 ```
 
-With `value_position: above`, a small line stands above the title, such as the next event above a greeting. The header then fills the height of its place and leaves no space above or below it, so in a grid next to a taller card, its two lines stand in the middle of their cell. A value whose `name` comes from a template leaves no line while the template is empty, such as a calendar without upcoming events. As on every Bubble card, the title can be Jinja:
+With `value_position: above`, a small line stands above the title, such as the next event above a greeting. The header then fills the height of its place and leaves no space above or below it, so in a grid next to a taller card, its two lines stand in the middle of their cell. A value whose `name` comes from a template leaves no line while the template is empty, such as a calendar without upcoming events.
+
+Header writes the title from the card's `name`. A template in `${ }` reads the states at once, so the title is there when the header first shows, and the lines do not move. A Jinja template in `{{ }}` gets its result from Home Assistant a moment later, so the title is empty until then. This example writes the greeting with a capital first letter:
 
 ```yaml
 type: custom:bubble-card
 card_type: separator
-name: "{{ (states('sensor.greetings')[:1] | upper) ~ states('sensor.greetings')[1:] }}"
+name: "${(s => s.charAt(0).toUpperCase() + s.slice(1))(states('sensor.greetings'))}"
 modules:
   - origami_base
   - origami_header
@@ -1238,7 +1275,7 @@ sub_button:
           state_not: ['off', standby, unavailable, unknown]
 ```
 
-A row's icon has the size and the background of a card's icon. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. With `slim: true`, the icons have no background and are smaller, the rows are as tall as a compact card and the keys are smaller. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their column, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` adds space between the rows and draws a line in the middle of it, across the rows' full width. The line has the width and the color of every line in Origami, such as the lines in Button's segmented bars. A regular list ignores `dividers`.
+A row is as tall as its content and its padding. A row's icon has the size and the background of a card's icon, so a row is as tall as a card. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. With `slim: true`, the icons have no background and are smaller, and so are the keys. A slim row is at least as tall as a list control and grows with its state line, so a row without a state line is lower. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their column, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` draws a line between the rows. The rows then touch, the line spans the rows' content from the icons' column to the signs' column, and the space above and below it is the same. The line has the width and the color of every line in Origami, such as the lines in Button's segmented bars. An unavailable row dims its content but not the lines beside it. A regular list ignores `dividers`.
 
 ```yaml
 type: custom:bubble-card
