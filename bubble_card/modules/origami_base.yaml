@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.7.0"
+  version: "12.8.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, fades and glides, and the card's own words."
+  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, fades, glides, sizes and the card's own words."
   editor:
     - name: compact
       label: "Compact"
@@ -49,6 +49,18 @@ origami_base:
       selector:
         boolean: {}
       default: false
+    - name: padding
+      label: "Padding (the space between the card's edge and its content, such as 20px)"
+      selector:
+        text: {}
+    - name: sub_button_height
+      label: "Sub-button height (the height of the sub-buttons and sliders, such as 40px)"
+      selector:
+        text: {}
+    - name: sub_button_text_size
+      label: "Sub-button text size (such as var(--ha-font-size-m))"
+      selector:
+        text: {}
     - name: words
       label: "Words (a map from a state or a value to the word that the modules write on the card)"
       selector:
@@ -457,8 +469,8 @@ origami_base:
         }
       };
       card._org = {
-        // The version is the version of these helpers. 12.5 added unframe() and shows().
-        version: 12.7,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), and 12.8 added the card padding in --org-pad.
+        version: 12.8,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -675,6 +687,8 @@ origami_base:
           if (el.getAttribute("icon") !== String(icon)) el.setAttribute("icon", String(icon));
         }
       };
+      // length() reads a length from an option and leaves out the characters that would end a style rule
+      const length = (v) => typeof v === "number" ? v + "px" : has(v) ? String(v).replace(/[;{}]/g, "").trim() : "";
       // The card's options and its entity's look stay on card._org, where Base's own styles read them. On a slider card, Bubble Card draws the background above the fill, so the container below the slider takes the surface there.
       const type = this.config.card_type ?? "button";
       const vertical = !!cfgB.vertical && type === "button";
@@ -689,6 +703,10 @@ origami_base:
         large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
         frame: ["button", "media-player"].includes(type),
+        // padding, sub_button_height and sub_button_text_size are lengths, such as 20px or var(--ha-space-5). A number counts as pixels.
+        pad: length(cfgB.padding),
+        sub: length(cfgB.sub_button_height),
+        text: length(cfgB.sub_button_text_size),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
         bare: ["separator", "sub-buttons", "pop-up"].includes(type),
         dark: !!hass.themes?.darkMode
@@ -784,14 +802,16 @@ origami_base:
     }
     ${card._org.fills === null ? "" : `
     ha-card {
-      --bubble-sub-slider-height: var(--control-height-mini);
+      --bubble-sub-slider-height: var(--org-sub-h, var(--control-height-mini));
       --bubble-slider-fill-color: var(--org-slider-fill);
       --org-slider-base: color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background));
       --org-slider-fill: var(--org-slider-base);
       --org-slider-mark: var(--primary-text-color);
     }
+    /* A slider's corners follow its height, which Bubble Card's custom_height can set for one slider */
     ha-card [class*="bubble-sub-button-slider-"] {
-      border-radius: var(--radius-small) !important;
+      --org-slider-r: calc(var(--bubble-sub-slider-height, var(--control-height-mini)) * var(--radius-ratio, 0.35));
+      border-radius: var(--org-slider-r) !important;
       background-color: var(--org-inset) !important;
       box-shadow: var(--card-ring), var(--org-inset-shadow);
     }
@@ -845,19 +865,19 @@ origami_base:
       box-shadow: 0 0 0 1px color-mix(in srgb, #000 12%, transparent), 0 1px 3px color-mix(in srgb, #000 25%, transparent);
     }
     :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill {
-      border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
+      border-radius: var(--org-slider-r, var(--radius-small)) 4px 4px var(--org-slider-r, var(--radius-small)) !important;
     }
     :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-right {
-      border-radius: 4px var(--radius-small) var(--radius-small) 4px !important;
+      border-radius: 4px var(--org-slider-r, var(--radius-small)) var(--org-slider-r, var(--radius-small)) 4px !important;
     }
     :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-top {
-      border-radius: var(--radius-small) var(--radius-small) 4px 4px !important;
+      border-radius: var(--org-slider-r, var(--radius-small)) var(--org-slider-r, var(--radius-small)) 4px 4px !important;
     }
     :is(ha-card [class*="bubble-sub-button-slider-"], ha-card[data-org-track]) .bubble-range-fill.fill-orientation-bottom {
-      border-radius: 4px 4px var(--radius-small) var(--radius-small) !important;
+      border-radius: 4px 4px var(--org-slider-r, var(--radius-small)) var(--org-slider-r, var(--radius-small)) !important;
     }
     ha-card .bubble-range-value.in-info-wrapper {
-      font-size: var(--ha-font-size-s);
+      font-size: var(--org-sub-text, var(--ha-font-size-s));
       font-weight: var(--ha-font-weight-medium) !important;
       color: var(--secondary-text-color) !important;
       opacity: 1 !important;
@@ -870,7 +890,7 @@ origami_base:
         const on = org.power(st);
         if (item.sub_button_type !== "slider" || on === true) return "";
         const sel = "ha-card .bubble-sub-button-slider-" + (i + 1) + " .bubble-range-value";
-        return sel + " { font-size: 0 !important; }\n    " + sel + "::before { font-size: var(--ha-font-size-s); }\n    " + sel + "::after { content: " + org.str(on === null ? "–" : org.word(hass, st)) + "; font-size: var(--ha-font-size-s); }";
+        return sel + " { font-size: 0 !important; }\n    " + sel + "::before { font-size: var(--org-sub-text, var(--ha-font-size-s)); }\n    " + sel + "::after { content: " + org.str(on === null ? "–" : org.word(hass, st)) + "; font-size: var(--org-sub-text, var(--ha-font-size-s)); }";
       }).filter(Boolean).join("\n    ");
     })()}
     ha-card .bubble-sub-slider-wrapper {
@@ -885,7 +905,7 @@ origami_base:
       min-width: var(--bubble-sub-slider-height) !important;
       height: var(--bubble-sub-slider-height) !important;
       padding: 0 !important;
-      border-radius: var(--radius-small) !important;
+      border-radius: calc(var(--bubble-sub-slider-height) * var(--radius-ratio, 0.35)) !important;
     }
     ha-card .bubble-sub-button-group:not([data-group-id$="_auto"]):has(> .bubble-sub-slider-wrapper.inline) > .bubble-sub-button:not(:has(> .bubble-sub-button-name-container:not(:empty))) .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-xs);
@@ -902,16 +922,20 @@ origami_base:
       --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-inset)"};
       --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--primary-text-color)"};
       --org-key-bg: ${card._org.opts.tile ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
-      --org-row-height: calc(var(--tile-size) + 2 * var(--ha-space-4));
+      /* The padding option sets the space between the card's edge and its content, and the row is as tall as the icon plus this space above and below it */
+      --org-pad: ${card._org.opts.pad || "var(--ha-space-4)"};
+      --org-sub-text: ${card._org.opts.text || "var(--ha-font-size-s)"};
+      ${card._org.opts.sub ? "--org-sub-h: " + card._org.opts.sub + ";" : ""}
+      --org-row-height: calc(var(--tile-size) + 2 * var(--org-pad));
       --org-tile-size: var(--tile-size);
-      --org-tile-inset: var(--ha-space-4);
-      --org-tile-radius: var(--radius-inner);
+      --org-tile-inset: var(--org-pad);
+      /* The icon's corners follow its height, as every corner does */
+      --org-tile-radius: calc(var(--org-tile-size) * var(--radius-ratio, 0.35));
       --org-icon-size: var(--icon-size-m);
       --org-text-gap: var(--ha-space-3);
-      --org-toggle-gap: calc(var(--ha-space-4) + var(--ha-space-2));
+      --org-toggle-gap: calc(var(--org-pad) + var(--ha-space-2));
       ${card._org.opts.compact ? "--org-row-height: var(--control-height);" : ""}
       ${card._org.opts.compact ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._org.opts.compact ? "--org-tile-radius: var(--radius-small);" : ""}
       ${card._org.opts.compact ? "--org-tile-inset: calc((var(--org-row-height) - var(--org-tile-size)) / 2);" : ""}
       ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-xs);" : ""}
       ${card._org.opts.compact ? "--org-text-gap: calc(var(--org-tile-inset) - var(--ha-space-1));" : ""}
@@ -1042,12 +1066,12 @@ origami_base:
       text-overflow: ellipsis;
     }
     ${card._org.opts.compact ? `
-    /* On a compact card, a slider among the main sub-buttons stands in for the pill switch. It is as tall as the switch, shows no value and takes half of the card, unless Bubble Card's width option sets its width. */
+    /* On a compact card, a slider among the main sub-buttons stands in for the pill switch. It is as tall as the switch, shows no value and takes 40 % of the card, so the name keeps the larger part, unless Bubble Card's width option sets its width. */
     ha-card .bubble-sub-button-container {
-      --bubble-sub-slider-height: var(--org-toggle-h);
+      --bubble-sub-slider-height: var(--org-sub-h, var(--org-toggle-h));
     }
     ha-card .bubble-sub-button-container:has(.bubble-sub-slider-wrapper.inline:not(.has-custom-width)) {
-      flex: 0 0 50%;
+      flex: 0 0 40%;
     }
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
       flex: 1 1 auto;
@@ -1069,7 +1093,7 @@ origami_base:
       display: grid !important;
       grid-template: "icon more" "name name" "info info" / minmax(0, 1fr) minmax(var(--control-height-icon), auto);
       box-sizing: border-box;
-      padding: var(--ha-space-4);
+      padding: var(--org-pad);
     }
     ha-card .bubble-content-container {
       display: contents !important;
@@ -1087,15 +1111,15 @@ origami_base:
       color: var(--primary-text-color);
     }
     .bubble-sub-button-name-container {
-      font-size: var(--ha-font-size-s);
+      font-size: var(--org-sub-text, var(--ha-font-size-s));
       font-weight: var(--ha-font-weight-medium);
       white-space: nowrap !important;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .bubble-sub-button-bottom-container {
-      width: calc(100% - 2 * var(--ha-space-4)) !important;
-      margin: 0 var(--ha-space-4) var(--ha-space-4) !important;
+      width: calc(100% - 2 * var(--org-pad, var(--ha-space-4))) !important;
+      margin: 0 var(--org-pad, var(--ha-space-4)) var(--org-pad, var(--ha-space-4)) !important;
     }
     ${this.config.sub_button?.bottom_layout === "rows" && (this.config.grid_options?.rows ?? this.config.rows) === "auto" ? `
     /* With rows and rows: auto, the card grows with its rows, which stand below the card's own row */
@@ -1214,16 +1238,19 @@ origami_base:
       margin-inline-end: var(--org-tile-inset) !important;
       inset-inline-end: 0 !important;
     }` : ""}
+    /* A key is as tall as the card's icon, or as the sub-button height option says. Bubble Card's custom_height on one sub-button wins over both, and the corners follow the height. */
     ha-card .bubble-sub-button${card._org.key} {
+      --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--org-tile-size)));
       display: flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      min-width: var(--org-tile-size) !important;
+      min-width: var(--org-key-h) !important;
       width: auto !important;
-      height: var(--org-tile-size) !important;
-      padding: 0 var(--ha-space-2) !important;
-      border-radius: var(--org-tile-radius) !important;
+      height: var(--org-key-h) !important;
+      /* A low key keeps its icon in a square */
+      padding: 0 min(var(--ha-space-2), calc((var(--org-key-h) - var(--org-icon-size)) / 2)) !important;
+      border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important;
       background: none !important;
       box-shadow: none !important;
       transition: var(--transition-interactive);
@@ -1278,7 +1305,7 @@ origami_base:
       margin: 0 !important;
     }
     ha-card .bubble-sub-button-name-container {
-      font-size: var(--ha-font-size-s);
+      font-size: var(--org-sub-text, var(--ha-font-size-s));
       font-weight: var(--ha-font-weight-bold);
     }
     ` : ""}
@@ -1308,9 +1335,9 @@ origami_base:
         if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
         const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
-        if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--ha-font-size-s)"));
+        if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--org-sub-text, var(--ha-font-size-s))"));
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { height: var(--control-height-icon) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: var(--radius-control, 14px) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--control-height-icon))); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-3) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; margin-inline-start: var(--ha-space-1); }",
           sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-xs); width: var(--icon-size-xs) !important; height: var(--icon-size-xs) !important; color: inherit !important; }",
@@ -1342,7 +1369,7 @@ origami_base:
         if (!drop(sub) && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push("ha-card .bubble-sub-button.bubble-sub-button-" + n + " { pointer-events: none !important; }");
       });
       // Each sub-button's own origami_base key works the same as a value in Header and Popup
-      return [...rules, ...org.values(env, this.config, "origami_base", "ha-card", "var(--ha-font-size-s)", list)].join("\n");
+      return [...rules, ...org.values(env, this.config, "origami_base", "ha-card", "var(--org-sub-text, var(--ha-font-size-s))", list)].join("\n");
     })()}
     ${(() => {
       const org = card._org;

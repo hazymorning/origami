@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.3.1"
+  version: "3.4.0"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In a list, an icon at each row's end shows what a tap does, such as a chevron, a play sign or a switch."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
   editor:
     - name: layout
       label: "Layout"
@@ -25,6 +25,33 @@ origami_tiles:
           step: 1
           mode: box
       default: 2
+    - name: slim
+      label: "Slim rows (list): small icons without a background, the state at the row's end"
+      selector:
+        boolean: {}
+      default: false
+    - name: dividers
+      label: "Lines between the rows (list)"
+      selector:
+        boolean: {}
+      default: false
+    - name: sign
+      label: "Sign for every row (list)"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Set by the tap action
+              value: auto
+            - label: Chevron
+              value: open
+            - label: Play
+              value: run
+            - label: Switch
+              value: switch
+            - label: None
+              value: none
+      default: auto
   code: |
     ${(() => {
       const org = card._org;
@@ -34,6 +61,10 @@ origami_tiles:
       const list = cfg.layout === "list";
       card._orgTilesList = list;
       card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2));
+      // A slim list has low rows with plain icons and the state at the row's end, and dividers draw a line between the rows of any list
+      card._orgTilesSlim = list && org.yes(cfg.slim);
+      card._orgTilesLines = list && org.yes(cfg.dividers);
+      const signKeys = ["open", "run", "switch", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
@@ -48,9 +79,10 @@ origami_tiles:
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
         // A tile is dimmed while its entity is missing or unavailable. A scene or a button that was never used is unknown, and it stays as it is.
-        if (entity && (!obj || obj.state === "unavailable")) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
+        if (entity && (!obj || obj.state === "unavailable")) rules0.push(list ? "ha-card " + sel + " > *, ha-card " + sel + "::after { opacity: var(--opacity-disabled) !important; }" : sel + " { opacity: var(--opacity-disabled); }");
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
-        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
+        // In a list with lines, the rows keep the order of the YAML, because each line belongs to the row below it
+        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) && !card._orgTilesLines ? " order: " + o.order + ";" : "") + " }", ...rules0];
         // A row without a state line keeps its name in the middle
         if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
         if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
@@ -62,7 +94,8 @@ origami_tiles:
           // The sign follows the entity that the tap acts on
           const target = org.targets(item)[0];
           const id = (target === "entity" ? null : target) ?? entity;
-          const sign = ["open", "run", "switch", "none"].includes(o.sign) ? o.sign
+          const sign = signKeys.includes(o.sign) ? o.sign
+            : signKeys.includes(cfg.sign) ? cfg.sign
             : org.links.includes(tap.action) ? "open"
             : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
             : ["perform-action", "call-service"].includes(tap.action) ? "run"
@@ -74,6 +107,7 @@ origami_tiles:
           if (sign === "run") signs[!org.filled(hass, item, id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
         }
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
+        if (org.has(o.state_color)) rules.push(sel + " .bubble-sub-button-name-container::after { color: " + o.state_color + "; }");
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
@@ -168,8 +202,11 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    /* A row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. */
+    /* A row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. */
     .bubble-sub-button-group:not(.hidden) {
+      --org-sign-col: var(--tile-size);
+      --org-sign-size: var(--icon-size-m);
+      --org-sign-gap: var(--ha-space-2);
       gap: 0 !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
@@ -190,15 +227,15 @@ origami_tiles:
     }
     /* The sign at a row's end is an icon in the middle of a column as wide as the icons' column on the other side. It is quiet, and it stands out while what it controls is on or runs. */
     ${card._orgTilesSign.at(card._orgTilesSign.all)} {
-      padding-inline-end: calc(2 * var(--ha-space-2) + var(--tile-size)) !important;
+      padding-inline-end: calc(var(--ha-space-2) + var(--org-sign-col) + var(--org-sign-gap)) !important;
     }
     ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
       content: "";
       position: absolute;
       top: 50%;
-      inset-inline-end: calc(var(--ha-space-2) + (var(--tile-size) - var(--icon-size-m)) / 2);
-      width: var(--icon-size-m);
-      height: var(--icon-size-m);
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-sign-col) - var(--org-sign-size)) / 2);
+      width: var(--org-sign-size);
+      height: var(--org-sign-size);
       translate: 0 -50%;
       -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
       mask: var(--org-sign-icon) center / contain no-repeat;
@@ -228,4 +265,58 @@ origami_tiles:
     ${card._orgTilesSign.at("running stop on", "::after")} {
       background-color: var(--primary-text-color);
       opacity: 1;
+    }
+    ${card._orgTilesSlim ? `
+    /* A slim row has the padding of a regular row around one line of text, so it is as tall as a button. Its icon and its sign are small and have no background, its name is medium, and its state stands at its end in bold. */
+    .bubble-sub-button-group:not(.hidden) {
+      --org-sign-col: var(--icon-size-s);
+      --org-sign-size: var(--icon-size-s);
+      --org-sign-gap: var(--ha-space-3);
+    }
+    .bubble-sub-button {
+      box-sizing: border-box !important;
+      min-height: var(--control-height-icon) !important;
+      align-items: center !important;
+    }
+    .bubble-sub-button-icon,
+    .bubble-sub-button-image {
+      width: var(--icon-size-s) !important;
+      min-width: var(--icon-size-s) !important;
+      height: var(--icon-size-s) !important;
+      border-radius: 0 !important;
+      box-shadow: none;
+    }
+    .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-s) !important;
+      background-color: transparent;
+      color: var(--org-tile-color, var(--secondary-text-color)) !important;
+    }
+    /* The name and the state share one line. The name keeps at least 40 % of it, and the state takes at most the rest. Bubble Card's own state text has a row of no height below them. */
+    .bubble-sub-button-name-container {
+      display: grid !important;
+      grid-template-columns: minmax(40%, 1fr) minmax(0, max-content);
+      grid-auto-rows: 0;
+      align-items: center;
+      line-height: var(--ha-line-height-normal) !important;
+    }
+    .bubble-sub-button-name-container::before {
+      grid-area: 1 / 1;
+      font-weight: var(--ha-font-weight-medium);
+    }
+    .bubble-sub-button-name-container::after {
+      grid-area: 1 / 2;
+      margin: -2px;
+      margin-inline-start: calc(var(--ha-space-3) - 2px);
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-bold);
     }` : ""}
+    ${card._orgTilesLines ? `
+    /* With dividers, each shown row after another shown row draws the line above it. The line spans the row's content, and the content keeps the same space to the line above as to the line below. */
+    .bubble-sub-button:not(.hidden):not([style*="display: none"]) ~ .bubble-sub-button:not(.hidden):not([style*="display: none"]) {
+      min-height: calc(var(--control-height-icon) + var(--org-line-width)) !important;
+      padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
+      background-image: linear-gradient(var(--org-line-color), var(--org-line-color)) !important;
+      background-size: calc(100% - 2 * var(--ha-space-2)) var(--org-line-width) !important;
+      background-position: center top !important;
+      background-repeat: no-repeat !important;
+    }` : ""}` : ""}

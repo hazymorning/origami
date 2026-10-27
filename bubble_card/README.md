@@ -132,7 +132,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `compact` | `false` | The card is a slim row with a small icon and no state line. A slider among its main sub-buttons is as tall as the pill switch and takes half of the card. |
+| `compact` | `false` | The card is a slim row with a small icon and no state line. A slider among its main sub-buttons is as tall as the pill switch and takes 40 % of the card. |
 | `toggle` | `false` | Every sub-button becomes a pill switch that shows whether its entity is on. A sub-button without an entity shows the card's entity. Give one sub-button a tap action with `action: toggle`, as in the example below. |
 | `group` | `false` | The sub-buttons appear as small buttons in a tray. This option has no effect together with `toggle`. |
 | `tile` | `false` | The card has no shadow and a light gray fill. The icon and the sub-buttons get the card background and a shadow. |
@@ -140,6 +140,9 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `large` | `false` | The name is larger, as on a card at the top of a pop-up. |
 | `animate` | `false` | The card fades in from below when it appears, and it glides to a new height when its content changes. The section [Fade in and glide](#fade-in-and-glide) explains this. |
 | `words` | | The option maps a state or a value to the word that the modules write on the card. The Language section above explains it. |
+| `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. The card's row is as tall as its icon plus this space above and below it, and the rows below keep this space from the edges. A compact card keeps the height of its row. |
+| `sub_button_height` | | The height of the card's sub-buttons and sliders, such as `40px`. Without it, a key is as tall as the card's icon, a dropdown is 40 px tall, and a slider is 32 px tall, or as tall as the switch on a compact card. Bubble Card's own `custom_height` on a sub-button wins over this option. The corners follow the height, as every corner does. |
+| `sub_button_text_size` | `var(--ha-font-size-s)` | The size of the text on the card's sub-buttons and sliders, such as `var(--ha-font-size-m)`. |
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
 
@@ -204,7 +207,7 @@ sub_button:
 rows: 1
 ```
 
-On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. The slider is as tall as the switch, ends where the switch ends and takes half of the card. Like the switch, it shows no value, and its fill shows the level. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
+On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. The slider is as tall as the switch, ends where the switch ends and takes 40 % of the card, so the name keeps the larger part. Like the switch, it shows no value, and its fill shows the level. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
 
 ```yaml
 # Compact row with a slider
@@ -478,7 +481,7 @@ The Media options go under `origami_media:`.
 | `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
 | `icon_color` | | The option maps the same keys as `icons` to a color for the icon, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
-| `cover` | `icon` | With `background`, the cover fills the card instead of the icon, as described below the examples. |
+| `cover` | `icon` | The option sets where the cover shows. With `icon`, it shows in the icon, and Bubble Card's `show_icon: false` hides it. With `above`, it shows as a large square above the name, and with `background`, it fills the card. The option also accepts a map from the state or a template, as described below the examples. |
 | `cover_mix` | `25` | With `cover: background`, the option sets the cover's share in percent. The card's color makes up the rest. |
 | `cover_blur` | `false` | With `cover: background`, the cover is blurred, so only its colors remain. |
 
@@ -559,6 +562,21 @@ origami_media:
 ```
 
 A `leader` template returns nothing while the speaker is not in a group, because a speaker whose leader is its own entity ID counts as a group leader.
+
+#### Cover above the name
+
+With `cover: above`, the cover is a square above the name, as in a music app's player. The square is as wide as the card's content, and its corners run parallel to the card's corners. It is the card's own icon box at a larger size, so a tap on it does what a tap on the icon does, and it also shows with `show_icon: false`. While there is no cover, the square shows the card's icon, such as the icon from `icons` for a stopped speaker. The name, the main sub-buttons and the rows below keep their places under the cover, and the card grows with it.
+
+`cover` also accepts a map from the card's state or a template, so a card can change where its cover shows without a helper. In this example, the cover is large while music plays or pauses and stays in the icon at other times. With Base's `animate` option, the card glides to its new height when the place changes.
+
+```yaml
+origami_base:
+  animate: true
+origami_media:
+  cover:
+    playing: above
+    paused: above
+```
 
 #### Cover as background
 
@@ -1160,7 +1178,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles or into a list. E
 
 <br>
 
-Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. All other options are set on each tile, under its own `origami_tiles` key.
+Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. A list has three more options on the card, which the List section below describes. These are `slim`, `dividers` and `sign`. All other options are set on each tile, under its own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -1171,7 +1189,8 @@ Set the layout on the card with `origami_tiles: layout`, which is `grid`, the de
 | `image` | | The tile shows this picture instead of the icon. |
 | `image_size` | `cover` | The key sets the picture's size. For example, `230%` shows only its middle. |
 | `name_color` | | The key sets the name's color. |
-| `sign` | Set by the tap action | In a list, the key sets the sign at the row's end. It is `open`, `run`, `switch` or `none`. |
+| `state_color` | | The key sets the color of the state line, or of the state at the end of a slim row. |
+| `sign` | Set by the tap action | In a list, the key sets the sign at the row's end. It is `open`, `run`, `switch` or `none`, and it wins over the card's `sign` option. |
 
 ```yaml
 type: custom:bubble-card
@@ -1285,6 +1304,41 @@ sub_button:
 ```
 
 A row's icon has the size and the background of a card's icon, so all rows have the same height. The signs' column at the row's end is as wide as the icons' column and as far from the edge. A row without an entity has no state, and its `state` key can give it a line, such as a short description, so every row has two lines. A row whose entity is unavailable is dimmed.
+
+#### Slim list
+
+With `slim: true`, a list has low rows for facts and settings, such as a server's load. A slim row has the same padding as a regular row, around one line of text instead of an icon's background, so it is 40 px tall, as tall as a button. Its icon has no background and is 20 px, its name is medium, and its state stands at its end in bold. The name keeps at least 40 % of the line, and a long name or state ends with an ellipsis. The icon starts as far from the card's edge as the state or the sign ends, and the signs are as small as the icons.
+
+With `dividers: true`, a line divides the rows of a list, in both styles. The line spans the rows' content, from the icons' edge to the signs' edge, and a row keeps the same space to the line above it as to the line below it. A hidden row takes no space and draws no line, and an unavailable row dims its content but not its line. In a list with lines, the rows keep their order from the YAML, so `order` has no effect there.
+
+The card's `sign` option sets the sign of every row that has no `sign` key of its own. With `sign: none`, the rows show no sign, such as for facts whose tap only opens their details.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_tiles
+origami_tiles:
+  layout: list
+  slim: true
+  dividers: true
+  sign: none
+sub_button:
+  bottom:
+    - entity: sensor.system_monitor_last_boot
+      name: Last restart
+      icon: mdi:timer-outline
+    - entity: sensor.system_monitor_processor_use
+      name: Processor
+      icon: mdi:cpu-64-bit
+    - entity: sensor.system_monitor_memory_usage
+      name: Memory
+      icon: mdi:memory
+    - entity: sensor.system_monitor_disk_usage
+      name: Disk
+      icon: mdi:harddisk
+```
 
 </details>
 
@@ -1424,7 +1478,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A new module follows the same idea as the Origami modules. Bubble Card handles the layout, the actions and the editor, and the module only adds what is missing. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. The Origami modules are good starting points. Climate shows how a module writes the state line, Media shows how it writes the name line too, Tiles shows how a module turns a sub-buttons card into a grid of tiles, and Speaker Select shows how a module reads a media player with Base's `media()` helper.
 
-Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`, and 12.6 from Base 12.6 on, which added `backdrop()`. These are the helpers:
+Base puts its helpers on `card._org`, so every module that runs after Base can use them. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. `card._org.version` is 12.5 from Base 12.5 on, which added `shows()` and `unframe()`, 12.6 from Base 12.6 on, which added `backdrop()`, and 12.8 from Base 12.8 on, which sets the card's padding in the `--org-pad` variable. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
