@@ -776,7 +776,7 @@ views:
                   hold_action:
                     action: more-info
 
-          # Climate table, open while the toggle is on. Each group is a row, and each cell joins its column through its css_class.
+          # Climate table, open while the toggle is on. Each group is a row. A cell joins the column that its css_class names, so a row can leave a column empty.
           - type: custom:bubble-card
             card_type: sub-buttons
             modules:
@@ -787,33 +787,33 @@ views:
             # The columns give their cells the same icons and values, so each cell only names its entity
             origami_table:
               columns:
-                room:
+                - name: room
                   icon: mdi:circle
-                  color: ${attr.color_code ?? "transparent"}
-                window:
-                  icon:
+                  color_template: ${attr.color_code ?? "transparent"}
+                - name: window
+                  icon_states:
                     'on': mdi:window-open-variant
                     'off': mdi:window-closed-variant
-                thermostat:
+                - name: thermostat
                   icon: mdi:thermostat
-                  name: ${num(attr.temperature)}°
+                  text_template: ${num(attr.temperature)}°
                 # The door column takes the free space, so the values stand at the end
-                door:
+                - name: door
                   width: 1fr
                   align: start
-                  icon:
+                  icon_states:
                     'on': mdi:door-open
                     'off': mdi:door-closed
                 # Arrows mark the warmest and the coldest room, and the warmest room stands out
-                temperature:
-                  icon: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
-                  color: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
-                  name: ${num(attr.temperature)}°
+                - name: temperature
+                  icon_template: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
+                  color_template: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
+                  text_template: ${num(attr.temperature)}°
                   'on': "${attr.temp_rank === 'warmest'}"
-                humidity:
-                  icon: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
-                  color: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
-                  name: ${num(attr.humidity, 0, '%')}
+                - name: humidity
+                  icon_template: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
+                  color_template: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
+                  text_template: ${num(attr.humidity, 0, '%')}
                   'on': "${attr.humidity_rank === 'most_humid'}"
             grid_options:
               columns: full

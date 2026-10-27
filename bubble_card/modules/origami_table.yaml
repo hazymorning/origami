@@ -3,12 +3,102 @@ origami_table:
   version: "1.0.0"
   supported:
     - sub-buttons
-  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, each sub-button is a cell, and all rows share the columns. The columns option names the columns, sets their widths and gives their cells values, and a cell joins a column through its css_class."
+  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show."
   editor:
     - name: columns
-      label: "Columns (a map from a column's name to its width or to its options)"
+      label: "Columns"
       selector:
-        object: {}
+        object:
+          multiple: true
+          label_field: name
+          description_field: width
+          fields:
+            name:
+              label: "Name"
+              description: "A cell whose css_class has this name joins the column. The other cells fill the columns in order."
+              selector:
+                text: {}
+            width:
+              label: "Width"
+              default: auto
+              selector:
+                select:
+                  mode: dropdown
+                  custom_value: true
+                  options:
+                    - label: "Fits its widest cell"
+                      value: auto
+                    - label: "Takes the free space"
+                      value: 1fr
+            align:
+              label: "Alignment"
+              description: "Without a choice, the first column is at the start and the others are in the center."
+              selector:
+                select:
+                  mode: dropdown
+                  options:
+                    - label: Start
+                      value: start
+                    - label: Center
+                      value: center
+                    - label: End
+                      value: end
+            icon:
+              label: "Icon"
+              group: "Cells"
+              selector:
+                icon: {}
+            icon_states:
+              label: "Icon for each state"
+              variant_of: icon
+              variant: "By state"
+              selector:
+                object: {}
+            icon_template:
+              label: "Icon template"
+              variant_of: icon
+              variant: "Template"
+              selector:
+                template: {}
+            text:
+              label: "Text"
+              group: "Cells"
+              selector:
+                text: {}
+            text_states:
+              label: "Text for each state"
+              variant_of: text
+              variant: "By state"
+              selector:
+                object: {}
+            text_template:
+              label: "Text template"
+              variant_of: text
+              variant: "Template"
+              selector:
+                template: {}
+            color:
+              label: "Icon color"
+              group: "Cells"
+              selector:
+                text: {}
+            color_states:
+              label: "Icon color for each state"
+              variant_of: color
+              variant: "By state"
+              selector:
+                object: {}
+            color_template:
+              label: "Icon color template"
+              variant_of: color
+              variant: "Template"
+              selector:
+                template: {}
+            "on":
+              label: "Stands out while this template is true"
+              group: "Cells"
+              selector:
+                template: {}
     - name: stripes
       label: "Striped rows"
       selector:
@@ -20,39 +110,47 @@ origami_table:
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_table needs origami_base 12 or later");
       const env = { hass, renderTemplate };
       const cfg = this.config.origami_table ?? {};
-      // columns maps a column's name to its width, or to its options. Besides width and align, the options are values that the column's cells take, with the same keys as a cell.
-      const map = cfg.columns && typeof cfg.columns === "object" && !Array.isArray(cfg.columns) ? cfg.columns : {};
-      const cols = Object.keys(map).map((key, i) => {
-        const { width, align, ...values } = map[key] && typeof map[key] === "object" ? map[key] : { width: map[key] };
-        return { key: org.slug(key), n: i + 1, width: org.has(width) ? String(width).trim() : "auto", align, values };
-      });
+      // columns is a list. Each column has a name, a width, an alignment and values for its cells.
+      const cols = (Array.isArray(cfg.columns) ? cfg.columns : []).map((c, i) => ({
+        key: org.slug(c?.name), n: i + 1, width: org.has(c?.width) ? String(c.width).trim() : "auto", align: c?.align,
+        raw: Object.fromEntries(Object.entries(c ?? {}).filter(([k]) => !["name", "width", "align"].includes(k)))
+      }));
+      // A value is fixed, a map from the state or a template. The card editor keeps the map under the key with _states and the template under the key with _template. A template wins over a map, and a map wins over a fixed value.
+      const sets = (o, k) => [k, k + "_states", k + "_template"].some((x) => x in o);
+      const pick = (o, k) => [o[k + "_template"], o[k + "_states"], o[k]].find(org.has);
       // Each group is a row. Bubble Card numbers the sub-buttons of the groups first, and a sub-button outside a group is a row of its own, unless no row is a group.
       const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
       const groups = bottom.filter((g) => Array.isArray(g?.group)).map((g) => g.group.filter(Boolean));
       const loose = bottom.filter((g) => g && !Array.isArray(g.group));
       const rows = groups.length ? [...groups, ...loose.map((g) => [g])] : [loose];
       const pos = rows.flatMap((r) => r.map((_, i) => i));
-      const count = Math.max(cols.length, ...rows.map((r) => r.length), 1);
       const scope = "ha-card .bubble-sub-button-bottom-container";
       const align = { start: "flex-end", center: "center", end: "flex-start" };
       const rules = [];
+      let count = Math.max(cols.length, 1);
       const list = org.subs(env, this.config, "origami_table").map((s) => {
-        const col = cols.find((c) => c.key && c.key === org.slug(s.item.css_class));
-        // A cell takes its column's values, and its own key wins over them
-        const given = col ? Object.fromEntries(Object.keys(col.values).map((k) => [k, org.value(env, col.values[k], s.ctx)])) : {};
-        const opt = { ...given, ...(s.opt ?? {}) };
+        const place = pos[s.n - 1] ?? 0;
+        // A cell joins the column that its css_class names, or else the column at its place in the row. A hidden cell keeps its column, so the cells after it stay in theirs.
+        const col = cols.find((c) => c.key && c.key === org.slug(s.item.css_class)) ?? cols[place];
+        const n = col?.n ?? place + 1;
+        count = Math.max(count, n);
+        // A cell takes its column's values, and a value that the cell sets itself wins
+        const given = Object.fromEntries(Object.keys(col?.raw ?? {}).map((k) => [k, org.value(env, col.raw[k], s.ctx)]));
+        const mine = s.opt ?? {};
+        const from = (k) => sets(mine, k) ? mine : given;
+        const opt = Object.fromEntries([["icon", "icon"], ["name", "text"], ["color", "color"], ["name_color", "name_color"], ["background", "background"]]
+          .map(([to, k]) => [to, pick(from(k), k)]).filter(([, v]) => v !== undefined));
         // The first column holds the row's name
-        const first = col ? col.n === 1 : pos[s.n - 1] === 0;
+        const first = n === 1;
         const side = col?.align ?? (first ? "start" : "center");
         const item = s.item;
         const text = org.has(opt.name) || (!!item.show_name && org.has(item.name))
           || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false);
         const look = org.look(hass, s.entity);
-        // The cell's on key decides whether it stands out. Without the key, a cell whose entity is on takes its state color.
-        const on = "on" in opt ? org.yes(opt.on) : null;
+        // The on value decides whether the cell stands out, even while it is empty. Without it, a cell whose entity is on takes its state color.
+        const on = sets(from("on"), "on") ? org.yes(pick(from("on"), "on")) : null;
         const lit = on === null && !!s.entity && look.lit;
-        const own = ["justify-content: " + (align[side] ?? "center") + " !important"];
-        if (col) own.push("grid-column: " + col.n);
+        const own = ["justify-content: " + (align[side] ?? "center") + " !important", "grid-column: " + n];
         // Names and cells with only an icon use the text color, and values use the secondary text color
         if (first || !text || on || lit) own.push("color: var(--primary-text-color) !important");
         // A cell with only an icon is a square, and a cell in a column that takes the free space keeps the width of its text, so a fill never stretches across a wide column
@@ -68,7 +166,7 @@ origami_table:
         rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + s.n + " { " + own.join("; ") + "; }");
         return { ...s, opt };
       });
-      // The cells' name, icon, color, name_color and background work as in Header and Button
+      // The cells' text, icon, color, name_color and background work as the name, icon, color, name_color and background of a value in Header
       rules.push(...org.values(env, this.config, "origami_table", scope, "var(--ha-font-size-s)", list));
       card._orgT = {
         template: [...cols.map((c) => c.width), ...Array(count - cols.length).fill("auto")].join(" "),

@@ -1199,33 +1199,33 @@ origami_base:
 # The columns give their cells the same icons and values, so each cell only names its entity
 origami_table:
   columns:
-    room:
+    - name: room
       icon: mdi:circle
-      color: ${attr.color_code ?? "transparent"}
-    window:
-      icon:
+      color_template: ${attr.color_code ?? "transparent"}
+    - name: window
+      icon_states:
         'on': mdi:window-open-variant
         'off': mdi:window-closed-variant
-    thermostat:
+    - name: thermostat
       icon: mdi:thermostat
-      name: ${num(attr.temperature)}°
+      text_template: ${num(attr.temperature)}°
     # The door column takes the free space, so the values stand at the end
-    door:
+    - name: door
       width: 1fr
       align: start
-      icon:
+      icon_states:
         'on': mdi:door-open
         'off': mdi:door-closed
     # Arrows mark the warmest and the coldest room, and the warmest room stands out
-    temperature:
-      icon: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
-      color: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
-      name: ${num(attr.temperature)}°
+    - name: temperature
+      icon_template: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
+      color_template: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
+      text_template: ${num(attr.temperature)}°
       'on': "${attr.temp_rank === 'warmest'}"
-    humidity:
-      icon: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
-      color: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
-      name: ${num(attr.humidity, 0, '%')}
+    - name: humidity
+      icon_template: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
+      color_template: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
+      text_template: ${num(attr.humidity, 0, '%')}
       'on': "${attr.humidity_rank === 'most_humid'}"
 grid_options:
   columns: full
@@ -3750,9 +3750,9 @@ The [module reference](bubble_card/README.md) explains every module and its opti
 Where possible, a sensor turns numbers into a single word, and the card changes its look based on that word. In this example from the climate table, a room gets an arrow when it is the warmest or the coldest room. The room's climate sensor in the [package](packages/origami.yaml) writes `temp_rank`, and the temperature column of the [Table](bubble_card/README.md#table) module gives every cell in it this icon.
 
 ```yaml
-temperature:
-  name: ${num(attr.temperature)}°
-  icon: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
+- name: temperature
+  text_template: ${num(attr.temperature)}°
+  icon_template: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
 ```
 
 </details>

@@ -202,7 +202,7 @@ sub_button:
 rows: 1
 ```
 
-On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. It is as tall as the switch, its value stands after the track, and together they take half of the card. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
+On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. The slider is as tall as the switch, ends where the switch ends and takes half of the card. Like the switch, it shows no value, and its fill shows the level. Bubble Card's `width` option on the sub-button sets another width. The slider works for every entity that Bubble Card's sliders support, such as the brightness of a light, the volume of a media player or the speed of a fan.
 
 ```yaml
 # Compact row with a slider
@@ -1151,8 +1151,8 @@ A tile whose entity is unavailable is dimmed. More tile examples are in the Favo
 With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. As on a tile, the row's icon stands on the card background and takes the state color while its entity is on. The state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
-- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows Base's pill switch with the entity's state.
-- A row that runs a script, a scene or another action shows a square key. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+- A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on a pill switch. A row is as tall as a compact card, so the switch is Base's compact pill switch.
+- A row that runs a script, a scene or another action shows a square key as large as the icon's background. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 
@@ -1214,7 +1214,7 @@ sub_button:
           state_not: ['off', standby, unavailable, unknown]
 ```
 
-With `slim: true`, the icons have no background, and the rows are lower. An icon whose entity is off takes the secondary text color, as the values in a header do. With `dividers: true`, a thin line separates the rows, and it starts where the text starts. The signs keep their size, so a slim list and a regular list can stand in the same pop-up.
+The signs end as far from the row's edge as the icon starts on the other side. With `slim: true`, the icons have no background, the rows are lower and the keys are smaller. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their place, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` draws a thin line across the full width between the rows, and the rows meet without a gap. A regular list ignores `dividers`.
 
 ```yaml
 type: custom:bubble-card
@@ -1246,7 +1246,7 @@ sub_button:
 
 ### Table
 
-The Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button in the group is a cell. All rows share their columns, so each column is as wide as its widest cell. Bubble Card's visibility conditions decide when a cell appears, and a row whose cells are all hidden takes no space.
+The Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button in the group is a cell. The cells fill the columns in their order, and all rows share their columns, so each column is as wide as its widest cell. Bubble Card's visibility conditions decide when a cell appears. A hidden cell leaves its column empty, and a row whose cells are all hidden takes no space.
 
 <img width="800" alt="The rooms header with the climate table open" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/climate.webp">
 
@@ -1257,19 +1257,28 @@ The Table module turns a sub-buttons card into a table. Each group of sub-button
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `columns` | | The option maps the name of each column to its width, such as `1fr`, or to its options. Without it, the table has as many columns as its longest row has cells, and they share the free space. |
+| `columns` | | The option lists the columns from the first to the last. In the card editor, each column has its own form, and a column can be dragged to another place. Without the option, the table has as many columns as its longest row has cells, and each column fits its widest cell. |
 | `stripes` | `true` | Every second visible row has a gray fill. |
 
-A cell joins a column through its `css_class`, which has the column's name. A cell without such a class takes the next free column in its row. So a row can leave a column empty, such as a room without a window, and a simple table needs no classes at all.
+Each column has these options. Only `name`, `width` and `align` belong to the column itself. The others are values for its cells, and the card editor shows them under Cells.
 
 | Column option | Default | Description |
 | --- | --- | --- |
+| `name` | | A cell whose `css_class` has this name joins the column, wherever it stands in its row. |
 | `width` | `auto` | The option sets the column's width. `auto` fits the widest cell, and `1fr` takes the free space. |
 | `align` | `start` in the first column, `center` in the others | The option places the cells at the `start`, in the `center` or at the `end` of the column. |
+| `icon` | The cell's own icon | Each cell in the column shows this icon. |
+| `text` | The cell's own name or state | Each cell in the column shows this text. |
+| `color` | | The option sets the color of the cells' icons. |
+| `on` | | While the value is true, a cell stands out with a gray fill, such as the warmest room. While it is false, the cell stays neutral. |
 
-A column's other options are values for its cells, with the same keys as a cell's own `origami_table` key. A cell's own key wins over its column's value. The keys are `name`, `icon`, `color`, `name_color` and `background`, as in the Header module, and `on`.
+As in the other modules, a value can be fixed, a map from the entity's state or a template. In the card editor, the icon, the text and the color each have a dropdown for this. The editor keeps a map under the option's name with `_states`, such as `icon_states`, and a template under its name with `_template`, such as `text_template`. A template wins over a map, and a map wins over a fixed value.
 
-The first column holds the names of the rows in the text color. The other cells show their values in the secondary text color, and a cell with only an icon is a square in the text color. A cell whose entity is on shows its icon in the state color on a tint of the same color, as a tile does, such as a heating thermostat or an open window. A cell with an `on` key stands out with a gray fill while the value is true, such as the warmest room, and it stays neutral while the value is false. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed.
+A cell's own `origami_table` key takes the same values, and they win over its column's values. A cell can also set `name_color` and `background`, as a value in the Header module can.
+
+A row can leave a column empty in two ways. The cells after the gap can name their columns through `css_class`, or an empty sub-button can hold the place. Bubble Card's sub-button editor has no field for `css_class`, so in the card editor, the empty sub-button is the easier way.
+
+The first column holds the names of the rows in the text color. The other cells show their values in the secondary text color, and a cell with only an icon is a square in the text color. A cell whose entity is on shows its icon in the state color on a tint of the same color, as a tile does, such as a heating thermostat or an open window. A cell with an `on` value stands out with a gray fill while the value is true, and it stays neutral while the value is false. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed.
 
 Each cell keeps Bubble Card's own actions. A cell without a tap action opens the more-info dialog for its entity, and a tap action with `action: more-info` and an `entity` opens the dialog for another entity, such as the room's thermostat.
 
@@ -1281,16 +1290,16 @@ modules:
   - origami_table
 origami_table:
   columns:
-    room:
+    - name: room
       icon: mdi:circle
-      color: ${attr.color_code ?? "transparent"}
-    thermostat:
+      color_template: ${attr.color_code ?? "transparent"}
+    - name: thermostat
       width: 1fr
       align: start
-      name: ${num(attr.temperature)}°
-    temperature:
+      text_template: ${num(attr.temperature)}°
+    - name: temperature
       icon: mdi:thermometer
-      name: ${num(attr.temperature)}°
+      text_template: ${num(attr.temperature)}°
 sub_button:
   bottom_layout: rows
   main: []
@@ -1298,24 +1307,21 @@ sub_button:
     - name: Living
       group:
         - entity: sensor.climate_living_room
-          css_class: room
           name: Living
           show_name: true
         - entity: climate.living_room
-          css_class: thermostat
         - entity: sensor.climate_living_room
-          css_class: temperature
     - name: Office
       group:
         - entity: sensor.climate_office
-          css_class: room
           name: Office
           show_name: true
+        # The office has no thermostat, so this cell names its column
         - entity: sensor.climate_office
           css_class: temperature
 ```
 
-The office has no thermostat, so its row leaves that column empty. The climate table in the [dashboard](../dashboard/dashboard.yaml) has six columns and uses the other keys, such as arrows for the warmest and the coldest room.
+The cells of the living room fill the three columns in their order. The office has no thermostat, so its temperature cell names its column, and the thermostat column stays empty in that row. The climate table in the [dashboard](../dashboard/dashboard.yaml) has six columns and uses the other keys, such as arrows for the warmest and the coldest room.
 
 </details>
 

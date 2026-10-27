@@ -947,7 +947,7 @@ origami_base:
       text-overflow: ellipsis;
     }
     ${card._org.opts.compact ? `
-    /* On a compact card, a slider among the main sub-buttons is as tall as the pill switch. With its value after the track, it takes half of the card, unless Bubble Card's width option sets its width. */
+    /* On a compact card, a slider among the main sub-buttons stands in for the pill switch. It is as tall as the switch, shows no value and takes half of the card, unless Bubble Card's width option sets its width. */
     ha-card .bubble-sub-button-container {
       --bubble-sub-slider-height: var(--org-toggle-h);
     }
@@ -955,35 +955,15 @@ origami_base:
       flex: 0 0 50%;
     }
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) minmax(var(--ha-space-11, 44px), max-content);
-      align-items: center;
-      gap: var(--ha-space-2);
       flex: 1 1 auto;
       min-width: 0;
     }
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline > [class*="bubble-sub-button-slider-"] {
-      display: contents !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline .bubble-range-slider {
-      grid-area: 1 / 1;
-      position: relative !important;
-      height: var(--bubble-sub-slider-height);
-      overflow: hidden;
-      border-radius: var(--radius-small);
-      background-color: var(--org-inset);
-      box-shadow: var(--card-ring), var(--org-inset-shadow);
+      width: 100% !important;
+      min-width: 0 !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper {
-      grid-area: 1 / 2;
-      justify-content: flex-end;
-      width: auto;
-      min-width: 0;
-      padding: 0 !important;
-    }
-    ha-card .bubble-sub-button-container .bubble-sub-slider-wrapper.inline .bubble-range-value {
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
+      display: none !important;
     }` : ""}
     ${card._org.opts.vertical ? `
     ha-card .bubble-container {
