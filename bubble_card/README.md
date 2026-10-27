@@ -1200,7 +1200,7 @@ With `layout: list`, the card is one list with a row for each sub-button, as in 
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
 - A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on Base's compact pill switch, which is as wide as the icon's background.
-- A row that runs a script, a scene or another action shows a play key with the size and the shape of the switch. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+- A row that runs a script, a scene or another action shows a square key as large as the icon's background. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 

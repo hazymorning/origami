@@ -167,7 +167,7 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    /* The switch and the key that runs something have the size of Base's compact pill switch. They are as wide as an icon's background, so all signs share one column at the row's end. */
+    /* The switch is Base's compact pill switch. It is as wide as an icon's background, so switches and keys share one column at the row's end. */
     ha-card {
       --org-toggle-w: var(--tile-size);
       --org-toggle-h: var(--icon-size-l);
@@ -204,7 +204,7 @@ origami_tiles:
       translate: 0 -50%;
       pointer-events: none;
     }
-    /* A switch and a key are pills on the card background, and they are filled while they are on or while their script runs */
+    /* A switch and a key stand on the card background, and they are filled while they are on or while their script runs */
     ${card._orgTilesSign.at("run running stop switch on", "::before")} {
       inset-inline-end: var(--ha-space-2);
       width: var(--org-toggle-w);
@@ -213,6 +213,10 @@ origami_tiles:
       background-color: var(--tile-chip-background, var(--ha-card-background));
       box-shadow: var(--card-ring), var(--tile-chip-shadow, var(--ha-card-box-shadow));
       transition: var(--transition-interactive);
+    }
+    /* A key is a square as large as an icon's background, and its sign is as large as the icon */
+    ${card._orgTilesSign.at("run running stop", "::before")} {
+      height: var(--tile-size);
     }
     ${card._orgTilesSign.at("running stop on", "::before")} {
       background-color: var(--fill-active);
@@ -235,9 +239,9 @@ origami_tiles:
     }
     ${card._orgTilesSign.at("run running stop", "::after")} {
       --org-sign-icon: ${card._orgTilesSign.playMask};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--org-toggle-knob)) / 2);
-      width: var(--org-toggle-knob);
-      height: var(--org-toggle-knob);
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
+      width: var(--icon-size-m);
+      height: var(--icon-size-m);
       background-color: var(--primary-text-color);
       opacity: var(--opacity-strong);
     }
