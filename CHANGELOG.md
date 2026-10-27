@@ -50,6 +50,9 @@ These changes are in the `next` branch and come with the next release.
 - Speaker Select also works on a button card with a slider, so a speaker's whole row can set its volume. Its rows hide Bubble Card's media buttons themselves, and a readout without a tap action of its own passes the tap to the row.
 - Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
 - The server card in the menu is a Bubble card with the Base module instead of Paper Buttons Row. It takes the same tile and text styles as the other Bubble cards, so its icon no longer changes its color with the status. The message still names the most urgent problem.
+- The new Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, all rows share their columns, and a cell joins a column through its `css_class`. A column sets its width and gives its cells icons and values. A cell whose entity is on takes the state color, a cell with the `on` key stands out, and every second row is striped.
+- The climate table is a Bubble card with the Table module instead of Paper Buttons Row. It looks as before and needs less than half of the YAML, because each cell only names its entity and its column. A hidden row leaves no gap in the stripes, and the table needs no count of its rooms.
+- Open doors are cyan, as open windows are.
 
 ### Bug fixes
 
@@ -112,6 +115,7 @@ Every module changed, and several options changed their names or their meaning. 
 19. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
 20. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
 21. To use the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
+22. To use the new climate table, replace the grid card with the climate table in your dashboard with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
 
 ## 2.0 · The Unfolding
 

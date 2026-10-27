@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder contains eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the same frame, text styles, colors and controls as the rest of the Origami dashboard. The modules read the theme's tokens, so they need the [Origami theme](../README.md#setup). The main README explains [how Origami is built](../README.md#how-origami-is-built), including why the modules exist.
+This folder contains twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the same frame, text styles, colors and controls as the rest of the Origami dashboard. The modules read the theme's tokens, so they need the [Origami theme](../README.md#setup). The main README explains [how Origami is built](../README.md#how-origami-is-built), including why the modules exist.
 
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, and the way it sets card heights is especially hard to work with. Some details may still change, but the modules work as shown in the dashboard.
@@ -24,7 +24,7 @@ Open any Bubble card in the editor and go to **Modules**, then **My Modules**, t
 
 ## How the modules work together
 
-Base is a global module, so Bubble Card runs it first on every card, and no card has to list it. It works only on cards that list an Origami module, so other Bubble cards keep their own look. A card that uses Base's options without another Origami module lists `origami_base`. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Button and Popup draw those cards. Every other module needs Base. Without Base, a module does not run, and the card editor shows an error. On Climate, Media and Speaker Select cards, the lines that the module writes then stop changing.
+Base is a global module, so Bubble Card runs it first on every card, and no card has to list it. It works only on cards that list an Origami module, so other Bubble cards keep their own look. A card that uses Base's options without another Origami module lists `origami_base`. Base draws the frame of button and media player cards, and it holds the helpers that the other modules share. These helpers give the modules Home Assistant's words, the code that reads templates in values and the rule for colors and filled buttons. On separator, sub-buttons and pop-up cards, Base adds only its `animate` and `words` options, because Header, Tiles, Table, Button and Popup draw those cards. Every other module needs Base. Without Base, a module does not run, and the card editor shows an error. On Climate, Media and Speaker Select cards, the lines that the module writes then stop changing.
 
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
@@ -38,6 +38,7 @@ Base is a global module, so Bubble Card runs it first on every card, and no card
 | [Button](#button) | `origami_button` | sub-buttons, button | Button shows rows and grids of buttons, segmented bars, tiles with labels and rows that scroll sideways. |
 | [Header](#header) | `origami_header` | separator | Header shows a section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Tiles shows grids and lists of tiles. |
+| [Table](#table) | `origami_table` | sub-buttons | Table shows rows of cells that share their columns, such as the climate table. |
 | [Popup](#popup) | `origami_popup` | pop-up | Popup styles a pop-up's header, backdrop and close button. |
 
 Give button cards `rows: 1.375` and compact cards `rows: 1`, including cards in pop-ups. This makes the height that Bubble Card reserves match the frame. Media cards with a slider at the bottom need `rows: '2.2'`. Cards with Base's `vertical` option set their own height, so they need no `rows`. A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
@@ -89,7 +90,7 @@ origami_base:
 
 <br>
 
-The `origami_base`, `origami_header`, `origami_tiles`, `origami_button` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. Base holds the code that reads them, so they work the same in all five modules. The `leader` and `art` options of Media and Speaker Select, Media's `state`, Speaker Select's `selected`, Popup's `art`, Header's `icon_color` and Button's `active` and `color` accept the same values. A Media card's `name` can be Jinja or JavaScript in `${ }`, but not a map.
+The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami_button` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. Base holds the code that reads them, so they work the same in all six modules. The `leader` and `art` options of Media and Speaker Select, Media's `state`, Speaker Select's `selected`, Popup's `art`, Header's `icon_color` and Button's `active` and `color` accept the same values. A Media card's `name` can be Jinja or JavaScript in `${ }`, but not a map.
 
 - `state`, `attr` and `entity` refer to the sub-button's entity, or to the card's entity if the sub-button has none.
 - `states(id)` returns another entity's state. `hass` is also available.
@@ -1240,6 +1241,81 @@ sub_button:
         action: navigate
         navigation_path: '#popup_vacuum'
 ```
+
+</details>
+
+### Table
+
+The Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button in the group is a cell. All rows share their columns, so each column is as wide as its widest cell. Bubble Card's visibility conditions decide when a cell appears, and a row whose cells are all hidden takes no space.
+
+<img width="800" alt="The rooms header with the climate table open" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/climate.webp">
+
+<details>
+<summary>Options and example</summary>
+
+<br>
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `columns` | | The option maps the name of each column to its width, such as `1fr`, or to its options. Without it, the table has as many columns as its longest row has cells, and they share the free space. |
+| `stripes` | `true` | Every second visible row has a gray fill. |
+
+A cell joins a column through its `css_class`, which has the column's name. A cell without such a class takes the next free column in its row. So a row can leave a column empty, such as a room without a window, and a simple table needs no classes at all.
+
+| Column option | Default | Description |
+| --- | --- | --- |
+| `width` | `auto` | The option sets the column's width. `auto` fits the widest cell, and `1fr` takes the free space. |
+| `align` | `start` in the first column, `center` in the others | The option places the cells at the `start`, in the `center` or at the `end` of the column. |
+
+A column's other options are values for its cells, with the same keys as a cell's own `origami_table` key. A cell's own key wins over its column's value. The keys are `name`, `icon`, `color`, `name_color` and `background`, as in the Header module, and `on`.
+
+The first column holds the names of the rows in the text color. The other cells show their values in the secondary text color, and a cell with only an icon is a square in the text color. A cell whose entity is on shows its icon in the state color on a tint of the same color, as a tile does, such as a heating thermostat or an open window. A cell with an `on` key stands out with a gray fill while the value is true, such as the warmest room, and it stays neutral while the value is false. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed.
+
+Each cell keeps Bubble Card's own actions. A cell without a tap action opens the more-info dialog for its entity, and a tap action with `action: more-info` and an `entity` opens the dialog for another entity, such as the room's thermostat.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_table
+origami_table:
+  columns:
+    room:
+      icon: mdi:circle
+      color: ${attr.color_code ?? "transparent"}
+    thermostat:
+      width: 1fr
+      align: start
+      name: ${num(attr.temperature)}°
+    temperature:
+      icon: mdi:thermometer
+      name: ${num(attr.temperature)}°
+sub_button:
+  bottom_layout: rows
+  main: []
+  bottom:
+    - name: Living
+      group:
+        - entity: sensor.climate_living_room
+          css_class: room
+          name: Living
+          show_name: true
+        - entity: climate.living_room
+          css_class: thermostat
+        - entity: sensor.climate_living_room
+          css_class: temperature
+    - name: Office
+      group:
+        - entity: sensor.climate_office
+          css_class: room
+          name: Office
+          show_name: true
+        - entity: sensor.climate_office
+          css_class: temperature
+```
+
+The office has no thermostat, so its row leaves that column empty. The climate table in the [dashboard](../dashboard/dashboard.yaml) has six columns and uses the other keys, such as arrows for the warmest and the coldest room.
 
 </details>
 

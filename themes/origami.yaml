@@ -182,6 +182,7 @@ Origami:
   state-switch-active-color: 'var(--state-active-color)'
   state-binary_sensor-active-color: 'var(--state-active-color)'
   state-binary_sensor-window-on-color: 'var(--cyan-color)'
+  state-binary_sensor-door-on-color: 'var(--cyan-color)'
   state-media_player-paused-color: 'var(--secondary-text-color)'
   state-cover-closed-color: 'var(--accent-color)'
   state-person-not_home-color: 'var(--secondary-text-color)'

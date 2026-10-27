@@ -1,0 +1,166 @@
+origami_table:
+  name: "Origami • Table"
+  version: "1.0.0"
+  supported:
+    - sub-buttons
+  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, each sub-button is a cell, and all rows share the columns. The columns option names the columns, sets their widths and gives their cells values, and a cell joins a column through its css_class."
+  editor:
+    - name: columns
+      label: "Columns (a map from a column's name to its width or to its options)"
+      selector:
+        object: {}
+    - name: stripes
+      label: "Striped rows"
+      selector:
+        boolean: {}
+      default: true
+  code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_table needs origami_base 12 or later");
+      const env = { hass, renderTemplate };
+      const cfg = this.config.origami_table ?? {};
+      // columns maps a column's name to its width, or to its options. Besides width and align, the options are values that the column's cells take, with the same keys as a cell.
+      const map = cfg.columns && typeof cfg.columns === "object" && !Array.isArray(cfg.columns) ? cfg.columns : {};
+      const cols = Object.keys(map).map((key, i) => {
+        const { width, align, ...values } = map[key] && typeof map[key] === "object" ? map[key] : { width: map[key] };
+        return { key: org.slug(key), n: i + 1, width: org.has(width) ? String(width).trim() : "auto", align, values };
+      });
+      // Each group is a row. Bubble Card numbers the sub-buttons of the groups first, and a sub-button outside a group is a row of its own, unless no row is a group.
+      const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
+      const groups = bottom.filter((g) => Array.isArray(g?.group)).map((g) => g.group.filter(Boolean));
+      const loose = bottom.filter((g) => g && !Array.isArray(g.group));
+      const rows = groups.length ? [...groups, ...loose.map((g) => [g])] : [loose];
+      const pos = rows.flatMap((r) => r.map((_, i) => i));
+      const count = Math.max(cols.length, ...rows.map((r) => r.length), 1);
+      const scope = "ha-card .bubble-sub-button-bottom-container";
+      const align = { start: "flex-end", center: "center", end: "flex-start" };
+      const rules = [];
+      const list = org.subs(env, this.config, "origami_table").map((s) => {
+        const col = cols.find((c) => c.key && c.key === org.slug(s.item.css_class));
+        // A cell takes its column's values, and its own key wins over them
+        const given = col ? Object.fromEntries(Object.keys(col.values).map((k) => [k, org.value(env, col.values[k], s.ctx)])) : {};
+        const opt = { ...given, ...(s.opt ?? {}) };
+        // The first column holds the row's name
+        const first = col ? col.n === 1 : pos[s.n - 1] === 0;
+        const side = col?.align ?? (first ? "start" : "center");
+        const item = s.item;
+        const text = org.has(opt.name) || (!!item.show_name && org.has(item.name))
+          || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => org.has(item[k]) && item[k] !== false);
+        const look = org.look(hass, s.entity);
+        // The cell's on key decides whether it stands out. Without the key, a cell whose entity is on takes its state color.
+        const on = "on" in opt ? org.yes(opt.on) : null;
+        const lit = on === null && !!s.entity && look.lit;
+        const own = ["justify-content: " + (align[side] ?? "center") + " !important"];
+        if (col) own.push("grid-column: " + col.n);
+        // Names and cells with only an icon use the text color, and values use the secondary text color
+        if (first || !text || on || lit) own.push("color: var(--primary-text-color) !important");
+        // A cell with only an icon is a square, and a cell in a column that takes the free space keeps the width of its text, so a fill never stretches across a wide column
+        const self = "justify-self: " + ({ start: "start", end: "end" }[side] ?? "center");
+        if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", self);
+        else if (/fr\b/.test(col?.width ?? "")) own.push(self);
+        if (on) own.push("--org-cell-bg: var(--fill-subtle)");
+        if (lit) own.push("--org-cell-ink: " + look.color, "--org-cell-bg: color-mix(in srgb, " + look.color + " var(--tint-strength), var(--ha-card-background))");
+        // The icon next to a value is muted, unless the cell stands out or has a color of its own
+        if (text && !on && !lit && !org.has(opt.color)) own.push("--org-cell-icon: var(--opacity-muted)");
+        const obj = hass.states[s.entity];
+        if (s.entity && (!obj || obj.state === "unavailable")) own.push("opacity: var(--opacity-disabled)");
+        rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + s.n + " { " + own.join("; ") + "; }");
+        return { ...s, opt };
+      });
+      // The cells' name, icon, color, name_color and background work as in Header and Button
+      rules.push(...org.values(env, this.config, "origami_table", scope, "var(--ha-font-size-s)", list));
+      card._orgT = {
+        template: [...cols.map((c) => c.width), ...Array(count - cols.length).fill("auto")].join(" "),
+        stripes: cfg.stripes ?? true,
+        rules: rules.join("\n    ")
+      };
+      return "";
+    })()}
+    ha-card {
+      --org-cell: var(--icon-size-m);
+    }
+    ha-card .bubble-container {
+      display: block !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    ha-card .bubble-container > .bubble-sub-button-container {
+      display: none !important;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      position: static !important;
+      inset: auto !important;
+      display: grid !important;
+      grid-template-columns: ${card._orgT.template};
+      justify-content: normal !important;
+      gap: 0 var(--ha-space-1) !important;
+      box-sizing: border-box;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      border-radius: var(--ha-card-border-radius);
+      pointer-events: auto !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
+      display: contents !important;
+    }
+    /* Each row is a subgrid, so every column is as wide as its widest cell in any row. A row keeps the table's gap, because a gap of its own would add space around every cell. */
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(.hidden) {
+      grid-column: 1 / -1;
+      display: grid !important;
+      grid-template-columns: subgrid;
+      gap: normal !important;
+      align-items: center;
+      box-sizing: border-box;
+      width: auto !important;
+      height: var(--control-height-icon);
+      padding: 0 var(--ha-space-2);
+    }
+    ${card._orgT.stripes ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(even of :not(.hidden)) {
+      background-color: var(--fill-subtle);
+    }` : ""}
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      box-sizing: border-box;
+      gap: var(--ha-space-1);
+      width: auto !important;
+      min-width: auto !important;
+      height: var(--org-cell) !important;
+      margin: 0 !important;
+      padding: 0 6px !important;
+      border-radius: var(--radius-inner) !important;
+      background: var(--org-value-chip, var(--org-cell-bg, transparent)) !important;
+      box-shadow: none !important;
+      color: var(--secondary-text-color) !important;
+      font-size: var(--ha-font-size-s) !important;
+      font-weight: var(--ha-font-weight-bold) !important;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap !important;
+      transition: var(--transition-interactive) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
+      transform: scale(var(--press-scale));
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-2xs) !important;
+      display: flex !important;
+      margin: 0 !important;
+      color: var(--org-cell-ink, currentColor) !important;
+      opacity: var(--org-cell-icon, 1) !important;
+    }
+    /* A cell is never narrower than its text, so its column fits it. A text that Bubble Card measured too wide before these styles applied stops scrolling at the next measurement. */
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-name-container {
+      overflow: visible !important;
+      white-space: nowrap !important;
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
+    ${card._orgT.rules}

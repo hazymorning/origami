@@ -776,468 +776,187 @@ views:
                   hold_action:
                     action: more-info
 
-          # Climate table, open while the toggle is on
-          - type: grid
-            square: false
-            columns: 1
+          # Climate table, open while the toggle is on. Each group is a row, and each cell joins its column through its css_class.
+          - type: custom:bubble-card
+            card_type: sub-buttons
+            modules:
+              - origami_base
+              - origami_table
+            origami_base:
+              animate: true
+            # The columns give their cells the same icons and values, so each cell only names its entity
+            origami_table:
+              columns:
+                room:
+                  icon: mdi:circle
+                  color: ${attr.color_code ?? "transparent"}
+                window:
+                  icon:
+                    'on': mdi:window-open-variant
+                    'off': mdi:window-closed-variant
+                thermostat:
+                  icon: mdi:thermostat
+                  name: ${num(attr.temperature)}°
+                # The door column takes the free space, so the values stand at the end
+                door:
+                  width: 1fr
+                  align: start
+                  icon:
+                    'on': mdi:door-open
+                    'off': mdi:door-closed
+                # Arrows mark the warmest and the coldest room, and the warmest room stands out
+                temperature:
+                  icon: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
+                  color: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
+                  name: ${num(attr.temperature)}°
+                  'on': "${attr.temp_rank === 'warmest'}"
+                humidity:
+                  icon: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
+                  color: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
+                  name: ${num(attr.humidity, 0, '%')}
+                  'on': "${attr.humidity_rank === 'most_humid'}"
+            grid_options:
+              columns: full
+              rows: auto
             visibility:
               - condition: state
                 entity: input_boolean.room_climate_card
                 state: 'on'
-            cards:
-              - type: custom:paper-buttons-row
-                extra_styles: |
-                  @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) } }
-                styles:
-                  display: grid
-                  grid-template-columns: auto auto auto 1fr auto auto
-                  grid-template-rows: repeat(6, var(--control-height-icon))
-                  column-gap: var(--ha-space-1)
-                  padding: 0px var(--ha-space-2)
-                  margin-bottom: var(--ha-space-5)
-                  border-radius: var(--ha-card-border-radius)
-                  opacity: 0
-                  transform: translateY(10px)
-                  animation: fadeInUp var(--duration-slow) ease-in forwards
-                  background-image: >-
-                    repeating-linear-gradient(to bottom, transparent, transparent var(--control-height-icon),
-                    var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(var(--control-height-icon) * 2))
-                base_config:
-                  layout: icon|name
-                  tap_action:
-                    action: more-info
-                  state_icons:
-                    warmest: mdi:arrow-up
-                    coldest: mdi:arrow-down
-                    most_humid: mdi:arrow-up
-                    driest: mdi:arrow-down
-                  state_styles:
-                    'on':
-                      button:
-                        background-color: var(--tint)
-                        color: var(--state-binary_sensor-window-on-color)
-                      icon:
-                        color: var(--state-binary_sensor-window-on-color)
-                    heating:
-                      button:
-                        background-color: var(--tint)
-                        color: var(--state-climate-heat-color)
-                      icon:
-                        color: var(--state-climate-heat-color)
-                      name:
-                        color: var(--primary-text-color)
-                    warmest:
-                      button:
-                        background-color: var(--fill-subtle)
-                        color: var(--primary-text-color)
-                      icon:
-                        opacity: 1
-                    most_humid:
-                      button:
-                        background-color: var(--fill-subtle)
-                        color: var(--primary-text-color)
-                      icon:
-                        opacity: 1
-                    coldest:
-                      icon:
-                        opacity: 1
-                    driest:
-                      icon:
-                        opacity: 1
-                  styles:
-                    button:
-                      padding: 0px 6px
-                      min-height: var(--icon-size-m)
-                      justify-content: center
-                      border-radius: var(--radius-inner)
-                    icon:
-                      --mdc-icon-size: var(--icon-size-2xs)
-                      margin-right: var(--ha-space-1)
-                      display: flex
-                      align-items: center
-                      justify-content: center
-                    name:
-                      padding: 0px
-                      font-size: var(--ha-font-size-s)
-                      font-weight: var(--ha-font-weight-bold)
-                      font-variant-numeric: tabular-nums
-                      white-space: nowrap
-                    state:
-                      padding: 0px
-                buttons:
-                  # Living
-                  - entity: sensor.climate_living_room
-                    icon: mdi:circle
-                    name: Living
-                    tap_action:
-                      entity: climate.living_room
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
-                  - entity: binary_sensor.living_room_balcony_door
-                    layout: icon
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        grid-column: 2
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: climate.living_room
-                    icon: mdi:thermostat
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: hvac_action
-                    styles:
-                      button:
-                        grid-column: 3
-                        color: var(--secondary-text-color)
-                  - entity: binary_sensor.front_door
-                    layout: icon
-                    state_icons:
-                      'on': mdi:door-open
-                      'off': mdi:door-closed
-                    styles:
-                      button:
-                        grid-column: 4
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: sensor.climate_living_room
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    tap_action:
-                      entity: climate.living_room
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_living_room
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    tap_action:
-                      entity: climate.living_room
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  # Bedroom
-                  - entity: sensor.climate_bedroom
-                    icon: mdi:circle
-                    name: Bed
-                    tap_action:
-                      entity: climate.bedroom
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_bedroom", "color_code") }}'
-                  - entity: binary_sensor.bedroom_window
-                    layout: icon
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        grid-column: 2
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: climate.bedroom
-                    icon: mdi:thermostat
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: hvac_action
-                    styles:
-                      button:
-                        grid-column: 3
-                        color: var(--secondary-text-color)
-                  - entity: sensor.climate_bedroom
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    tap_action:
-                      entity: climate.bedroom
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_bedroom
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    tap_action:
-                      entity: climate.bedroom
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  # Office
-                  - entity: sensor.climate_office
-                    icon: mdi:circle
-                    name: Office
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_office", "color_code") }}'
-                  - entity: sensor.climate_office
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_office
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  # Bath
-                  - entity: sensor.climate_bathroom
-                    icon: mdi:circle
-                    name: Bath
-                    tap_action:
-                      entity: climate.bathroom
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_bathroom", "color_code") }}'
-                  - entity: binary_sensor.bathroom_window
-                    layout: icon
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        grid-column: 2
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: climate.bathroom
-                    icon: mdi:thermostat
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: hvac_action
-                    styles:
-                      button:
-                        grid-column: 3
-                        color: var(--secondary-text-color)
-                  - entity: sensor.climate_bathroom
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    tap_action:
-                      entity: climate.bathroom
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_bathroom
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    tap_action:
-                      entity: climate.bathroom
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  # Kitchen
-                  - entity: sensor.climate_kitchen
-                    icon: mdi:circle
-                    name: Kitchen
-                    tap_action:
-                      entity: climate.kitchen
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_kitchen", "color_code") }}'
-                  - entity: binary_sensor.kitchen_window
-                    layout: icon
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        grid-column: 2
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: climate.kitchen
-                    icon: mdi:thermostat
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: hvac_action
-                    styles:
-                      button:
-                        grid-column: 3
-                        color: var(--secondary-text-color)
-                  - entity: sensor.climate_kitchen
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    tap_action:
-                      entity: climate.kitchen
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_kitchen
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    tap_action:
-                      entity: climate.kitchen
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  # WC
-                  - entity: sensor.climate_small_bathroom
-                    icon: mdi:circle
-                    name: WC
-                    tap_action:
-                      entity: climate.small_bathroom
-                    styles:
-                      button:
-                        grid-column: 1
-                        justify-content: flex-start
-                      icon:
-                        color: '{{ state_attr("sensor.climate_small_bathroom", "color_code") }}'
-                  - entity: binary_sensor.small_bathroom_window
-                    layout: icon
-                    state_icons:
-                      'on': mdi:window-open-variant
-                      'off': mdi:window-closed-variant
-                    styles:
-                      button:
-                        grid-column: 2
-                        padding: 0px
-                        width: var(--icon-size-m)
-                      icon:
-                        margin-right: 0px
-                  - entity: climate.small_bathroom
-                    icon: mdi:thermostat
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: hvac_action
-                    styles:
-                      button:
-                        grid-column: 3
-                        color: var(--secondary-text-color)
-                  - entity: sensor.climate_small_bathroom
-                    icon: mdi:thermometer
-                    name:
-                      attribute: temperature
-                      postfix: °
-                    state:
-                      attribute: temp_rank
-                    tap_action:
-                      entity: climate.small_bathroom
-                    styles:
-                      button:
-                        grid-column: 5
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
-                  - entity: sensor.climate_small_bathroom
-                    icon: mdi:water-percent
-                    name:
-                      attribute: humidity
-                      postfix: ' %'
-                    state:
-                      attribute: humidity_rank
-                    tap_action:
-                      entity: climate.small_bathroom
-                    styles:
-                      button:
-                        grid-column: 6
-                        color: var(--secondary-text-color)
-                      icon:
-                        opacity: var(--opacity-muted)
+            styles: |-
+              ha-card {
+                margin-bottom: var(--ha-space-5);
+              }
+            sub_button:
+              bottom_layout: rows
+              main: []
+              bottom:
+                - name: Living
+                  group:
+                    - entity: sensor.climate_living_room
+                      css_class: room
+                      name: Living
+                      show_name: true
+                      tap_action:
+                        action: more-info
+                        entity: climate.living_room
+                    - entity: binary_sensor.living_room_balcony_door
+                      css_class: window
+                    - entity: climate.living_room
+                      css_class: thermostat
+                    - entity: binary_sensor.front_door
+                      css_class: door
+                    - entity: sensor.climate_living_room
+                      css_class: temperature
+                      tap_action:
+                        action: more-info
+                        entity: climate.living_room
+                    - entity: sensor.climate_living_room
+                      css_class: humidity
+                      tap_action:
+                        action: more-info
+                        entity: climate.living_room
+                - name: Bedroom
+                  group:
+                    - entity: sensor.climate_bedroom
+                      css_class: room
+                      name: Bed
+                      show_name: true
+                      tap_action:
+                        action: more-info
+                        entity: climate.bedroom
+                    - entity: binary_sensor.bedroom_window
+                      css_class: window
+                    - entity: climate.bedroom
+                      css_class: thermostat
+                    - entity: sensor.climate_bedroom
+                      css_class: temperature
+                      tap_action:
+                        action: more-info
+                        entity: climate.bedroom
+                    - entity: sensor.climate_bedroom
+                      css_class: humidity
+                      tap_action:
+                        action: more-info
+                        entity: climate.bedroom
+                - name: Office
+                  group:
+                    - entity: sensor.climate_office
+                      css_class: room
+                      name: Office
+                      show_name: true
+                    - entity: sensor.climate_office
+                      css_class: temperature
+                    - entity: sensor.climate_office
+                      css_class: humidity
+                - name: Bath
+                  group:
+                    - entity: sensor.climate_bathroom
+                      css_class: room
+                      name: Bath
+                      show_name: true
+                      tap_action:
+                        action: more-info
+                        entity: climate.bathroom
+                    - entity: binary_sensor.bathroom_window
+                      css_class: window
+                    - entity: climate.bathroom
+                      css_class: thermostat
+                    - entity: sensor.climate_bathroom
+                      css_class: temperature
+                      tap_action:
+                        action: more-info
+                        entity: climate.bathroom
+                    - entity: sensor.climate_bathroom
+                      css_class: humidity
+                      tap_action:
+                        action: more-info
+                        entity: climate.bathroom
+                - name: Kitchen
+                  group:
+                    - entity: sensor.climate_kitchen
+                      css_class: room
+                      name: Kitchen
+                      show_name: true
+                      tap_action:
+                        action: more-info
+                        entity: climate.kitchen
+                    - entity: binary_sensor.kitchen_window
+                      css_class: window
+                    - entity: climate.kitchen
+                      css_class: thermostat
+                    - entity: sensor.climate_kitchen
+                      css_class: temperature
+                      tap_action:
+                        action: more-info
+                        entity: climate.kitchen
+                    - entity: sensor.climate_kitchen
+                      css_class: humidity
+                      tap_action:
+                        action: more-info
+                        entity: climate.kitchen
+                - name: WC
+                  group:
+                    - entity: sensor.climate_small_bathroom
+                      css_class: room
+                      name: WC
+                      show_name: true
+                      tap_action:
+                        action: more-info
+                        entity: climate.small_bathroom
+                    - entity: binary_sensor.small_bathroom_window
+                      css_class: window
+                    - entity: climate.small_bathroom
+                      css_class: thermostat
+                    - entity: sensor.climate_small_bathroom
+                      css_class: temperature
+                      tap_action:
+                        action: more-info
+                        entity: climate.small_bathroom
+                    - entity: sensor.climate_small_bathroom
+                      css_class: humidity
+                      tap_action:
+                        action: more-info
+                        entity: climate.small_bathroom
 
           # Room cards
           - type: grid
