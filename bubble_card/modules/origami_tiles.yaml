@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.1.1"
+  version: "3.2.0"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In the list, a sign at the end of each row shows whether a tap opens, runs or switches something."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In a list, a sign at each row's end shows whether a tap opens, runs or switches something. Lists can be slim and have dividers."
   editor:
     - name: layout
       label: "Layout"
@@ -25,14 +25,28 @@ origami_tiles:
           step: 1
           mode: box
       default: 2
+    - name: slim
+      label: "Slim rows without icon backgrounds (list)"
+      selector:
+        boolean: {}
+      default: false
+    - name: dividers
+      label: "Lines between the rows (list)"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_tiles needs origami_base 12 or later");
       const env = { hass, renderTemplate };
-      const list = this.config.origami_tiles?.layout === "list";
+      const cfg = this.config.origami_tiles ?? {};
+      const list = cfg.layout === "list";
       card._orgTilesList = list;
-      card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
+      card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2));
+      // A slim list shows its icons without a background, and dividers draw a line between its rows
+      card._orgTilesSlim = list && !!cfg.slim;
+      card._orgTilesLines = list && !!cfg.dividers;
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
@@ -52,7 +66,7 @@ origami_tiles:
         const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
         // A row without a state line keeps its name in the middle
         if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
-        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: " + (list ? "color-mix(in srgb, var(--org-tile-color) 18%, var(--ha-card-background))" : "var(--tint)") + "; }");
+        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
         if (list) {
           // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
           const tap = org.act(item);
@@ -182,15 +196,17 @@ origami_tiles:
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
     .bubble-sub-button-group:not(.hidden) {
+      --org-list-row: var(--control-height);
+      --org-list-icon: var(--control-height-icon);
       gap: var(--ha-space-1) !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
       border-radius: var(--ha-card-border-radius);
-      background-color: var(--fill-subtle);
+      background-color: var(--tile-background, var(--fill-subtle));
     }
     .bubble-sub-button {
       position: relative !important;
-      height: var(--control-height) !important;
+      height: var(--org-list-row) !important;
       padding: 0 var(--ha-space-2) !important;
       border-radius: calc(var(--ha-card-border-radius) - var(--ha-space-2)) !important;
       background-color: transparent !important;
@@ -200,20 +216,45 @@ origami_tiles:
     }
     .bubble-sub-button-icon,
     .bubble-sub-button-image {
-      width: var(--control-height-icon) !important;
-      min-width: var(--control-height-icon) !important;
-      height: var(--control-height-icon) !important;
+      width: var(--org-list-icon) !important;
+      min-width: var(--org-list-icon) !important;
+      height: var(--org-list-icon) !important;
       border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
-      box-shadow: none;
     }
     .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-s) !important;
-      background-color: var(--org-tile-chip, var(--fill-subtle));
-      color: var(--org-tile-color, var(--secondary-text-color)) !important;
     }
     .bubble-sub-button-name-container::after {
       margin-top: 2px;
     }
+    ${card._orgTilesSlim ? `
+    .bubble-sub-button-group:not(.hidden) {
+      --org-list-row: var(--control-height-list);
+      --org-list-icon: var(--icon-size-m);
+    }
+    .bubble-sub-button-icon,
+    .bubble-sub-button-image {
+      border-radius: var(--radius-small) !important;
+      box-shadow: none;
+    }
+    .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-m) !important;
+      background-color: transparent;
+      color: var(--org-tile-color, var(--secondary-text-color)) !important;
+    }` : ""}
+    ${card._orgTilesLines ? `
+    /* The lines lie in the gaps between the rows and start where the text starts. Hidden rows take no space, so the rows keep one height and one gap. */
+    .bubble-sub-button-group:not(.hidden) {
+      --org-list-line: calc(var(--org-list-row) + var(--ha-space-1) / 2 - 0.5px);
+      background-image: repeating-linear-gradient(to bottom, transparent 0 var(--org-list-line), var(--fill-strong) 0 calc(var(--org-list-line) + 1px), transparent 0 calc(var(--org-list-row) + var(--ha-space-1)));
+      background-size: calc(100% - var(--ha-space-2) - var(--org-list-icon) - var(--ha-space-3)) 100%;
+      background-position: right top;
+      background-origin: content-box;
+      background-repeat: no-repeat;
+    }
+    ha-card:dir(rtl) .bubble-sub-button-group:not(.hidden) {
+      background-position: left top;
+    }` : ""}
     ${card._orgTilesSign.at(card._orgTilesSign.all)} {
       padding-inline-end: calc(2 * var(--ha-space-2) + var(--org-toggle-w)) !important;
     }
@@ -230,9 +271,14 @@ origami_tiles:
       width: var(--org-toggle-w);
       height: var(--org-toggle-h);
       border-radius: var(--radius-inner);
-      background-color: var(--fill-subtle);
-      box-shadow: var(--card-ring);
+      background-color: var(--tile-chip-background, var(--ha-card-background));
+      box-shadow: var(--card-ring), var(--tile-chip-shadow, var(--ha-card-box-shadow));
       transition: var(--transition-interactive);
+    }
+    ${card._orgTilesSign.at("run running stop", "::before")} {
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--org-toggle-h)) / 2);
+      width: var(--org-toggle-h);
+      border-radius: var(--radius-small);
     }
     ${card._orgTilesSign.at("running stop on", "::before")} {
       background-color: var(--fill-active);

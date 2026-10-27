@@ -47,7 +47,9 @@ Give button cards `rows: 1.375` and compact cards `rows: 1`, including cards in 
 
 <br>
 
-Color mostly shows that a device is on. The Base module gives the icon Home Assistant's state color for the entity. On a tile, the area behind the icon uses the theme's `tint`, which mixes the same color into the card background. On a regular card, Base mixes the color into the gray fill behind the icon. Lights are amber, heating is deep orange, media is light blue, fans are cyan and vacuums are teal. Switches and all other entities without a color of their own are green.
+Color mostly shows that a device is on. The Base module gives the icon Home Assistant's state color for the entity. On a tile, the area behind the icon uses the theme's `tint`, which mixes the same color into the card background. On a regular card, Base mixes the color into the gray fill behind the icon.
+
+On a gray surface, such as a tile, a list or a card with Base's `tile` option, the area behind an icon, a switch or a key is the card background with a shadow, so it stands out from the surface. On a regular card, this area is a gray fill. The theme's `tile-chip-background` and `tile-chip-shadow` set the look on gray surfaces. With `tile-chip-background: var(--fill-subtle)` and `tile-chip-shadow: none` in a copy of the theme, all these areas are muted and flat. Lights are amber, heating is deep orange, media is light blue, fans are cyan and vacuums are teal. Switches and all other entities without a color of their own are green.
 
 Base follows Home Assistant's own rules for when an entity counts as on and which color it takes, and the Tiles module uses the same rules. A group takes the colors of its members when they all belong to one domain, such as a group of lights. Origami differs in two places. A media player that is paused or idle counts as off, so a paused speaker does not glow, and a thermostat that reports what it is doing counts as on only while it heats, cools, dries or runs its fan. The Light module also colors its slider, and the Button module's `lamp` style tints the active button.
 
@@ -791,7 +793,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and i
 | `active` | | The option takes plain text, a map from the card entity's state, Jinja or JavaScript in `${ }`. Buttons whose name, `css_class` or tap target matches it are highlighted, in any language. Separate several values with commas. |
 | `active_style` | `lamp` | `lamp` tints the active button in the lamp color, and `toggle` gives a filled button. |
 | `color` | `var(--lamp-color)` | The option sets the lamp color of the `lamp` style. A button whose own entity is on takes that entity's state color instead, such as cyan for a fan. |
-| `muted` | `false` | The buttons' text is dimmed. |
+| `muted` | `false` | The buttons' text and icons are dimmed. |
 | `icon_size` | `var(--icon-size-2xs)` | The option sets the size of the icons. |
 | `padding` | `0` | The option sets the space around the buttons. |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
@@ -1065,7 +1067,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles or into a list. E
 
 <br>
 
-Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. All other options are set on each tile, under its own `origami_tiles` key.
+Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. A list has two more options on the card, `slim` and `dividers`, which the [List](#list) section describes. All other options are set on each tile, under its own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -1121,11 +1123,11 @@ A tile whose entity is unavailable is dimmed. More tile examples are in the Favo
 
 #### List
 
-With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. The row's icon takes the state color while its entity is on, and the state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
+With `layout: list`, the card is one list with a row for each sub-button, as in a settings app. As on a tile, the row's icon stands on the card background and takes the state color while its entity is on. The state line shows what happens now. The whole row is the tap target, and a sign at its end shows what a tap does. The sign follows Base's rules for sub-buttons:
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
 - A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows Base's pill switch with the entity's state.
-- A row that runs a script, a scene or another action shows a key. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+- A row that runs a script, a scene or another action shows a square key. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 
@@ -1185,6 +1187,34 @@ sub_button:
         - condition: state
           entity: media_player.living_room_tv
           state_not: ['off', standby, unavailable, unknown]
+```
+
+With `slim: true`, the icons have no background, and the rows are lower. An icon whose entity is off takes the secondary text color, as the values in a header do. With `dividers: true`, a thin line separates the rows, and it starts where the text starts. The signs keep their size, so a slim list and a regular list can stand in the same pop-up.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_tiles
+origami_tiles:
+  layout: list
+  slim: true
+  dividers: true
+sub_button:
+  bottom:
+    - entity: fan.bedroom
+      name: Bedroom fan
+      icon: mdi:fan
+      state_content: percentage
+      tap_action:
+        action: more-info
+    - entity: vacuum.robot
+      name: Vacuum
+      icon: mdi:robot-vacuum
+      tap_action:
+        action: navigate
+        navigation_path: '#popup_vacuum'
 ```
 
 </details>

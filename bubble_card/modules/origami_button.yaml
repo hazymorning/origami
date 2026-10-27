@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.6.1"
+  version: "3.6.2"
   supported:
     - sub-buttons
     - button
@@ -34,7 +34,7 @@ origami_button:
           mode: box
       default: 0
     - name: muted
-      label: "Muted"
+      label: "Dimmed text and icons"
       selector:
         boolean: {}
       default: false

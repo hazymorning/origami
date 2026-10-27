@@ -4203,7 +4203,7 @@ The name Origami comes from Paper Buttons Row, because origami is folded paper. 
 | `fill-subtle`, `fill-strong`, `fill-loud` | Neutral surfaces, mixed from `fill-base` so that they stay warm |
 | `fill-contrast` | The strength of `fill-subtle`, 8% in light mode and 5% in dark mode |
 | `fill-active`, `toggle-on` | The text color at 85% on the card background, for switch tracks and active buttons |
-| `tile-background`, `tile-chip-background` | A tile's background and its icon's background |
+| `tile-background`, `tile-chip-background`, `tile-chip-shadow` | A tile's background, and the background and shadow behind icons, switches and keys on gray surfaces such as tiles and lists. With `tile-chip-background: var(--fill-subtle)` and `tile-chip-shadow: none`, these backgrounds are muted and flat. |
 | `opacity-disabled`, `opacity-quiet`, `opacity-muted`, `opacity-strong` | Opacity levels of 0.3, 0.45, 0.6 and 0.8 |
 | `control-height-mini`, `-icon`, `-row`, `-list`, `-sm`, `control-height`, `-lg` | Fixed control heights of 32, 40, 44, 48, 52, 56 and 64 px |
 | `tile-size`, `tile-size-lg`, `dot-size` | Icon backgrounds of 48 and 80 px, and dots of 12 px |
