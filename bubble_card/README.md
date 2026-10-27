@@ -61,7 +61,7 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a small chip in the active color. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and Home Assistant's icon for that entity's state, and an option that is not an entity ID, such as None, keeps its text. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 
@@ -542,36 +542,23 @@ A `leader` template returns nothing while the speaker is not in a group, because
 
 #### Cover as background
 
-With `cover: background`, the cover fills the card. It keeps its colors and takes a lightness close to the card's, and a veil in the card's color softens it, so the card stays light in light mode and dark in dark mode, even with a black or a white cover. The text keeps its contrast, and the cover is not blurred. Without a cover, the card keeps its own background.
-
-The icon then has no background and stands at the top left. It shows what plays through the `icons` option, such as a note while music plays, and a tap on it runs the card's `tap_action`. The name and the state line stand below the icon. The main sub-buttons stand at the top right, and with `main_layout: rows` under `sub_button`, each main group is a row. A dropdown there is a small chip in the active color, such as a speaker picker above a group button:
+With `cover: background`, the cover fills the card behind a veil in the card's color. The cover is therefore lighter in light mode and darker in dark mode, and it is not blurred. The veil is a little stronger at the top, behind the name and the state line, so the text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
 
 ```yaml
+show_icon: false
 origami_base:
   words:
     media_player.living_room: Living
 origami_media:
   cover: background
-  icons:
-    playing: mdi:music-note
 sub_button:
-  main_layout: rows
-  bottom_layout: rows
   main:
-    - name: Speaker
-      group:
-        - entity: input_select.speaker
-          sub_button_type: select
-          show_icon: false
-    - name: Group
-      group:
-        - icon: mdi:speaker-multiple
-          css_class: members
-          show_name: true
-          show_background: true
+    - entity: input_select.speaker
+      sub_button_type: select
+      show_icon: false
 ```
 
-The dropdown's options in this example are the entity IDs of the speakers, so Base shows their names, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
+The dropdown's options in this example are the entity IDs of the speakers. Base therefore shows the dropdown as a small chip with the chosen speaker's name, as the Color section under [How the modules work together](#how-the-modules-work-together) describes.
 
 #### Play row
 
@@ -1153,7 +1140,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles or into a list. E
 
 <br>
 
-Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. A list has two more options on the card, `slim` and `dividers`, which the [List](#list) section describes. All other options are set on each tile, under its own `origami_tiles` key.
+Set the layout on the card with `origami_tiles: layout`, which is `grid`, the default, or `list`. In a grid, `origami_tiles: columns` sets the number of columns, from 1 to 6, and the default is 2. All other options are set on each tile, under its own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -1213,7 +1200,7 @@ With `layout: list`, the card is one list with a row for each sub-button, as in 
 
 - A row whose tap opens something, such as a pop-up, a URL or the more-info dialog, shows a chevron.
 - A row whose tap toggles its entity, such as `action: toggle` or `input_boolean.toggle`, shows the entity's state on Base's compact pill switch, which is as wide as the icon's background.
-- A row that runs a script, a scene or another action shows a square key as large as the icon's background. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
+- A row that runs a script, a scene or another action shows a play key with the size and the shape of the switch. Base fills the key while what it runs is on, as it fills a sub-button. With `script.toggle`, the filled key shows a stop sign, because a second tap stops the script.
 
 A row's `sign` key chooses another sign, such as `open` for a script that opens a pop-up, or `none`. Two rows with opposite visibility conditions can share one place, so a row can change what it does. In the example below, the TV row turns on the TV while it is off and opens the TV pop-up once it is on.
 
@@ -1275,33 +1262,7 @@ sub_button:
           state_not: ['off', standby, unavailable, unknown]
 ```
 
-A row is as tall as its content and its padding. A row's icon has the size and the background of a card's icon, so a row is as tall as a card. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. With `slim: true`, the icons have no background and are smaller, and so are the keys. A slim row is at least as tall as a list control and grows with its state line, so a row without a state line is lower. An icon whose entity is off takes the secondary text color, as the values in a header do. The icons keep their column, so the text in a slim list starts where it starts in a regular list, and both lists can stand in the same pop-up. In a slim list, `dividers: true` draws a line between the rows. The rows then touch, the line spans the rows' content from the icons' column to the signs' column, and the space above and below it is the same. The line has the width and the color of every line in Origami, such as the lines in Button's segmented bars. An unavailable row dims its content but not the lines beside it. A regular list ignores `dividers`.
-
-```yaml
-type: custom:bubble-card
-card_type: sub-buttons
-modules:
-  - origami_base
-  - origami_tiles
-origami_tiles:
-  layout: list
-  slim: true
-  dividers: true
-sub_button:
-  bottom:
-    - entity: fan.bedroom
-      name: Bedroom fan
-      icon: mdi:fan
-      state_content: percentage
-      tap_action:
-        action: more-info
-    - entity: vacuum.robot
-      name: Vacuum
-      icon: mdi:robot-vacuum
-      tap_action:
-        action: navigate
-        navigation_path: '#popup_vacuum'
-```
+A row's icon has the size and the background of a card's icon, so all rows have the same height, with or without a state line. The signs share one column at the row's end, which is as wide as the icons' column and as far from the edge. A row whose entity is unavailable is dimmed.
 
 </details>
 
@@ -1388,7 +1349,7 @@ The cells of the living room fill the three columns in their order. The office h
 
 ### Popup
 
-The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the pop-up's sub-buttons appear below the title, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title stays on one line and ends with an ellipsis. Otherwise, Bubble Card scrolls it. A header with a button, a switch or a slider keeps Bubble Card's own layout.
+The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the pop-up's sub-buttons appear below the title or beside it, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title stays on one line and ends with an ellipsis. Otherwise, Bubble Card scrolls it. A header with a button, a switch or a slider keeps Bubble Card's own layout.
 
 <details>
 <summary>Options and example</summary>
@@ -1396,6 +1357,8 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 <br>
 
 `value_style` can be `text` (the default) or `chip`. The image at the top of this page shows a pop-up with `text`. Each sub-button can have an `origami_popup` key with `name`, `icon`, `color`, `name_color` and `background`, the same keys as in the Header module. A value with a `name` of its own and no visibility conditions always shows. The row under the title appears only while at least one value shows.
+
+`value_position` places the values `below` the title, which is the default, or `beside` it. Beside the title, the values stand between the title and the close button, and they are small text with a larger icon. A value there can open another part of the pop-up, such as a view that groups speakers.
 
 `art` shows a cover blurred behind the pop-up's content. It accepts a picture's address or a template that returns one, such as the cover of the speaker that the pop-up controls. While the value is empty, the last cover fades out.
 

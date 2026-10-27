@@ -321,6 +321,8 @@ Origami:
   bubble-select-main-background-color: 'var(--ha-card-background)'
   bubble-media-player-main-background-color: 'var(--ha-card-background)'
   bubble-select-list-width: '140px'
+  # The chosen option in a dropdown's menu has a quiet fill, as a pressed row in a list
+  bubble-select-list-item-accent-color: 'var(--fill-subtle)'
   modes:
 
     light:

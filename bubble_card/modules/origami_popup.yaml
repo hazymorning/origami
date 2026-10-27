@@ -1,9 +1,9 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.3.0"
+  version: "4.4.0"
   supported:
     - pop-up
-  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover blurred behind the content. On a header that shows only a name, the sub-buttons become values below the title, as text or as chips, with the same keys as in Header."
+  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover blurred behind the content. On a header that shows only a name, the sub-buttons become values below the title or beside it, as text or as chips, with the same keys as in Header."
   code: |-
     ${(() => {
       const org = card._org;
@@ -19,13 +19,15 @@ origami_popup:
       card._orgP = {
         chip,
         title: type === "name",
+        // With value_position: beside, the values stand at the right of the title, before the close button
+        beside: cfg.value_position === "beside",
         // The icon passes its tap to the card, unless the pop-up has an entity whose icon Bubble Card makes tappable
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
         // The Art option shows a cover blurred behind the pop-up's content. While its value is empty, the last cover fades out.
         art: cfg.art === undefined ? null : org.picture(org.value({ hass, renderTemplate }, cfg.art, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} })) ?? "",
-        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", "var(--ha-font-size-m)", list).join("\n")
+        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
       // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
@@ -140,6 +142,29 @@ origami_popup:
       text-overflow: ellipsis;
       -webkit-line-clamp: 1 !important;
     }
+    ${card._orgP.beside ? `
+    /* Beside the title, the values are small text with a large icon, as in a header with a large title */
+    div.bubble-header .bubble-sub-button-container {
+      position: relative !important;
+      inset: auto !important;
+      align-self: center !important;
+      flex: 0 0 auto !important;
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-3) !important;
+      padding: 0 !important;
+    }
+    div.bubble-header .bubble-sub-button {
+      font-size: var(--ha-font-size-s) !important;
+    }
+    div.bubble-header .bubble-sub-button-icon:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-m) !important;
+      margin: 0 !important;
+      margin-inline-end: var(--ha-space-2) !important;
+    }
+    div.bubble-header .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-2) !important;
+    }` : `
     .bubble-header-container:has(${card._orgP.any}) {
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon) + var(--control-height-mini)) !important;
     }
@@ -176,7 +201,7 @@ origami_popup:
       margin: 0px !important;
       margin-inline-end: auto !important;
       padding: 0px !important;
-    }
+    }`}
     ${card._org.plain("div.bubble-header .bubble-sub-button-container", "var(--ha-font-weight-medium)")}
     ${card._orgP.chip ? card._org.chips("div.bubble-header .bubble-sub-button-container") : ""}
     div.bubble-header .bubble-sub-button-icon {
@@ -198,6 +223,17 @@ origami_popup:
               value: text
             - label: Chips
               value: chip
+    - name: value_position
+      label: "Values"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Below the title
+              value: below
+            - label: Beside the title
+              value: beside
+      default: below
     - name: art
       label: "Art (a cover's address or a template, blurred behind the content)"
       selector:
