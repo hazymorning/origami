@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.4.1"
+  version: "3.4.2"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
@@ -68,9 +68,12 @@ origami_tiles:
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
       const named = [];
+      const free = [];
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
         const sel = ".bubble-sub-button.bubble-sub-button-" + n;
         const rules0 = [];
+        // Only visibility conditions hide a tile, because Tiles writes the name and the state of every tile
+        if (!item.visibility) free.push(".bubble-sub-button-" + n);
         const o = opt ?? {};
         const obj = hass.states[entity];
         const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
@@ -113,6 +116,10 @@ origami_tiles:
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
+      // Bubble Card hides a sub-button that shows neither an icon nor a name of its own, and with it a group or a lane whose sub-buttons are all hidden. A tile without visibility conditions shows anyway, so the rules for shown tiles and groups take it in.
+      card._orgTilesFree = free.join(", ");
+      card._orgTilesShown = free.length ? ":is(:not(.hidden), " + card._orgTilesFree + ")" : ":not(.hidden)";
+      card._orgTilesGroup = free.length ? ":is(:not(.hidden), :has(> :is(" + card._orgTilesFree + ")))" : ":not(.hidden)";
       // A slim row's name keeps at least 40 % of the line, or its own width if that is less, so a short name leaves the rest of the line to the state. The fonts and the widths are known only after layout, so the names are measured in the next frame, as Slider measures its names.
       if (named.length) requestAnimationFrame(() => {
         const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
@@ -141,18 +148,27 @@ origami_tiles:
       return "";
     })()}
     ${card._org.unframe()}
-    .bubble-sub-button-group:not(.hidden) {
+    .bubble-sub-button-group${card._orgTilesGroup} {
+      --org-row-min: calc(var(--tile-size) + 2 * var(--ha-space-4));
       display: grid !important;
       grid-template-columns: repeat(${card._orgTilesCols}, minmax(0, 1fr));
       gap: var(--ha-space-3) !important;
       width: 100%;
     }
+    ${card._orgTilesFree ? `
+    /* A tile without an icon shows its name and state, and its lane stays with it */
+    .bubble-sub-button.hidden:is(${card._orgTilesFree}):not([style*="display: none"]),
+    .bubble-sub-button-alignment-lane.hidden:has(> .bubble-sub-button-group > :is(${card._orgTilesFree})) {
+      display: flex !important;
+    }` : ""}
+    /* A tile without an icon is as tall as a tile with one */
     .bubble-sub-button {
       flex-direction: row !important;
       justify-content: flex-start !important;
       width: auto !important;
       min-width: 0 !important;
       height: auto !important;
+      min-height: var(--org-row-min) !important;
       padding: var(--ha-space-4) !important;
       border-radius: var(--ha-card-border-radius) !important;
       background-color: var(--tile-background, var(--fill-subtle)) !important;
@@ -217,10 +233,11 @@ origami_tiles:
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
     /* A row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. */
-    .bubble-sub-button-group:not(.hidden) {
+    .bubble-sub-button-group${card._orgTilesGroup} {
       --org-sign-col: var(--tile-size);
       --org-sign-size: var(--icon-size-m);
       --org-sign-gap: var(--ha-space-2);
+      --org-row-min: calc(var(--tile-size) + 2 * var(--ha-space-2));
       gap: 0 !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
@@ -282,14 +299,14 @@ origami_tiles:
     }
     ${card._orgTilesSlim ? `
     /* A slim row has the padding of a regular row around one line of text, so it is as tall as a button. Its icon and its sign are small and have no background, its name is medium, and its state stands at its end in bold. */
-    .bubble-sub-button-group:not(.hidden) {
+    .bubble-sub-button-group${card._orgTilesGroup} {
       --org-sign-col: var(--icon-size-s);
       --org-sign-size: var(--icon-size-s);
       --org-sign-gap: var(--ha-space-3);
+      --org-row-min: var(--control-height-icon);
     }
     .bubble-sub-button {
       box-sizing: border-box !important;
-      min-height: var(--control-height-icon) !important;
       align-items: center !important;
     }
     .bubble-sub-button-icon,
@@ -326,8 +343,8 @@ origami_tiles:
     }` : ""}
     ${card._orgTilesLines ? `
     /* With dividers, each shown row after another shown row draws the line above it. The line spans the row's content, and the content keeps the same space to the line above as to the line below. */
-    .bubble-sub-button:not(.hidden):not([style*="display: none"]) ~ .bubble-sub-button:not(.hidden):not([style*="display: none"]) {
-      min-height: calc(var(--control-height-icon) + var(--org-line-width)) !important;
+    .bubble-sub-button${card._orgTilesShown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTilesShown}:not([style*="display: none"]) {
+      min-height: calc(var(--org-row-min) + var(--org-line-width)) !important;
       padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
       background-image: linear-gradient(var(--org-line-color), var(--org-line-color)) !important;
       background-size: calc(100% - 2 * var(--ha-space-2)) var(--org-line-width) !important;

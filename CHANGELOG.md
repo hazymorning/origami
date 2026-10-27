@@ -107,6 +107,7 @@ These changes are in the `next` branch and come with the next release.
 - All cards for one speaker agree on whether an old cover still shows after the speaker leaves an input.
 - A tap that sets a value for several entities, listed in one `entity_id` line and separated by commas, fills its button while the first of them has that value.
 - In the grid layout, the Tiles module reads the theme's `tile-background`, `tile-chip-background` and `tile-chip-shadow`, as Base's `tile` option does.
+- A tile or a list row with `show_icon: false` shows its name and its state, and it is as tall as a tile with an icon. Before, Bubble Card hid it, because Tiles writes the name and the state itself.
 
 ### Upgrading
 

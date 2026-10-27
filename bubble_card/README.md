@@ -1173,7 +1173,7 @@ The header leaves 24 px of space above it and 8 px below it. Popup's `gap` optio
 
 ### Tiles
 
-The Tiles module turns a sub-buttons card into a grid of tiles or into a list. Each tile or row has an icon, a name and a state line. Tiles are sub-buttons, so Bubble Card's visibility conditions decide when each one appears.
+The Tiles module turns a sub-buttons card into a grid of tiles or into a list. Each tile or row has an icon, a name and a state line. Tiles are sub-buttons, so Bubble Card's visibility conditions decide when each one appears. With `show_icon: false`, a tile shows its name and its state where the icon would start, and it is as tall as a tile with an icon.
 
 <img width="800" alt="Six tiles with the oven and the vacuum sorted to the front" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/favorites.webp">
 
