@@ -78,7 +78,7 @@ These changes are in the `next` branch and come with the next release.
 - Each Climate readout shows the target of its own thermostat. It shows a dash while there is no target instead of keeping an old value, and a range keeps its order in languages that read from right to left.
 - On Climate cards, buttons that set a mode or a preset are filled again while that mode or preset is set.
 - A Media card's icon opens the more-info dialog again when you tap it, as on other Bubble cards.
-- In the dashboard, the printer tile no longer turns its name black while the printer runs, so the name stays readable in dark mode.
+- In the dashboard, the printer tile's name has the theme's text color while the printer runs, as on the other tiles. Before, it had the browser's default color.
 - A header keeps Bubble Card's own grid options once you set its rows.
 - In a Button card, a button whose icon sits above or below its name has its icon in the middle and room for both lines.
 - A sub-button slider takes its `custom_height`. Before, Base gave every sub-button slider the same height.
