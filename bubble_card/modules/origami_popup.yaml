@@ -1,20 +1,25 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.5.1"
+  version: "4.6.0"
   supported:
     - pop-up
-  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. On a header that shows only a name, the sub-buttons become values below the title or beside it, as text or as chips, with the same keys as in Header."
+  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. The title can be a template. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
   code: |-
     ${(() => {
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 12.6)) throw new Error("origami_popup needs origami_base 12.6 or later");
       const cfg = this.config.origami_popup ?? {};
+      const env = { hass, renderTemplate };
+      const ctx = { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} };
       // Origami 2 named this option subtitle_style, and that name still works
       const chip = (cfg.value_style ?? cfg.subtitle_style) === "chip";
       // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.
       const type = ["classic", "home-assistant"].includes(this.config.popup_style) ? "switch" : this.config.button_type || (this.config.entity ? "switch" : "name");
+      // Popup writes the title, as Bubble Card would, so a title in ${ } reads the states at once, such as the view that a helper chooses. A header that shows only a name has no title without a name of its own, and a header with a button shows its entity's name.
+      const own = this.config.name;
+      if (card.querySelector('.bubble-name')) card.querySelector('.bubble-name').textContent = type !== "name" ? org.name(hass, entity, own, env) : org.has(own) ? String(org.value(env, own, ctx) ?? "") : "";
       // A value with a name of its own and no visibility conditions always shows, even while Bubble Card would hide it, so the header keeps the row for it
-      const list = org.subs({ hass, renderTemplate }, this.config, "origami_popup");
+      const list = org.subs(env, this.config, "origami_popup");
       const forced = list.filter(({ item, opt }) => org.has(opt?.name) && !item.visibility).map(({ n }) => ".bubble-sub-button-" + n);
       card._orgP = {
         chip,
@@ -26,10 +31,10 @@ origami_popup:
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
         // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. While its value is empty, the last cover fades out.
-        art: cfg.art === undefined ? null : org.picture(org.value({ hass, renderTemplate }, cfg.art, { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} })) ?? "",
+        art: cfg.art === undefined ? null : org.picture(org.value(env, cfg.art, ctx)) ?? "",
         mix: cfg.cover_mix ?? 16,
         cover: cfg.cover_blur === undefined || org.yes(cfg.cover_blur),
-        css: org.values({ hass, renderTemplate }, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
+        css: org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
       // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it

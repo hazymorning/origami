@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.10.0"
+  version: "12.11.0"
   is_global: true
   supported:
     - button
@@ -1389,6 +1389,9 @@ origami_base:
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; margin-inline-start: var(--ha-space-1); }",
           sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--org-icon-size); width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; color: inherit !important; }",
+          // An icon before the name, such as a speaker, is as large as the icon of a chip and has the chip's text color. The chip's start then has less padding, so the icon starts about as far from the edge as the chevron ends.
+          sel + org.key + ":has(> .bubble-sub-button-icon:not(.hidden)) { padding-inline-start: var(--ha-space-3) !important; }",
+          sel + " .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; margin-inline-end: var(--ha-space-2) !important; color: inherit !important; opacity: 1 !important; }",
           // The open menu is the sign that the dropdown is open, so Bubble Card's ring in the accent color stays hidden
           sel + " .bubble-dropdown-inner-border { display: none !important; }");
         // Bubble Card builds the menu's items again when the options change, so they are written after each update

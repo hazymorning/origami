@@ -62,7 +62,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. Its menu shows each entity's name and icon, and options such as None keep their text. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 
@@ -593,10 +593,10 @@ sub_button:
   main:
     - entity: input_select.speaker
       sub_button_type: select
-      show_icon: false
+      icon: mdi:speaker
 ```
 
-The dropdown's options are the speakers' entity IDs, so it shows as a chip with the chosen speaker's name, as described under Color in [How the modules work together](#how-the-modules-work-together).
+The dropdown's options are the speakers' entity IDs, so it shows as a chip with a small speaker and the chosen speaker's name, as described under Color in [How the modules work together](#how-the-modules-work-together).
 
 #### Play row
 
@@ -1443,6 +1443,8 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 `value_position` is `below` (the default) or `beside`, which puts the values as small text between the title and the close button.
 
 `art` shows a blurred cover behind the content. It takes a picture's address or a template that returns one, such as the cover of the pop-up's speaker. While it is empty, the last cover fades out. `cover_mix` and `cover_blur` work as in Media, but here they default to `16` and `true`.
+
+The pop-up's `name` can be a template. JavaScript in `${ }` shows at once, while Jinja in `{{ }}` leaves the title empty until Home Assistant answers. With `name: ${states('input_select.music_view')}`, the title names the view that a helper chooses.
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 

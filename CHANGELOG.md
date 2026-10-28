@@ -30,7 +30,7 @@ These changes are in the `next` branch and come with the next release.
 - A compact card's icon has no background, as in a slim list.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
-- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line.
+- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
 
@@ -72,6 +72,7 @@ These changes are in the `next` branch and come with the next release.
 
 - `art` shows a blurred cover behind the content. `cover_mix` and `cover_blur` work as in Media.
 - `gap` sets the space between the cards of a vertical stack.
+- Popup writes the title itself, so a title with a `${ }` template shows at once, such as the view that a helper chooses.
 - `value_position: beside` puts the values beside the title.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
