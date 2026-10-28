@@ -1,9 +1,9 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.3.1"
+  version: "5.7.0"
   supported:
     - media-player
-  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover, and the TV layout shows what plays or the running app. A play key gets a ring for the track's progress. Options name other players, a group leader, a cover and icons."
+  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
   editor:
     - name: layout
       label: "Layout"
@@ -68,10 +68,43 @@ origami_media:
       label: "Icon colors (a map from a state or an input to a color)"
       selector:
         object: {}
+    - name: cover
+      label: "Cover (also a list, a map from the state or a template)"
+      selector:
+        select:
+          mode: dropdown
+          custom_value: true
+          options:
+            - label: In the icon
+              value: icon
+            - label: Large, above the name
+              value: above
+            - label: As the card's background
+              value: background
+            - label: In the icon and as the background
+              value: icon background
+            - label: Above the name and as the background
+              value: above background
+      default: icon
+    - name: cover_mix
+      label: "Cover mix (the cover's share in percent, behind the card)"
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 5
+          mode: slider
+          unit_of_measurement: "%"
+      default: 25
+    - name: cover_blur
+      label: "Cover blur (behind the card)"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_media needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.8)) throw new Error("origami_media needs origami_base 12.8 or later");
       const own = this.config.origami_media ?? {};
       // Origami 2 named a TV's players art_entity and app_entity, and those still work as the TV layout with these players
       const old = [own.art_entity, own.app_entity].filter(Boolean);
@@ -80,6 +113,8 @@ origami_media:
       const ent = hass.states[entity];
       const tv = cfg.layout === "tv";
       const m = org.media(hass, entity, { env, tv, cfg });
+      // The cover option names one place or several, as a list or as words, also from a map from the state or a template, so a card can change its layout with the state without a helper. The background combines with the icon or with the square above the name.
+      const places = String(org.value(env, cfg.cover, { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} })).toLowerCase().split(/[^a-z]+/).filter(Boolean);
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
       const power = m.power;
       // A bottom sub-button with css_class play is the play key, and its row becomes the play row. Sub-buttons are found by number, because Bubble Card also turns a name such as Play into a class.
@@ -95,12 +130,20 @@ origami_media:
         powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
+        // With background, the cover fills the card. Cover mix sets its share in a mix with the card's color, and Cover blur blurs it. The icon keeps the cover when the list also names icon or above, and without background it always does.
+        back: places.includes("background"),
+        above: places.includes("above"),
+        boxed: !places.includes("background") || places.includes("icon") || places.includes("above"),
+        mix: cfg.cover_mix ?? 25,
+        blur: org.yes(cfg.cover_blur),
         // Origami 2 kept Filled play and power buttons under origami_base, and that place still works
         solid: !!(cfg.solid_controls ?? this.config.origami_base?.solid_controls),
         // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
         state: this.config.show_state === false || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
       };
       const c = card._orgM;
+      // A cover that goes fades out, so the card keeps the last cover until another one comes
+      if (c.art) card._orgMArt = c.art;
       // With Filled play and power buttons, the play button is filled while media plays and the power button while the device is on
       c.filled = c.solid ? [c.playing ? ".bubble-play-pause-button" : "", c.powered ? ".bubble-power-button" : ""].filter(Boolean) : [];
       // With Keep name, the name line always shows the card's name, and the state line shows the title and the artist while music plays
@@ -181,8 +224,9 @@ origami_media:
     })()}
     ha-card {
       --org-color: ${card._orgM.m.color};
+      ${card._orgM.state === "none" ? "--org-lines-h: 0px;" : card._org.opts.large ? "--org-lines-h: calc(var(--ha-font-size-xl) * var(--ha-line-height-normal) + var(--ha-space-1) + var(--ha-font-size-s) * var(--ha-line-height-normal));" : ""}
       --org-chip-bg: ${card._orgM.on && !card._orgM.ink ? "var(--org-field)" : "var(--org-inset)"};
-      --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--primary-text-color)")};
+      --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--org-chip-rest, var(--primary-text-color))")};
     }
     ${card._orgM.members.length ? `${card._orgM.members.join(", ")} {
       gap: 0 !important;
@@ -308,7 +352,64 @@ origami_media:
       display: none !important;
     }
     ` : ""}
-    ${card._org.cover(card._orgM.art, "1")}
+    ${card._org.cover(card._orgM.boxed ? card._orgM.art : null, "1")}
+    ${card._orgM.above ? `
+    /* Above the name, the icon's box becomes a square cover as wide as the card's content, so a tap on the cover does what a tap on the icon does. Without a cover, it shows the card's icon. The name, the main sub-buttons and the rows below stay in their places, and the card grows with the cover. */
+    .card-content,
+    ha-card .bubble-container {
+      height: auto !important;
+    }
+    ha-card .bubble-wrapper {
+      position: relative !important;
+      height: auto !important;
+      flex-wrap: wrap !important;
+      align-items: flex-start !important;
+      align-content: flex-start;
+    }
+    ha-card .bubble-content-container {
+      display: contents !important;
+    }
+    ha-card .bubble-main-icon-container,
+    ha-card .bubble-main-icon-container.hidden {
+      display: flex !important;
+      z-index: 1;
+      flex: 0 0 calc(100% - 2 * var(--org-pad)) !important;
+      width: auto !important;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      aspect-ratio: 1;
+      margin: var(--org-pad) var(--org-pad) 0 !important;
+      /* The cover spans the card's width at the card's padding, so its corners run parallel to the card's corners, as a list's rows do */
+      border-radius: max(0px, calc(var(--ha-card-border-radius) - var(--org-pad))) !important;
+      container-type: inline-size;
+    }
+    ha-card .bubble-main-icon-container .bubble-icon {
+      --mdc-icon-size: 30cqi;
+    }
+    ha-card .bubble-name-container {
+      flex: 1 1 0% !important;
+      align-self: stretch;
+      justify-content: center;
+      min-width: 0 !important;
+      height: var(--org-row-height) !important;
+      margin-inline-start: var(--org-pad) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      position: static !important;
+      order: 1;
+      flex: 0 0 auto;
+    }` : ""}
+    ${card._orgM.back ? `
+    /* On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. */
+    ha-card .bubble-background {
+      overflow: hidden;
+    }
+    ${card._org.backdrop("ha-card .bubble-background::before", card._orgMArt, card._orgM.art ? card._orgM.mix : 0, card._orgM.blur, "0px")}
+    ${card._orgM.art ? `ha-card {
+      --org-inset: color-mix(in srgb, var(--ha-card-background) 70%, transparent);
+    }` : ""}
+    ` : ""}
     .bubble-name-container {
       display: flex !important;
     }

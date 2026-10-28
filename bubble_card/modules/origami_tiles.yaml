@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.1.1"
+  version: "3.4.2"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows, each with an icon, a name and a state line. In the list, a sign at the end of each row shows whether a tap opens, runs or switches something."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
   editor:
     - name: layout
       label: "Layout"
@@ -25,42 +25,82 @@ origami_tiles:
           step: 1
           mode: box
       default: 2
+    - name: slim
+      label: "Slim rows (list): small icons without a background, the state at the row's end"
+      selector:
+        boolean: {}
+      default: false
+    - name: dividers
+      label: "Lines between the rows (list)"
+      selector:
+        boolean: {}
+      default: false
+    - name: sign
+      label: "Sign for every row (list)"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Set by the tap action
+              value: auto
+            - label: Chevron
+              value: open
+            - label: Play
+              value: run
+            - label: Switch
+              value: switch
+            - label: None
+              value: none
+      default: auto
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_tiles needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_tiles needs origami_base 12.5 or later");
       const env = { hass, renderTemplate };
-      const list = this.config.origami_tiles?.layout === "list";
+      const cfg = this.config.origami_tiles ?? {};
+      const list = cfg.layout === "list";
       card._orgTilesList = list;
-      card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(this.config.origami_tiles?.columns ?? 2, 10) || 2));
+      card._orgTilesCols = list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2));
+      // A slim list has low rows with plain icons and the state at the row's end, and dividers draw a line between the rows of any list
+      card._orgTilesSlim = list && org.yes(cfg.slim);
+      card._orgTilesLines = list && org.yes(cfg.dividers);
+      const signKeys = ["open", "run", "switch", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
+      const named = [];
+      const free = [];
       card._orgTilesCss = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
         const sel = ".bubble-sub-button.bubble-sub-button-" + n;
         const rules0 = [];
+        // Only visibility conditions hide a tile, because Tiles writes the name and the state of every tile
+        if (!item.visibility) free.push(".bubble-sub-button-" + n);
         const o = opt ?? {};
         const obj = hass.states[entity];
         const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
+        if (card._orgTilesSlim) named.push([n, String(name)]);
         // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
         const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
         const state = org.has(o.state) ? o.state : obj ? org.state(hass, entity, parts) : "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
         // A tile is dimmed while its entity is missing or unavailable. A scene or a button that was never used is unknown, and it stays as it is.
-        if (entity && (!obj || obj.state === "unavailable")) rules0.push(sel + " { opacity: var(--opacity-disabled); }");
+        if (entity && (!obj || obj.state === "unavailable")) rules0.push(list ? "ha-card " + sel + " > *, ha-card " + sel + "::after { opacity: var(--opacity-disabled) !important; }" : sel + " { opacity: var(--opacity-disabled); }");
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
-        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) ? " order: " + o.order + ";" : "") + " }", ...rules0];
+        // In a list with lines, the rows keep the order of the YAML, because each line belongs to the row below it
+        const rules = [sel + " { --org-tile-name: " + org.str(name) + "; --org-tile-state: " + org.str(state) + ";" + (org.has(o.order) && !card._orgTilesLines ? " order: " + o.order + ";" : "") + " }", ...rules0];
         // A row without a state line keeps its name in the middle
         if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
-        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: " + (list ? "color-mix(in srgb, var(--org-tile-color) 18%, var(--ha-card-background))" : "var(--tint)") + "; }");
+        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
         if (list) {
           // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
           const tap = org.act(item);
-          const [domain, verb] = org.service(item).split(".");
+          // A tap with action: toggle counts as a toggle, so a play sign set by the sign key shows a stop sign while the entity is on
+          const [domain, verb] = (tap.action === "toggle" ? "homeassistant.toggle" : org.service(item)).split(".");
           // The sign follows the entity that the tap acts on
           const target = org.targets(item)[0];
           const id = (target === "entity" ? null : target) ?? entity;
-          const sign = ["open", "run", "switch", "none"].includes(o.sign) ? o.sign
+          const sign = signKeys.includes(o.sign) ? o.sign
+            : signKeys.includes(cfg.sign) ? cfg.sign
             : org.links.includes(tap.action) ? "open"
             : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
             : ["perform-action", "call-service"].includes(tap.action) ? "run"
@@ -72,9 +112,26 @@ origami_tiles:
           if (sign === "run") signs[!org.filled(hass, item, id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
         }
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
+        if (org.has(o.state_color)) rules.push(sel + " .bubble-sub-button-name-container::after { color: " + o.state_color + "; }");
         if (org.has(o.image)) rules.push(sel + " .bubble-sub-button-icon { --mdc-icon-size: 0px !important; background-image: url(" + org.str(o.image) + "); background-size: " + (org.has(o.image_size) ? o.image_size : "cover") + "; background-position: center; }");
         return rules.join("\n");
       }).join("\n");
+      // Bubble Card hides a sub-button that shows neither an icon nor a name of its own, and with it a group or a lane whose sub-buttons are all hidden. A tile without visibility conditions shows anyway, so the rules for shown tiles and groups take it in.
+      card._orgTilesFree = free.join(", ");
+      card._orgTilesShown = free.length ? ":is(:not(.hidden), " + card._orgTilesFree + ")" : ":not(.hidden)";
+      card._orgTilesGroup = free.length ? ":is(:not(.hidden), :has(> :is(" + card._orgTilesFree + ")))" : ":not(.hidden)";
+      // A slim row's name keeps at least 40 % of the line, or its own width if that is less, so a short name leaves the rest of the line to the state. The fonts and the widths are known only after layout, so the names are measured in the next frame, as Slider measures its names.
+      if (named.length) requestAnimationFrame(() => {
+        const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
+        named.forEach(([n, text]) => {
+          const el = card.querySelector(".bubble-sub-button-" + n + " > .bubble-sub-button-name-container");
+          if (!el) return;
+          const cs = getComputedStyle(el, "::before");
+          pen.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+          const w = Math.ceil(pen.measureText(text).width) + 1 + "px";
+          if (el.style.getPropertyValue("--org-name-w") !== w) el.style.setProperty("--org-name-w", w);
+        });
+      });
       // at() returns a selector list for the rows with these signs, with the same ending on each selector
       const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
       // The signs are icons from Material Design Icons, drawn as masks in the text color. Only the list builds them.
@@ -83,41 +140,35 @@ origami_tiles:
         at,
         all: "open run running stop switch on",
         chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
-        playMask: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
-        stopMask: mask("M18,18H6V6H18V18Z"),
-        // The knob is the circle that Base's pill switch uses
-        knob: mask("M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z")
+        play: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
+        stop: mask("M18,18H6V6H18V18Z"),
+        off: mask("M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"),
+        on: mask("M17,7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7M17,15A3,3 0 0,1 14,12A3,3 0 0,1 17,9A3,3 0 0,1 20,12A3,3 0 0,1 17,15Z")
       };
       return "";
     })()}
-    .bubble-container {
-      height: auto !important;
-      overflow: visible !important;
-      border: none !important;
-      border-radius: 0 !important;
-      background: none !important;
-      box-shadow: none !important;
-    }
-    .bubble-sub-button-container {
-      display: none !important;
-    }
-    .bubble-sub-button-bottom-container {
-      position: static !important;
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    .bubble-sub-button-group:not(.hidden) {
+    ${card._org.unframe()}
+    .bubble-sub-button-group${card._orgTilesGroup} {
+      --org-row-min: calc(var(--tile-size) + 2 * var(--ha-space-4));
       display: grid !important;
       grid-template-columns: repeat(${card._orgTilesCols}, minmax(0, 1fr));
       gap: var(--ha-space-3) !important;
       width: 100%;
     }
+    ${card._orgTilesFree ? `
+    /* A tile without an icon shows its name and state, and its lane stays with it */
+    .bubble-sub-button.hidden:is(${card._orgTilesFree}):not([style*="display: none"]),
+    .bubble-sub-button-alignment-lane.hidden:has(> .bubble-sub-button-group > :is(${card._orgTilesFree})) {
+      display: flex !important;
+    }` : ""}
+    /* A tile without an icon is as tall as a tile with one */
     .bubble-sub-button {
       flex-direction: row !important;
       justify-content: flex-start !important;
       width: auto !important;
       min-width: 0 !important;
       height: auto !important;
+      min-height: var(--org-row-min) !important;
       padding: var(--ha-space-4) !important;
       border-radius: var(--ha-card-border-radius) !important;
       background-color: var(--tile-background, var(--fill-subtle)) !important;
@@ -181,103 +232,122 @@ origami_tiles:
     }
     ${card._orgTilesCss}
     ${card._orgTilesList ? `
-    .bubble-sub-button-group:not(.hidden) {
-      gap: var(--ha-space-1) !important;
+    /* A row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. */
+    .bubble-sub-button-group${card._orgTilesGroup} {
+      --org-sign-col: var(--tile-size);
+      --org-sign-size: var(--icon-size-m);
+      --org-sign-gap: var(--ha-space-2);
+      --org-row-min: calc(var(--tile-size) + 2 * var(--ha-space-2));
+      gap: 0 !important;
       box-sizing: border-box;
       padding: var(--ha-space-2);
       border-radius: var(--ha-card-border-radius);
-      background-color: var(--fill-subtle);
+      background-color: var(--tile-background, var(--fill-subtle));
     }
     .bubble-sub-button {
       position: relative !important;
-      height: var(--control-height) !important;
-      padding: 0 var(--ha-space-2) !important;
+      padding: var(--ha-space-2) !important;
       border-radius: calc(var(--ha-card-border-radius) - var(--ha-space-2)) !important;
       background-color: transparent !important;
     }
     .bubble-sub-button.bubble-action-enabled:active {
       background-color: var(--fill-subtle) !important;
     }
-    .bubble-sub-button-icon,
-    .bubble-sub-button-image {
-      width: var(--control-height-icon) !important;
-      min-width: var(--control-height-icon) !important;
-      height: var(--control-height-icon) !important;
-      border-radius: calc(var(--radius-inner) - var(--ha-space-1)) !important;
-      box-shadow: none;
-    }
-    .bubble-sub-button-icon {
-      --mdc-icon-size: var(--icon-size-s) !important;
-      background-color: var(--org-tile-chip, var(--fill-subtle));
-      color: var(--org-tile-color, var(--secondary-text-color)) !important;
-    }
     .bubble-sub-button-name-container::after {
       margin-top: 2px;
     }
+    /* The sign at a row's end is an icon in the middle of a column as wide as the icons' column on the other side. It is quiet, and it stands out while what it controls is on or runs. */
     ${card._orgTilesSign.at(card._orgTilesSign.all)} {
-      padding-inline-end: calc(2 * var(--ha-space-2) + var(--org-toggle-w)) !important;
+      padding-inline-end: calc(var(--ha-space-2) + var(--org-sign-col) + var(--org-sign-gap)) !important;
     }
-    ${card._orgTilesSign.at(card._orgTilesSign.all, "::before")},
     ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
       content: "";
       position: absolute;
       top: 50%;
+      inset-inline-end: calc(var(--ha-space-2) + (var(--org-sign-col) - var(--org-sign-size)) / 2);
+      width: var(--org-sign-size);
+      height: var(--org-sign-size);
       translate: 0 -50%;
-      pointer-events: none;
-    }
-    ${card._orgTilesSign.at("run running stop switch on", "::before")} {
-      inset-inline-end: var(--ha-space-2);
-      width: var(--org-toggle-w);
-      height: var(--org-toggle-h);
-      border-radius: var(--radius-inner);
-      background-color: var(--fill-subtle);
-      box-shadow: var(--card-ring);
-      transition: var(--transition-interactive);
-    }
-    ${card._orgTilesSign.at("running stop on", "::before")} {
-      background-color: var(--fill-active);
-    }
-    ${card._orgTilesSign.at(card._orgTilesSign.all, "::after")} {
       -webkit-mask: var(--org-sign-icon) center / contain no-repeat;
       mask: var(--org-sign-icon) center / contain no-repeat;
+      background-color: var(--secondary-text-color);
+      opacity: var(--opacity-muted);
+      pointer-events: none;
+      transition: background-color var(--duration-normal) ease, opacity var(--duration-normal) ease;
     }
     ${card._orgTilesSign.at("open", "::after")} {
       --org-sign-icon: ${card._orgTilesSign.chevron};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-m)) / 2);
-      width: var(--icon-size-m);
-      height: var(--icon-size-m);
-      background-color: var(--secondary-text-color);
-      opacity: var(--opacity-muted);
     }
     ${card._orgTilesSign.at("open", "::after", "ha-card:dir(rtl) ")} {
       scale: -1 1;
     }
-    ${card._orgTilesSign.at("run running stop", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.playMask};
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-toggle-w) - var(--icon-size-s)) / 2);
-      width: var(--icon-size-s);
-      height: var(--icon-size-s);
-      background-color: var(--primary-text-color);
-      opacity: var(--opacity-strong);
+    ${card._orgTilesSign.at("run running", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.play};
     }
     ${card._orgTilesSign.at("stop", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.stopMask};
+      --org-sign-icon: ${card._orgTilesSign.stop};
     }
-    ${card._orgTilesSign.at("running stop", "::after")} {
-      background-color: var(--text-color-active);
-      opacity: 1;
-    }
-    ${card._orgTilesSign.at("switch on", "::after")} {
-      --org-sign-icon: ${card._orgTilesSign.knob};
-      inset-inline-end: calc(var(--ha-space-2) + var(--org-toggle-w) - var(--ha-space-1) - var(--org-toggle-knob));
-      width: var(--org-toggle-knob);
-      height: var(--org-toggle-knob);
-      background-color: var(--primary-text-color);
-      opacity: var(--opacity-quiet);
-      transition: inset-inline-end var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) ease;
+    ${card._orgTilesSign.at("switch", "::after")} {
+      --org-sign-icon: ${card._orgTilesSign.off};
     }
     ${card._orgTilesSign.at("on", "::after")} {
-      inset-inline-end: calc(var(--ha-space-2) + var(--ha-space-1));
-      background-color: var(--text-color-active);
+      --org-sign-icon: ${card._orgTilesSign.on};
+    }
+    ${card._orgTilesSign.at("running stop on", "::after")} {
+      background-color: var(--primary-text-color);
       opacity: 1;
+    }
+    ${card._orgTilesSlim ? `
+    /* A slim row has the padding of a regular row around one line of text, so it is as tall as a button. Its icon and its sign are small and have no background, its name is medium, and its state stands at its end in bold. */
+    .bubble-sub-button-group${card._orgTilesGroup} {
+      --org-sign-col: var(--icon-size-s);
+      --org-sign-size: var(--icon-size-s);
+      --org-sign-gap: var(--ha-space-3);
+      --org-row-min: var(--control-height-icon);
+    }
+    .bubble-sub-button {
+      box-sizing: border-box !important;
+      align-items: center !important;
+    }
+    .bubble-sub-button-icon,
+    .bubble-sub-button-image {
+      width: var(--icon-size-s) !important;
+      min-width: var(--icon-size-s) !important;
+      height: var(--icon-size-s) !important;
+      border-radius: 0 !important;
+      box-shadow: none;
+    }
+    .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-s) !important;
+      background-color: transparent;
+      color: var(--org-tile-color, var(--secondary-text-color)) !important;
+    }
+    /* The name and the state share one line. The name keeps at least 40 % of it, or its measured width if that is less, and the state takes at most the rest. Bubble Card's own state text has a row of no height below them. */
+    .bubble-sub-button-name-container {
+      display: grid !important;
+      grid-template-columns: minmax(min(40%, var(--org-name-w, 40%)), 1fr) minmax(0, max-content);
+      grid-auto-rows: 0;
+      align-items: center;
+      line-height: var(--ha-line-height-normal) !important;
+    }
+    .bubble-sub-button-name-container::before {
+      grid-area: 1 / 1;
+      font-weight: var(--ha-font-weight-medium);
+    }
+    .bubble-sub-button-name-container::after {
+      grid-area: 1 / 2;
+      margin: -2px;
+      margin-inline-start: calc(var(--ha-space-3) - 2px);
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-bold);
     }` : ""}
+    ${card._orgTilesLines ? `
+    /* With dividers, each shown row after another shown row draws the line above it. The line spans the row's content, and the content keeps the same space to the line above as to the line below. */
+    .bubble-sub-button${card._orgTilesShown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTilesShown}:not([style*="display: none"]) {
+      min-height: calc(var(--org-row-min) + var(--org-line-width)) !important;
+      padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
+      background-image: linear-gradient(var(--org-line-color), var(--org-line-color)) !important;
+      background-size: calc(100% - 2 * var(--ha-space-2)) var(--org-line-width) !important;
+      background-position: center top !important;
+      background-repeat: no-repeat !important;
+    }` : ""}` : ""}

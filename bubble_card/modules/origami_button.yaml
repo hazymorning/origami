@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.6.1"
+  version: "3.8.0"
   supported:
     - sub-buttons
     - button
@@ -34,7 +34,7 @@ origami_button:
           mode: box
       default: 0
     - name: muted
-      label: "Muted"
+      label: "Dimmed text and icons"
       selector:
         boolean: {}
       default: false
@@ -124,7 +124,7 @@ origami_button:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_button needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_button needs origami_base 12.5 or later");
       const cfg = this.config.origami_button ?? {};
       const lang = hass.locale?.language ?? hass.language ?? "en";
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
@@ -156,8 +156,6 @@ origami_button:
       const segNames = seg ? [] : [].concat(segRaw ?? []).flatMap((v) => String(v).split(",")).map(low).filter((v) => v && v !== "false");
       // Bubble Card numbers the sub-buttons of the groups first, in their order. On a button card, the main sub-buttons come before the bottom ones, and Button leaves them to Base.
       const own = this.config.card_type === "sub-buttons";
-      // On a button card, Base 12.4 and later leaves the bottom sub-buttons to Button. An older Base would fill them like the main sub-buttons.
-      if (!own && !org.key) throw new Error("origami_button needs origami_base 12.4 or later on a button card");
       const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
       const grouped = bottom.filter((g) => Array.isArray(g?.group));
       const loose = bottom.filter((g) => g && !Array.isArray(g.group));
@@ -208,6 +206,10 @@ origami_button:
       }
       const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
+      // Base's sub_button_height and sub_button_text_size set the buttons' height and the size of their text, as on Base's own cards
+      const opts = org.opts ?? {};
+      // A button without a name or a state of its own shows only its icon, and it is a square
+      const bare = subs.filter(({ n, item, opt }) => !org.shows(item) && !org.has(opt?.name) && org.slug(item.css_class) !== "divider" && !inBar.includes(n)).map(({ n }) => base + ".bubble-sub-button-" + n);
       const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => base + ".bubble-sub-button-" + n + ":not(.org-pending-off)"), base + ".org-pending-on"];
       const chips = !!cfg.chips;
       const scroll = !!cfg.scroll && !seg;
@@ -219,7 +221,7 @@ origami_button:
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
-      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)", subs).join("\n    ");
+      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", org.opts?.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
       // A small segmented switch is a track around its group, and its active segment takes the stronger fill
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
@@ -266,6 +268,9 @@ origami_button:
         values,
         pad: pad || "0",
         size,
+        height: opts.sub || "",
+        text: opts.text || "",
+        bare,
         row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
         rev: { start: "flex-end", center: "center", end: "flex-start" }[align],
         // on() adds each suffix it receives to every active button's selector and joins the results into one list
@@ -274,38 +279,22 @@ origami_button:
       return "";
     })()}
     ha-card {
-      --org-btn-height: ${card._orgB.seg ? "var(--control-height)" : card._orgB.bg ? "var(--control-height-icon)" : "auto"};
-      --org-btn-padding: ${card._orgB.seg ? "0 var(--ha-space-2)" : card._orgB.bg ? "0 var(--ha-space-4)" : "var(--ha-space-2) var(--ha-space-4)"};
+      --org-btn-height: ${card._orgB.seg ? card._orgB.height || "var(--control-height)" : card._orgB.bg ? card._orgB.height || "var(--control-height-icon)" : "auto"};
+      /* A button's sides have 40 % of its height as padding, which is 16 px on a 40 px button */
+      --org-btn-padding: ${card._orgB.seg ? "0 var(--ha-space-2)" : card._orgB.bg ? "0 calc(var(--org-btn-height) * 0.4)" : "var(--ha-space-2) var(--ha-space-4)"};
       --org-btn-bg: ${card._orgB.bg || card._orgB.seg ? "var(--fill-subtle)" : "transparent"};
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
       --org-btn-lamp: ${card._orgB.lamp};
-      --org-btn-radius: ${!card._orgB.chips ? "var(--radius-inner)" : card._orgB.bg || card._orgB.seg ? "calc(var(--org-btn-height) / 2)" : "calc(var(--control-height-icon) / 2)"};
+      --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
     }
     ${card._orgB.lamps}
     ${card._orgB.values}
     ${card._orgB.order}
-    ${card._orgB.own ? `ha-card .bubble-container {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      padding: ${card._orgB.pad} !important;
-      box-sizing: border-box !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-    ha-card .bubble-container > .bubble-sub-button-container {
-      display: none !important;
-    }` : ""}
+    ${card._orgB.own ? card._org.unframe(card._orgB.pad) : ""}
     ha-card .bubble-sub-button-bottom-container {
       position: static !important;
       inset: auto !important;
-      ${card._orgB.own ? `width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;` : ""}
       gap: ${card._orgB.seg ? "0" : "var(--ha-space-2)"} !important;
       pointer-events: auto !important;
       ${card._orgB.cols ? `display: grid !important;
@@ -358,7 +347,7 @@ origami_button:
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap !important;
-      font-size: ${card._orgB.seg ? (card._orgB.large ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"} !important;
+      font-size: ${card._orgB.text || (card._orgB.seg ? (card._orgB.large ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)")} !important;
       font-weight: ${card._orgB.seg ? "var(--ha-font-weight-bold)" : "var(--ha-font-weight-medium)"} !important;
       ${card._orgB.seg ? "font-variant-numeric: tabular-nums;" : ""}
       color: inherit !important;
@@ -382,12 +371,12 @@ origami_button:
       margin: 0 !important;
     }
     ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:first-child, :nth-child(1 of .bubble-sub-button:not(.hidden))) {
-      border-start-start-radius: var(--radius-inner) !important;
-      border-end-start-radius: var(--radius-inner) !important;
+      border-start-start-radius: var(--org-btn-radius) !important;
+      border-end-start-radius: var(--org-btn-radius) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
-      border-start-end-radius: var(--radius-inner) !important;
-      border-end-end-radius: var(--radius-inner) !important;
+      border-start-end-radius: var(--org-btn-radius) !important;
+      border-end-end-radius: var(--org-btn-radius) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(:is(:last-child, :nth-last-child(1 of .bubble-sub-button-group:not(.hidden)))) > .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
       margin-inline-end: var(--ha-space-3);
@@ -397,16 +386,16 @@ origami_button:
       position: absolute;
       inset-block: 25%;
       inset-inline-start: 0;
-      width: 2px;
-      background-color: var(--fill-loud);
+      width: var(--org-line-width);
+      background-color: var(--org-line-color);
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button::before {
-      --org-btn-inset: calc((var(--control-height) - var(--control-height-row)) / 2);
+      --org-btn-inset: calc((var(--org-btn-height) - var(--control-height-row)) / 2);
       content: "";
       position: absolute;
       inset: var(--org-btn-inset);
       z-index: -1;
-      border-radius: calc(var(--radius-inner) - var(--org-btn-inset));
+      border-radius: calc(var(--org-btn-radius) - var(--org-btn-inset));
       background-color: var(--fill-active);
       opacity: 0;
       transition: opacity var(--duration-normal) ease;
@@ -424,12 +413,7 @@ origami_button:
       color: var(--secondary-text-color) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right {
-      padding-inline-end: var(--ha-space-3) !important;
-    }
-    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:not(:has(.bubble-sub-button-name-container:not(:empty))) {
-      width: var(--org-btn-height) !important;
-      padding: 0 !important;
-      justify-content: center !important;
+      padding-inline-end: calc(var(--org-btn-height) * 0.3) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
       margin-inline: var(--ha-space-1) 0 !important;
@@ -453,18 +437,35 @@ origami_button:
       width: 100% !important;
       height: var(--tile-size-lg) !important;
       margin: 0 !important;
-      border-radius: var(--radius-inner);
+      border-radius: min(calc(var(--tile-size-lg) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
       background: var(--org-value-chip, var(--org-btn-bg));
       transition: var(--transition-interactive);
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-name-container {
       max-width: 100%;
       margin-top: var(--ha-space-3) !important;
-      font-size: var(--ha-font-size-m) !important;
+      font-size: ${card._orgB.text || "var(--ha-font-size-m)"} !important;
+    }` : ""}
+    ${!card._orgB.bare.length || card._orgB.cols || card._orgB.seg ? "" : card._orgB.below ? `
+    /* A field without a name is a square, and no space for a name stays below it */
+    ${card._orgB.each(card._orgB.bare, "")} {
+      width: var(--tile-size-lg) !important;
+    }
+    ${card._orgB.each(card._orgB.bare, " .bubble-sub-button-name-container")} {
+      display: none !important;
+    }` : card._orgB.bg ? `
+    /* A button with only its icon is a square, and a button that stacks its icon and name is as wide as it is tall */
+    ${card._orgB.each(card._orgB.bare, "")} {
+      width: var(--org-btn-height) !important;
+      padding: 0 !important;
+      justify-content: center !important;
+    }
+    ${card._orgB.each(card._orgB.bare, ":is(.content-icon-top, .content-icon-bottom)")} {
+      width: calc(2 * var(--org-btn-height)) !important;
     }` : ""}
     ${card._orgB.rings.length ? card._orgB.each(card._orgB.rings, "") + ` {
       background: transparent !important;
-      box-shadow: inset 0 0 0 2px var(--fill-loud) !important;
+      box-shadow: inset 0 0 0 var(--org-line-width) var(--org-line-color) !important;
     }` : ""}
     ${card._orgB.bars}
     ${card._orgB.each(card._orgB.barOn, "")} {
@@ -475,15 +476,15 @@ origami_button:
       font-weight: var(--ha-font-weight-bold) !important;
     }
     ${card._orgB.dividers.length ? card._orgB.each(card._orgB.dividers, "") + ` {
-      flex: 0 0 1px !important;
-      width: 1px !important;
-      min-width: 1px !important;
+      flex: 0 0 var(--org-line-width) !important;
+      width: var(--org-line-width) !important;
+      min-width: var(--org-line-width) !important;
       height: var(--icon-size-s) !important;
       align-self: center;
       margin-inline: var(--ha-space-1) !important;
       padding: 0 !important;
       border-radius: 0 !important;
-      background: var(--fill-strong) !important;
+      background: var(--org-line-color) !important;
       pointer-events: none;
     }
     ` + card._orgB.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {
