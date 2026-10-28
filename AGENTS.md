@@ -4,12 +4,20 @@ These notes are for coding agents that work on this repository. They hold the ru
 
 ## For everyone
 
-This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, but it also holds parts that only fit that home, such as a taxi button or a grow tent pop-up. Only what works for everyone goes into the repository.
+This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and grow tent pop-ups, and they stay out.
 
-- Separate what makes a feature work from one home's use cases. The general part goes into the repository. The personal part stays out, also from examples and the README.
+- Separate what makes a feature work from one home's details. The repository has the general part, with plain defaults where the user's setup has personal details, such as English greetings instead of the user's own words.
 - Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
-- A script or a template sensor goes into the package only when a feature cannot work without it, and only after a simpler way was ruled out, such as a module option, a Bubble Card feature or a helper that people create themselves. It must stay short and easy to read, change and debug. A script full of one home's edge cases does not belong in the package.
-- If it is unclear whether a part is general, ask the user.
+- Every feature stands on its own, so people take only what they use. A feature is a card or a pop-up and the few parts it needs. Nothing bundles several features into one install, and nothing puts parts into a home that it does not use.
+- Entities appear only in a feature's card YAML, where people replace them with their own. Scripts take entities as fields from the card, so they work without edits. Logic that a card can compute in its `${ }` templates stays in the card instead of a template sensor.
+- A feature's helpers, scripts and automations go into one small package file next to its card, and only when the feature cannot work without them. Each one stays short and easy to read, change and debug. A script full of one home's edge cases does not belong there.
+
+## Repository layout from 3.0
+
+- The theme, the font and the modules are the core that every user installs.
+- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, its package file.
+- The README explains the core setup first. Then each feature has one section: a screenshot, what it does, what it needs, links to its files and the entities to replace.
+- There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
 
 ## Building
 
@@ -80,7 +88,7 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- When everything works, the last step of the release builds the example dashboard and the package from the user's final setup, following "For everyone", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them. Until then, only `fold_cards.py` and the comments above its copies change the README.
+- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them. Until then, only `fold_cards.py` and the comments above its copies change the README.
 - Every change is tested in the user's own Home Assistant before the release.
 - A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
 - For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.
