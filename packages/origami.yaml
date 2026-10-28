@@ -30,6 +30,23 @@ input_select:
       - media_player.living_room
       - media_player.bedroom
       - media_player.office
+  # The view below the controls in the vacuum pop-up
+  vacuum_view:
+    name: Vacuum view
+    options:
+      - Job
+      - Maintenance
+      - Map
+
+input_text:
+  # The next job of the vacuum pop-up as passes:rooms:zones, such as 2:kitchen,bathroom:on
+  vacuum_selection:
+    name: Vacuum selection
+
+counter:
+  # Cleanings since the dust bin was emptied, for the bin slider in the vacuum pop-up. Emptying the bin resets it.
+  vacuum_cleanings:
+    name: Vacuum cleanings
 
 # The fan pop-up uses this timer. An automation below turns the fan off when the timer ends.
 timer:
@@ -508,6 +525,416 @@ template:
                  or 'none' }}
             {% endif %}
 
+      # The logic for the vacuum pop-up. The pop-up reads the state and the attributes.
+      - name: Vacuum cockpit
+        unique_id: vacuum_cockpit
+        icon: mdi:robot-vacuum
+        state: >-
+          {{ {'cleaning': 'Vacuuming', 'paused': 'Paused',
+              'returning': 'Returning', 'docked': 'Docked',
+              'idle': 'Ready', 'error': 'Stuck'}
+             .get(states('vacuum.robot'), 'Offline') }}
+        attributes:
+          # The card at the top
+          detail: >-
+            {% set s = states('vacuum.robot') %}
+            {% set E = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\.') | list %}
+            {% set ef = E | select('search', 'area')
+               | reject('search', 'total') | first | default('', true) %}
+            {% set ed = E | select('search', 'clean') | select('search', 'time')
+               | reject('search', 'total|begin|last')
+               | first | default('', true) %}
+            {% set ez = E | select('search', 'clean_end')
+               | first | default('', true) %}
+            {% set ex = E | select('search', 'error') | reject('search', 'dock')
+               | first | default('', true) %}
+            {% set fv = states(ef) | float(-1) if ef else -1 %}
+            {% set flt = (fv | round(1) | string ~ ' m²') if fv >= 0 else '' %}
+            {% set dv = states(ed) | float(-1) if ed else -1 %}
+            {% set du = state_attr(ed, 'unit_of_measurement') if ed else '' %}
+            {% set mn = ((dv / 60) if du in ['s', 'sec', 'seconds'] else dv) | round(0) | int %}
+            {% set dat = ((mn // 60) ~ ' h ' ~ (mn % 60) ~ ' min' if mn >= 60
+               else mn ~ ' min') if dv >= 0 else '' %}
+            {% set room = states('sensor.robot_current_room') %}
+            {% set room = room | title if room not in
+               ['unknown', 'unavailable', 'none', ''] else '' %}
+            {% if s == 'error' %}
+              {% set f = states(ex) if ex else '' %}
+              {{ f | replace('_', ' ') | title if f not in
+                 ['', 'unknown', 'unavailable', 'none'] else 'Please take a look' }}
+            {% elif s in ['cleaning', 'paused'] %}
+              {{ [room, dat, flt] | reject('eq', '') | list | join(' · ') }}
+            {% elif s == 'unavailable' %}
+              No connection
+            {% else %}
+              {% set ts = states(ez) if ez else 'unknown' %}
+              {% set dt = as_datetime(ts) if ts not in
+                 ['unknown', 'unavailable', 'none', ''] else none %}
+              {% if dt is none %}
+                {{ [dat, flt] | reject('eq', '') | list | join(' · ')
+                   or 'Nothing cleaned yet' }}
+              {% else %}
+                {% set d = (now().date() - (dt | as_local).date()).days %}
+                {% set w = 'today' if d < 1 else ('yesterday' if d == 1 else
+                   (d ~ ' days ago' if d <= 7 else 'over a week ago')) %}
+                {{ (['Last run ' ~ w] + ([flt] | reject('eq', '') | list)) | join(' · ') }}
+              {% endif %}
+            {% endif %}
+          battery: >-
+            {{ [[states('sensor.robot_battery') | int(0), 0] | max, 100] | min }}
+          battery_text: >-
+            {% set b = states('sensor.robot_battery') | int(-1) %}
+            {% if b < 0 %}–
+            {% else %}{{ b }} %{{ ' · charging' if is_state('vacuum.robot', 'docked')
+               and b < 100 else '' }}{% endif %}
+          battery_color: >-
+            {% set b = states('sensor.robot_battery') | int(0) %}
+            {{ 'var(--error-color)' if b < 20 else
+               ('var(--warning-color)' if b < 40 else 'var(--accent-color)') }}
+          # The primary button, dock and stop
+          primary: >-
+            {{ {'cleaning': 'pause', 'paused': 'resume', 'error': 'error',
+                'unavailable': 'off', 'unknown': 'off'}
+               .get(states('vacuum.robot'), 'start') }}
+          primary_label: >-
+            {% set s = states('vacuum.robot') %}
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set p = raw.split(':')[0] | int(1) %}
+            {% set r = raw.split(':')[1].split(',') | reject('eq', '') | list %}
+            {% set suf = ' · ' ~ p ~ '×' if p > 1 else '' %}
+            {% set names = {'living_room': 'Living', 'kitchen': 'Kitchen',
+               'bedroom': 'Bedroom', 'bathroom': 'Bath'} %}
+            {% if s == 'cleaning' %}Pause
+            {% elif s == 'paused' %}Resume
+            {% elif s == 'error' %}Send to dock
+            {% elif s in ['unavailable', 'unknown'] %}Offline
+            {% elif raw.split(':')[2] == 'off' %}Without no-go zones{{ suf }}
+            {% elif r | count == 0 %}Vacuum everywhere{{ suf }}
+            {% elif r | count == 1 %}Vacuum {{ names.get(r[0], r[0] | title) }}{{ suf }}
+            {% else %}Vacuum {{ r | count }} rooms{{ suf }}{% endif %}
+          dock: >-
+            {% set s = states('vacuum.robot') %}
+            {{ 'returning' if s == 'returning' else
+               ('off' if s in ['docked', 'unavailable', 'unknown'] else 'on') }}
+          stop: >-
+            {{ 'on' if states('vacuum.robot') in
+               ['cleaning', 'paused', 'returning'] else 'off' }}
+          # The job
+          header: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set p = raw.split(':')[0] | int(1) %}
+            {% set n = raw.split(':')[1].split(',') | reject('eq', '') | list | count %}
+            {% if raw.split(':')[2] == 'off' %}No-go zones off
+            {% elif n == 0 and p <= 1 %}Hold = vacuum now
+            {% elif n == 0 %}All rooms · {{ p }}×
+            {% else %}{{ n }} {{ 'room' if n == 1 else 'rooms' }}{{
+              ' · ' ~ p ~ '×' if p > 1 else '' }}{% endif %}
+          living_room: >-
+            {% set rm = 'living_room' %}
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set live = states('sensor.robot_current_room') | lower
+               | replace(' ', '_') %}
+            {% if raw.split(':')[2] == 'off' %}locked
+            {% elif is_state('vacuum.robot', 'cleaning') and live == rm %}running
+            {% elif rm in raw.split(':')[1].split(',') %}active
+            {% else %}inactive{% endif %}
+          kitchen: >-
+            {% set rm = 'kitchen' %}
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set live = states('sensor.robot_current_room') | lower
+               | replace(' ', '_') %}
+            {% if raw.split(':')[2] == 'off' %}locked
+            {% elif is_state('vacuum.robot', 'cleaning') and live == rm %}running
+            {% elif rm in raw.split(':')[1].split(',') %}active
+            {% else %}inactive{% endif %}
+          bedroom: >-
+            {% set rm = 'bedroom' %}
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set live = states('sensor.robot_current_room') | lower
+               | replace(' ', '_') %}
+            {% if raw.split(':')[2] == 'off' %}locked
+            {% elif is_state('vacuum.robot', 'cleaning') and live == rm %}running
+            {% elif rm in raw.split(':')[1].split(',') %}active
+            {% else %}inactive{% endif %}
+          bathroom: >-
+            {% set rm = 'bathroom' %}
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {% set live = states('sensor.robot_current_room') | lower
+               | replace(' ', '_') %}
+            {% if raw.split(':')[2] == 'off' %}locked
+            {% elif is_state('vacuum.robot', 'cleaning') and live == rm %}running
+            {% elif rm in raw.split(':')[1].split(',') %}active
+            {% else %}inactive{% endif %}
+          # Suction: s1 to s4 are Quiet, Balanced, Turbo and Max
+          s1: >-
+            {{ 'active' if state_attr('vacuum.robot', 'fan_speed') | string | lower
+               in ['silent', 'quiet'] else 'inactive' }}
+          s2: >-
+            {{ 'active' if state_attr('vacuum.robot', 'fan_speed') | string | lower
+               in ['balanced', 'standard'] else 'inactive' }}
+          s3: >-
+            {{ 'active' if state_attr('vacuum.robot', 'fan_speed') | string | lower
+               in ['turbo', 'medium'] else 'inactive' }}
+          s4: >-
+            {{ 'active' if state_attr('vacuum.robot', 'fan_speed') | string | lower
+               in ['max', 'max_plus', 'high'] else 'inactive' }}
+          # Passes also apply to the whole home. Only the routine
+          # without no-go zones has no repeat.
+          p1: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'active' if raw.split(':')[0] | int(1) <= 1 else 'inactive' }}
+          p2: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'active' if raw.split(':')[0] | int(1) == 2 else 'inactive' }}
+          p3: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'active' if raw.split(':')[0] | int(1) == 3 else 'inactive' }}
+          # No-go zones: on is the default, and off applies only to the next start
+          zones_on: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'inactive' if raw.split(':')[2] == 'off' else 'active' }}
+          zones_off: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'active' if raw.split(':')[2] == 'off' else 'inactive' }}
+          discard: >-
+            {% set raw = states('input_text.vacuum_selection') %}
+            {% set raw = (raw if ':' in (raw | string) else '1:') ~ '::' %}
+            {{ 'empty' if raw.split(':')[1].split(',') | reject('eq', '') | list
+               | count == 0 and raw.split(':')[0] | int(1) <= 1
+               and raw.split(':')[2] != 'off' else 'full' }}
+          # View
+          map_picture: >-
+            {{ state_attr('image.robot_map', 'entity_picture') }}
+          map_time: >-
+            {% set d = as_datetime(states('image.robot_map')) %}
+            {{ ('As of ' ~ (d | as_local).strftime('%H:%M')) if d else 'no map' }}
+          maintenance_warn: >-
+            {% set E = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\.') | list %}
+            {% set ns = namespace(warn=false) %}
+            {% for pattern, life in [('^sensor\..*main', 300),
+                                     ('^sensor\..*side', 200),
+                                     ('^sensor\..*filter', 150),
+                                     ('^sensor\..*sensor_time', 30)] %}
+              {% set e = E | select('search', pattern) | first | default('', true) %}
+              {% set v = states(e) | float(-1) if e else -1 %}
+              {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+              {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+                 ((v / 60) if u in ['min', 'minutes'] else v) %}
+              {% if v >= 0 and (h / life * 100) < 10 %}{% set ns.warn = true %}{% endif %}
+            {% endfor %}
+            {% set b = states('sensor.vacuum_dust_bin') | string
+               | replace('%', '') | trim | float(-1) %}
+            {% set c = states('counter.vacuum_cleanings') | int(0) %}
+            {% set mx = [state_attr('counter.vacuum_cleanings', 'maximum')
+               | int(3), 1] | max %}
+            {% if (b if b >= 0 else (c / mx * 100)) >= 100 %}{% set ns.warn = true %}{% endif %}
+            {{ 'warn' if ns.warn else 'ok' }}
+          # Maintenance
+          totals: >-
+            {% set E = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\.') | list %}
+            {% set ea = E | select('search', 'area')
+               | select('search', 'total') | first | default('', true) %}
+            {% set ec = E | select('search', 'clean')
+               | select('search', 'count') | first | default('', true) %}
+            {% set et = E | select('search', 'cleaning_time')
+               | select('search', 'total') | first | default('', true) %}
+            {% set a = states(ea) | float(-1) if ea else -1 %}
+            {% set c = states(ec) | int(-1) if ec else -1 %}
+            {% set tv = states(et) | float(-1) if et else -1 %}
+            {% set tu = state_attr(et, 'unit_of_measurement') if et else '' %}
+            {% set th = (tv / 3600) if tu in ['s', 'sec', 'seconds'] else
+               ((tv / 60) if tu in ['min', 'minutes'] else tv) %}
+            {{ (([] + ([a | round(0) | int | string ~ ' m²'] if a >= 0 else [])
+               + ([c | string ~ ' runs'] if c >= 0 else [])
+               + ([th | round(0) | int | string ~ ' h'] if tv >= 0 else []))) | join(' · ')
+               or '–' }}
+          bin: >-
+            {% set t = states('sensor.vacuum_dust_bin') | string
+               | replace('%', '') | trim | float(-1) %}
+            {% set c = states('counter.vacuum_cleanings') | int(0) %}
+            {% set mx = [state_attr('counter.vacuum_cleanings', 'maximum')
+               | int(3), 1] | max %}
+            {{ [[(t if t >= 0 else (c / mx * 100)) | round(0) | int, 0] | max, 100] | min }}
+          bin_text: >-
+            {% set c = states('counter.vacuum_cleanings') | int(0) %}
+            {% set mx = state_attr('counter.vacuum_cleanings', 'maximum') | int(3) %}
+            {% set t = states('sensor.vacuum_dust_bin') %}
+            {{ t if t not in ['unknown', 'unavailable', 'none', ''] else (c ~ ' / ' ~ mx) }}
+          bin_color: >-
+            {% set t = states('sensor.vacuum_dust_bin') | string
+               | replace('%', '') | trim | float(-1) %}
+            {% set c = states('counter.vacuum_cleanings') | int(0) %}
+            {% set mx = [state_attr('counter.vacuum_cleanings', 'maximum')
+               | int(3), 1] | max %}
+            {% set p = (t if t >= 0 else (c / mx * 100)) | round(0) | int %}
+            {{ 'var(--error-color)' if p >= 100 else
+               ('var(--warning-color)' if p >= 66 else 'var(--accent-color)') }}
+          mb: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*main') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {{ 0 if not e else [[(h / 300 * 100) | round(0) | int, 0] | max, 100] | min }}
+          mb_text: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*main') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% if not e %}–
+            {% elif h <= 0 %}due
+            {% else %}{{ h | round(0) | int }} h{% endif %}
+          mb_color: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*main') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% set p = 0 if not e else [(h / 300 * 100) | round(0) | int, 0] | max %}
+            {{ 'var(--error-color)' if p < 10 else
+               ('var(--warning-color)' if p < 25 else 'var(--accent-color)') }}
+          sb: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*side') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {{ 0 if not e else [[(h / 200 * 100) | round(0) | int, 0] | max, 100] | min }}
+          sb_text: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*side') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% if not e %}–
+            {% elif h <= 0 %}due
+            {% else %}{{ h | round(0) | int }} h{% endif %}
+          sb_color: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*side') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% set p = 0 if not e else [(h / 200 * 100) | round(0) | int, 0] | max %}
+            {{ 'var(--error-color)' if p < 10 else
+               ('var(--warning-color)' if p < 25 else 'var(--accent-color)') }}
+          fi: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*filter') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {{ 0 if not e else [[(h / 150 * 100) | round(0) | int, 0] | max, 100] | min }}
+          fi_text: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*filter') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% if not e %}–
+            {% elif h <= 0 %}due
+            {% else %}{{ h | round(0) | int }} h{% endif %}
+          fi_color: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*filter') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% set p = 0 if not e else [(h / 150 * 100) | round(0) | int, 0] | max %}
+            {{ 'var(--error-color)' if p < 10 else
+               ('var(--warning-color)' if p < 25 else 'var(--accent-color)') }}
+          se: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*sensor_time') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {{ 0 if not e else [[(h / 30 * 100) | round(0) | int, 0] | max, 100] | min }}
+          se_text: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*sensor_time') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% if not e %}–
+            {% elif h <= 0 %}due
+            {% else %}{{ h | round(0) | int }} h{% endif %}
+          se_color: >-
+            {% set e = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\..*sensor_time') | first | default('', true) %}
+            {% set v = states(e) | float(0) if e else 0 %}
+            {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+            {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+               ((v / 60) if u in ['min', 'minutes'] else v) %}
+            {% set p = 0 if not e else [(h / 30 * 100) | round(0) | int, 0] | max %}
+            {{ 'var(--error-color)' if p < 10 else
+               ('var(--warning-color)' if p < 25 else 'var(--accent-color)') }}
+          maintenance_header: >-
+            {% set E = device_entities(device_id('vacuum.robot')) | default([], true)
+               | select('search', '^sensor\.') | list %}
+            {% set ns = namespace(n=0) %}
+            {% for pattern, life in [('^sensor\..*main', 300),
+                                     ('^sensor\..*side', 200),
+                                     ('^sensor\..*filter', 150),
+                                     ('^sensor\..*sensor_time', 30)] %}
+              {% set e = E | select('search', pattern) | first | default('', true) %}
+              {% set v = states(e) | float(0) if e else 0 %}
+              {% set u = state_attr(e, 'unit_of_measurement') if e else '' %}
+              {% set h = (v / 3600) if u in ['s', 'sec', 'seconds'] else
+                 ((v / 60) if u in ['min', 'minutes'] else v) %}
+              {% if e and (h / life * 100) < 10 %}{% set ns.n = ns.n + 1 %}{% endif %}
+            {% endfor %}
+            {{ 'all ok' if ns.n == 0 else
+               (ns.n ~ (' part due' if ns.n == 1 else ' parts due')) }}
+          # State: water and mop are only critical when the vacuum should mop
+          water_text: >-
+            {% set tank = is_state('binary_sensor.robot_water_box_attached', 'on') %}
+            {% set mops = states('select.robot_cleaning_mode')
+               in ['vac_and_mop', 'mop'] %}
+            {% if not tank %}{{ 'missing' if mops else 'removed' }}
+            {% elif is_state('binary_sensor.robot_water_shortage', 'on') %}empty
+            {% else %}ok{% endif %}
+          mop_text: >-
+            {% set attached = is_state('binary_sensor.robot_mop_attached', 'on') %}
+            {% set mops = states('select.robot_cleaning_mode')
+               in ['vac_and_mop', 'mop'] %}
+            {% if attached %}attached
+            {% else %}{{ 'missing' if mops else 'removed' }}{% endif %}
+
+      # How full the dust bin is in percent, for the slider in the vacuum pop-up
+      - name: Vacuum bin
+        unique_id: vacuum_bin
+        icon: mdi:trash-can-outline
+        unit_of_measurement: "%"
+        state: >-
+          {{ state_attr('sensor.vacuum_cockpit', 'bin') | int(0) }}
+
 script:
   # Oscillation on or off, for the fan pop-up
   fan_oscillation:
@@ -609,6 +1036,526 @@ script:
                     area_id: "{{ area }}"
                   continue_on_error: true
 
+  # The actions of the buttons in the vacuum pop-up
+  vacuum_actions:
+    alias: Vacuum actions
+    icon: mdi:robot-vacuum-variant
+    description: Controls the Roborock vacuum, with a cart of rooms for the next start.
+    mode: queued
+    max: 10
+    fields:
+      action:
+        name: Action
+        required: true
+        example: cart_start
+        selector:
+          select:
+            options:
+              - start_pause
+              - stop
+              - dock
+              - clean_all
+              - clean_room
+              - clean_no_zones
+              - fan_speed
+              - cart_toggle
+              - cart_all
+              - cart_clear
+              - cart_passes
+              - cart_zones
+              - cart_start
+              - empty_bin
+              - reset_consumable
+              - sync_rooms
+              - command
+      room:
+        name: Room
+        description: A key from "rooms", such as living_room.
+        selector:
+          text:
+      level:
+        name: Level
+        description: The absolute level for fan_speed (1 = lowest), or the passes.
+        selector:
+          number:
+            min: 1
+            max: 6
+            mode: box
+      step:
+        name: Step
+        description: A relative change of the suction, such as 1 or -1.
+        selector:
+          number:
+            min: -6
+            max: 6
+            mode: box
+      zones:
+        name: No-go zones
+        description: on = keep to them, off = the next start ignores them.
+        selector:
+          select:
+            options:
+              - "on"
+              - "off"
+      consumable:
+        name: Consumable
+        selector:
+          select:
+            options:
+              - main_brush
+              - side_brush
+              - filter
+              - sensor
+      command:
+        name: Raw command
+        selector:
+          text:
+      params:
+        name: Parameters
+        selector:
+          object:
+    sequence:
+      - alias: Variables
+        variables:
+          vac: vacuum.robot
+          ent_cart: input_text.vacuum_selection
+          ent_counter: counter.vacuum_cleanings
+          rooms:
+            living_room:
+              name: Living room
+              area: living_room
+              segment: 16
+            kitchen:
+              name: Kitchen
+              area: kitchen
+              segment: 17
+            bedroom:
+              name: Bedroom
+              area: bedroom
+              segment: 18
+            bathroom:
+              name: Bathroom
+              area: bathroom
+              segment: 19
+          trash_can:
+            - 18500
+            - 27500
+          dev: "{{ device_id(vac) }}"
+          dev_ents: "{{ device_entities(dev) | default([], true) }}"
+          lvl: "{{ level | default(0) | int(0) }}"
+          stp: "{{ step | default(0) | int(0) }}"
+          rm: "{{ room | default('', true) | string | lower }}"
+          vac_state: "{{ states(vac) }}"
+          busy: "{{ states(vac) in ['cleaning', 'paused', 'returning'] }}"
+          speed_now: "{{ state_attr(vac, 'fan_speed') }}"
+          speeds: |-
+            {{ state_attr(vac, 'fan_speed_list') | default([], true)
+               | reject('in', ['off', 'auto', 'custom', 'gentle']) | list }}
+          cart_raw: "{% set r = states(ent_cart) %} {{ r if ':' in (r | string) else '1:' }}"
+          passes: "{{ [[cart_raw.split(':')[0] | int(1), 1] | max, 3] | min }}"
+          cart: "{{ cart_raw.split(':')[1].split(',') | reject('eq', '') | list }}"
+          zones_now: "{{ 'off' if (cart_raw ~ '::').split(':')[2] == 'off' else 'on' }}"
+      - alias: Run the chosen action
+        choose:
+          - alias: Pause, resume or error
+            conditions:
+              - condition: template
+                value_template: |-
+                  {{ action == 'start_pause' and
+                     vac_state in ['cleaning', 'paused', 'error'] }}
+            sequence:
+              - alias: Depending on the state
+                choose:
+                  - alias: Running → pause
+                    conditions:
+                      - condition: template
+                        value_template: "{{ vac_state == 'cleaning' }}"
+                    sequence:
+                      - action: vacuum.pause
+                        target:
+                          entity_id: "{{ vac }}"
+                  - alias: Error → send to the dock
+                    conditions:
+                      - condition: template
+                        value_template: "{{ vac_state == 'error' }}"
+                    sequence:
+                      - action: vacuum.return_to_base
+                        target:
+                          entity_id: "{{ vac }}"
+                default:
+                  - alias: Paused → resume
+                    action: vacuum.start
+                    target:
+                      entity_id: "{{ vac }}"
+          - alias: Stop
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'stop' }}"
+            sequence:
+              - action: vacuum.stop
+                target:
+                  entity_id: "{{ vac }}"
+          - alias: Dock
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'dock' }}"
+            sequence:
+              - alias: Start or cancel the return
+                if:
+                  - condition: template
+                    value_template: "{{ vac_state == 'returning' }}"
+                then:
+                  - action: vacuum.stop
+                    target:
+                      entity_id: "{{ vac }}"
+                else:
+                  - action: vacuum.return_to_base
+                    target:
+                      entity_id: "{{ vac }}"
+          - alias: Suction
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'fan_speed' }}"
+            sequence:
+              - alias: Find the target level in fan_speed_list
+                variables:
+                  target_speed: |-
+                    {% set n = speeds | count %} {% if n == 0 %}
+                      {{ speed_now }}
+                    {% else %}
+                      {% set idx = speeds.index(speed_now) if speed_now in speeds else 0 %}
+                      {% set i = (lvl - 1) if lvl > 0 else (idx + stp) %}
+                      {% set i = 0 if i < 0 else (n - 1 if i > n - 1 else i) %}
+                      {{ speeds[i] }}
+                    {% endif %}
+              - alias: Set the suction
+                action: vacuum.set_fan_speed
+                target:
+                  entity_id: "{{ vac }}"
+                data:
+                  fan_speed: "{{ target_speed }}"
+          - alias: Add a room to the job or remove it
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'cart_toggle' }}"
+            sequence:
+              - alias: Only known rooms
+                condition: template
+                value_template: "{{ rm in rooms }}"
+              - action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: |-
+                    {% set new = cart | reject('eq', rm) | list if rm in cart
+                       else cart + [rm] %}
+                    {{ passes ~ ':' ~ (new | join(',')) ~ ':' ~ zones_now }}
+          - alias: Select all rooms or none
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'cart_all' }}"
+            sequence:
+              - action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: |-
+                    {{ passes ~ ':' ~ ('' if cart | count == rooms | count
+                       else rooms.keys() | join(',')) ~ ':' ~ zones_now }}
+          - alias: Clear the job and turn the no-go zones back on
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'cart_clear' }}"
+            sequence:
+              - action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: 1::on
+          - alias: Set the no-go zones for the next start
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'cart_zones' }}"
+            sequence:
+              - action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: |-
+                    {{ passes ~ ':' ~ (cart | join(',')) ~ ':' ~
+                       ('off' if zones | default('on', true) == 'off' else 'on') }}
+          - alias: Set the passes
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'cart_passes' }}"
+            sequence:
+              - action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: >-
+                    {% set p = lvl if lvl > 0 else 1 %} {{ ([[p, 1] | max, 3] | min)
+                    ~ ':' ~ (cart | join(',')) ~ ':' ~ zones_now }}
+          - alias: Start without no-go zones, which cleans the whole home through the routine
+            conditions:
+              - condition: template
+                value_template: |-
+                  {{ action == 'clean_no_zones' or (zones_now == 'off' and
+                     (action in ['cart_start', 'clean_all'] or
+                      (action == 'start_pause' and
+                       vac_state not in ['cleaning', 'paused', 'error']))) }}
+            sequence:
+              - alias: Find the button at runtime instead of guessing its ID
+                variables:
+                  btn_no_zones: |-
+                    {{ states.button | map(attribute='entity_id')
+                       | select('search', 'without.*no_go_zone') | first | default('', true) }}
+              - alias: Without a matching button, stop and report it
+                if:
+                  - condition: template
+                    value_template: "{{ btn_no_zones == '' }}"
+                then:
+                  - action: input_text.set_value
+                    target:
+                      entity_id: "{{ ent_cart }}"
+                    data:
+                      value: "{{ passes ~ ':' ~ (cart | join(',')) ~ ':on' }}"
+                  - action: persistent_notification.create
+                    data:
+                      title: Vacuum · Without no-go zones
+                      notification_id: vacuum_no_go_zones
+                      message: >-
+                        No button entity found whose ID contains "without … no_go_zone".
+                        The routine has to exist in the Roborock app, and the integration
+                        has to add it as a button.
+                  - stop: No matching button
+              - alias: Stop the running job
+                if:
+                  - condition: template
+                    value_template: "{{ busy }}"
+                then:
+                  - action: vacuum.stop
+                    target:
+                      entity_id: "{{ vac }}"
+                  - delay:
+                      seconds: 2
+              - alias: Run the routine, which sets its own passes
+                action: button.press
+                target:
+                  entity_id: "{{ btn_no_zones }}"
+              - alias: The special case is used up, and the selection stays
+                action: input_text.set_value
+                target:
+                  entity_id: "{{ ent_cart }}"
+                data:
+                  value: "{{ passes ~ ':' ~ (cart | join(',')) ~ ':on' }}"
+          - alias: Start the job for the cart or the whole home, with passes
+            conditions:
+              - condition: template
+                value_template: |-
+                  {{ action in ['cart_start', 'clean_all'] or
+                     (action == 'start_pause' and
+                      vac_state not in ['cleaning', 'paused', 'error']) }}
+            sequence:
+              - alias: Pick the selection, clean_all skips the cart
+                variables:
+                  selection: "{{ [] if action == 'clean_all' else cart }}"
+              - alias: An empty selection means all known rooms
+                variables:
+                  targets: "{{ selection if selection | count > 0 else rooms.keys() | list }}"
+              - alias: Look up the segments and the areas
+                variables:
+                  segments: |-
+                    {% set ns = namespace(ids=[]) %} {% for r in targets %}
+                      {% if r in rooms and rooms[r].segment %}
+                        {% set ns.ids = ns.ids + [rooms[r].segment | int] %}
+                      {% endif %}
+                    {% endfor %} {{ ns.ids }}
+                  area_ids: |-
+                    {% set ns = namespace(ids=[]) %} {% for r in targets %}
+                      {% if r in rooms and rooms[r].area %}
+                        {% set ns.ids = ns.ids + [rooms[r].area] %}
+                      {% endif %}
+                    {% endfor %} {{ ns.ids }}
+              - alias: Stop the running job
+                if:
+                  - condition: template
+                    value_template: "{{ busy }}"
+                then:
+                  - action: vacuum.stop
+                    target:
+                      entity_id: "{{ vac }}"
+                  - delay:
+                      seconds: 2
+              - alias: Choose how to start
+                choose:
+                  - alias: Segment cleaning, which supports passes
+                    conditions:
+                      - condition: template
+                        value_template: |-
+                          {{ segments | count == targets | count and
+                             (selection | count > 0 or passes > 1) }}
+                    sequence:
+                      - action: vacuum.send_command
+                        target:
+                          entity_id: "{{ vac }}"
+                        data:
+                          command: app_segment_clean
+                          params: "{{ [{'segments': segments, 'repeat': passes}] }}"
+                  - alias: Area cleaning without segment IDs, always one pass
+                    conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ selection | count > 0 and area_ids | count == selection |
+                          count }}
+                    sequence:
+                      - action: vacuum.clean_area
+                        target:
+                          entity_id: "{{ vac }}"
+                        data:
+                          cleaning_area_id: "{{ area_ids }}"
+                default:
+                  - alias: The whole home in one pass. The no-go zones apply automatically.
+                    action: vacuum.start
+                    target:
+                      entity_id: "{{ vac }}"
+          - alias: Clean a single room now
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'clean_room' }}"
+            sequence:
+              - alias: Only known rooms
+                condition: template
+                value_template: "{{ rm in rooms }}"
+              - alias: Stop the running job
+                if:
+                  - condition: template
+                    value_template: "{{ busy }}"
+                then:
+                  - action: vacuum.stop
+                    target:
+                      entity_id: "{{ vac }}"
+                  - delay:
+                      seconds: 2
+              - alias: Segment or area
+                if:
+                  - condition: template
+                    value_template: "{{ rooms[rm].segment is not none }}"
+                then:
+                  - action: vacuum.send_command
+                    target:
+                      entity_id: "{{ vac }}"
+                    data:
+                      command: app_segment_clean
+                      params: |-
+                        {{ [{'segments': [rooms[rm].segment | int],
+                             'repeat': [[(lvl if lvl > 0 else passes), 1] | max, 3] | min}] }}
+                else:
+                  - action: vacuum.clean_area
+                    target:
+                      entity_id: "{{ vac }}"
+                    data:
+                      cleaning_area_id: "{{ [rooms[rm].area] }}"
+          - alias: Empty the dust bin
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'empty_bin' }}"
+            sequence:
+              - alias: Drive to the trash can, but do not interrupt a running clean
+                if:
+                  - condition: template
+                    value_template: "{{ vac_state != 'cleaning' }}"
+                then:
+                  - action: vacuum.send_command
+                    target:
+                      entity_id: "{{ vac }}"
+                    data:
+                      command: app_goto_target
+                      params: "{{ trash_can }}"
+              - alias: Reset the cleaning counter
+                action: counter.reset
+                target:
+                  entity_id: "{{ ent_counter }}"
+          - alias: Reset a consumable
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'reset_consumable' }}"
+            sequence:
+              - alias: Find the matching button on the device
+                variables:
+                  pattern: |-
+                    {{ {'main_brush': 'main_brush',
+                        'side_brush': 'side_brush',
+                        'filter': 'filter',
+                        'sensor': 'sensor'}[consumable | default('main_brush', true)] }}
+                  btn: |-
+                    {{ dev_ents | select('search', '^button\.')
+                       | select('search', pattern) | first | default('', true) }}
+              - alias: The button if there is one, otherwise a raw command to the robot
+                if:
+                  - condition: template
+                    value_template: "{{ btn != '' }}"
+                then:
+                  - action: button.press
+                    target:
+                      entity_id: "{{ btn }}"
+                else:
+                  - action: vacuum.send_command
+                    target:
+                      entity_id: "{{ vac }}"
+                    data:
+                      command: reset_consumable
+                      params: |-
+                        {{ [{'main_brush': 'main_brush_work_time',
+                             'side_brush': 'side_brush_work_time',
+                             'filter': 'filter_work_time',
+                             'sensor': 'sensor_dirty_time'}[consumable
+                             | default('main_brush', true)]] }}
+          - alias: Get the room IDs from the robot
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'sync_rooms' }}"
+            sequence:
+              - alias: Get the maps
+                action: roborock.get_maps
+                target:
+                  entity_id: "{{ vac }}"
+                response_variable: maps
+              - alias: Show the result as a notification
+                action: persistent_notification.create
+                data:
+                  title: Vacuum · Room IDs
+                  notification_id: vacuum_rooms
+                  message: >-
+                    {% set res = maps.get(vac, maps) %} {% set ns =
+                    namespace(lines=['Enter these IDs in the script under rooms: as
+                    segment.', '']) %} {% for m in res.get('maps', []) %}
+                      {% set ns.lines = ns.lines + ['**' ~ m.get('name', 'Map') ~ '**'] %}
+                      {% for id, name in (m.get('rooms', {})).items() %}
+                        {% set ns.lines = ns.lines + ['`' ~ name | lower | replace(' ', '_')
+                           ~ ': ' ~ id ~ '`' ~ '  (' ~ name ~ ')'] %}
+                      {% endfor %}
+                      {% set ns.lines = ns.lines + [''] %}
+                    {% endfor %} {{ ns.lines | join('\n') }}
+          - alias: Raw command to the Roborock
+            conditions:
+              - condition: template
+                value_template: "{{ action == 'command' }}"
+            sequence:
+              - action: vacuum.send_command
+                target:
+                  entity_id: "{{ vac }}"
+                data:
+                  command: "{{ command }}"
+                  params: "{{ params | default([], true) }}"
+        default:
+          - alias: Log an unknown action
+            action: system_log.write
+            data:
+              level: warning
+              logger: vacuum.actions
+              message: "Unknown action: {{ action | default('(empty)') }}"
+
 automation:
   # Turns the fan off when the fan pop-up's timer ends
   - id: origami_living_room_fan_timer
@@ -623,3 +1570,19 @@ automation:
       - action: fan.turn_off
         target:
           entity_id: fan.living_room
+
+  # Counts the vacuum's cleanings, so the vacuum pop-up can tell when the bin is full
+  - id: origami_vacuum_cleanings
+    alias: Vacuum cleanings
+    description: Counts one cleaning each time the vacuum stops cleaning and heads back to its dock.
+    triggers:
+      - trigger: state
+        entity_id: vacuum.robot
+        from: cleaning
+        to:
+          - returning
+          - docked
+    actions:
+      - action: counter.increment
+        target:
+          entity_id: counter.vacuum_cleanings

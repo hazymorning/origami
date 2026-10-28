@@ -973,7 +973,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). All of them also need the [Base module](bubble_card/README.md#base). The rooms header and **All rooms** also need the [Header module](bubble_card/README.md#header). The rooms header is the first card.
 
-<!-- dashboard.yaml card_type=separator name=Rooms -->
+<!-- dashboard.yaml card_type=separator name=Rooms origami_header.value_style=chip -->
 
 ```yaml
 type: custom:bubble-card
