@@ -27,13 +27,15 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 ## README from 3.0
 
-The README is the main documentation and shows the finished result. People scroll through it and pick the parts they want, so it has to be easy to scan.
+The README is the main documentation, and it is written for people. Most readers are beginners who scroll through it and pick the parts they like, so it has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
 
-- It is a series of short sections in the order of the dashboard, one per part. Each section starts with its image, and the images show what the part does.
-- Below each image, one or two sentences say what the part is. Everything else, such as setup steps, YAML, options and the entities to replace, sits in collapsed `<details>` blocks. There are no walls of text.
-- The core setup comes first: the theme, the font and the modules, which give every part the Origami look.
-- Each part says clearly what it needs. First what it needs to work, such as other cards, integrations, helpers and scripts, with links to its files. Then what it needs for the Origami look, which is the theme and the modules it uses.
-- No section depends on another one, except the core setup.
+- It folds. At first glance, each part is its image, its name and one or two sentences. Everything else sits in folded `<details>` blocks, so people open what they want on purpose. Every part uses the same blocks in the same order, and the first part that gets written sets them.
+- Each step, explanation and term lives in one place, and other places link there. Installing the theme, the font and the modules is explained once, in the core setup at the top.
+- A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again. History and reasons stay out, and how a module works inside belongs in the module reference.
+- It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
+- Each part says what it needs to work, such as cards, integrations, helpers and scripts, with links to its files. Then it says what it needs for the Origami look. No part depends on another one, except the core setup.
+
+The README is done when the rule checks pass and every claim matches the files. Then the maintainer reads it from top to bottom, and someone who doesn't know Origami sets up the core and one part with nothing but the README.
 
 ## Building
 
@@ -75,15 +77,23 @@ Commit messages, PR titles and the README stay plain.
 
 ## Writing
 
-All text is short, plain English, the way a person would write it. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
+All text is written for people: short, plain English, the way you'd explain something to a friend next to you. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
+- Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
+- No text about the text, such as `this section explains` or `the first three are`. Headings already say what follows.
+- No buzzwords, tech slang, filler or metaphors, such as `seamless`, `under the hood`, `swap`, `squash a bug` or `simply`. `check_rules.py` has the full list.
 - Leave out test logs, earlier attempts and measurements, unless the reader needs the number.
 - When a text changes, rewrite it instead of adding to it.
-- Short list items and colons are fine. Avoid dashes, semicolons and exclamation marks.
-- No first person, buzzwords, marketing words, idioms or metaphors, such as seamless, powerful, under the hood or out of the box.
+- Short list items and colons are fine. Avoid dashes, semicolons, exclamation marks and the first person.
 - A module's description has 50 words at most. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
-- Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
+- Check every claim against the files before writing it. The entities are examples from one home, so say what is optional.
+
+| Instead of | Write |
+| --- | --- |
+| Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
+| The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or your browser still shows an old version of the page. |
+| The room's climate sensor writes `temp_rank`, and the Table module gives every cell in its column this icon. | The warmest and the coldest room get an arrow. |
 
 ## Commits and pull requests
 

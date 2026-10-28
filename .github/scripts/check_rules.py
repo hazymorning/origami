@@ -100,19 +100,31 @@ def prose(text):
     return re.sub(r"<[^>\n]+>", "", text)
 
 
+# Buzzwords, tech slang and filler that nobody says in real life
+BUZZWORDS = [
+    "seamless", "seamlessly", "effortless", "effortlessly", "robust", "powerful", "leverage", "utilize", "elevate",
+    "unlock", "empower", "streamline", "supercharge", "delve", "dive into", "deep dive", "cutting-edge", "game changer",
+    "next level", "sleek", "stunning", "intuitive", "comprehensive", "tailored", "boasts", "showcase", "harness",
+    "magic", "magical", "under the hood", "out of the box", "plug and play", "drop-in", "heavy lifting", "swap",
+    "swapped", "swapping", "tweak", "tweaks", "tweaked", "a breeze", "spin up", "baked in", "wire up", "battle-tested",
+    "bulletproof", "best of both worlds", "first-class", "single source of truth", "simply", "easily", "basically",
+    "note that", "keep in mind", "worth noting", "whether you", "let's", "in other words", "that said",
+]
+
 WRITING = {
     "a dash": r"[—–]|\w - \w",
     "a semicolon": r";",
     "an exclamation mark": r"\w!(\s|$)",
     "first person": r"\b(I|we|We|our|Our|us)\b",
+    "a buzzword": r"(?i)\b(" + "|".join(map(re.escape, BUZZWORDS)) + r")\b|\bsquash\w* (the |a |all |some )?bugs?\b",
 }
 
 
 def check_writing(where, text, first_line=1):
     for n, line in enumerate(prose(text).splitlines(), first_line):
         for name, pattern in WRITING.items():
-            if re.search(pattern, line):
-                fail(f"{where}:{n}", f"has {name}: {line.strip()[:80]}")
+            if found := [m.group(0).strip() for m in re.finditer(pattern, line)]:
+                fail(f"{where}:{n}", f"has {name} ({', '.join(found)}): {line.strip()[:80]}")
 
 
 for name in ["AGENTS.md", ".github/MAINTAINING.md", "bubble_card/README.md"]:
