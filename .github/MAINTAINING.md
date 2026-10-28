@@ -1,4 +1,4 @@
-# Working on Origami
+# Maintaining Origami
 
 These rules are for work on Origami itself: its modules, theme, dashboard and docs in the hazymorning/origami repository. They hold what the code alone does not show, and coding agents follow them too.
 

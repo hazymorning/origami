@@ -1,4 +1,4 @@
-"""Check the rules from CONTRIBUTING.md that a script can check.
+"""Check the rules from .github/MAINTAINING.md that a script can check.
 
 The checks look for AI attribution in the files and commit messages, check
 each module's basics, keep entity IDs out of the modules, keep card-mod out of
@@ -115,7 +115,7 @@ def check_writing(where, text, first_line=1):
                 fail(f"{where}:{n}", f"has {name}: {line.strip()[:80]}")
 
 
-for name in ["AGENTS.md", "CONTRIBUTING.md", "bubble_card/README.md"]:
+for name in ["AGENTS.md", ".github/MAINTAINING.md", "bubble_card/README.md"]:
     check_writing(name, (ROOT / name).read_text(encoding="utf-8"))
 changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 start = changelog.find("## Next release")
@@ -129,5 +129,5 @@ for path in modules:
 
 if problems:
     print("\n".join(problems))
-    sys.exit(f"{len(problems)} problems. CONTRIBUTING.md explains each rule.")
+    sys.exit(f"{len(problems)} problems. .github/MAINTAINING.md explains each rule.")
 print("All rules pass.")
