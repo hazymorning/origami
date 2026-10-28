@@ -2,6 +2,13 @@
 
 These notes are for coding agents that work on this repository. They hold the rules that the code alone does not show.
 
+## The idea
+
+Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
+
+- Prefer a clean solution with what Home Assistant and Bubble Card offer over a workaround.
+- Every part works on its own and says what it needs.
+
 ## For everyone
 
 This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and grow tent pop-ups, and they stay out.
@@ -16,8 +23,17 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 - The theme, the font and the modules are the core that every user installs.
 - Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, its package file.
-- The README explains the core setup first. Then each feature has one section: a screenshot, what it does, what it needs, links to its files and the entities to replace.
 - There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
+
+## README from 3.0
+
+The README is the main documentation and shows the finished result. People scroll through it and pick the parts they want, so it has to be easy to scan.
+
+- It is a series of short sections in the order of the dashboard, one per part. Each section starts with its image, and the images show what the part does.
+- Below each image, one or two sentences say what the part is. Everything else, such as setup steps, YAML, options and the entities to replace, sits in collapsed `<details>` blocks. There are no walls of text.
+- The core setup comes first: the theme, the font and the modules, which give every part the Origami look.
+- Each part says clearly what it needs. First what it needs to work, such as other cards, integrations, helpers and scripts, with links to its files. Then what it needs for the Origami look, which is the theme and the modules it uses.
+- No section depends on another one, except the core setup.
 
 ## Building
 
@@ -88,7 +104,7 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them. Until then, only `fold_cards.py` and the comments above its copies change the README.
+- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them, following "README from 3.0". Until then, only `fold_cards.py` and the comments above its copies change the README.
 - Every change is tested in the user's own Home Assistant before the release.
 - A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
 - For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.
