@@ -108,12 +108,10 @@ These changes are in the `next` branch and come with the next release.
 
 #### Dashboard
 
-- The greeting is a Bubble card with the Header module. The next event stands above it.
 - The room cards are Bubble cards with Base's `vertical` option.
 - The TV pop-up uses Bubble cards with the Button module instead of Paper Buttons Row.
 - The server card in the menu is a Bubble card.
 - The climate table uses the Table module.
-- The dashboard has pop-ups for the favorites, the server and the vacuum. The server pop-up's graph needs Plotly Graph Card. The vacuum pop-up's sensors, script and helpers are in the package.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 
 ### Bug fixes
@@ -183,9 +181,8 @@ Every module changed, and some options were renamed or work differently. The [mo
 20. In the menu card's `css`, replace the `.sheet` rule with the one from the [Menu](https://github.com/hazymorning/origami#menu) section.
 21. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
 22. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
-23. For the new greeting, replace the first card in the grid under `# The next event and the greeting` with the one from the [Greeting and notifications](https://github.com/hazymorning/origami#greeting-and-notifications) section. The old greeting keeps working.
-24. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
-25. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens.
+23. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
+24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens.
 
 ## 2.0 · The Unfolding
 

@@ -240,24 +240,49 @@ type: grid
 square: false
 columns: 2
 cards:
-  - type: custom:bubble-card
-    card_type: separator
-    name: ${(s => s.charAt(0).toUpperCase() + s.slice(1))(states('sensor.greetings'))}
-    modules:
-      - origami_base
-      - origami_header
-    origami_header:
-      value_position: above
-      value_size: var(--ha-font-size-s)
-      value_max_width: 100px
-    sub_button:
-      main:
-        - entity: calendar.household
-          show_icon: false
-          origami_header:
-            name: ${attr.message}
-          tap_action:
-            action: none
+  - type: custom:paper-buttons-row
+    extra_styles: ':host { display: block; height: 100% }'
+    styles:
+      flex-direction: column
+      justify-content: center
+      height: 100%
+      gap: var(--ha-space-1)
+    base_config:
+      layout: state
+      tap_action:
+        action: none
+      styles:
+        button:
+          min-height: unset
+          padding: 0px
+          align-self: flex-start
+          justify-content: flex-start
+          pointer-events: none
+        state:
+          padding: 0px
+    buttons:
+      - entity: calendar.household
+        state:
+          attribute: message
+        styles:
+          state:
+            font-size: var(--ha-font-size-s)
+            font-weight: var(--ha-font-weight-bold)
+            color: var(--secondary-text-color)
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+            max-width: 100px
+      - entity: sensor.greetings
+        state:
+          case: first
+        styles:
+          state:
+            font-size: var(--ha-font-size-l)
+            font-weight: var(--ha-font-weight-bold)
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
   - type: custom:origami-notifications
     entities:
       - sensor.dwd_current_warning_level
@@ -775,7 +800,7 @@ sub_button:
 
 The second card contains the tiles.
 
-<!-- dashboard.yaml modules.1=origami_tiles grid_options.columns=full -->
+<!-- dashboard.yaml modules.1=origami_tiles -->
 
 ```yaml
 type: custom:bubble-card
@@ -973,7 +998,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). All of them also need the [Base module](bubble_card/README.md#base). The rooms header and **All rooms** also need the [Header module](bubble_card/README.md#header). The rooms header is the first card.
 
-<!-- dashboard.yaml card_type=separator name=Rooms origami_header.value_style=chip -->
+<!-- dashboard.yaml card_type=separator name=Rooms -->
 
 ```yaml
 type: custom:bubble-card
