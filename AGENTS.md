@@ -2,6 +2,15 @@
 
 These notes are for coding agents that work on this repository. They hold the rules that the code alone does not show.
 
+## For everyone
+
+This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, but it also holds parts that only fit that home, such as a taxi button or a grow tent pop-up. Only what works for everyone goes into the repository.
+
+- Separate what makes a feature work from one home's use cases. The general part goes into the repository. The personal part stays out, also from examples and the README.
+- Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
+- A script or a template sensor goes into the package only when a feature cannot work without it, and only after a simpler way was ruled out, such as a module option, a Bubble Card feature or a helper that people create themselves. It must stay short and easy to read, change and debug. A script full of one home's edge cases does not belong in the package.
+- If it is unclear whether a part is general, ask the user.
+
 ## Building
 
 A new custom card is often the easiest path for an agent, but it is rarely the right one here. Home Assistant and Bubble Card should do as much as possible.
@@ -68,10 +77,10 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 `main` holds the latest release. The README on GitHub and the ZIP download come from `main`, and HACS installs the releases. `next` collects all work for the coming release.
 
 - Commit all work for the coming release directly to `next`. Do not open another branch or pull request for it, even when the session starts on another branch. Never push to `main` directly.
-- One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: a short checklist of what the release needs, what is done and what is left. Check every line against the repo, update it with every change, and keep side topics out of it.
-- The example dashboard follows the user's own dashboard. When a card or pop-up is built or changed for the user's setup, put it into `dashboard/dashboard.yaml` in the same step, with the example home's entities, such as `light.living_room`, and its helpers in `packages/origami.yaml`. Then run `python3 .github/scripts/fold_cards.py` and commit its output.
+- One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
+- During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- The README and the screenshots are rewritten once, when all cards and pop-ups of the release are done and tested. Until then, only `fold_cards.py` and the comments above its copies change the README.
+- When everything works, the last step of the release builds the example dashboard and the package from the user's final setup, following "For everyone", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them. Until then, only `fold_cards.py` and the comments above its copies change the README.
 - Every change is tested in the user's own Home Assistant before the release.
 - A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
 - For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.
