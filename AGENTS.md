@@ -11,7 +11,7 @@ Origami builds on what Home Assistant already offers and does things the Home As
 
 ## For everyone
 
-This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and grow tent pop-ups, and they stay out.
+This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and tent pop-ups, and they stay out.
 
 - Separate what makes a feature work from one home's details. The repository has the general part, with plain defaults where the user's setup has personal details, such as English greetings instead of the user's own words.
 - Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
