@@ -5,7 +5,7 @@
 ## Checklist
 
 - [ ] The change was tested in a real Home Assistant.
-- [ ] The base branch is `next`, or `main` for a fix to the current release or for the release itself.
+- [ ] This is the release's draft pull request from `next`, or a fix for the current release into `main`. Other work goes straight to `next`.
 - [ ] `dashboard/dashboard.yaml` uses the example home's entities.
 - [ ] The README describes the change.
 - [ ] The module reference and the module's description describe the change, if a module changed.
