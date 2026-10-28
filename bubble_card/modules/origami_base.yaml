@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.9.1"
+  version: "12.10.0"
   is_global: true
   supported:
     - button
@@ -707,6 +707,9 @@ origami_base:
         pad: length(cfgB.padding),
         sub: length(cfgB.sub_button_height),
         text: length(cfgB.sub_button_text_size),
+        // A card has a state line under its name as Bubble Card decides, unless the card is a slim row or has its name under the icon. A media card writes its state line, and Media takes it back when it hides the line.
+        lines: !(cfgB.compact ?? this.config.origami_media?.compact) && !cfgB.vertical && (type === "media-player" ? this.config.show_state !== false
+          : ["show_state", "show_attribute"].some((k) => this.config[k] ?? this.config.button_type === "state") || !!this.config.show_last_changed || !!this.config.show_last_updated),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
         bare: ["separator", "sub-buttons", "pop-up"].includes(type),
         dark: !!hass.themes?.darkMode
@@ -935,6 +938,8 @@ origami_base:
       --org-pad: ${card._org.opts.pad || "var(--ha-space-4)"};
       --org-sub-text: ${card._org.opts.text || "var(--ha-font-size-s)"};
       ${card._org.opts.sub ? "--org-sub-h: " + card._org.opts.sub + ";" : ""}
+      /* The name and the state line together. A dropdown in the card's own row is as tall, so its edges meet the edges of the text beside it. */
+      --org-lines-h: ${card._org.opts.lines ? "calc(" + (card._org.opts.large ? "var(--ha-font-size-xl) * 1.25" : "var(--ha-font-size-m) * var(--ha-line-height-normal)") + " + var(--ha-space-1) + var(--ha-font-size-s) * var(--ha-line-height-normal))" : "0px"};
       --org-row-height: calc(var(--tile-size) + 2 * var(--org-pad));
       --org-tile-size: var(--tile-size);
       --org-tile-inset: var(--org-pad);
@@ -1369,14 +1374,18 @@ origami_base:
         return { off: "mdi:speaker-off", playing: "mdi:speaker-pause", bluetooth: "mdi:speaker-bluetooth", tv: "mdi:television-speaker" }[kind] ?? "mdi:speaker";
       };
       // A dropdown that picks an entity, such as a helper whose options are the entity IDs of speakers, shows the entities' names, as the card's words rename them, and its menu shows each entity's icon for its state. An option that is not an entity, such as None, stays as it is.
+      // The card's own sub-buttons come first, and the rows below follow
+      const own = org.items({ card_type: this.config.card_type, sub_button: Array.isArray(this.config.sub_button) ? this.config.sub_button : { main: this.config.sub_button?.main ?? [] } }).length;
       drops.forEach(({ n, item, entity: id, opt }) => {
         const options = hass.states[id]?.attributes?.options;
         if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
         const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
+        // In the card's own row, the dropdown is as tall as the name and the state line together, and never smaller than a button
+        const h = card._org.opts.frame && n <= own ? "max(var(--control-height-icon), var(--org-lines-h, 0px))" : "var(--control-height-icon)";
         if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--org-sub-text, var(--ha-font-size-s))"));
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The arrow is as large as the card's icons, as on a key. The chevron fills less than half of its icon, so the chip's end has less padding, and the chevron ends about as far from the edge as the name starts. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--control-height-icon))); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; margin-inline-start: var(--ha-space-1); }",
           sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--org-icon-size); width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; color: inherit !important; }",

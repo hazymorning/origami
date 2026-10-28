@@ -1658,10 +1658,15 @@ views:
                 text-overflow: ellipsis !important;
               }
 
-              /* The progress bar is hidden. The card only reads media_position and does not update in between,
-                 so the bar would not move smoothly. */
+              /* The progress is a line as strong as a dividing line along the card's bottom edge. It spans the whole card, and the card's corners round its ends.
+                 The part that has played takes the media color, and Navbar Card 1.8 moves it smoothly while music plays. */
               .media-player .media-player-progress-bar {
-                display: none !important;
+                height: 2px;
+                background: var(--fill-strong);
+              }
+
+              .media-player:dir(rtl) .media-player-progress-bar-fill {
+                transform-origin: right;
               }
 
               .media-player-image {

@@ -61,7 +61,7 @@ Controls stay neutral. An active control uses `fill-active`, which is the text c
 - Sub-buttons that navigate, open the more-info dialog, open a URL or fire a browser event stay neutral, unless they have `css_class: accent`.
 - A sub-button without a `tap_action` opens the more-info dialog, so it also stays neutral. On a card with Base's `vertical` option, a sub-button without a tap, hold or double tap action passes the tap to the card instead.
 - On a Climate card, the plus and minus buttons stay neutral while the thermostat works. Buttons that set a mode or a preset are still filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. Its arrow is as large as the card's icons, as an icon on a key is. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the size and the shape of a button in a Button row. Its arrow is as large as the card's icons, as an icon on a key is. In the card's own row, the chip is as tall as the name and the state line together, so its edges meet the edges of the text beside it, and it is never smaller than a button. It shows the chosen entity's name instead of its ID. In its menu, each option shows its entity's name and an icon for its state, and an option that is not an entity ID, such as None, keeps its text. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV, and other entities show Home Assistant's icon. Base's `words` option renames the entities, with the entity ID or the name as the key.
 - In the menu of every dropdown, the options are the rows of a list, so their corners follow the menu's corners. A row is as tall as the dropdown's chip, which is 40 px, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color and bold text, also while it has the focus. The open menu shows that the dropdown is open, so Bubble Card's ring in the accent color is hidden.
 
 </details>
@@ -141,8 +141,8 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `animate` | `false` | The card fades in from below when it appears, and it glides to a new height when its content changes. The section [Fade in and glide](#fade-in-and-glide) explains this. |
 | `words` | | The option maps a state or a value to the word that the modules write on the card. The Language section above explains it. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. The card's row is as tall as its icon plus this space above and below it, and the rows below keep this space from the edges. A compact card keeps the height of its row. |
-| `sub_button_height` | | The height of the card's sub-buttons and sliders, such as `40px`. Without it, a key is as tall as the card's icon, a dropdown is 40 px tall, and a slider is 32 px tall, or as tall as the switch on a compact card. Bubble Card's own `custom_height` on a sub-button wins over this option. The corners follow the height, as every corner does. |
-| `sub_button_text_size` | `var(--ha-font-size-s)` | The size of the text on the card's sub-buttons and sliders, such as `var(--ha-font-size-m)`. |
+| `sub_button_height` | | The height of the card's sub-buttons and sliders, such as `40px`. Without it, a key is as tall as the card's icon, a dropdown is 40 px tall, or as tall as the name and the state line in the card's own row, and a slider is 32 px tall, or as tall as the switch on a compact card. On a card with the Button module, the option sets the height of the buttons, and their side padding grows with it. Bubble Card's own `custom_height` on a sub-button wins over this option. The corners follow the height, as every corner does. |
+| `sub_button_text_size` | `var(--ha-font-size-s)` | The size of the text on the card's sub-buttons and sliders, such as `var(--ha-font-size-m)`. It also sets the size of the labels in a Button row. |
 
 To keep a sub-button neutral, give it `css_class: plain`. To fill it while the entity is on, even if it navigates, give it `css_class: accent`. Dropdowns, sliders and readouts always stay neutral.
 
@@ -485,9 +485,9 @@ The Media options go under `origami_media:`.
 | `state` | | The state line shows this value instead of what the module writes. It accepts a template, such as one that reads a title from a template sensor. While the value is empty, the module's own line shows. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | A crown marks the group leader and a link marks its members on the icon, as in Speaker Select. |
 | `icon_color` | | The option maps the same keys as `icons` to a color for the icon, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
-| `cover` | `icon` | The option sets where the cover shows. With `icon`, it shows in the icon, and Bubble Card's `show_icon: false` hides it. With `above`, it shows as a large square above the name, and with `background`, it fills the card. The option also accepts a map from the state or a template, as described below the examples. |
-| `cover_mix` | `25` | With `cover: background`, the option sets the cover's share in percent. The card's color makes up the rest. |
-| `cover_blur` | `false` | With `cover: background`, the cover is blurred, so only its colors remain. |
+| `cover` | `icon` | The option sets where the cover shows. With `icon`, it shows in the icon, and Bubble Card's `show_icon: false` hides it. With `above`, it shows as a large square above the name, and with `background`, it fills the card. A list such as `[background, icon]` shows the cover in two places, because `background` combines with `icon` or `above`. The option also accepts a map from the state or a template, as described below the examples. |
+| `cover_mix` | `25` | While the cover fills the card, the option sets the cover's share in percent. The card's color makes up the rest. |
+| `cover_blur` | `false` | While the cover fills the card, it is blurred, so only its colors remain. |
 
 Groups come from Home Assistant's `group_members` attribute, which lists the leader first, so a group member shows its leader's music. A cover from `art` also shows while the player reports no title, because the option itself decides when there is a cover. While a speaker uses an input, the card shows the source's name, and Base's `words` option can rename it. The card's name can be a template, as on other Bubble cards. For a slim row, use Base's `compact` option.
 
@@ -584,7 +584,7 @@ origami_media:
 
 #### Cover as background
 
-With `cover: background`, the cover fills the card. `cover_mix` sets the cover's share in percent, and the card's color makes up the rest. The cover is therefore lighter in light mode and darker in dark mode, and the default share of 25 % keeps the text readable on a busy cover. With `cover_blur: true`, the cover is blurred, so only its colors remain. When the cover goes, such as when the speaker stops, it fades out, and a cover that comes back fades in. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
+With `cover: background`, the cover fills the card. `cover_mix` sets the cover's share in percent, and the card's color makes up the rest. The cover is therefore lighter in light mode and darker in dark mode, and the default share of 25 % keeps the text readable on a busy cover. With `cover_blur: true`, the cover is blurred, so only its colors remain. When the cover goes, such as when the speaker stops, it fades out, and a cover that comes back fades in. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. The icon shows the card's own icon instead of the cover, and `show_icon: false` hides it. With `cover: [background, icon]`, the cover also shows in the icon, so a blurred cover behind the card frames the sharp one. With `[background, above]`, the large square above the name stands on the blurred cover. A template returns the same places as words, such as `background icon`. In this example, the name and the state line stand on the left, and a dropdown at the top right picks the speaker:
 
 ```yaml
 show_icon: false
@@ -887,11 +887,11 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and i
 | `padding` | `0` | The option sets the space around the buttons. |
 | `press` | `true` | The buttons shrink a little when you press them. Segmented buttons get a stronger fill instead. |
 | `segmented` | `false` | With `true`, the buttons in each Bubble Card group form one bar with a thin line between them. The groups share one row, so all buttons have the same width. The active button is filled. Segmented buttons are as tall as other controls and have bold labels, and they ignore `background`, `align`, `columns`, `active_style` and `scroll`. With the names of groups instead, only those groups become small switches, which can stand in any row, also in one that scrolls. In a row that does not scroll, a switch fills the free width. |
-| `chips` | `false` | The buttons are chips with the label in the text color and the icon in the secondary color. A chip with only an icon is a square. An active button has a bold label with every style. |
+| `chips` | `false` | The buttons are chips with the label in the text color and the icon in the secondary color. An active button has a bold label with every style. |
 | `pending` | `false` | After a tap, the button shows the look its tap is about to give it, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, and buttons that only open something and segments never do. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The option sets the size of segmented labels. `large` suits short figures, as in the TV pop-up, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways. `columns` has no effect. |
-| `labels` | `inside` | With `below`, each button is a large field with its icon, and its name stands under the field, as for scenes. The icons are larger, unless `icon_size` sets their size. |
+| `labels` | `inside` | With `below`, each button is a large field with its icon, and its name stands under the field, as for scenes. The icons are larger, unless `icon_size` sets their size. A field without a name is a square, so a row of scenes can show icons alone. |
 | `outline` | | The option takes the same values as `active`. Matching buttons that are not active get a ring instead of a fill, which suits a suggestion, such as the scene for the time of day. |
 | `start` | | The option takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end, as in a cycle of scenes for the times of day. |
 
@@ -992,6 +992,18 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
 ```
 
 A button with `content_layout: icon-top` or `icon-bottom` stacks its icon and name in the middle. Unless the card has `background: false`, it is twice as tall as a button whose icon sits beside its name.
+
+A button that shows only its icon is a square, in a row of buttons, of chips and of stacked buttons, and with `labels: below`. In a grid with `columns`, the grid sets the width instead. Base's `sub_button_height` and `sub_button_text_size` set the buttons' height and the size of their labels. The side padding is 40 % of the height, which is 16 px for the default 40 px, and the corners follow the height. In this example, the chips under a music card are 48 px tall with 16 px labels:
+
+```yaml
+origami_base:
+  sub_button_height: var(--control-height-list)
+  sub_button_text_size: var(--ha-font-size-m)
+origami_button:
+  chips: true
+  scroll: true
+  icon_size: var(--icon-size-s)
+```
 
 With `segmented: true`, each group under `sub_button: bottom` becomes one bar. Buttons outside a group each form a bar of their own when the card also has groups, and they share one bar when it has none. The TV pop-up's input and volume buttons are two groups, so they form two bars in one row.
 

@@ -107,7 +107,7 @@ Open each repository in HACS. If HACS asks you to add the repository, select **A
 | [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting and the fan pop-up | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
 | [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers, the room cards and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
 | [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) | Loading the Bubble Card modules | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration) |
-| [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
+| [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom, from version 1.8.0 | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
 | [Origami Notifications](https://github.com/hazymorning/origami_notifications) | The notifications next to the greeting | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_notifications&category=plugin) |
 | [Origami Weather](https://github.com/hazymorning/origami_weather) | The weather card | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_weather&category=plugin) |
 
@@ -1386,7 +1386,7 @@ The navigation bar is a [Navbar Card](https://github.com/joseluis9595/lovelace-n
 - Hold **Music** to play or pause the active speaker, unless the speaker is playing TV audio. Tap **TV** to open the [TV pop-up](#tv), or hold it to open the TV entity's controls.
 - Hold **Lights** to open a menu. The menu contains the living room scenes and a button that turns all lights on or off. The active scene is amber.
 - **More** opens the Origami Header menu. Administrators see a dot on this button while updates are available.
-- The card above the bar shows either the TV or the most relevant speaker, which comes from `sensor.active_speaker`.
+- The card above the bar shows either the TV or the most relevant speaker, which comes from `sensor.active_speaker`. A line along its bottom edge shows how far the track has played. It spans the whole card, it is as strong as a dividing line, and the part that has played takes the media color. Radio has no length, so the line only shows for tracks.
 - In Navbar Card's `[[[ ]]]` templates, read a state with `states['sensor.x'].state`. The `states('sensor.x')` function only works in Jinja and in the `${ }` templates of the Bubble Card modules.
 
 <img width="600" alt="The light scenes, which open when you hold Lights" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/navbar-scenes.webp">
@@ -1825,10 +1825,15 @@ styles: |
     text-overflow: ellipsis !important;
   }
 
-  /* The progress bar is hidden. The card only reads media_position and does not update in between,
-     so the bar would not move smoothly. */
+  /* The progress is a line as strong as a dividing line along the card's bottom edge. It spans the whole card, and the card's corners round its ends.
+     The part that has played takes the media color, and Navbar Card 1.8 moves it smoothly while music plays. */
   .media-player .media-player-progress-bar {
-    display: none !important;
+    height: 2px;
+    background: var(--fill-strong);
+  }
+
+  .media-player:dir(rtl) .media-player-progress-bar-fill {
+    transform-origin: right;
   }
 
   .media-player-image {
