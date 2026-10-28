@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.7.0"
+  version: "5.7.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -379,7 +379,8 @@ origami_media:
       height: auto !important;
       min-height: 0 !important;
       aspect-ratio: 1;
-      margin: var(--org-pad) var(--org-pad) 0 !important;
+      /* On a frameless card, the gap between its rows also stands between the cover and the name */
+      margin: var(--org-pad) var(--org-pad) var(--org-gap, 0px) !important;
       /* The cover spans the card's width at the card's padding, so its corners run parallel to the card's corners, as a list's rows do */
       border-radius: max(0px, calc(var(--ha-card-border-radius) - var(--org-pad))) !important;
       container-type: inline-size;

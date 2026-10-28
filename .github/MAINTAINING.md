@@ -2,6 +2,14 @@
 
 These rules are for work on Origami itself: its modules, theme, dashboard and docs in the hazymorning/origami repository. They hold what the code alone does not show, and coding agents follow them too.
 
+## Handing files to the user
+
+The user tests every change on a phone, in their own Home Assistant. Every round that changes a file the user has to paste, such as a module, a card, a pop-up or a script, ends the same way:
+
+- All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
+- The same page is updated for every round, so its link stays the same, and the reply gives that link.
+- Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
+
 ## The idea
 
 Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
@@ -126,7 +134,6 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - Commit all work for the coming release directly to `next`. Do not open another branch or pull request for it, even when the session starts on another branch. Never push to `main` directly.
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
-- Every changed file the user has to paste, such as a module, a card, a pop-up or a script, goes to the user on one published page with a copy button for each file, in the order to paste them. The same page is updated for every round, so its link stays the same. Never paste long YAML into the conversation and never send the files as attachments instead, because the user tests on a phone and can only copy from that page.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
 - When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them, following "README from 3.0". Until then, only `fold_cards.py` and the comments above its copies change the README.
 - Every change is tested in the user's own Home Assistant before the release.

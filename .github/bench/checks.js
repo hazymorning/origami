@@ -162,9 +162,15 @@ window.__check = () => {
       const subs = card.root.querySelector('.bubble-sub-button-container');
       if (icon && visible(icon) && !near(icon.getBoundingClientRect().left, cb.left)) fails.push(`card ${card.i}: the icon starts ${r1(icon.getBoundingClientRect().left - cb.left)} px from the edge, expected 0`);
       if (subs && visible(subs) && !near(subs.getBoundingClientRect().right, cb.right)) fails.push(`card ${card.i}: the sub-buttons end ${r1(cb.right - subs.getBoundingClientRect().right)} px from the edge, expected 0`);
+      // The rows have one gap between them: between a cover above the name and the name, and between the card's own row and the rows below
+      const gap = length(card, 'var(--org-gap)');
+      const name = card.root.querySelector('.bubble-name-container')?.getBoundingClientRect();
+      const rows = card.root.querySelector('.bubble-sub-button-bottom-container');
+      if (name && icon && near(icon.getBoundingClientRect().width, cb.width, 1) && !near(name.top - icon.getBoundingClientRect().bottom, gap)) fails.push(`card ${card.i}: ${r1(name.top - icon.getBoundingClientRect().bottom)} px between the cover and the name, expected ${r1(gap)}`);
+      if (name && rows && visible(rows) && !near(rows.getBoundingClientRect().top - name.bottom, gap)) fails.push(`card ${card.i}: ${r1(rows.getBoundingClientRect().top - name.bottom)} px between the card's own row and the rows below, expected ${r1(gap)}`);
     }
     if (!frameless.length) fails.push('the sheet has no frameless card');
-    report('frameless', fails, `${frameless.length} frameless card draws nothing behind its content, which reaches its edges`);
+    report('frameless', fails, `${frameless.length} frameless card draws nothing behind its content, which reaches its edges, with one gap between its rows`);
   }
 
   // Plain cards: Base does nothing on a card without an Origami module

@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.12.0"
+  version: "12.12.1"
   is_global: true
   supported:
     - button
@@ -958,8 +958,9 @@ origami_base:
       ${card._org.opts.sub ? "--org-sub-h: " + card._org.opts.sub + ";" : ""}
       /* The name and the state line together. A dropdown in the card's own row is as tall, so its edges meet the edges of the text beside it. */
       --org-lines-h: ${card._org.opts.lines ? "calc(" + (card._org.opts.large ? "var(--ha-font-size-xl) * 1.25" : "var(--ha-font-size-m) * var(--ha-line-height-normal)") + " + var(--ha-space-1) + var(--ha-font-size-s) * var(--ha-line-height-normal))" : "0px"};
-      /* A frameless card loses only the space at its edges, so its rows keep the height of a regular card's rows */
-      --org-row-height: calc(var(--tile-size) + 2 * ${card._org.opts.frameless && !card._org.opts.pad ? "var(--ha-space-4)" : "var(--org-pad)"});
+      --org-row-height: calc(var(--tile-size) + 2 * var(--org-pad));
+      /* A frameless card's rows have no padding of their own, so the card puts this gap between them, as between the rows below the card's own row */
+      --org-gap: ${card._org.opts.frameless && !card._org.opts.pad ? "var(--ha-space-5)" : "0px"};
       --org-tile-size: var(--tile-size);
       --org-tile-inset: var(--org-pad);
       /* The icon's corners follow its height, as every corner does */
@@ -1046,6 +1047,10 @@ origami_base:
       opacity: 1 !important;
     }` : ""}
     ${card._org.opts.gray ? "ha-card .bubble-container { background-color: " + (this.config.button_type === "slider" ? "var(--org-surface)" : "transparent") + " !important; }" : ""}
+    ${card._org.opts.frameless ? `/* A frameless card's content reaches its edges, so the card's corners do not cut into it, such as into a slider at the bottom */
+    ha-card .bubble-container {
+      border-radius: 0 !important;
+    }` : ""}
     .bubble-icon-container {
       min-width: var(--org-tile-size) !important;
       width: var(--org-tile-size) !important;
@@ -1191,7 +1196,7 @@ origami_base:
       display: flex !important;
       flex-direction: column !important;
       row-gap: var(--ha-space-5) !important;
-      margin-top: var(--ha-space-1) !important;
+      margin-top: max(var(--ha-space-1), var(--org-gap, 0px)) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group {
       width: 100% !important;

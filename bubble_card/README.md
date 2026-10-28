@@ -135,7 +135,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `toggle` | `false` | Turns each sub-button into a pill switch for its entity, or the card's entity. Give it a tap action with `action: toggle`. |
 | `group` | `false` | Shows the sub-buttons as small keys in a tray. No effect with `toggle`. |
 | `tile` | `false` | A light gray card without a shadow. The icon and the sub-buttons get the card background and a shadow. |
-| `frameless` | `false` | A card without background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up. The rows keep their height, and the icon and the sub-buttons look as on a tile. |
+| `frameless` | `false` | A card without background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up. Its content reaches the card's edges, with the same gap between all its rows, and the icon and the sub-buttons look as on a tile. |
 | `vertical` | `false` | Puts the name under the icon, on button cards. See [Name under the icon](#name-under-the-icon). |
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
