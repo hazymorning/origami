@@ -6,141 +6,183 @@ These changes are in the `next` branch and come with the next release.
 
 ### New
 
-- The modules work for every home and every language. They show Home Assistant's own words for states and attributes, so a French user sees French words, as asked in discussion #26. Where Home Assistant's words are too long for a card, Base keeps shorter ones, such as Heizt for a German thermostat that heats. The new `words` option of Base changes the words that the modules write on a card.
-- Base is the shared core of all modules, and Bubble Card runs it by itself on every card that uses an Origami module. It reads Home Assistant's words, and it holds the code that reads templates in values, the color rule and the media rules that Media and Speaker Select share. No module checks another module's name anymore, and the module reference lists the helpers for people who write their own modules.
-- The room cards are now Bubble cards with the Base module and its new `vertical` option, which places the name under the icon. They look the same as before, and the comfort dot gets its color in the first frame instead of waiting for the server. While a room's climate sensor has no color, the dot is transparent.
-- A sub-button whose tap sets a value, such as a fan speed, a preset, a source, an app, a brightness, a position or a target temperature, is filled while its entity has that value. A tap that sets several of these values matches when all of them match. So the Fan module works with any number of speeds, and the TV pop-up's **TV** button needs no template of its own. A button that selects a source is also filled while a TV reports that app as its source, its `app_name` or its `app_id`, so the TV pop-up's app buttons need no template either. The Button module highlights its buttons by the same rule.
-- Base follows Home Assistant's own rules for when an entity counts as on and which color it gets, so timers, plants, cameras, alerts, lawn mowers, weather entities and groups look as they do in Home Assistant. A paused or idle speaker and a thermostat that waits still count as off, as before.
-- Media and Speaker Select take groups from Home Assistant's `group_members` and covers from the speaker's own picture, so they work with every integration that reports these attributes. Their new `players`, `leader`, `art`, `inputs` and `icons` options cover setups that report these parts elsewhere. Speaker Select's new `selected` option takes the helper that selects a speaker.
-- The speaker's own music comes first. Another player in `players` gives the title while it plays and the speaker plays nothing with a title, or while both are paused and only that player has one. So an old Music Assistant title no longer covers what the speaker plays itself or an idle speaker. A title that is a stream address or a file path does not count, but a title such as 24/7 does.
-- With the TV layout, no source counts as an input, so a TV on HDMI 1 still shows the title and the cover from its Cast player.
-- Source names such as HDMI 1, AUX In and Line In 2 count as inputs. Short names such as TV, CD and FM count only on their own, so a radio station called FM4 is not an input.
-- The Media module writes the card's name line and state line through the lines that Bubble Card hands to modules, instead of a copy of Bubble Card's scrolling text. A Media card's `name` can be a template.
-- The Media module has a `layout` option. With `tv`, the card shows what is cast, the running app or the source, from the card's own entity or from the media players in its `players` list. A group member's card and a card fed by `players` show the music of the speaker that plays it, and a TV show, a channel or a playlist appears where the artist would.
-- The Climate module shows the target temperature with its decimals, and the range for thermostats with a low and a high target. Thermostats without `hvac_action` get a color in every mode except off. The new `icons` option chooses the icons, and Home Assistant's icons are the default.
-- The Fan module's icon turns the other way while the fan runs in reverse, and it stands still when the device asks for less motion.
-- The Popup module keeps Bubble Card's own header layout on pop-ups whose header has a button, a switch or a slider. With `scrolling_effect: false`, a long title stays on one line and ends with an ellipsis, and a value with a name of its own and no visibility conditions always shows.
-- Header and Popup share their value keys. Each value can have `name`, `icon`, `color`, `name_color` and `background`, and `color` is the icon's color in every module. Popup's chips look like Header's chips, because Base draws both.
-- The Tiles module has a `list` layout for favorites and similar lists. Each row shows its icon in the state color, a state line and a sign at its end. A chevron opens something, a switch toggles the entity, and a play sign runs a script or a scene. With `script.toggle`, the play sign is a stop sign while the script runs, and so is the play sign of a row with `action: toggle` while its entity is on. The sign follows the tap action and the entity that the tap targets. The signs are icons of one size in one column at the row's end, which is as wide as the icons' column and as far from the edge. They are muted, and a sign takes the text color while what it controls is on or runs. A row's icon has the size and the background of a card's icon, so all rows have the same height, and a row without an entity can get a state line from its `state` key. The rows touch, so two icons are as far apart as an icon is from the list's edge, and no space inside the list is wider than its padding.
-- The Tiles module has an `image_size` key, shows a sub-button's `state_content` or `attribute` in Home Assistant's words and dims tiles whose entity is unavailable. Times such as `last_changed` and the states of scenes, buttons and timestamp sensors read as relative times, such as 3 days ago. As on Bubble Card's own state line, a speed, a brightness or a position of 0 is left out. A speed or a brightness is also left out while the fan or the light is off, so a fan tile needs only `state_content: percentage` to show its speed while it runs and Off while it is off.
-- Templates in values have `num()` for numbers in the format of your Home Assistant profile, with an optional unit such as `%` or `minute`, `format()` for an entity's state in Home Assistant's words, `word()` for Home Assistant's word for a value and `ago()` for how long ago something happened. An expression in `${ }` that returns `unavailable` or `unknown` now counts as empty, so the default appears. `minutesUntil()` also reads timers, paused timers and dates, and it reads times in the time zone of your Home Assistant.
+#### All modules
+
+- The modules work for every home and language. They show Home Assistant's own words for states and attributes, as asked in discussion #26. Base keeps shorter words where Home Assistant's are too long for a card, and its new `words` option changes any word.
+- The modules follow Home Assistant's rules for when an entity counts as on and which color it gets.
+- Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
+- A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
+- Sub-buttons have three new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, and `dot` marks a control that is on with a small dot.
+- Templates in values have `num()`, `format()`, `word()` and `ago()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
-- Base shares its number and date formatters among all cards, and Base and Tiles leave out steps that a card's layout does not need, so cards render with less work. Header and Popup draw their plain values with the same rules from Base, and Base and Media fill active controls with the same rules.
-- Media has three new options. `keep_name` keeps the card's name in the name line and shows the title and the artist in the state line while music plays, `state` replaces the state line with a value or a template, and `badge` marks a group's leader and members on the icon, as in Speaker Select.
-- Header's new `size: large` makes the title as large as a pop-up's title, and Popup's new `art` option shows a cover blurred behind the pop-up's content.
-- Each button in a Button card can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key, so the buttons in a row of playlists can each have their own tint.
-- Options that this release moved, renamed or replaced still work. These are `compact` under `origami_media`, `animate` under `origami_button`, `solid_controls` under `origami_base`, `art_entity` and `app_entity` under `origami_media` and `subtitle_style` under `origami_popup`.
-- The modules place their parts by the start and the end of a line instead of left and right, so cards are mirrored in languages that read from right to left.
-- The new `animate` option of the Base module lets any card with Base fade in when it appears. A button card, a media player card and a pop-up with the option also glide to their new height when their content changes, such as when a row of controls appears or a pop-up shows another view. It replaces the option of the same name in the Button module.
-- The TV pop-up no longer needs Paper Buttons Row. The row with the input and volume buttons, the row of apps and the remote are now sub-buttons cards with the Button module. The app buttons look like the other Button rows, so they are a little smaller and have no outline, and the pill on the **TV** button has a little more room around it.
-- The Button module has two new options. With `segmented`, the buttons in each group form one bar with thin lines between them. With `scroll`, the buttons stay in one row that scrolls sideways.
-- The Button module's `active` option also matches the entity that a button's tap targets, so `scene.living_room_evening` highlights its button whatever the label says. The new `color` option sets the lamp color, and a button whose own entity is on takes that entity's state color. The new `label_size` option makes segmented labels smaller.
-- The Media module has a play row for music pop-ups. A bottom sub-button with `css_class: play` is a large play key with a ring that shows how far the track has played, and the keys beside it hold shuffle, previous, next and repeat. A card with a play key also shows the title while the music is paused. A sub-button with `css_class: members` shows how many speakers play in the group.
-- Media's new `icon_color` option colors the icon by what the speaker does, its `players` option accepts a template, and a `state` value that repeats the name hides the state line.
-- Sub-buttons have three new keys. `on` decides whether a sub-button is filled, `disabled` shows a control that cannot work and ignores taps, and `dot` marks a control that is on with a small dot instead of a fill. On a slider that is always visible, `name` stands before the value.
-- The state line under a card's name and the state on a tile use the medium weight instead of bold, so they read lighter while their color keeps a contrast of 4.5:1.
-- A card with `bottom_layout: rows` and `rows: auto` grows with its rows. The value on a sub-button slider is in the secondary text color, and a key next to a slider in the same group is as tall as the slider.
-- The Button module has new options for a row of chips. `chips` shows the buttons as chips, `segmented` takes the names of groups that become small switches in the row, and a button with `css_class: divider` is a short line between two buttons. With `pending`, a tapped button shows the look it is about to get until its state changes.
-- Header's new `title_action` option lets a tap on the title run the first value's action, and its new `value_size` and `icon_gap` options set the size of the values and the space next to their icons.
-- The Slider module shows slider sub-buttons on a sub-buttons card as rows with their names, such as the speakers of a group. Each row has a column for its name, its track and its value, so the value no longer covers the fill. A name that is wider than its column scrolls, and the new `label_width` option sets the column's width, so the tracks of several cards stand in line. A sub-button for a switch is a row whose track fills while the switch is on. With the Light module, rows of lamps fill in the light color.
-- The Button module also works on button cards, where it styles the bottom sub-buttons and Base draws the rest of the card. With the new `labels: below` option, each button is a large field with its icon and its name under it, as for scenes in a room card. The new `outline` option rings a suggested button, and `start` lets a row begin at a matching button.
-- Header has a new value style, `switch`, which joins the values into one small switch. On a switch and on chips, the value whose tap sets what its entity shows now stands out. The new `scroll` option lets the values scroll sideways next to the title, such as a row of chips that chooses a room, and a chip with only an icon is a square.
-- Base has a new `large` option for a larger name, as on a card at the top of a pop-up.
-- On a compact card, a slider sub-button with `always_visible: true` can stand in for the pill switch. Base makes it as tall as the switch and as wide as a tray with three keys, so the name keeps the larger part and the slider lines up with the trays of other cards. Like the switch, it shows no value, and its fill shows the level. It works for lights, media players, fans and every other entity that Bubble Card's sliders support.
-- Speaker Select also works on a button card with a slider, so a speaker's whole row can set its volume. Its rows hide Bubble Card's media buttons themselves, and a readout without a tap action of its own passes the tap to the row.
-- Popup's new `gap` option sets the space between the cards of a vertical stack in a pop-up, and the headers in that stack have twice that space above them. A row that scrolls sideways reaches the edges of a pop-up.
-- The server card in the menu is a Bubble card with the Base module instead of Paper Buttons Row. It takes the same tile and text styles as the other Bubble cards, so its icon no longer changes its color with the status. The message still names the most urgent problem.
-- The new Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and the cells fill the columns in their order, or join the column that their `css_class` names. In the card editor, each column has its own form with its width, its alignment and the icon, the text and the icon color of its cells, and each of these can be fixed, set by the state or a template. A cell whose entity is on takes the state color, a cell with the `on` key stands out, and every second row is striped.
-- The climate table is a Bubble card with the Table module instead of Paper Buttons Row. It looks as before and needs less than half of the YAML, because each cell only names its entity and its column. A hidden row leaves no gap in the stripes, and the table needs no count of its rooms.
+- The state line under a card's name and the state on a tile use the medium weight instead of bold.
+- A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
+- Options that moved or were renamed in this release still work: `compact`, `animate`, `solid_controls`, `art_entity`, `app_entity` and `subtitle_style`.
+
+#### Base
+
+- Base is the shared core of all modules. Bubble Card runs it on every card with an Origami module, and the module reference lists its helpers for your own modules.
+- `vertical` places the name under the icon, as on the room cards.
+- `large` makes the name larger, as on a card at the top of a pop-up.
+- `animate` fades a card in. Button cards, media cards and pop-ups also glide to their new height when their content changes. It replaces Button's option of the same name.
+- `padding`, `sub_button_height` and `sub_button_text_size` set a card's padding and the size of its sub-buttons, sliders and Button rows. Bubble Card's `custom_height` on a single sub-button wins over them.
+- All dividing lines share one width and the theme's line color.
+- A compact card's icon has no background, as in a slim list.
+- On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
+- Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
+- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line.
+- Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
+- All cards share one number and date formatter, so they render with less work.
+
+#### Media
+
+- Groups come from `group_members` and covers from the speaker's own picture, so Media works with any integration that reports them. The new `players`, `leader`, `art`, `inputs` and `icons` options cover other setups.
+- The speaker's own music comes first. Another player in `players` only gives the title while the speaker itself plays nothing with a title.
+- `layout: tv` shows what is cast, the running app or the source.
+- Source names such as HDMI 1 or Line In 2 count as inputs. Short names such as TV, CD and FM count only on their own.
+- Media writes the name and state lines through Bubble Card's own lines, and a card's `name` can be a template.
+- New options: `keep_name`, `state`, `badge` and `icon_color`. `players` accepts a template.
+- A play row for music pop-ups: a bottom sub-button with `css_class: play` is a large play key with a progress ring, between shuffle, previous, next and repeat. A sub-button with `css_class: members` shows how many speakers play in the group.
+- `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
+
+#### Speaker Select
+
+- `selected` takes the helper that selects a speaker.
+- Speaker Select also works on a button card with a slider, so a speaker's whole row sets its volume.
+
+#### Climate
+
+- The target shows its decimals, and thermostats with a low and a high target show the range.
+- Thermostats without `hvac_action` get a color in every mode except off.
+- `icons` chooses the icons. Home Assistant's icons are the default.
+
+#### Fan
+
+- The Fan module works with any number of speeds.
+- The icon spins backwards while the fan runs in reverse. It stands still when the device asks for reduced motion.
+
+#### Header
+
+- Header and Popup share their value keys: `name`, `icon`, `color`, `name_color` and `background`.
+- New options: `size: large`, `title_action`, `value_size`, `icon_gap`, `scroll` and `value_position: above`, which puts the values in a small line above the title.
+- The `switch` value style joins the values into one small switch.
+- Header writes the title itself, so a title with a `${ }` template shows at once.
+
+#### Popup
+
+- `art` shows a blurred cover behind the content. `cover_mix` and `cover_blur` work as in Media.
+- `gap` sets the space between the cards of a vertical stack.
+- `value_position: beside` puts the values beside the title.
+- Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
+- With `scrolling_effect: false`, a long title ends with an ellipsis.
+
+#### Button
+
+- New options: `segmented`, `scroll`, `chips`, `labels: below`, `outline`, `start`, `pending`, `color` and `label_size`.
+- `active` also matches the entity that a button's tap targets.
+- Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
+- A button with `css_class: divider` is a short line between two buttons.
+- Button also works on button cards, where it styles the bottom sub-buttons.
+
+#### Slider
+
+- Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. `label_width` lines up the tracks of several cards.
+- A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
+
+#### Tiles
+
+- The `list` layout shows rows with an icon, a state line and a sign at the end. A chevron opens something, a switch toggles the entity, and a play sign runs a script or a scene.
+- `slim` makes one-line rows for facts and settings, and `dividers` draws lines between rows.
+- New options: `sign` for every row, and the `state_color` and `image_size` keys for a tile.
+- Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.
+
+#### Table
+
+- The new Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each column has its own options in the card editor.
+
+#### Theme
+
+- New shadows: a fine edge, a contact shadow and a soft drop in a dark tone of the background's hue. The new `shadow-edge` and `chip-shadow` tokens hold them.
+- Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
-- The theme draws new shadows. Each one has a fine edge, a contact shadow and a soft drop below, all in a dark tone of the background's warm hue, so a shadow reads as depth without a gray halo or a color of its own. Icons, switches and keys on tiles get a smaller shadow of the same kind. In dark mode, a faint light line marks the top edge. The new `shadow-edge` and `chip-shadow` tokens hold these shadows.
-- Every corner follows one rule. A shape's radius is its height times the theme's new `radius-ratio`, which is 0.35, and no shape is rounder than a card. So a 32 px chip, a 40 px button and a 48 px icon background have the same shape. A shape close inside another shape takes the outer radius less the space between them, and only switches, dots and rings are round. Sliders are a little rounder than before, and chips, Button's chips and the chips in a header are no longer pills. The new `radius-control` token is the radius of a 40 px shape. On a compact card, the icon's background, the keys and the side slider are 28 px tall, so their corners are 9.8 px.
-- All dividing lines have the same width and color, and Base sets both. The color is the theme's `fill-strong`, as in the theme's `separator` token, so the lines are quiet. Button's segmented bars, its dividers and its outlined buttons use them, and so does the line in the fan pop-up's speed row. Button's dividers are therefore 2 px wide now, and the lines in segmented bars are lighter.
-- Header's new `value_position: above` puts the values in a small line above the title, such as the next event above a greeting. The header then fills the height of its place and centers its lines.
-- Header writes the title itself, as Media writes its lines. A title with a template in `${ }` reads the states at once, so it is there when the header first shows, and nothing moves. A Jinja title still gets its result from Home Assistant a moment later.
-- Media's new `cover: background` fills the card with the cover. `cover_mix` sets the cover's share in a mix with the card's color, which is 25 % by default, and `cover_blur` blurs the cover. A cover that goes fades out. On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable.
-- A dropdown whose options are entity IDs, such as a helper that picks a speaker, is a chip in the active color with the chosen entity's name, and it has the size and the shape of a button in a Button row. Its arrow is as large as the card's icons. Its menu shows each entity's name and an icon for its state, and Base's `words` option renames them. A speaker's icon shows what it does, such as a pause sign while it plays, Bluetooth or a TV. An option that is not an entity ID, such as None, keeps its text. On Origami cards, the options in every dropdown's menu are the rows of a list, whose corners follow the menu's corners. A row is as tall as the dropdown's chip, its text and icon are as large as the chip's text and arrow, and the chosen option has the active color and bold text, also while it has the focus. Bubble Card's ring in the accent color around an open dropdown is hidden. On other cards, the theme gives the chosen option a quiet fill instead of the accent color.
-- Popup's new `value_position: beside` puts the values beside the title, before the close button, as small text. Popup's art takes Media's `cover_mix` and `cover_blur` options, and a blurred cover no longer fades at the pop-up's edges.
-- The chosen chip in Header's chips and switches takes the theme's chip shadow instead of a black one.
-- The Tiles list has a slim style for facts and settings. With `slim`, a row has the padding of a regular row around one line, so it is 40 px tall. Its icon has no background, its name is medium, and its state stands at its end in bold. The name keeps at least 40 % of the line, or less when the name itself is shorter, so a long state can use the space that a short name leaves. With `dividers`, a line divides the rows of either style, spans their content and keeps the same space to the content above and below. The card's new `sign` option sets the sign of every row without a sign of its own, and the new `state_color` key colors a tile's state.
-- A compact card's icon has no background, as in a slim list. It starts at the card's padding, its name starts 12 px after it, and it takes the state color while the entity is on and the secondary text color at other times.
-- The controls at the end of a card's row line up from card to card. Each one ends at the card's padding, also on a compact card and for a pill switch. The keys in a tray are as far apart as they are from its edge, also when Bubble Card puts them in a group of their own, so a speaker's tray and a thermostat's tray with three keys each are both 128 px wide. A thermostat's target takes the space between its minus and plus keys, so its tray keeps this width with a target such as 20.5°. A compact card's side slider has the same width, so in a pop-up the trays and the sliders start on one line.
-- Media's `cover` option takes a list, so the cover can fill the card and also show in the icon, or stand as the large square above the name on its own blurred copy. A template can return the places as words, such as `background icon`.
-- In a card's own row, a dropdown is as tall as the name and the state line together, so its edges meet the edges of the text beside it.
-- The navbar's now playing card shows how far the track has played, as a line along its bottom edge that spans the whole card. It is as strong as a dividing line, and the part that has played takes the media color. The line needs Navbar Card 1.8.0, which moves it smoothly while music plays.
-- Base has three new options for a card's sizes. `padding` sets the space between the card's edge and its content, `sub_button_height` sets the height of the card's sub-buttons and sliders, and `sub_button_text_size` sets the size of their text. A card's corners follow the new heights. Bubble Card's own `custom_height` on a single sub-button now works on Origami cards too and wins over the card's option.
-- Media's `cover` option has a third place. With `above`, the cover is a large square above the name, as in a music app's player, and without a cover the square shows the card's icon. The option also accepts a map from the state or a template, so a card can show its cover large while music plays and in the icon at other times, without a helper.
-- The navbar follows the rules of the Bubble cards. The now playing card has a card's padding and the space between a card's icon and its text, so it is as tall as the other cards. Its group badge has the size and the gap of the badge on a speaker's icon, the artist has the weight of a state line, and the buttons are as tall as an icon's background. The line on top of the bar and the dividers in the status row on desktop have the color of all other lines.
-- Base has three new helpers for people who write modules. `shows()` tells whether a sub-button shows a text of its own. `unframe()` returns the rules that remove Bubble Card's frame from a sub-buttons card, and Button, Slider, Table and Tiles share these rules instead of four copies. `backdrop()` returns the rules that show a cover behind a card's content, and Media and Popup share them.
+
+#### Dashboard
+
+- The room cards are Bubble cards with Base's `vertical` option.
+- The TV pop-up uses Bubble cards with the Button module instead of Paper Buttons Row.
+- The server card in the menu is a Bubble card.
+- The climate table uses the Table module.
+- The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 
 ### Bug fixes
 
-- A slider whose entity is off shows Home Assistant's word for off instead of 0 % or Unavailable, and an unavailable one shows a dash.
-- Color sliders, such as those for a light's hue or color temperature, keep Bubble Card's colored track. Before, Base painted its fill and its mark over the colors.
-- A slider that only shows a value, such as one for a sensor, has no mark at the end of its fill, because it cannot be moved. Before, the mark looked like a handle, and on a full slider it covered the value.
-- On a button card without an icon, the name starts at the same distance from the edge as the rest of the card.
-- A row of buttons with `scroll` starts at its first button again when a button in front of the others appears. The row no longer snaps to its buttons, because the browser kept the row on the button it had snapped to.
-- The Header and Tiles modules now show values exactly as they are. Before, Bubble Card's style cleaner removed the space after a comma or a semicolon, so "Mon, 12:00" became "Mon,12:00", and a value with braces disappeared.
-- On iPhones, the menu now starts below the status bar instead of behind it.
-- Base no longer replaces a card's state line with On, Off or Error. A sensor card now shows its value.
-- Each pill switch shows the state of its own entity instead of the card's entity.
-- In a classic pop-up, the last card can scroll fully into view, and the other pop-up modes keep the space of the phone's home indicator.
-- A group member's speaker card shows its leader's music, also when the speaker is not a LinkPlay speaker.
-- A light card of the slider type shows its fill again when it has the Base module.
+- A slider whose entity is off shows Home Assistant's word for off, and an unavailable one shows a dash.
+- Color sliders, such as those for hue or color temperature, keep Bubble Card's colored track.
+- A slider that only shows a value has no mark at the end of its fill.
+- On a button card without an icon, the name keeps the card's padding.
+- A row with `scroll` starts at its first button again when a button appears in front of the others.
+- Header and Tiles show values exactly as written, with the space after a comma and with braces.
+- On iPhones, the menu starts below the status bar.
+- Base no longer replaces a card's state line with On, Off or Error, so a sensor card shows its value.
+- Each pill switch shows the state of its own entity.
+- In a classic pop-up, the last card scrolls fully into view. The other pop-up modes keep the space of the phone's home indicator.
+- A group member's speaker card shows its leader's music, also for speakers that are not LinkPlay speakers.
+- A light card of the slider type with Base shows its fill again.
 - A speaker that is off no longer shows the music of another player in its `players` list.
-- A buffering speaker counts as playing, so `collapse` no longer shrinks the card at the start of every track. With `solid_controls`, the power button is filled while the speaker is on, also while it is paused.
-- An app counts as running only while its device is on, not in standby.
-- Each Climate readout shows the target of its own thermostat. It shows a dash while there is no target instead of keeping an old value, and a range keeps its order in languages that read from right to left.
-- On Climate cards, buttons that set a mode or a preset are filled again while that mode or preset is set.
-- A Media card's icon opens the more-info dialog again when you tap it, as on other Bubble cards.
-- In the dashboard, the printer tile's name has the theme's text color while the printer runs, as on the other tiles. Before, it had the browser's default color.
-- A header keeps Bubble Card's own grid options once you set its rows.
-- In a Button card, a button whose icon sits above or below its name has its icon in the middle and room for both lines.
-- A sub-button slider takes its `custom_height`. Before, Base gave every sub-button slider the same height.
-- Numbers with a unit follow Home Assistant's format for the language, so English shows 33% and German shows 48 %.
-- A header value whose icon is on the right keeps a small gap between its text and its icon.
-- The Button module's `active` option also matches buttons whose name is a number.
-- On a card with Base's `vertical` option, a sub-button with `css_class: accent` whose tap sets a value is filled only while its entity has that value.
-- In Speaker Select, the line after the name stays in the middle of the row while it scrolls. Long lines in Media and Speaker Select scroll also when their text arrived while the pop-up was closed.
-- A pop-up without a header starts its content 16 px below its top edge, as below a header. Before, Bubble Card's own rule placed it 10 px below the edge.
-- Each readout on a Speaker Select row shows the volume of its own entity.
-- With both `toggle` and `group`, Base shows the pill switches, because `group` has no effect together with `toggle`.
-- Numbers follow the number format with apostrophes, as used in Switzerland.
-- A value that Base, Header or Popup shows in place of a hidden sub-button also shows when Bubble Card hides the group around it.
+- A buffering speaker counts as playing, so `collapse` no longer shrinks the card at the start of every track. With `solid_controls`, the power button stays filled while the speaker is paused.
+- An app counts as running only while its device is on.
+- Each Climate readout shows the target of its own thermostat, a dash while there is no target, and a range in the right order in right-to-left languages.
+- Climate buttons that set a mode or a preset are filled again while it is set.
+- A tap on a Media card's icon opens the more-info dialog again.
+- The printer tile's name in the dashboard keeps the theme's text color while the printer runs.
+- A header keeps Bubble Card's grid options once you set its rows.
+- In a Button card, a button with its icon above or below its name centers the icon and fits both lines.
+- A sub-button slider takes its `custom_height`.
+- Numbers with a unit follow Home Assistant's format for the language, such as 33% in English and 48 % in German.
+- A header value with its icon on the right keeps a gap between its text and its icon.
+- Button's `active` option also matches buttons whose name is a number.
+- With Base's `vertical` option, an accent sub-button that sets a value is filled only while its entity has that value.
+- Speaker Select keeps the line after the name in the middle of the row while it scrolls. Long lines in Media and Speaker Select also scroll when their text arrived while the pop-up was closed.
+- A pop-up without a header starts its content as far below the top edge as a pop-up with a header.
+- Each Speaker Select readout shows the volume of its own entity.
+- With both `toggle` and `group`, Base shows the pill switches.
+- Numbers follow the Swiss number format with apostrophes.
+- A value that replaces a hidden sub-button also shows when Bubble Card hides the group around it.
 - All cards for one speaker agree on whether an old cover still shows after the speaker leaves an input.
-- A tap that sets a value for several entities, listed in one `entity_id` line and separated by commas, fills its button while the first of them has that value.
-- In the grid layout, the Tiles module reads the theme's `tile-background`, `tile-chip-background` and `tile-chip-shadow`, as Base's `tile` option does.
-- A tile or a list row with `show_icon: false` shows its name and its state, and it is as tall as a tile with an icon. Before, Bubble Card hid it, because Tiles writes the name and the state itself.
-- A Button card ignored Base's `sub_button_height` and `sub_button_text_size`. Now they set the height of its buttons and the size of their labels, and the side padding grows with the height.
-- A button that showed only its icon was as narrow as the icon when it stacked its icon and name, and a field with `labels: below` kept the space for a name. Now a button with only its icon is a square in every Button style, so a row of scenes can show large icons alone.
+- A tap that sets a value for several entities in one `entity_id` line fills its button while the first entity has that value.
+- In the grid layout, Tiles reads the theme's `tile-background`, `tile-chip-background` and `tile-chip-shadow`.
+- A tile or a list row with `show_icon: false` shows again, and it is as tall as the other tiles.
+- Button cards follow Base's `sub_button_height` and `sub_button_text_size`.
+- A button that shows only its icon is a square in every Button style.
 
 ### Upgrading
 
-Every module changed, and several options changed their names or their meaning. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) describes every option.
+Every module changed, and some options were renamed or work differently. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) lists every option.
 
 1. Copy all files from `bubble_card/modules/` to `/config/bubble_card/modules/` again.
-2. Base is a global module, so Bubble Card runs it first on every card with an Origami module, and no card has to list it. A card that uses Base's options without another Origami module keeps `origami_base` in its list.
+2. Base is a global module. Bubble Card runs it first on every card with an Origami module, so no card has to list it. A card that uses Base's options without another Origami module keeps `origami_base` in its list.
 3. A card with only Base shows a state line only with `state_content`. Add `state_content: state` where a card should show its state.
-4. The `animate` option moved from `origami_button` to `origami_base`. The old place still works, and new cards use `origami_base`.
-5. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. A separator or sub-buttons card that used Base alone now looks like a plain Bubble card.
-6. The cards show Home Assistant's words, so some words change. For example, a German thermostat shows Nicht verfügbar instead of Fehler. To keep a word that a module writes, add it to the `words` option of Base on that card, such as `idle: Auto` on a thermostat. The line that Bubble Card writes from `state_content` always shows Home Assistant's words.
-7. On media cards, `art_entity` and `app_entity` still work as `layout: tv` with a `players` list that holds both entities, and new cards use `layout` and `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` moved from `origami_base` to `origami_media`. The old places still work.
-8. Media and Speaker Select no longer replace the card's icon by themselves. A card keeps its own icon, or Home Assistant's icon for the state, unless the `icons` option sets one. To keep the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A Media card's icon also opens the more-info dialog when you tap it. To keep the icon from reacting, give the card `tap_action` with `action: none`.
-9. The Media module no longer shortens speaker names. Its title line shows the card's `name`, or else the speaker's name in Home Assistant. A speaker's TV input shows the source's own name, such as Optical In, and the `words` option can rename it.
-10. Media and Speaker Select take groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that do not appear in `group_members`, set `leader` on both kinds of cards to a template that returns the leader's entity ID while the speaker is in a group and nothing at other times. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`. On Speaker Select cards, set `selected` to the helper that selects a speaker, such as `input_select.selected_speaker`.
-11. The Light and Fan modules no longer write the state line. Give light cards `state_content` with `state` and `brightness`, and give fan cards `state_content: percentage`.
+4. `animate` moved from `origami_button` to `origami_base`. The old place still works.
+5. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. Such a card with Base alone looks like a plain Bubble card.
+6. The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`. The line that Bubble Card writes from `state_content` always shows Home Assistant's words.
+7. On media cards, `art_entity` and `app_entity` still work. New cards use `layout: tv` with both entities in `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` from `origami_base` to `origami_media`. The old places still work.
+8. Media and Speaker Select keep the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
+9. Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.
+10. Media and Speaker Select take groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` on both kinds of cards to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`. On Speaker Select cards, set `selected` to the helper that selects a speaker, such as `input_select.selected_speaker`.
+11. Light and Fan no longer write the state line. Give light cards `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`.
 12. Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
-13. The Climate module shows Home Assistant's icons for the actions on cards without an icon of their own. A card with an icon keeps it, unless `icons` replaces it. To keep radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
-14. In the Header module, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. To keep the old size, add `icon_size: var(--dot-size)` to every header without an `icon_size` of its own.
-15. In the Popup module, `subtitle_style` is now `value_style`, and the old name still works. The backdrop is no longer blurred in pop-ups with `performance_mode: performance` or with a `backdrop_blur` of their own.
-16. Tile pictures fill their icon. To zoom into a picture as before, add `image_size: 230%` to the tile.
-17. Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. Before, a tile with a number or a temperature was colored too. To keep that color, give the tile a `color` under its `origami_tiles` key.
-18. Replace the room cards in your dashboard with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working, because the rest of the dashboard still uses Paper Buttons Row.
-19. Replace the TV pop-up with the pop-up from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button now sends its command only once.
-20. In the menu card's `css`, replace the `.sheet` rule with the rule from the [Menu](https://github.com/hazymorning/origami#menu) section.
-21. To use the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
-22. To use the new climate table, replace the grid card with the climate table in your dashboard with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
-23. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under a new name keeps its old shadows until it gets the shadow tokens of the new theme.
+13. Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
+14. In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.
+15. In Popup, `subtitle_style` is now `value_style`, and the old name still works. Pop-ups with `performance_mode: performance` or their own `backdrop_blur` no longer blur the backdrop.
+16. Tile pictures fill their icon. To zoom in as before, add `image_size: 230%` to the tile.
+17. Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. To keep the color on a tile with a number or a temperature, give it a `color` under its `origami_tiles` key.
+18. Replace the room cards with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working.
+19. Replace the TV pop-up with the one from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button sends its command only once.
+20. In the menu card's `css`, replace the `.sheet` rule with the one from the [Menu](https://github.com/hazymorning/origami#menu) section.
+21. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
+22. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
+23. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
+24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens.
 
 ## 2.0 · The Unfolding
 
