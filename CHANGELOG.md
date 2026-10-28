@@ -113,6 +113,7 @@ These changes are in the `next` branch and come with the next release.
 - The TV pop-up uses Bubble cards with the Button module instead of Paper Buttons Row.
 - The server card in the menu is a Bubble card.
 - The climate table uses the Table module.
+- The dashboard has pop-ups for the favorites and the server. The server pop-up's graph needs Plotly Graph Card.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 
 ### Bug fixes
