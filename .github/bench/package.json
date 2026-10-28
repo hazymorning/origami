@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "description": "Renders Bubble cards with the Origami modules and checks the design rules.",
+  "dependencies": {
+    "@mdi/js": "7.4.47",
+    "js-yaml": "4.3.2",
+    "playwright": "1.63.0"
+  }
+}
