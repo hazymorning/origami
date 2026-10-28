@@ -13,7 +13,7 @@ These changes are in the `next` branch and come with the next release.
 - Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
 - A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
 - Sub-buttons have three new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, and `dot` marks a control that is on with a small dot.
-- Templates in values have `num()`, `format()`, `word()` and `ago()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
+- Templates in values have `num()`, `format()`, `word()`, `ago()` and `name()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.
 - A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
@@ -30,7 +30,8 @@ These changes are in the `next` branch and come with the next release.
 - A compact card's icon has no background, as in a slim list.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
-- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line.
+- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
+- `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
 

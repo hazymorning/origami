@@ -44,6 +44,7 @@ A new custom card is often the easiest path for an agent, but it is rarely the r
 - Build with Bubble Card's card types and the Origami modules, the other cards that the dashboard already uses and Home Assistant's own features, such as template sensors and scripts. If Bubble cards need a new look or behavior, write or extend a module, even when a custom card would be faster.
 - All modules follow one design logic. The theme's tokens and Base's sizes set every radius, gap, line and shadow, and `themes/origami.yaml` explains the corner rule. A module uses those instead of its own values, and the design checks measure the result.
 - Shared code lives in Base, and no module repeats what Base or another module already does. Less code keeps the dashboard fast.
+- Grouping speakers always uses the link icon, `mdi:link-variant`, as the badge of a group member does. Speaker icons stand for choosing a speaker, so a control that groups never uses one.
 - Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
 - Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
 

@@ -62,7 +62,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 
@@ -94,6 +94,7 @@ The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami
 
 - `state`, `attr` and `entity` refer to the sub-button's entity, or to the card's entity if the sub-button has none.
 - `states(id)` returns another entity's state. `hass` is also available.
+- `name(id)` returns an entity's name, which the card's `words` option can shorten, as in a dropdown. `${name(states('input_select.speaker'))}` names the speaker that a helper selects.
 - `minutesUntil(id)` returns the minutes until a time. It takes a timer, an `input_datetime`, a sensor whose state is a time, or a time itself. A paused timer gives the minutes it has left, and a time of day that has passed counts for tomorrow. Times without a time zone use Home Assistant's time zone.
 - `num(value)` writes a number in the format of your profile, such as 21,5 in German. `num(value, 1)` always shows one decimal. `num(value, 0, '%')` adds a unit in your language, such as `%`, `minute` or `hour`.
 - `word(value)` returns Home Assistant's word for a state of the template's own entity, such as `${word('off')}`.
@@ -134,6 +135,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `toggle` | `false` | Turns each sub-button into a pill switch for its entity, or the card's entity. Give it a tap action with `action: toggle`. |
 | `group` | `false` | Shows the sub-buttons as small keys in a tray. No effect with `toggle`. |
 | `tile` | `false` | A light gray card without a shadow. The icon and the sub-buttons get the card background and a shadow. |
+| `frameless` | `false` | A card without background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up. The rows keep their height, and the icon and the sub-buttons look as on a tile. |
 | `vertical` | `false` | Puts the name under the icon, on button cards. See [Name under the icon](#name-under-the-icon). |
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
@@ -565,7 +567,7 @@ A `leader` template returns nothing outside a group, because a speaker named as 
 
 #### Cover above the name
 
-With `cover: above`, the cover is a square above the name, as wide as the card's content. It is the card's icon at a larger size, so a tap on it does what a tap on the icon does, and it also shows with `show_icon: false`. Without a cover, the square shows the card's icon.
+With `cover: above`, the cover is a square above the name, as wide as the card's content. It is the card's icon at a larger size, so a tap on it does what a tap on the icon does, and it also shows with `show_icon: false`. Without a cover, the square shows the card's icon. With Base's `frameless` option, the card has no background or padding, so the cover is as wide as the card.
 
 `cover` also accepts a map from the card's state or a template. In this example, the cover is large while music plays or is paused and stays in the icon at other times. With Base's `animate` option, the card glides between the two heights.
 

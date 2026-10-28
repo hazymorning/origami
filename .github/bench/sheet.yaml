@@ -108,6 +108,24 @@ sections:
           bottom:
             - {entity: scene.living_room_evening, name: Evening, icon: mdi:weather-sunset, show_name: true}
             - {entity: scene.living_room_dinner, icon: mdi:silverware-fork-knife, show_name: false}
+      # A frameless speaker with its cover above the name
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        origami_base: {frameless: true}
+        origami_media: {cover: above}
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - {icon: mdi:skip-next, show_background: true}
+          bottom:
+            - name: Volume
+              group:
+                - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button

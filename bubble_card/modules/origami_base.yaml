@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.11.0"
+  version: "12.12.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every Origami card, and Bubble Card runs it on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a name under the icon, fades, glides, sizes and the card's own words."
+  description: "Base is the frame and shared core of every Origami card, and it runs on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes and the card's own words."
   editor:
     - name: compact
       label: "Compact"
@@ -31,6 +31,11 @@ origami_base:
       default: false
     - name: tile
       label: "Tile"
+      selector:
+        boolean: {}
+      default: false
+    - name: frameless
+      label: "Frameless (no background, shadow or padding)"
       selector:
         boolean: {}
       default: false
@@ -199,7 +204,7 @@ origami_base:
         let fn = fns.get(v);
         if (!fn) {
           try {
-            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "num", "format", "word", "ago", "return fill`" + v + "`;");
+            fn = new Function("fill", "hass", "entity", "state", "attr", "states", "minutesUntil", "num", "format", "word", "ago", "name", "return fill`" + v + "`;");
           } catch (e) {
             fn = () => "";
           }
@@ -227,7 +232,8 @@ origami_base:
             const st = env.hass.states[v];
             return ago(env.hass, st ? (attribute ? st.attributes?.[attribute] : st.last_changed) : v, false);
           };
-          return fn(fill, env.hass, ctx.entity, ctx.state, ctx.attr, states, until, (x, digits, unit) => num(env.hass, x, digits, unit), format, say, since);
+          // name() gives an entity's name with the card's words, such as the speaker that a helper selects
+          return fn(fill, env.hass, ctx.entity, ctx.state, ctx.attr, states, until, (x, digits, unit) => num(env.hass, x, digits, unit), format, say, since, (id) => named(env.hass, id));
         } catch (e) {
           return "";
         }
@@ -269,6 +275,13 @@ origami_base:
       const rename = (text) => {
         const own = pick(words, text ?? "");
         return own === undefined ? null : String(own);
+      };
+      // named() gives an entity's name, as the card's words rename it by its entity ID or its name, such as a shorter name for a speaker, the same way a dropdown names its entities
+      const named = (hass, id) => {
+        const st = hass.states[id];
+        if (!st) return "";
+        const n = String(st.attributes?.friendly_name ?? id);
+        return rename(id) ?? rename(n) ?? n;
       };
       const word = (hass, st, attr, val) => {
         const raw = val ?? (attr ? st?.attributes?.[attr] : st ? st.state : "unavailable");
@@ -692,6 +705,8 @@ origami_base:
       // The card's options and its entity's look stay on card._org, where Base's own styles read them. On a slider card, Bubble Card draws the background above the fill, so the container below the slider takes the surface there.
       const type = this.config.card_type ?? "button";
       const vertical = !!cfgB.vertical && type === "button";
+      // A frameless card has no background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up
+      const frameless = !!cfgB.frameless && ["button", "media-player"].includes(type);
       const opts = card._org.opts = {
         vertical,
         toggle: !!cfgB.toggle && !vertical,
@@ -700,6 +715,9 @@ origami_base:
         // Origami 2 kept compact under origami_media and Fade in under origami_button, and those places still work
         compact: !!(cfgB.compact ?? this.config.origami_media?.compact),
         tile: !!cfgB.tile,
+        frameless,
+        // On a tile and on a frameless card, the content stands on a gray surface, the tile's own or the page's, so the icon, the keys and the sliders take the look for gray surfaces
+        gray: !!cfgB.tile || frameless,
         large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
         frame: ["button", "media-player"].includes(type),
@@ -922,25 +940,26 @@ origami_base:
     }`}
     ${card._org.opts.bare ? "" : `
     ha-card {
-      --bubble-border: var(--border-width) solid var(--border-color);
+      --bubble-border: ${card._org.opts.frameless ? "none" : "var(--border-width) solid var(--border-color)"};
       --org-color: ${card._org.me.color};
-      --org-surface: ${card._org.opts.tile ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
-      --org-surface-shadow: ${card._org.opts.tile ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
-      --org-inset: ${card._org.opts.tile ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
-      --org-inset-shadow: ${card._org.opts.tile ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
-      --org-field: ${card._org.opts.tile ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
+      --org-surface: ${card._org.opts.frameless ? "transparent" : card._org.opts.tile ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
+      --org-surface-shadow: ${card._org.opts.gray ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
+      --org-inset: ${card._org.opts.gray ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
+      --org-inset-shadow: ${card._org.opts.gray ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
+      --org-field: ${card._org.opts.gray ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
       --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-inset)"};
       /* An icon that is not lit takes the text color, and on a compact card the secondary text color, as in a slim list */
       --org-chip-rest: ${card._org.opts.compact ? "var(--secondary-text-color)" : "var(--primary-text-color)"};
       --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--org-chip-rest)"};
-      --org-key-bg: ${card._org.opts.tile ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
-      /* The padding option sets the space between the card's edge and its content, and the row is as tall as the icon plus this space above and below it */
-      --org-pad: ${card._org.opts.pad || "var(--ha-space-4)"};
+      --org-key-bg: ${card._org.opts.gray ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
+      /* The padding option sets the space between the card's edge and its content, and the row is as tall as the icon plus this space above and below it. A frameless card has no padding unless the option sets one. */
+      --org-pad: ${card._org.opts.pad || (card._org.opts.frameless ? "0px" : "var(--ha-space-4)")};
       --org-sub-text: ${card._org.opts.text || "var(--ha-font-size-s)"};
       ${card._org.opts.sub ? "--org-sub-h: " + card._org.opts.sub + ";" : ""}
       /* The name and the state line together. A dropdown in the card's own row is as tall, so its edges meet the edges of the text beside it. */
       --org-lines-h: ${card._org.opts.lines ? "calc(" + (card._org.opts.large ? "var(--ha-font-size-xl) * 1.25" : "var(--ha-font-size-m) * var(--ha-line-height-normal)") + " + var(--ha-space-1) + var(--ha-font-size-s) * var(--ha-line-height-normal))" : "0px"};
-      --org-row-height: calc(var(--tile-size) + 2 * var(--org-pad));
+      /* A frameless card loses only the space at its edges, so its rows keep the height of a regular card's rows */
+      --org-row-height: calc(var(--tile-size) + 2 * ${card._org.opts.frameless && !card._org.opts.pad ? "var(--ha-space-4)" : "var(--org-pad)"});
       --org-tile-size: var(--tile-size);
       --org-tile-inset: var(--org-pad);
       /* The icon's corners follow its height, as every corner does */
@@ -1026,7 +1045,7 @@ origami_base:
       filter: none !important;
       opacity: 1 !important;
     }` : ""}
-    ${card._org.opts.tile ? "ha-card .bubble-container { background-color: " + (this.config.button_type === "slider" ? "var(--org-surface)" : "transparent") + " !important; }" : ""}
+    ${card._org.opts.gray ? "ha-card .bubble-container { background-color: " + (this.config.button_type === "slider" ? "var(--org-surface)" : "transparent") + " !important; }" : ""}
     .bubble-icon-container {
       min-width: var(--org-tile-size) !important;
       width: var(--org-tile-size) !important;
@@ -1381,9 +1400,10 @@ origami_base:
         if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
         const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
         const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
-        // In the card's own row, the dropdown is as tall as the name and the state line together, and never smaller than a button
-        const h = card._org.opts.frame && n <= own ? "max(var(--control-height-icon), var(--org-lines-h, 0px))" : "var(--control-height-icon)";
-        if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), "var(--org-sub-text, var(--ha-font-size-s))"));
+        // In the card's own row, the dropdown is as tall as the name and the state line together, and never smaller than a button. Its text has the size of a card's name, unless sub_button_text_size sets another size.
+        const top = card._org.opts.frame && n <= own;
+        const h = top ? "max(var(--control-height-icon), var(--org-lines-h, 0px))" : "var(--control-height-icon)";
+        if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), top ? card._org.opts.text || "var(--ha-font-size-m)" : "var(--org-sub-text, var(--ha-font-size-s))"));
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The arrow is as large as the card's icons, as on a key. The chevron fills less than half of its icon, so the chip's end has less padding, and the chevron ends about as far from the edge as the name starts. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
         rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",

@@ -83,7 +83,8 @@ window.__check = () => {
       const row = mainRow(card);
       if (!row.length) continue;
       const right = card.haCard.getBoundingClientRect().right;
-      const pad = parseFloat(getComputedStyle(card.haCard).getPropertyValue('--org-pad')) || 16;
+      const set = parseFloat(getComputedStyle(card.haCard).getPropertyValue('--org-pad'));
+      const pad = Number.isFinite(set) ? set : 16;
       const end = Math.max(...row.map((el) => el.getBoundingClientRect().right));
       count++;
       if (!near(right - end, pad)) fails.push(`card ${card.i}: its row ends ${r1(right - end)} px from the edge, expected ${pad}`);
@@ -145,6 +146,25 @@ window.__check = () => {
     }
     if (!count) fails.push('no divider found on the sheet');
     report('lines', fails, `the dividers are as thick as the line width (${count} checked)`);
+  }
+
+  // Frameless: a frameless card draws no background, shadow or border, and its content reaches its edges
+  {
+    const fails = [];
+    const frameless = origami.filter((c) => c.cfg.origami_base?.frameless === true);
+    for (const card of frameless) {
+      const cb = card.haCard.getBoundingClientRect();
+      for (const el of [card.haCard, ...card.root.querySelectorAll('.bubble-container, .bubble-background, .card-content')]) {
+        const cs = getComputedStyle(el);
+        if (!/^(transparent|rgba\(.*,\s*0\))$/.test(cs.backgroundColor) || parseFloat(cs.borderTopWidth) > 0 || !['none', 'rgba(0, 0, 0, 0) 0px 0px 0px 0px'].includes(cs.boxShadow)) fails.push(`card ${card.i} ${label(el)}: draws a background, a border or a shadow`);
+      }
+      const icon = card.root.querySelector('.bubble-main-icon-container');
+      const subs = card.root.querySelector('.bubble-sub-button-container');
+      if (icon && visible(icon) && !near(icon.getBoundingClientRect().left, cb.left)) fails.push(`card ${card.i}: the icon starts ${r1(icon.getBoundingClientRect().left - cb.left)} px from the edge, expected 0`);
+      if (subs && visible(subs) && !near(subs.getBoundingClientRect().right, cb.right)) fails.push(`card ${card.i}: the sub-buttons end ${r1(cb.right - subs.getBoundingClientRect().right)} px from the edge, expected 0`);
+    }
+    if (!frameless.length) fails.push('the sheet has no frameless card');
+    report('frameless', fails, `${frameless.length} frameless card draws nothing behind its content, which reaches its edges`);
   }
 
   // Plain cards: Base does nothing on a card without an Origami module
