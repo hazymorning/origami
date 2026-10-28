@@ -1,110 +1,17 @@
 # Origami
 
-These notes are for coding agents that work on this repository. They hold the rules that the code alone does not show.
+These notes are for coding agents that work with this repository.
 
-## The idea
+## Adapting Origami to a home
 
-Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
+Most people use Origami as a starting point for their own dashboard. Every home has other entities, devices and integrations, so help them take the parts they want and fit those to their home.
 
-- Prefer a clean solution with what Home Assistant and Bubble Card offer over a workaround.
-- Every part works on its own and says what it needs.
+- Before you write anything, read [How Origami is built](README.md#how-origami-is-built), the README section of the part they want and the [Techniques](README.md#techniques) section. For Bubble cards, also read the [module reference](bubble_card/README.md). Do not guess options.
+- Every part works on its own. Take only the parts they ask for, with the helpers and scripts that those parts need.
+- Build the way Origami does: Bubble Card's card types and the Origami modules first, then Home Assistant's own template sensors and scripts, and a new custom card only for a gap that nothing else can fill. Never use card-mod.
+- Ask for their real entity IDs, and never invent one.
+- Change only the cards they ask for, and remind them to keep a copy of their configuration before they paste anything.
 
-## For everyone
+## Working on Origami itself
 
-This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and tent pop-ups, and they stay out.
-
-- Separate what makes a feature work from one home's details. The repository has the general part, with plain defaults where the user's setup has personal details, such as English greetings instead of the user's own words.
-- Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
-- Every feature stands on its own, so people take only what they use. A feature is a card or a pop-up and the few parts it needs. Nothing bundles several features into one install, and nothing puts parts into a home that it does not use.
-- Entities appear only in a feature's card YAML, where people replace them with their own. Scripts take entities as fields from the card, so they work without edits. Logic that a card can compute in its `${ }` templates stays in the card instead of a template sensor.
-- A feature's helpers, scripts and automations go into one small package file next to its card, and only when the feature cannot work without them. Each one stays short and easy to read, change and debug. A script full of one home's edge cases does not belong there.
-
-## Repository layout from 3.0
-
-- The theme, the font and the modules are the core that every user installs.
-- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, its package file.
-- There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
-
-## README from 3.0
-
-The README is the main documentation and shows the finished result. People scroll through it and pick the parts they want, so it has to be easy to scan.
-
-- It is a series of short sections in the order of the dashboard, one per part. Each section starts with its image, and the images show what the part does.
-- Below each image, one or two sentences say what the part is. Everything else, such as setup steps, YAML, options and the entities to replace, sits in collapsed `<details>` blocks. There are no walls of text.
-- The core setup comes first: the theme, the font and the modules, which give every part the Origami look.
-- Each part says clearly what it needs. First what it needs to work, such as other cards, integrations, helpers and scripts, with links to its files. Then what it needs for the Origami look, which is the theme and the modules it uses.
-- No section depends on another one, except the core setup.
-
-## Building
-
-A new custom card is often the easiest path for an agent, but it is rarely the right one here. Home Assistant and Bubble Card should do as much as possible.
-
-- Build with Bubble Card's card types and the Origami modules, the other cards that the dashboard already uses and Home Assistant's own features, such as template sensors and scripts. If Bubble cards need a new look or behavior, write or extend a module, even when a custom card would be faster.
-- Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
-- Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
-
-## Compatibility
-
-An update must keep every dashboard working that worked with the release before, without any edits to its cards. People copy the new modules and reload, and most of them never read the upgrade steps.
-
-- Before modules go to the user or to `next`, test them in the bench against the user's own unchanged cards, not only against the dashboard and cards that were converted for the new version.
-- A change that needs new YAML on existing cards needs a fallback in the modules. If no fallback is possible, it waits for a major release, and the changelog's upgrade steps describe it.
-- Base is a global module (`is_global: true`), because every other module needs it. Bubble Card runs it first on every card, so no card has to list it. Base must stay global, and it must keep doing nothing on cards without an Origami module.
-- A module that needs Base checks `card._org.version` and fails with a clear message. Such a failure is a bug in the update, not something to fix in the user's cards.
-
-## Names
-
-The repository never names an assistant, a model or a tool. Where an agent has to name something itself, it uses a German word for paper or for something made of paper, such as Papierflieger, Karton, DIN A4, Falz, Knick, Bogen, Pappe, Kranich, Faltschachtel or Papierschiff. One or two words are enough, and clarity comes first.
-
-- Branches that an agent creates are named `<word>/<topic>`, with the word in lowercase ASCII, such as `papierflieger/readme`, `karton/weather` or `dina4/tv-remote`. Umlauts become ae, oe and ue.
-- Session titles use the same words, such as "Falz: README fixes".
-- Releases: `Origami <version> · <name>`. 2.0 is The Unfolding. Ideas for later ones: Valley Fold, Mountain Fold, Squash Fold, Petal Fold, Crane, Waterbomb, Kite Base, Washi.
-- Scratch files can use the same words. Anything a screenshot shows, like a demo entity's name, stays plain.
-
-Commit messages, PR titles and the README stay plain.
-
-## Writing
-
-All text is short, plain English, the way a person would write it. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
-
-- Say what something does or what changed, then stop. One line per change is usually enough.
-- Leave out test logs, earlier attempts and measurements, unless the reader needs the number.
-- When a text changes, rewrite it instead of adding to it.
-- Short list items and colons are fine. Avoid dashes, semicolons and exclamation marks.
-- No first person, buzzwords, marketing words, idioms or metaphors, such as seamless, powerful, under the hood or out of the box.
-- A module's description has 50 words at most. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
-- Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
-
-## Commits and pull requests
-
-- No AI attribution anywhere. Commits, pull requests, comments and files have no `Co-Authored-By` trailers, no "Generated with" or "Generated by" footers and no session links. A tool that adds such a line by itself is overruled, and the line is removed before anything is posted.
-- Commits use the maintainer's identity. Before the first commit, run `git config user.name hazymorning` and `git config user.email 302314336+hazymorning@users.noreply.github.com`.
-- A commit message is one short line that says what changed.
-- Pull requests name no people. "Tested in a real Home Assistant" is right. "The owner's music pop-up works" and "the author's home" are wrong.
-- Delete a branch once its pull request is merged or closed.
-
-## Images
-
-- Screenshots come from a real Home Assistant with the real theme, font and cards.
-- Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
-- Phone mockups use the 3D phone with the camera at eye level. The phones stand upright, and the screens are never tilted away.
-- README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones.
-
-## README cards
-
-The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, the README shows only one, because more copies add nothing but noise.
-
-The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After any change to the dashboard, run `python3 .github/scripts/fold_cards.py` to copy them again. A comment above each code block names its card, and the Fold cards workflow fails while a copy is out of date.
-
-## Branches and releases
-
-`main` holds the latest release. The README on GitHub and the ZIP download come from `main`, and HACS installs the releases. `next` collects all work for the coming release.
-
-- Commit all work for the coming release directly to `next`. Do not open another branch or pull request for it, even when the session starts on another branch. Never push to `main` directly.
-- One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
-- During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
-- A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them, following "README from 3.0". Until then, only `fold_cards.py` and the comments above its copies change the README.
-- Every change is tested in the user's own Home Assistant before the release.
-- A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
-- For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.
+Changes to Origami itself, such as its modules, theme, dashboard or docs in the hazymorning/origami repository, follow [CONTRIBUTING.md](CONTRIBUTING.md). Read it completely before you change anything.
