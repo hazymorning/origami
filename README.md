@@ -775,7 +775,7 @@ sub_button:
 
 The second card contains the tiles.
 
-<!-- dashboard.yaml modules.1=origami_tiles -->
+<!-- dashboard.yaml modules.1=origami_tiles grid_options.columns=full -->
 
 ```yaml
 type: custom:bubble-card
