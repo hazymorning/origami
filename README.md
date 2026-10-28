@@ -11,8 +11,8 @@ Origami is a Home Assistant theme with a matching phone dashboard. The dashboard
 | Dashboard | The dashboard shows the weather, favorites, rooms and a navigation bar. You can install all of it or copy single cards. |
 | Bubble Card modules | The modules give Bubble cards the Origami look. They are still a bit experimental. The [module reference](bubble_card/README.md) explains them. |
 
-> [!NOTE]
-> The dashboard comes from a real home, so all entities are examples. Replace them with your own and remove the parts you do not need. Some cards are built in an unusual way so that nothing moves while the page loads. The [Techniques](#techniques) section explains how. The desktop layout is not finished yet.
+> [!IMPORTANT]
+> This dashboard is being released in three phases. Version 2, the current one, is fully usable, but it still mixes Bubble cards with Paper Buttons Row, which makes it harder to set up and adapt. Version 3, planned for late 2026, moves everything to Bubble cards, adds the remaining sections such as music and brings all fixes in one large update. If you want Origami as your complete dashboard, it is worth waiting for. [Status](#status) shows what is coming.
 
 > [!TIP]
 > If you use an AI assistant to adapt the dashboard, read the [AI assistants](#ai-assistants) section first.
@@ -4007,10 +4007,15 @@ Origami was built by hand over many years. Many of its details have reasons that
 - [x] Theme, dashboard and helpers
 - [x] Bubble Card modules, which are still experimental
 - [x] Pop-ups for a room, the TV and the fan
-- [ ] More pop-ups, such as those for music, lights, favorites and the server
-- [ ] Desktop layout
 
-Origami 3 continues the approach from [How Origami is built](#how-origami-is-built). Most cards that still use Paper Buttons Row will become Bubble cards, and the modules will move to Bubble Card's [Module Store](https://github.com/Clooos/Bubble-Card#modules).
+Version 3 continues the approach from [How Origami is built](#how-origami-is-built):
+
+- [ ] Every card becomes a Bubble card, and no Paper Buttons Row is left
+- [ ] More pop-ups, such as those for music, lights, favorites, the server and the vacuum
+- [ ] Each part gets its own folder with the files it needs, so you can take only what you want
+- [ ] A new README that shows each part with an image and its setup
+
+The desktop layout comes after version 3. The [Origami 3.0 pull request](https://github.com/hazymorning/origami/pull/32) shows the plan and the progress. To get a notice when version 3 is out, choose Watch, Custom and Releases at the top of the repository on GitHub.
 
 ## License
 
