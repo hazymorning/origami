@@ -84,7 +84,7 @@ These changes are in the `next` branch and come with the next release.
 - `value_position: beside` puts the values beside the title.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
-- A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title and stands in the title's place while the title is empty.
+- A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
 
 #### Button
 

@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.8.0"
+  version: "4.8.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
@@ -199,7 +199,7 @@ origami_popup:
     }
     ` : ""}
     ${card._orgP.lead ? `
-    /* A dropdown in the title's place starts where the title starts. Its name ends with an ellipsis before the values beside it would reach the close button, and the values keep their size. */
+    /* A dropdown in the title's place starts where the title starts, and the values after it stand at the end, before the close button. The dropdown's name ends with an ellipsis before it would reach them, and the values keep their size. */
     div.bubble-header .bubble-name-container {
       display: none !important;
     }
@@ -215,6 +215,7 @@ origami_popup:
     div.bubble-header .bubble-sub-button-container .bubble-sub-button.is-select {
       flex: 0 1 auto !important;
       min-width: 0 !important;
+      margin-inline-end: auto !important;
     }` : ""}
     ${card._orgP.css}
   editor:

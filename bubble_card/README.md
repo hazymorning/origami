@@ -1483,7 +1483,7 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 The pop-up's `name` can be a template. JavaScript in `${ }` shows at once, while Jinja in `{{ }}` leaves the title empty until Home Assistant answers. With `name: ${states('input_select.music_view')}`, the title names the view that a helper chooses.
 
-A dropdown among the values, such as a helper that picks a speaker, is a title of its own. It shows the chosen entity's name as large as the title with a small arrow after it, and its menu lists the entities' names and icons, as a dropdown on a card does. While the title is empty, the dropdown stands in its place, so this music pop-up names its speaker in the music view and its other views by their names:
+A dropdown among the values, such as a helper that picks a speaker, is a title of its own. It shows the chosen entity's name as large as the title with a small arrow after it, and its menu lists the entities' names and icons, as a dropdown on a card does. While the title is empty, the dropdown stands in its place and the other values stand at the end, before the close button. This music pop-up names its speaker in the music view and its other views by their names:
 
 ```yaml
 name: "${states('input_select.music_view') === 'Music' ? '' : states('input_select.music_view')}"
