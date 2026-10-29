@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.8.0"
+  version: "5.9.0"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -268,13 +268,18 @@ origami_media:
       display: none !important;
     }` : ""}
     ${card._orgM.play ? `
+    /* The play key is the largest control after the cover: its fill is one step up from the 40 px keys beside it, and its ring runs around it at the size of a large tile */
+    ha-card {
+      --org-play: var(--control-height-lg);
+      --org-play-ring: var(--tile-size-lg);
+    }
     ${card._orgM.row} {
       display: grid !important;
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
       align-items: center !important;
       justify-items: center !important;
-      height: var(--control-height-lg) !important;
+      height: var(--org-play-ring) !important;
       gap: 0 !important;
     }
     ${card._orgM.row}:has(> :nth-child(5):last-child) {
@@ -319,8 +324,8 @@ origami_media:
     ${card._orgM.row} > .bubble-sub-button${card._orgM.play} {
       display: grid !important;
       place-items: center;
-      width: var(--control-height-lg) !important;
-      height: var(--control-height-lg) !important;
+      width: var(--org-play-ring) !important;
+      height: var(--org-play-ring) !important;
       isolation: isolate;
     }
     ${card._orgM.row} > .bubble-sub-button${card._orgM.play} > :not(.org-ring) {
@@ -329,13 +334,13 @@ origami_media:
     ${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {
       content: "";
       position: absolute;
-      inset: calc((var(--control-height-lg) - var(--control-height-sm)) / 2);
+      inset: calc((var(--org-play-ring) - var(--org-play)) / 2);
       z-index: -1;
       border-radius: 50%;
       background-color: var(--fill-active);
     }
     ${card._orgM.row} > .bubble-sub-button${card._orgM.play} .bubble-sub-button-icon:not(.hidden) {
-      --mdc-icon-size: 32px;
+      --mdc-icon-size: var(--control-height-icon);
       color: var(--text-color-active) !important;
     }
     ${card._orgM.rest ? `${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {

@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.15.0"
+  version: "12.16.0"
   is_global: true
   supported:
     - button
@@ -404,14 +404,6 @@ origami_base:
         const t = String(p?.attributes?.media_title ?? "").trim();
         return t !== "" && !/^[a-z][a-z0-9+.-]*:\/\//i.test(t) && !/^(?:[a-z]:)?[\\/]/i.test(t) && !/[\\/][^\\/]*\.[a-z0-9]{2,4}$/i.test(t) && norm(t) !== norm(p?.attributes?.source);
       };
-      // heard() returns when a player's title last changed, or 0 for a title seen since the first look. All cards share these times, so a change that one card has seen counts for every card.
-      const titles = globalThis.__origamiTitles ?? (globalThis.__origamiTitles = new Map());
-      const heard = (p) => {
-        const t = real(p) ? norm(p.attributes.media_title) : "";
-        const was = titles.get(p.entity_id);
-        if (!was || was.t !== t) titles.set(p.entity_id, { t, at: was ? +now : 0 });
-        return titles.get(p.entity_id).at;
-      };
       const readable = (v) => typeof v === "string" && v && !(v.includes(".") && !v.includes(" ")) ? v : null;
       // An app's name comes from the card's words first, which can also name an app by its ID, then from the name the device reports
       const appOf = (p) => {
@@ -428,22 +420,19 @@ origami_base:
           : { leader: null, role: null };
         const showId = group.role === "member" ? group.leader : id;
         const show = hass.states[showId] ?? st;
-        // The players option can be a template, such as the Music Assistant player of whichever speaker a card stands in for
-        const twins = list(Array.isArray(cfg.players) ? cfg.players : value(env, cfg.players, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} })).map((p) => hass.states[p]).filter(Boolean);
+        // The players option and each entry of its list can be a template, such as the Music Assistant player of whichever speaker a card stands in for
+        const twins = list([].concat(cfg.players ?? []).map((p) => value(env, p, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }))).map((p) => hass.states[p]).filter(Boolean);
         const source = String(show?.attributes?.source ?? "").trim();
         const powered = power(show);
         // A TV's HDMI sources are where its pictures come from, so the TV layout counts no source as an input
         const inp = powered && !tv ? input(source, cfg.inputs) : null;
-        // The speaker's own music comes first. Another player gives the music while it plays and the speaker does not, or while both are paused and only that player has a title. A speaker that is off or uses an input shows only itself.
-        // While players with a title play together, the one whose title changed last gives the music. A speaker that is polled, such as a LinkPlay speaker, reports a new song seconds after Music Assistant does, and a player that hangs keeps its old title.
-        const pool = [show, ...twins].filter(Boolean);
-        const at = new Map(pool.map((p) => [p, heard(p)]));
+        // The players come before the speaker, because they know the music first, such as Music Assistant, which reports a new song at once while a polled speaker reports it seconds later, even its waking up. The first player that plays gives the music, then the first that is paused, then the speaker itself. A speaker that uses an input and a TV that is off show only themselves.
+        const pool = [...twins, show].filter(Boolean);
         const tier = (states) => {
           const t = pool.filter((p) => states.includes(p.state));
-          const titled = t.filter(real);
-          return titled.reduce((a, p) => (at.get(p) > at.get(a) ? p : a), titled[0]) ?? t[0];
+          return t.find(real) ?? t[0];
         };
-        const player = inp || powered === false ? show : tier(["playing", "buffering"]) ?? (show?.state === "paused" ? tier(["paused"]) : null) ?? show;
+        const player = inp || (tv && powered === false) ? show : tier(["playing", "buffering"]) ?? tier(["paused"]) ?? show;
         const pa = player?.attributes ?? {};
         const title = real(player) ? String(pa.media_title).trim() : "";
         const read = (k) => String(pa[k] ?? "").trim();
@@ -460,14 +449,15 @@ origami_base:
         if (raw && inp && !given) stale.set(showId + " " + plain(raw), title);
         const art = raw && !inp && live && (given || ((title || artist || pa.media_album_name) && stale.get(showId + " " + plain(raw)) !== title)) ? raw : null;
         const holder = [show, ...twins].find((p) => power(p) === true && appOf(p));
-        const kind = powered === null ? "unavailable" : !powered ? "off" : inp ?? (playing ? "playing" : show.state);
+        // While a player plays, the speaker plays too, even if its own state still says otherwise
+        const kind = playing && !inp ? "playing" : powered === null ? "unavailable" : !powered ? "off" : inp ?? show.state;
         return {
           st, show, showId, player, twins, ...group, source, input: inp, title, artist, art, live, kind, playing,
           // power is the device's own answer, and while it has none, whether any of its players is on
           power: power(st) ?? (twins.some((p) => power(p) !== null) ? twins.some((p) => power(p) === true) : null),
           color: "var(--state-media_player-playing-color, var(--state-media_player-active-color))",
           // The speaker is active while it plays, uses an input, or is simply on, as a TV is
-          active: powered === true && (playing || inp !== null || show.state === "on"),
+          active: playing || (powered === true && (inp !== null || show.state === "on")),
           // icon() returns the card's icon for what the speaker does, from the map in a card's icons option. Without an entry, the card keeps its own icon.
           icon: (own) => pick(own, kind, true) ?? null,
           app: holder ? appOf(holder) : null,

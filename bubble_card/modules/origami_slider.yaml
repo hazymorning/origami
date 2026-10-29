@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.9.0"
+  version: "1.10.0"
   supported:
     - button
     - sub-buttons
@@ -99,7 +99,7 @@ origami_slider:
       height: var(--bubble-sub-slider-height);
       overflow: hidden;
       border-radius: var(--radius-small);
-      background-color: var(--ha-card-background);
+      background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
     ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper {
@@ -148,7 +148,7 @@ origami_slider:
       margin: 0 !important;
       padding: 0 !important;
       border-radius: var(--radius-small);
-      background-color: var(--ha-card-background);
+      background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
       font-size: 0 !important;
       transition: background-color var(--duration-normal) ease;
@@ -196,8 +196,9 @@ origami_slider:
         text-overflow: ellipsis;
       }
     }
+    /* Every track has the subtle fill, as a standalone slider and a Button row's tiles have */
     ha-card [class*="bubble-sub-button-slider-"] {
-      --org-inset: var(--ha-card-background);
+      --org-inset: var(--fill-subtle);
       height: 100% !important;
     }
     ${card._orgSl.names}
@@ -238,7 +239,7 @@ origami_slider:
       opacity: 1 !important;
       display: block !important;
       font-size: var(--ha-font-size-s);
-      font-weight: var(--ha-font-weight-bold);
+      font-weight: var(--ha-font-weight-medium);
       color: var(--secondary-text-color);
     }
     ${card._orgOne.name ? `.bubble-range-value::before {

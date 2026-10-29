@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.6.1"
+  version: "4.7.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. The title can be a template. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
@@ -30,8 +30,8 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
-        // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. While its value is empty, the last cover fades out.
-        art: cfg.art === undefined ? null : org.picture(org.value(env, cfg.art, ctx)) ?? "",
+        // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
+        art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
         mix: cfg.cover_mix ?? 16,
         cover: cfg.cover_blur === undefined || org.yes(cfg.cover_blur),
         css: org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
@@ -227,7 +227,7 @@ origami_popup:
               value: beside
       default: below
     - name: art
-      label: "Art (a cover's address or a template, behind the content)"
+      label: "Art (a media player, a cover's address or a template, behind the content)"
       selector:
         text: {}
     - name: cover_mix

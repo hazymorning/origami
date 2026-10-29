@@ -39,14 +39,15 @@ These changes are in the `next` branch and come with the next release.
 #### Media
 
 - Groups come from `group_members` and covers from the speaker's own picture, so Media works with any integration that reports them. The new `players`, `leader`, `art`, `inputs` and `icons` options cover other setups.
-- The speaker's own music comes first. Another player in `players` only gives the title while the speaker itself plays nothing with a title, or while both play and its title changed last. So a song started in Music Assistant shows at once, even on a speaker that reports it seconds later.
+- A player in `players`, such as Music Assistant, gives the music while it plays or is paused, before the speaker itself. Such a player reports a new song at once, while a polled speaker reports it seconds later.
 - `layout: tv` shows what is cast, the running app or the source.
 - Source names such as HDMI 1 or Line In 2 count as inputs. Short names such as TV, CD and FM count only on their own.
 - Media writes the name and state lines through Bubble Card's own lines, and a card's `name` can be a template.
-- New options: `keep_name`, `state`, `badge` and `icon_color`. `players` accepts a template.
+- New options: `keep_name`, `state`, `badge` and `icon_color`. `players` accepts a template, also in each entry of a list.
 - A play row for music pop-ups: a bottom sub-button with `css_class: play` is a large play key with a progress ring, between shuffle, previous, next and repeat. A sub-button with `css_class: members` shows how many speakers play in the group.
 - The ring skips a player that has lost track of the music, such as a Music Assistant player whose position stands still, and follows the speaker itself.
 - A disabled play key rests in a quiet fill, so the play row can stay in place while nothing plays.
+- The play key is the largest control after the cover: a 64 px fill with a 40 px icon, inside its ring at 80 px.
 - `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
 
 #### Speaker Select
@@ -74,7 +75,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Popup
 
-- `art` shows a blurred cover behind the content. `cover_mix` and `cover_blur` work as in Media.
+- `art` shows a blurred cover behind the content. `cover_mix` and `cover_blur` work as in Media. With a media player's entity ID, it shows the same cover as a Media card for that player.
 - `gap` sets the space between the cards of a vertical stack.
 - Popup writes the title itself, so a title with a `${ }` template shows at once, such as the view that a helper chooses.
 - `value_position: beside` puts the values beside the title.
@@ -88,12 +89,14 @@ These changes are in the `next` branch and come with the next release.
 - Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
 - A button with `css_class: divider` is a short line between two buttons.
 - Button also works on button cards, where it styles the bottom sub-buttons.
+- A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
 
 #### Slider
 
 - Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. `label_width` lines up the tracks of several cards.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
+- Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles, and the values use the medium weight.
 
 #### Tiles
 
@@ -134,7 +137,7 @@ These changes are in the `next` branch and come with the next release.
 - In a classic pop-up, the last card scrolls fully into view. The other pop-up modes keep the space of the phone's home indicator.
 - A group member's speaker card shows its leader's music, also for speakers that are not LinkPlay speakers.
 - A light card of the slider type with Base shows its fill again.
-- A speaker that is off no longer shows the music of another player in its `players` list.
+- A TV that is off no longer shows the music of another player in its `players` list.
 - A buffering speaker counts as playing, so `collapse` no longer shrinks the card at the start of every track. With `solid_controls`, the power button stays filled while the speaker is paused.
 - An app counts as running only while its device is on.
 - Each Climate readout shows the target of its own thermostat, a dash while there is no target, and a range in the right order in right-to-left languages.

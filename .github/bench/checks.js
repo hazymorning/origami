@@ -199,6 +199,43 @@ window.__check = () => {
     report('slider keys', fails, `${sliders.length} standalone slider has its keys after the track, as tall as it and with its background`);
   }
 
+  // Scroll taps: a scrolling row reaches past its card, and only its buttons take taps there, so the card above keeps the taps on its own edge
+  {
+    const fails = [];
+    const rows = origami.filter((c) => c.cfg.card_type === 'sub-buttons' && c.cfg.origami_button?.scroll === true);
+    // The card that a tap at a point reaches, through every shadow root
+    const cardAt = (x, y) => {
+      let el = document.elementFromPoint(x, y);
+      while (el?.shadowRoot?.elementFromPoint(x, y) && el.shadowRoot.elementFromPoint(x, y) !== el) el = el.shadowRoot.elementFromPoint(x, y);
+      let n = el;
+      while (n && n.getRootNode().host && n.getRootNode().host.tagName !== 'BUBBLE-CARD') n = n.getRootNode().host;
+      return n?.getRootNode()?.host ?? null;
+    };
+    for (const card of rows) {
+      const tile = [...card.root.querySelectorAll('.bubble-sub-button-bottom-container .bubble-sub-button')].find(visible);
+      if (!tile) { fails.push(`card ${card.i}: no button in the row`); continue; }
+      const t = tile.getBoundingClientRect();
+      const x = t.left + t.width / 2;
+      if (cardAt(x, t.top - 4) === card.el) fails.push(`card ${card.i}: a tap 4 px above its buttons reaches this card instead of the one above`);
+      if (cardAt(x, t.top + t.height / 2) !== card.el) fails.push(`card ${card.i}: a tap on a button does not reach the card`);
+    }
+    if (!rows.length) fails.push('the sheet has no scrolling row');
+    report('scroll taps', fails, `${rows.length} scrolling row takes taps only on its buttons`);
+  }
+
+  // Players: a player in players gives the music before the speaker, also when a template in its list names it. On the sheet, such a speaker's player is its entity ID with _ma.
+  {
+    const fails = [];
+    const speakers = origami.filter((c) => c.cfg.card_type === 'media-player' && Array.isArray(c.cfg.origami_media?.players));
+    for (const card of speakers) {
+      const want = (card.el._hass ?? card.el.hass)?.states?.[card.cfg.entity + '_ma']?.attributes?.media_title;
+      const got = card.root.querySelector('.bubble-name')?.textContent;
+      if (got !== want) fails.push(`card ${card.i}: shows ${JSON.stringify(got)}, expected the player's song ${JSON.stringify(want)}`);
+    }
+    if (!speakers.length) fails.push('the sheet has no speaker with a list of players');
+    report('players', fails, `${speakers.length} speaker shows the song of its player`);
+  }
+
   // Plain cards: Base does nothing on a card without an Origami module
   {
     const fails = [];

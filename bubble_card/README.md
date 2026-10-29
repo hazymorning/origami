@@ -472,7 +472,7 @@ The Media options go under `origami_media:`.
 | Option | Default | Description |
 | --- | --- | --- |
 | `layout` | `speaker` | `speaker`, or `tv` for a TV. With `tv`, the card keeps its own icon, and its entity decides whether the TV is on. While that entity is unavailable or unknown, the players decide. |
-| `players` | | Other media players for the same device, such as a Cast or a Music Assistant player. The card's entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while both are paused and only that player has a title. While both play different titles, the one that changed last shows, so a song started in Music Assistant shows at once, even on a speaker that reports it seconds later. Stream addresses and file paths do not count as titles. The app's name comes from the card's entity, or else from the first player that reports one. Accepts a template. |
+| `players` | | Other media players for the same device, such as a Cast or a Music Assistant player. They come before the card's entity, because such a player reports a new song at once, while a polled speaker reports it seconds later. The first player that plays gives the title, the artist and the picture, then the first that is paused, then the card's entity. While the speaker uses an input, such as the TV, or while a TV is off, the card shows only its entity. Stream addresses and file paths do not count as titles. The app's name comes from the card's entity, or else from the first player that reports one. Accepts a template, also in each entry of a list. |
 | `collapse` | `false` | Hides the bottom sub-buttons, such as a volume slider, while the speaker plays nothing and uses no input, or while the TV is off. |
 | `solid_controls` | `false` | Fills Bubble Card's play and pause button while media plays and its power button while the device is on. No effect on sub-buttons. |
 | `leader` | | The group leader's entity ID, for integrations without `group_members`. Accepts a template. A card for a stand-in entity, such as a universal media player, can name the real speaker here to show its music, source and group. |
@@ -603,7 +603,7 @@ The dropdown's options are the speakers' entity IDs, so it shows as a chip with 
 
 #### Play row
 
-A bottom sub-button with `css_class: play` is a large play key, and its group becomes a play row. The keys beside it are large, and the others small and in the secondary text color. A ring around the play key shows how far the track has played. It follows a player in `players` that plays or pauses along with the card's music and reports a length, or else the player whose music the card shows, or the speaker itself. A player that has lost track of the music is skipped: its position stands still while it plays, runs past the end of the track, or it plays another title. Radio and inputs have no length and show no ring. While the play key's `visibility` hides it, the whole row is hidden. With a play key, the card also shows the title and the artist while the music is paused.
+A bottom sub-button with `css_class: play` is a large play key, and its group becomes a play row. Its fill is 64 px, one step up from the 40 px keys beside it, and its ring runs around it at 80 px. The other keys are small and in the secondary text color. A ring around the play key shows how far the track has played. It follows a player in `players` that plays or pauses along with the card's music and reports a length, or else the player whose music the card shows, or the speaker itself. A player that has lost track of the music is skipped: its position stands still while it plays, runs past the end of the track, or it plays another title. Radio and inputs have no length and show no ring. While the play key's `visibility` hides it, the whole row is hidden. With a play key, the card also shows the title and the artist while the music is paused.
 
 Base never fills the keys of a play row. Its `dot` key marks a key that is on, such as shuffle, and its `disabled` key a key that cannot work. A disabled play key rests in a quiet fill, so a play row can stay in place while nothing plays and the card keeps its height. A main sub-button with `css_class: members` shows how many speakers play in the group, the leader included. With `bottom_layout: rows` under `sub_button` and `rows: auto`, each bottom group is its own row. A tap sends fixed data, so shuffle and repeat need small scripts that switch them. The scripts are below the card.
 
@@ -779,7 +779,7 @@ rows: 1
 
 ### Slider
 
-The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value.
+The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. Every track has the subtle fill of a Button row's tiles, and every value the medium weight.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
 
@@ -921,7 +921,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `chips` | `false` | The buttons are chips, with the label in the text color and the icon in the secondary color. Active chips have a bold label. |
 | `pending` | `false` | After a tap, a button shows its next look, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, never segments or buttons that only open something. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
-| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. |
+| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
 | `field_size` | `var(--tile-size-lg)` | With `labels: below`, the size of the icon fields, such as `76px`. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
@@ -1478,7 +1478,7 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 `value_position` is `below` (the default) or `beside`, which puts the values as small text between the title and the close button.
 
-`art` shows a blurred cover behind the content. It takes a picture's address or a template that returns one, such as the cover of the pop-up's speaker. While it is empty, the last cover fades out. `cover_mix` and `cover_blur` work as in Media, but here they default to `16` and `true`.
+`art` shows a blurred cover behind the content. It takes a picture's address or a template that returns one. With a media player's entity ID, it shows the cover that a Media card shows for that player, so a music card and its pop-up change their pictures together. While it is empty, the last cover fades out. `cover_mix` and `cover_blur` work as in Media, but here they default to `16` and `true`.
 
 The pop-up's `name` can be a template. JavaScript in `${ }` shows at once, while Jinja in `{{ }}` leaves the title empty until Home Assistant answers. With `name: ${states('input_select.music_view')}`, the title names the view that a helper chooses.
 

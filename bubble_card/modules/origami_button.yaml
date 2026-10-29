@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.0"
+  version: "3.9.1"
   supported:
     - sub-buttons
     - button
@@ -506,7 +506,11 @@ origami_button:
       opacity: var(--opacity-muted) !important;
       pointer-events: none !important;
     }
-    ${card._orgB.scroll && card._orgB.own ? `ha-card .bubble-sub-button-bottom-container {
+    ${card._orgB.scroll && card._orgB.own ? `/* The row reaches past the card by its padding, so the buttons scroll to the screen's edge and their shadows show. The card reaches as far and lies over the cards around it, so only the buttons take taps, and a tap beside them reaches the card below, such as a slider. A swipe on a button still scrolls the row. */
+    ha-card {
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-button-bottom-container {
       width: auto !important;
       margin: calc(-1 * var(--scroller-bleed)) !important;
       padding: ${card._orgB.chips ? "var(--scroller-bleed)" : "var(--scroller-padding)"} !important;
@@ -514,6 +518,10 @@ origami_button:
       overscroll-behavior-x: contain;
       scrollbar-width: none;
       mask-image: var(--scroller-mask);
+      pointer-events: none !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      pointer-events: auto;
     }
     ha-card:dir(rtl) .bubble-sub-button-bottom-container {
       mask-image: linear-gradient(to left, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);

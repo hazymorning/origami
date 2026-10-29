@@ -15,6 +15,12 @@ states:
   fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 50}}
   sensor.living_room_temperature: {state: '21.5', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Temperature}}
   sensor.living_room_humidity: {state: '48', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Humidity}}
+  media_player.kitchen_speaker:
+    state: playing
+    attributes: {friendly_name: Kitchen speaker, media_title: The last song, media_artist: Polled late, group_members: [media_player.kitchen_speaker]}
+  media_player.kitchen_speaker_ma:
+    state: playing
+    attributes: {friendly_name: Kitchen speaker MA, media_title: The new song, media_artist: Music Assistant}
   scene.living_room_evening: {state: '2026-10-28T18:00:00+00:00', attributes: {friendly_name: Evening}}
   scene.living_room_dinner: {state: '2026-10-27T19:00:00+00:00', attributes: {friendly_name: Dinner}}
   scene.living_room_movie: {state: '2026-10-25T20:00:00+00:00', attributes: {friendly_name: Movie}}
@@ -141,6 +147,15 @@ sections:
         sub_button:
           main:
             - {icon: mdi:chevron-down, show_background: true}
+      # A speaker whose Music Assistant player comes from a template in a list, and which shows that player's song
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.kitchen_speaker
+        modules: [origami_base, origami_media]
+        origami_media:
+          players:
+            - "${entity + '_ma'}"
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button
