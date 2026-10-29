@@ -67,6 +67,7 @@ Two checks keep the rules that a script can measure. Run them before each commit
 - `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules. It takes a second.
 - `node .github/bench/bench.mjs` renders example cards with the modules and the theme in Chromium and measures the design rules, such as corners, row ends, the end column and line widths. It takes a few seconds. Run `npm ci` and `npx playwright install chromium` in `.github/bench` once before.
 - `node .github/bench/bench.mjs shot <scenario.yaml> <folder>` takes screenshots of any cards, such as the user's own, which stay outside the repository.
+- `node .github/bench/compare.mjs [--ref <commit>] <scenario.yaml ...>` renders scenarios with the modules of a commit and with the working tree, and compares every element's style and the pixels. A change that should look the same, such as a cleanup, is done only when every render is the same. `python3 .github/bench/options.py <folder>` writes scenarios with every module option alone and in the pairs that interact, and the user's own cards belong in the comparison too.
 
 A failing check means that the change breaks a rule. Fix the change, not the check. A check changes only with its rule, and a new design rule gets a check in `.github/bench/checks.js` and an example card in `.github/bench/sheet.yaml`.
 
