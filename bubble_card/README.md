@@ -160,7 +160,7 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `disabled` | While true, the sub-button takes the disabled color, ignores taps and is never filled. |
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
 | `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
-| `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line, and the sub-button has no fill, as for the values on the server card. |
+| `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line. Both end at the same edge, and the sub-button has no fill, as for the values on the server card. |
 
 All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
