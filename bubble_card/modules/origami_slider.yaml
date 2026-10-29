@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.11.1"
+  version: "1.11.2"
   supported:
     - button
     - sub-buttons
@@ -13,7 +13,7 @@ origami_slider:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_slider needs origami_base 13 or later");
+      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_slider needs origami_base 13.1 or later");
       if (this.config.card_type === "sub-buttons") {
         // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
         // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
@@ -41,7 +41,7 @@ origami_slider:
           words: toggles.map((r) => r.sel + "::after { content: " + org.str(r.word) + "; }").join("\n    ")
         };
         // A name wider than its column scrolls like Bubble Card's scrolling text, at the same speed. The fonts and the column width are known only after layout, so the rows are measured in the next frame.
-        requestAnimationFrame(() => {
+        org.later("slider", () => {
           rows.forEach((r) => {
             const el = card.querySelector(r.sel.replace(/^ha-card /, ""));
             if (!el) return;

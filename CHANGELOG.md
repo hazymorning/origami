@@ -98,7 +98,7 @@ These changes are in the `next` branch and come with the next release.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 - Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles. The value stands in the track and ends where the track's corner begins, and it uses the medium weight.
-- The modules share more of Base's helpers, such as the card's template values, the fade at the ends of a scrolling row and the measuring of long names, so each module has less code of its own. The cards look and work as before. Every module now needs Base 13.
+- The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
 
 #### Tiles
 

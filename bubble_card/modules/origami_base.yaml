@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.0.0"
+  version: "13.1.0"
   is_global: true
   supported:
     - button
@@ -95,8 +95,11 @@ origami_base:
       const coloured = ["alarm_control_panel", "alert", "automation", "binary_sensor", "calendar", "camera", "climate", "cover", "device_tracker", "fan", "group",
         "humidifier", "input_boolean", "lawn_mower", "light", "lock", "media_player", "person", "plant", "remote", "schedule", "script", "siren", "sun", "switch",
         "timer", "update", "vacuum", "valve", "water_heater", "weather"];
+      // Home Assistant gives an entity a new state object whenever it changes, so one look per state object serves every card and every style pass
+      const looks = globalThis.__origamiLooks ?? (globalThis.__origamiLooks = new WeakMap());
       const look = (hass, id) => {
         const st = hass.states[id];
+        if (st && looks.has(st)) return looks.get(st);
         const s = String(st?.state ?? "unavailable");
         const a = st?.attributes ?? {};
         const d = String(id ?? "").split(".")[0];
@@ -111,11 +114,13 @@ origami_base:
         const key = (cd === "climate" && mode[act] ? mode[act] : s).toLowerCase().replace(/[^a-z0-9]+/g, "_");
         const names = ["--state-" + cd + "-" + key + "-color", "--state-" + cd + "-" + (on ? "active" : "inactive") + "-color", "--state-" + (on ? "active" : "inactive") + "-color"];
         if (a.device_class) names.unshift("--state-" + cd + "-" + a.device_class + "-" + key + "-color");
-        return {
+        const out = {
           on, available, coloured: coloured.includes(cd), lit: on && coloured.includes(cd),
           color: names.reduceRight((acc, n) => acc ? "var(" + n + ", " + acc + ")" : "var(" + n + ")", ""),
           action: act || null, mode: mode[act] ?? null
         };
+        if (st) looks.set(st, out);
+        return out;
       };
       // power() tells whether a device is switched on. It is null while the device has no answer, and false while it is off or in standby.
       const power = (st) => !st || silent(st.state) ? null : !["off", "standby"].includes(st.state);
@@ -498,8 +503,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen().
-        version: 13,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), and 13.1 added layout() and later().
+        version: 13.1,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -560,17 +565,29 @@ origami_base:
         write: (el, text) => {
           if (card._org.fresh(el, text)) el.textContent = text;
         },
-        // remeasure() lets Bubble Card measure a handed-over line again. Bubble Card decides whether a line scrolls only when its text changes, so a line written while its card was hidden, such as in a closed pop-up, keeps its ellipsis once it shows.
-        remeasure: (el, scrolls) => {
-          if (!scrolls || !el || el.hasAttribute("data-animated") || el.clientWidth === 0 || el.scrollWidth - el.clientWidth <= 1) return;
-          const text = el.textContent;
-          el.textContent = "";
-          el.textContent = text;
+        // later() runs work in the next frame, once per card and key however many style passes ask for it, with what the last pass asked. Bubble Card runs several passes for one change, such as about seven while a pop-up opens, and work that reads the layout, such as measuring a name, is then done once.
+        later: (key, fn) => {
+          const queue = card._orgLater ?? (card._orgLater = new Map());
+          if (!queue.has(key)) requestAnimationFrame(() => {
+            const job = queue.get(key);
+            queue.delete(key);
+            job();
+          });
+          queue.set(key, fn);
         },
         // readouts() writes a text into each sub-button with css_class readout, or another class, made by text() from that sub-button's own entity
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {
           if (slug(item.css_class) === cls) card._org.write(card.querySelector(".bubble-sub-button-" + (i + 1) + " .bubble-sub-button-name-container"), text(hass.states[item.entity ?? entity]));
         }),
+        // layout() gives the number of main sub-buttons, which Bubble Card numbers first, and the bottom row's entries in the YAML's order: each group with its name and its sub-buttons' numbers, and each single sub-button with its number. Bubble Card numbers the grouped sub-buttons before the single ones.
+        layout: (cfg) => {
+          const sb = cfg.sub_button;
+          const bottom = (Array.isArray(sb) ? [] : sb?.bottom ?? []).filter(Boolean).map((x) => Array.isArray(x.group) ? { name: x.name, group: x.group.filter(Boolean) } : { item: x });
+          let g = items(cfg).length - bottom.reduce((a, x) => a + (x.group ? x.group.length : 1), 0);
+          let l = g + bottom.reduce((a, x) => a + (x.group?.length ?? 0), 0);
+          const mains = g;
+          return { mains, bottom: bottom.map((x) => x.group ? { name: x.name, group: true, n: x.group.map(() => ++g) } : { group: false, n: [++l] }) };
+        },
         // classed() returns the sub-buttons with this css_class by their numbers, because Bubble Card also turns a name such as Play into a class
         classed: (cfg, cls) => items(cfg).map((item, i) => slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean),
         // shows() tells whether a sub-button shows a text of its own, which is its name or a state
@@ -825,9 +842,15 @@ origami_base:
         });
         card._orgGlide.rows = rows;
         card._orgGlide.observe(rows);
+        // Bubble Card calls this when the card goes away, so the observer goes with it
+        if (typeof onTeardown === "function") onTeardown(() => {
+          card._orgGlide?.disconnect();
+          card._orgGlide = null;
+        });
       }
-      // On the cards that Base frames, and on separator, sub-buttons and pop-up cards with the Slider module, sliders take Origami's look. Other cards keep Bubble Card's sliders.
-      card._org.fills = !opts.bare ? "ha-card" : [].concat(this.config.modules ?? []).includes("origami_slider") ? 'ha-card [class*="bubble-sub-button-slider-"]' : null;
+      // On the cards that Base frames, and on separator, sub-buttons and pop-up cards with the Slider module, sliders take Origami's look. Other cards keep Bubble Card's sliders. Bubble Card draws a slider only on a button card of the slider type, in a media player's volume control and as a slider sub-button, so other framed cards get none of these rules.
+      const slides = this.config.button_type === "slider" || type === "media-player" || items(this.config).some((item) => item.sub_button_type === "slider");
+      card._org.fills = !opts.bare ? (slides ? "ha-card" : null) : [].concat(this.config.modules ?? []).includes("origami_slider") ? 'ha-card [class*="bubble-sub-button-slider-"]' : null;
       // Each pill switch shows the state of its own entity
       // key excludes slider sub-buttons and a bottom row that another module styles, such as Button on a button card, from Base's look for sub-buttons
       card._org.key = ':not([class*="bubble-sub-button-slider-"]):not(:where(ha-card[data-org-fill="bottom"] .bubble-sub-button-bottom-container *))';
@@ -1433,7 +1456,7 @@ origami_base:
       };
       // A dropdown that picks an entity, such as a helper whose options are the entity IDs of speakers, shows the entities' names, as the card's words rename them, and its menu shows each entity's icon for its state. An option that is not an entity, such as None, stays as it is.
       // The card's own sub-buttons come first, and the rows below follow
-      const own = org.items({ card_type: this.config.card_type, sub_button: Array.isArray(this.config.sub_button) ? this.config.sub_button : { main: this.config.sub_button?.main ?? [] } }).length;
+      const own = org.layout(this.config).mains;
       drops.forEach(({ n, item, entity: id, opt }) => {
         const options = hass.states[id]?.attributes?.options;
         if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
@@ -1453,12 +1476,16 @@ origami_base:
           sel + " .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; margin-inline-end: var(--ha-space-2) !important; color: inherit !important; opacity: 1 !important; }",
           // The open menu is the sign that the dropdown is open, so Bubble Card's ring in the accent color stays hidden
           sel + " .bubble-dropdown-inner-border { display: none !important; }");
-        // Bubble Card builds the menu's items again when the options change, so they are written after each update
+        // Bubble Card builds new items when the options change and leaves them alone otherwise, so an item is written again only for a new state of its entity
         const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
           const st = hass.states[el.dataset.bubbleValue ?? el.value];
           if (!st) return;
+          const name = label(st.entity_id);
+          if (el._orgSt === st && el._orgName === name) return;
+          el._orgSt = st;
+          el._orgName = name;
           const text = [...el.childNodes].reverse().find((c) => c.nodeType === 3);
-          if (text && text.nodeValue !== label(st.entity_id)) text.nodeValue = label(st.entity_id);
+          if (text && text.nodeValue !== name) text.nodeValue = name;
           let icon = el.querySelector(":scope > ha-state-icon");
           if (!icon) {
             icon = document.createElement("ha-state-icon");
@@ -1471,7 +1498,7 @@ origami_base:
           icon.icon = speaker(st);
         });
         write();
-        requestAnimationFrame(write);
+        org.later("drop" + n, write);
       });
       // Under the icon, a sub-button without an action of its own passes the tap to the card
       if (org.opts.vertical) list.forEach((sub) => {

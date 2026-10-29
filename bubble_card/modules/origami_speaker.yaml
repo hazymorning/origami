@@ -1,6 +1,6 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.3.2"
+  version: "5.3.3"
   supported:
     - media-player
     - button
@@ -73,7 +73,6 @@ origami_speaker:
         : s.track ? line
         : org.word(hass, m.show);
       card.querySelector('.bubble-state').textContent = next;
-      org.remeasure(card.querySelector('.bubble-state'), this.config.scrolling_effect !== false);
       org.icon(icon, m.icon(cfg.icons));
       // Each readout shows its own speaker's volume
       org.readouts(hass, this.config, entity, (t) => org.power(t) === null || t?.attributes?.volume_level == null ? "–" : org.word(hass, t, "volume_level"));

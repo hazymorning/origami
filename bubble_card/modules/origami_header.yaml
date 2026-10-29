@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.6.2"
+  version: "3.6.3"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -97,7 +97,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_header needs origami_base 13 or later");
+      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_header needs origami_base 13.1 or later");
       const { env, ctx } = org;
       const cfg = this.config.origami_header ?? {};
       // Header writes the title, as Bubble Card would. A title in ${ } reads the states at once, so it is there when the header first shows. Jinja in {{ }} comes from Home Assistant a moment later, and a header without a name shows its entity's name.
@@ -135,7 +135,7 @@ origami_header:
       if (card._orgH.switch || card._orgH.chip) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => at(n));
       // In a row that scrolls, a newly chosen value scrolls into view, such as the chip of the room a pop-up opens on
       const pick = card._orgH.scroll ? card._orgH.picked[0] ?? "" : "";
-      if (pick && pick !== card._orgHPick) requestAnimationFrame(() => {
+      if (pick && pick !== card._orgHPick) org.later("pick", () => {
         const row = card.querySelector(scope.replace(/^ha-card /, ""));
         const chip = card.querySelector(pick.replace(/^ha-card /, ""));
         if (!row || !chip || !row.clientWidth) return;
@@ -275,14 +275,14 @@ origami_header:
     }
     ` : ""}
     ${card._orgH.chip ? card._org.chips("ha-card .bubble-sub-button-container") : ""}
-    ${card._org.each(card._orgH.bare, "")} {
+    ${card._orgH.bare.length ? card._org.each(card._orgH.bare, "") + ` {
       justify-content: center !important;
       min-width: var(--control-height-mini) !important;
       padding: 0 !important;
     }
-    ${card._org.each(card._orgH.bare, " .bubble-sub-button-icon:not(.hidden)")} {
+    ` + card._org.each(card._orgH.bare, " .bubble-sub-button-icon:not(.hidden)") + ` {
       --mdc-icon-size: var(--icon-size-xs) !important;
-    }
+    }` : ""}
     ${card._orgH.chip && card._orgH.picked.length ? card._org.each(card._orgH.picked, "") + ` {
       background-color: var(--org-header-pick) !important;
       box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;

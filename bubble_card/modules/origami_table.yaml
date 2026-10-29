@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.0.2"
+  version: "1.0.3"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show."
@@ -107,7 +107,7 @@ origami_table:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_table needs origami_base 13 or later");
+      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_table needs origami_base 13.1 or later");
       const env = org.env;
       const cfg = this.config.origami_table ?? {};
       // columns is a list. Each column has a name, a width, an alignment and values for its cells.
@@ -118,18 +118,16 @@ origami_table:
       // A value is fixed, a map from the state or a template. The card editor keeps the map under the key with _states and the template under the key with _template. A template wins over a map, and a map wins over a fixed value.
       const sets = (o, k) => [k, k + "_states", k + "_template"].some((x) => x in o);
       const pick = (o, k) => [o[k + "_template"], o[k + "_states"], o[k]].find(org.has);
-      // Each group is a row. Bubble Card numbers the sub-buttons of the groups first, and a sub-button outside a group is a row of its own, unless no row is a group.
-      const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
-      const groups = bottom.filter((g) => Array.isArray(g?.group)).map((g) => g.group.filter(Boolean));
-      const loose = bottom.filter((g) => g && !Array.isArray(g.group));
-      const rows = groups.length ? [...groups, ...loose.map((g) => [g])] : [loose];
-      const pos = rows.flatMap((r) => r.map((_, i) => i));
+      // Each group is a row, and a sub-button outside a group is a row of its own, unless no row is a group
+      const { bottom } = org.layout(this.config);
+      const rows = bottom.some((x) => x.group) ? bottom.map((x) => x.n) : [bottom.flatMap((x) => x.n)];
+      const pos = new Map(rows.flatMap((r) => r.map((n, i) => [n, i])));
       const scope = "ha-card .bubble-sub-button-bottom-container";
       const align = { start: "flex-end", center: "center", end: "flex-start" };
       const rules = [];
       let count = Math.max(cols.length, 1);
       const list = org.subs(env, this.config, "origami_table").map((s) => {
-        const place = pos[s.n - 1] ?? 0;
+        const place = pos.get(s.n) ?? 0;
         // A cell joins the column that its css_class names, or else the column at its place in the row. A hidden cell keeps its column, so the cells after it stay in theirs.
         const col = cols.find((c) => c.key && c.key === org.slug(s.item.css_class)) ?? cols[place];
         const n = col?.n ?? place + 1;
