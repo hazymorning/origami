@@ -98,6 +98,7 @@ These changes are in the `next` branch and come with the next release.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 - Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles. The value stands in the track and ends where the track's corner begins, and it uses the medium weight.
+- The modules share more of Base's helpers, such as the card's template values, the fade at the ends of a scrolling row and the measuring of long names, so each module has less code of its own. The cards look and work as before. Every module now needs Base 13.
 
 #### Tiles
 
@@ -115,6 +116,7 @@ These changes are in the `next` branch and come with the next release.
 - New shadows: a fine edge, a contact shadow and a soft drop in a dark tone of the background's hue. The new `shadow-edge` and `chip-shadow` tokens hold them.
 - Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
+- The `scroller-mask` token is gone, because the modules fade scrolling rows themselves.
 
 #### Dashboard
 

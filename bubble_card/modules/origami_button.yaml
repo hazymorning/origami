@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.1"
+  version: "3.9.2"
   supported:
     - sub-buttons
     - button
@@ -129,14 +129,12 @@ origami_button:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_button needs origami_base 12.5 or later");
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_button needs origami_base 13 or later");
       const cfg = this.config.origami_button ?? {};
       const lang = hass.locale?.language ?? hass.language ?? "en";
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
       const low = (v) => String(v ?? "").trim().toLocaleLowerCase(lang);
-      const env = { hass, renderTemplate };
-      const st = hass.states[entity];
-      const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
+      const { env, ctx } = org;
       // pick() reads active, outline or start as a list of names, css classes or entity IDs, and hit() tells whether a button matches such a list
       const pick = (v) => {
         const raw = String(org.value(env, v, ctx) ?? "").trim();
@@ -164,9 +162,10 @@ origami_button:
       const bottom = Array.isArray(this.config.sub_button) ? [] : this.config.sub_button?.bottom ?? [];
       const grouped = bottom.filter((g) => Array.isArray(g?.group));
       const loose = bottom.filter((g) => g && !Array.isArray(g.group));
-      const mains = org.items(this.config).length - grouped.reduce((a, g) => a + g.group.filter(Boolean).length, 0) - loose.length;
+      const inGroups = grouped.reduce((a, g) => a + g.group.filter(Boolean).length, 0);
+      const mains = org.items(this.config).length - inGroups - loose.length;
       let k = mains;
-      const bars = bottom.filter((g) => Array.isArray(g?.group)).map((g) => ({ name: low(g.name), n: g.group.filter(Boolean).map(() => ++k) })).filter((g) => segNames.includes(g.name));
+      const bars = grouped.map((g) => ({ name: low(g.name), n: g.group.filter(Boolean).map(() => ++k) })).filter((g) => segNames.includes(g.name));
       const inBar = bars.flatMap((g) => g.n);
       // A button is active when its name, its css_class or an entity its tap targets matches, when its tap sets what its entity shows now, or while its own entity is on. Its own on key decides before all of these.
       const lamps = [];
@@ -211,11 +210,12 @@ origami_button:
       }
       const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
+      const at = (n) => base + ".bubble-sub-button-" + n;
       // Base's sub_button_height and sub_button_text_size set the buttons' height and the size of their text, as on Base's own cards
       const opts = org.opts ?? {};
       // A button without a name or a state of its own shows only its icon, and it is a square
-      const bare = subs.filter(({ n, item, opt }) => !org.shows(item) && !org.has(opt?.name) && org.slug(item.css_class) !== "divider" && !inBar.includes(n)).map(({ n }) => base + ".bubble-sub-button-" + n);
-      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => base + ".bubble-sub-button-" + n + ":not(.org-pending-off)"), base + ".org-pending-on"];
+      const bare = subs.filter(({ n, item, opt }) => !org.shows(item) && !org.has(opt?.name) && org.slug(item.css_class) !== "divider" && !inBar.includes(n)).map(({ n }) => at(n));
+      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => at(n) + ":not(.org-pending-off)"), base + ".org-pending-on"];
       const chips = !!cfg.chips;
       const scroll = !!cfg.scroll && !seg;
       // With labels below, each button is a large icon field with its name under it, as for scenes
@@ -228,7 +228,7 @@ origami_button:
       // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default
       const field = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim() || "var(--tile-size-lg)";
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
-      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", org.opts?.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
+      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", opts.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
       // A small segmented switch is a track around its group, and its active segment takes the stronger fill
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
@@ -236,12 +236,12 @@ origami_button:
         + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; }").join("\n    ");
       const barOn = bars.flatMap((g) => g.n.filter((n) => active.includes(n)).map((n) => bar(g) + " > .bubble-sub-button.bubble-sub-button-" + n));
       // A divider is a short line between two buttons, and it shows while its group shows
-      const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => base + ".bubble-sub-button-" + n);
+      const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => at(n));
       // outline rings the matching buttons that are not active, such as the scene for the time of day
       const ring = pick(cfg.outline);
-      const rings = subs.filter(({ n, item }) => !active.includes(n) && hit(item, ring)).map(({ n }) => base + ".bubble-sub-button-" + n + (below ? " .bubble-sub-button-icon:not(.hidden)" : ""));
+      const rings = subs.filter(({ n, item }) => !active.includes(n) && hit(item, ring)).map(({ n }) => at(n) + (below ? " .bubble-sub-button-icon:not(.hidden)" : ""));
       // start lets the row begin at the matching button, and the buttons before it follow at the end, as in a cycle of scenes for the times of day
-      let gi = mains, li = mains + grouped.reduce((a, g) => a + g.group.filter(Boolean).length, 0);
+      let gi = mains, li = mains + inGroups;
       const seq = bottom.flatMap((x) => Array.isArray(x?.group) ? x.group.filter(Boolean).map(() => ++gi) : x ? [++li] : []);
       const first = pick(cfg.start);
       const s = seq.findIndex((n) => hit(subs.find((x) => x.n === n)?.item ?? {}, first));
@@ -251,7 +251,7 @@ origami_button:
         own,
         below,
         rings,
-        order: s < 0 ? "" : seq.map((n, i) => base + ".bubble-sub-button-" + n + " { order: " + ((i - s + seq.length) % seq.length) + "; }").join("\n    "),
+        order: s < 0 ? "" : seq.map((n, i) => at(n) + " { order: " + ((i - s + seq.length) % seq.length) + "; }").join("\n    "),
         bg: cfg.background ?? true,
         muted: !!cfg.muted,
         // The active segment is filled like the Toggle style
@@ -262,15 +262,13 @@ origami_button:
         active,
         pending: subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n),
         bars: barCss,
-        // each() adds each suffix it receives to every selector in a list and joins the results, or matches nothing for an empty list
-        each: (list, ...ends) => list.length ? list.flatMap((s) => ends.map((e) => s + e)).join(",\n    ") : ".org-none",
         barOn,
         dividers,
         press: cfg.press ?? true,
         large: cfg.label_size !== "normal",
         // The Lamp style tints active buttons in the lamp color, or in the state color of a button's own entity
         lamp: lamp || "var(--lamp-color)",
-        lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => base + ".bubble-sub-button-" + n + " { --org-btn-lamp: " + c + "; }").join("\n    "),
+        lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => at(n) + " { --org-btn-lamp: " + c + "; }").join("\n    "),
         cols,
         values,
         pad: pad || "0",
@@ -282,7 +280,7 @@ origami_button:
         row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
         rev: { start: "flex-end", center: "center", end: "flex-start" }[align],
         // on() adds each suffix it receives to every active button's selector and joins the results into one list
-        on: (...ends) => card._orgB.each(sel, ...ends)
+        on: (...ends) => org.each(sel, ...ends)
       };
       return "";
     })()}
@@ -457,34 +455,34 @@ origami_button:
     }` : ""}
     ${!card._orgB.bare.length || card._orgB.cols || card._orgB.seg ? "" : card._orgB.below ? `
     /* A field without a name is a square, and no space for a name stays below it */
-    ${card._orgB.each(card._orgB.bare, "")} {
+    ${card._org.each(card._orgB.bare, "")} {
       width: var(--org-btn-field) !important;
     }
-    ${card._orgB.each(card._orgB.bare, " .bubble-sub-button-name-container")} {
+    ${card._org.each(card._orgB.bare, " .bubble-sub-button-name-container")} {
       display: none !important;
     }` : card._orgB.bg ? `
     /* A button with only its icon is a square, and a button that stacks its icon and name is as wide as it is tall */
-    ${card._orgB.each(card._orgB.bare, "")} {
+    ${card._org.each(card._orgB.bare, "")} {
       width: var(--org-btn-height) !important;
       padding: 0 !important;
       justify-content: center !important;
     }
-    ${card._orgB.each(card._orgB.bare, ":is(.content-icon-top, .content-icon-bottom)")} {
+    ${card._org.each(card._orgB.bare, ":is(.content-icon-top, .content-icon-bottom)")} {
       width: calc(2 * var(--org-btn-height)) !important;
     }` : ""}
-    ${card._orgB.rings.length ? card._orgB.each(card._orgB.rings, "") + ` {
+    ${card._orgB.rings.length ? card._org.each(card._orgB.rings, "") + ` {
       background: transparent !important;
       box-shadow: inset 0 0 0 var(--org-line-width) var(--org-line-color) !important;
     }` : ""}
     ${card._orgB.bars}
-    ${card._orgB.each(card._orgB.barOn, "")} {
+    ${card._org.each(card._orgB.barOn, "")} {
       background: var(--fill-strong) !important;
       color: var(--primary-text-color) !important;
     }
-    ${card._orgB.each(card._orgB.barOn, " .bubble-sub-button-name-container")} {
+    ${card._org.each(card._orgB.barOn, " .bubble-sub-button-name-container")} {
       font-weight: var(--ha-font-weight-bold) !important;
     }
-    ${card._orgB.dividers.length ? card._orgB.each(card._orgB.dividers, "") + ` {
+    ${card._orgB.dividers.length ? card._org.each(card._orgB.dividers, "") + ` {
       flex: 0 0 var(--org-line-width) !important;
       width: var(--org-line-width) !important;
       min-width: var(--org-line-width) !important;
@@ -496,10 +494,10 @@ origami_button:
       background: var(--org-line-color) !important;
       pointer-events: none;
     }
-    ` + card._orgB.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {
+    ` + card._org.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {
       display: flex !important;
     }
-    ` + card._orgB.each(card._orgB.dividers, " > *") + ` {
+    ` + card._org.each(card._orgB.dividers, " > *") + ` {
       display: none !important;
     }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
@@ -517,14 +515,11 @@ origami_button:
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
-      mask-image: var(--scroller-mask);
       pointer-events: none !important;
     }
+    ${card._org.fade(".bubble-sub-button-bottom-container", "var(--scroller-bleed)")}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
       pointer-events: auto;
-    }
-    ha-card:dir(rtl) .bubble-sub-button-bottom-container {
-      mask-image: linear-gradient(to left, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
     }` : ""}
     ${card._orgB.scroll && !card._orgB.own ? `ha-card .bubble-sub-button-bottom-container {
       box-sizing: border-box !important;
@@ -535,11 +530,8 @@ origami_button:
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
-      mask-image: linear-gradient(to right, transparent 0px, black var(--ha-space-4), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
     }
-    ha-card:dir(rtl) .bubble-sub-button-bottom-container {
-      mask-image: linear-gradient(to left, transparent 0px, black var(--ha-space-4), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
-    }` : ""}
+    ${card._org.fade(".bubble-sub-button-bottom-container", "var(--ha-space-4)")}` : ""}
     ${card._orgB.on("")} {
       ${card._orgB.seg || card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : card._orgB.bg ? "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;" : ""}
       color: ${card._orgB.toggle && !card._orgB.below ? "var(--text-color-active)" : "var(--primary-text-color)"} !important;

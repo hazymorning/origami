@@ -1,6 +1,6 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.3.1"
+  version: "5.3.2"
   supported:
     - media-player
     - button
@@ -41,13 +41,12 @@ origami_speaker:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_speaker needs origami_base 12 or later");
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_speaker needs origami_base 13 or later");
       // The row draws its own background, so Base leaves it as it is
       if (card.dataset.orgBg !== "own") card.dataset.orgBg = "own";
       const cfg = this.config.origami_speaker ?? {};
-      const env = { hass, renderTemplate };
+      const { env, ctx } = org;
       const st = hass.states[entity];
-      const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
       const m = org.media(hass, entity, { env, cfg });
       const name = org.name(hass, entity, this.config.name, env);
       // Selected is a helper whose state names the speaker, or a template that names it itself

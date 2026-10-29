@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.17.0"
+  version: "13.0.0"
   is_global: true
   supported:
     - button
@@ -77,6 +77,9 @@ origami_base:
       if (!card._orgOn) return "";
       // Base leaves these helpers on card._org for the modules that run after it. They take hass as an argument, so no module reads an earlier render.
       const cfgB = this.config.origami_base ?? {};
+      // silent() tells whether a state only says that the entity has no answer, and ctxOf() is what a template reads about an entity: its ID, its state and its attributes
+      const silent = (s) => ["unavailable", "unknown"].includes(s);
+      const ctxOf = (hass, id) => ({ entity: id, state: hass.states[id]?.state ?? "unknown", attr: hass.states[id]?.attributes ?? {} });
       // look() follows Home Assistant's rules for when an entity is active and which state color it takes, as the frontend's state_active.ts, state_color.ts, data/group.ts and data/climate.ts define them
       const stamped = ["ai_task", "button", "conversation", "datetime", "event", "image", "infrared", "input_button", "notify", "radio_frequency", "scene", "stt", "tag", "tts", "wake_word"];
       const rule = {
@@ -98,7 +101,7 @@ origami_base:
         const a = st?.attributes ?? {};
         const d = String(id ?? "").split(".")[0];
         const act = String(a.hvac_action ?? "").toLowerCase();
-        const available = !["unavailable", "unknown"].includes(s);
+        const available = !silent(s);
         const on = stamped.includes(d) ? s !== "unavailable"
           : available && (s !== "off" || d === "alert") && (rule[d]?.(s) ?? true) && !(rests[d] ?? []).includes(s)
             && (d !== "climate" || !act || !["off", "idle"].includes(act));
@@ -115,7 +118,7 @@ origami_base:
         };
       };
       // power() tells whether a device is switched on. It is null while the device has no answer, and false while it is off or in standby.
-      const power = (st) => !st || ["unavailable", "unknown"].includes(st.state) ? null : !["off", "standby"].includes(st.state);
+      const power = (st) => !st || silent(st.state) ? null : !["off", "standby"].includes(st.state);
       // items() lists the sub-buttons in Bubble Card's numbering. Groups come first, and a sub-buttons card has no main sub-buttons.
       const items = (cfg) => {
         const sb = cfg.sub_button;
@@ -222,9 +225,9 @@ origami_base:
             const left = String(a.remaining ?? "").match(/^(\d+):(\d{2}):(\d{2})$/);
             if (st.state === "paused" && left) return Math.round(Number(left[1]) * 60 + Number(left[2]) + Number(left[3]) / 60);
             if (a.has_date && Number.isFinite(Number(a.timestamp))) return Math.round((Number(a.timestamp) * 1000 - now) / 60000);
-            return ["unavailable", "unknown"].includes(st.state) ? "" : minutesUntil(st.state, zone);
+            return silent(st.state) ? "" : minutesUntil(st.state, zone);
           };
-          const format = (id, attribute) => ["unavailable", "unknown"].includes(env.hass.states[id]?.state ?? "unknown") ? "" : word(env.hass, env.hass.states[id], attribute || null);
+          const format = (id, attribute) => silent(env.hass.states[id]?.state ?? "unknown") ? "" : word(env.hass, env.hass.states[id], attribute || null);
           // word() gives Home Assistant's word for a value of the template's own entity, such as ${word('off')}. Without arguments, it gives the state's word, and a missing value gives an empty text, so the default shows.
           const say = (...a) => a.length && !has(a[0]) && !a[1] ? "" : word(env.hass, env.hass.states[ctx.entity] ?? null, a[1] || null, has(a[0]) ? a[0] : undefined);
           // ago() takes an entity, which gives its last change or the attribute named, such as last_triggered, or a time itself
@@ -248,7 +251,7 @@ origami_base:
           return hit === undefined ? undefined : map[hit];
         };
         const v = find(key);
-        return v === undefined && off && ["unavailable", "unknown"].includes(String(key).toLowerCase()) ? find("off") : v;
+        return v === undefined && off && silent(String(key).toLowerCase()) ? find("off") : v;
       };
       // slug() turns a text into a class name, the way Bubble Card turns a sub-button's name or css_class into one
       const slug = (v) => ["string", "number"].includes(typeof v) ? String(v).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : "";
@@ -339,7 +342,7 @@ origami_base:
         if (!ids.length && ["area_id", "device_id", "floor_id", "label_id"].some((k) => target[k] ?? data[k])) return null;
         const id = ids[0] ?? entity;
         const st = hass.states[id === "entity" ? entity : id];
-        if (!st || ["unavailable", "unknown"].includes(st.state)) return false;
+        if (!st || silent(st.state)) return false;
         const at = st.attributes ?? {};
         if (app) return String(at.app_id ?? "").toLowerCase() === String(data.media_content_id).trim().toLowerCase();
         return used.every((k) => {
@@ -413,7 +416,7 @@ origami_base:
       // media() reads a media player the way Media and Speaker show it, from Home Assistant's standard attributes. The module's options in cfg fill the gaps that some integrations leave, and tv marks the TV layout.
       const media = (hass, id, { env, tv, cfg = {} } = {}) => {
         const st = hass.states[id];
-        const lead = String(value(env, cfg.leader, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) ?? "").trim();
+        const lead = String(value(env, cfg.leader, ctxOf(hass, id)) ?? "").trim();
         const members = st?.attributes?.group_members;
         const group = lead && hass.states[lead] ? { leader: lead, role: lead === id ? "leader" : "member" }
           : Array.isArray(members) && members.length > 1 && members.includes(id) ? { leader: members[0], role: members[0] === id ? "leader" : "member" }
@@ -421,7 +424,7 @@ origami_base:
         const showId = group.role === "member" ? group.leader : id;
         const show = hass.states[showId] ?? st;
         // The players option and each entry of its list can be a template, such as the Music Assistant player of whichever speaker a card stands in for
-        const twins = list([].concat(cfg.players ?? []).map((p) => value(env, p, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }))).map((p) => hass.states[p]).filter(Boolean);
+        const twins = list([].concat(cfg.players ?? []).map((p) => value(env, p, ctxOf(hass, id)))).map((p) => hass.states[p]).filter(Boolean);
         const source = String(show?.attributes?.source ?? "").trim();
         const powered = power(show);
         // A TV's HDMI sources are where its pictures come from, so the TV layout counts no source as an input
@@ -495,8 +498,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, and 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest.
-        version: 12.9,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen().
+        version: 13,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -526,7 +529,7 @@ origami_base:
         // name() is the card's own name, which can be a template, then the entity's name in Home Assistant
         name: (hass, id, own, env) => {
           const st = hass.states[id];
-          const v = env ? run(env, own, { entity: id, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) : own;
+          const v = env ? run(env, own, ctxOf(hass, id)) : own;
           return has(v) ? String(v) : String(st?.attributes?.friendly_name ?? id ?? "");
         },
         // state() joins the parts of a state line the way Bubble Card joins state_content. Each part is the state, the name, last_changed, last_updated or an attribute, in Home Assistant's words, and times read as relative times.
@@ -538,7 +541,7 @@ origami_base:
             // Bubble Card also takes the spellings last-changed, last-updated and last-triggered
             const p = String(part).trim().replace(/^last-(changed|updated|triggered)$/, "last_$1");
             // The state of a scene, a button or a timestamp sensor is a time, which reads as a relative time
-            return p === "state" ? ((stamped.includes(domain) || st.attributes?.device_class === "timestamp") && !["unavailable", "unknown"].includes(st.state) ? ago(hass, st.state) : word(hass, st))
+            return p === "state" ? ((stamped.includes(domain) || st.attributes?.device_class === "timestamp") && !silent(st.state) ? ago(hass, st.state) : word(hass, st))
               : p === "name" ? card._org.name(hass, id)
               : ["last_changed", "last_updated"].includes(p) ? ago(hass, st[p])
               : p === "last_triggered" || (stamps[domain] ?? []).includes(p) ? ago(hass, st.attributes?.[p])
@@ -568,6 +571,8 @@ origami_base:
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {
           if (slug(item.css_class) === cls) card._org.write(card.querySelector(".bubble-sub-button-" + (i + 1) + " .bubble-sub-button-name-container"), text(hass.states[item.entity ?? entity]));
         }),
+        // classed() returns the sub-buttons with this css_class by their numbers, because Bubble Card also turns a name such as Play into a class
+        classed: (cfg, cls) => items(cfg).map((item, i) => slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean),
         // shows() tells whether a sub-button shows a text of its own, which is its name or a state
         shows: (item) => (!!item.show_name && has(item.name)) || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => has(item[k]) && item[k] !== false),
         // unframe() returns the rules that remove Bubble Card's frame from a sub-buttons card, so the bottom sub-buttons fill the card, as in Button, Slider, Table and Tiles. pad is the space around them.
@@ -598,8 +603,7 @@ origami_base:
         // subs() returns each sub-button with its number, its entity and the values of its own key, such as origami_header
         subs: (env, cfg, key) => items(cfg).map((item, i) => {
           const entity = item.entity ?? cfg.entity;
-          const st = env.hass.states[entity];
-          const ctx = { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} };
+          const ctx = ctxOf(env.hass, entity);
           const raw = item[key];
           const opt = raw && typeof raw === "object" ? Object.fromEntries(Object.keys(raw).map((k) => [k, value(env, raw[k], ctx)])) : null;
           return { n: i + 1, item, entity, ctx, opt };
@@ -671,12 +675,12 @@ origami_base:
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
           return scope + " { gap: var(--ha-space-2) !important; }\n"
             + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
-            + chip.map((c) => c + " .bubble-sub-button-icon:not(.hidden)").join(", ") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
-            + chip.map((c) => c + " .bubble-sub-button-name-container:empty").join(", ") + " { display: none !important; }";
+            + card._org.each(chip, " .bubble-sub-button-icon:not(.hidden)") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
+            + card._org.each(chip, " .bubble-sub-button-name-container:empty") + " { display: none !important; }";
         },
         // fill() returns the rules that fill active controls, such as filled sub-buttons and Media's play button, with their icons and names
         fill: (sel) => !sel.length ? "" : sel.join(", ") + " { color: var(--text-color-active) !important; background-color: var(--fill-active) !important; }\n"
-          + sel.map((s) => s + " :is(.bubble-sub-button-icon, .bubble-sub-button-name-container, .bubble-media-button-icon)").join(", ") + " { color: var(--text-color-active) !important; --icon-primary-color: var(--text-color-active) !important; opacity: 1 !important; }",
+          + card._org.each(sel, " :is(.bubble-sub-button-icon, .bubble-sub-button-name-container, .bubble-media-button-icon)") + " { color: var(--text-color-active) !important; --icon-primary-color: var(--text-color-active) !important; opacity: 1 !important; }",
         // plain() returns the rules that show the sub-buttons in a container as plain text values, for Header and Popup
         plain: (scope, weight) => scope + " { gap: var(--ha-space-3) !important; }\n"
           + scope + " .bubble-sub-button { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; font-size: var(--ha-font-size-m) !important; font-weight: " + weight + " !important; color: var(--secondary-text-color) !important; white-space: nowrap !important; }\n"
@@ -704,6 +708,20 @@ origami_base:
           if (b.style.display !== shown) b.style.display = shown;
           if (role) card._org.icon(b.firstChild, role === "member" ? "mdi:link-variant" : "mdi:crown");
         },
+        // env and ctx are what every module passes to value() and run(): the template environment, and the card's entity with its state and attributes
+        env: { hass, renderTemplate },
+        ctx: ctxOf(hass, entity),
+        // each() adds each ending to every selector of a list and joins the results, or matches nothing for an empty list
+        each: (list, ...ends) => list.length ? list.flatMap((s) => ends.map((e) => s + e)).join(",\n    ") : ".org-none",
+        // fade() returns the rules that fade a scrolling row out at both ends, in both directions of writing. The row starts to show after start and ends 48 px before its end.
+        fade: (sel, start) => ["right", "left"].map((to, i) => "ha-card" + (i ? ":dir(rtl) " : " ") + sel + " { mask-image: linear-gradient(to " + to + ", transparent 0px, black " + start + ", black calc(100% - var(--ha-space-12, 48px)), transparent 100%); }").join("\n    "),
+        // pen() measures texts in the font of an element's ::before, once the fonts and the layout are known, such as a name that may be wider than its column
+        pen: (el, pseudo = "::before") => {
+          const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
+          const cs = getComputedStyle(el, pseudo);
+          pen.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+          return { cs, width: (text) => pen.measureText(text).width };
+        },
         // icon() shows an icon instead of the card's own, and without an icon it gives the card its own icon back
         icon: (el, icon) => {
           if (!el) return;
@@ -723,13 +741,14 @@ origami_base:
       const vertical = !!cfgB.vertical && type === "button";
       // A frameless card has no background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up
       const frameless = !!cfgB.frameless && ["button", "media-player"].includes(type);
+      // Origami 2 kept compact under origami_media and Fade in under origami_button, and those places still work
+      const compact = !!(cfgB.compact ?? this.config.origami_media?.compact);
       const opts = card._org.opts = {
         vertical,
         toggle: !!cfgB.toggle && !vertical,
         // toggle wins over group, because a pill switch cannot sit in a tray
         group: !!cfgB.group && !vertical && !cfgB.toggle,
-        // Origami 2 kept compact under origami_media and Fade in under origami_button, and those places still work
-        compact: !!(cfgB.compact ?? this.config.origami_media?.compact),
+        compact,
         tile: !!cfgB.tile,
         frameless,
         // On a tile and on a frameless card, the content stands on a gray surface, the tile's own or the page's, so the keys take the look for gray surfaces. On a tile, the icon and the sliders are chips of the card's color with a shadow. On a frameless card, they have the keys' fill, as the tiles of a Button row have, so no chip edge shows on a dark page.
@@ -742,7 +761,7 @@ origami_base:
         sub: length(cfgB.sub_button_height),
         text: length(cfgB.sub_button_text_size),
         // A card has a state line under its name as Bubble Card decides, unless the card is a slim row or has its name under the icon. A media card writes its state line, and Media takes it back when it hides the line.
-        lines: !(cfgB.compact ?? this.config.origami_media?.compact) && !cfgB.vertical && (type === "media-player" ? this.config.show_state !== false
+        lines: !compact && !cfgB.vertical && (type === "media-player" ? this.config.show_state !== false
           : ["show_state", "show_attribute"].some((k) => this.config[k] ?? this.config.button_type === "state") || !!this.config.show_last_changed || !!this.config.show_last_updated),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
         bare: ["separator", "sub-buttons", "pop-up"].includes(type),
@@ -855,6 +874,8 @@ origami_base:
     }
     ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill {
       position: relative;
+      background-color: var(--org-slider-fill) !important;
+      opacity: 1 !important;
     }
     /* A color slider, such as one for the hue or the color temperature of a light, keeps Bubble Card's own track and cursor without a fill or a mark */
     ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill::after {
@@ -886,10 +907,6 @@ origami_base:
     }
     ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill.fill-orientation-bottom::after {
       top: var(--ha-space-2);
-    }
-    ${card._org.fills} :not(.is-color-slider) > .bubble-range-fill {
-      background-color: var(--org-slider-fill) !important;
-      opacity: 1 !important;
     }
     ${card._org.fills} .is-color-slider .bubble-color-track {
       opacity: var(--opacity-strong);
@@ -988,15 +1005,15 @@ origami_base:
       --org-toggle-gap: var(--org-pad);
       /* The end column is as wide as a tray with three keys. A compact card's side slider fills it, so it lines up with the trays of other cards. */
       --org-end-col: calc(3 * var(--control-height-mini) + 2 * (var(--tile-size) - var(--control-height-mini)));
-      ${card._org.opts.compact ? "--org-row-height: var(--control-height);" : ""}
-      ${card._org.opts.compact ? "--org-tile-size: var(--org-toggle-h);" : ""}
-      ${card._org.opts.compact ? "--org-icon-size: var(--icon-size-s);" : ""}
-      ${card._org.opts.compact ? "/* A compact card's icon has no background, so the icon itself starts at the padding and the name starts 12 px after it, as in a slim list */" : ""}
-      ${card._org.opts.compact ? "--org-tile-inset: calc(var(--org-pad) - (var(--org-tile-size) - var(--org-icon-size)) / 2);" : ""}
-      ${card._org.opts.compact ? "--org-text-gap: calc(var(--ha-space-3) - (var(--org-tile-size) - var(--org-icon-size)) / 2 - var(--ha-space-1));" : ""}
-      ${card._org.opts.compact ? "--org-toggle-w: var(--tile-size);" : ""}
-      ${card._org.opts.compact ? "--org-toggle-h: var(--icon-size-l);" : ""}
-      ${card._org.opts.compact ? "--org-toggle-knob: var(--icon-size-s);" : ""}
+      ${card._org.opts.compact ? `--org-row-height: var(--control-height);
+      --org-tile-size: var(--org-toggle-h);
+      --org-icon-size: var(--icon-size-s);
+      /* A compact card's icon has no background, so the icon itself starts at the padding and the name starts 12 px after it, as in a slim list */
+      --org-tile-inset: calc(var(--org-pad) - (var(--org-tile-size) - var(--org-icon-size)) / 2);
+      --org-text-gap: calc(var(--ha-space-3) - (var(--org-tile-size) - var(--org-icon-size)) / 2 - var(--ha-space-1));
+      --org-toggle-w: var(--tile-size);
+      --org-toggle-h: var(--icon-size-l);
+      --org-toggle-knob: var(--icon-size-s);` : ""}
       ${card._org.opts.vertical ? "--org-row-height: auto; --org-tile-inset: 0px;" : ""}
     }
     .bubble-sub-button-icon {
@@ -1293,7 +1310,7 @@ origami_base:
       color: var(--primary-text-color) !important;
       transition: all var(--duration-normal) var(--ease-standard);
     }
-    ${card._org.pills.length ? card._org.pills.map((p) => p + " .bubble-sub-button-icon").join(",\n    ") + ` {
+    ${card._org.pills.length ? card._org.each(card._org.pills, " .bubble-sub-button-icon") + ` {
       margin-inline-start: calc(var(--org-toggle-w) - 2 * var(--ha-space-1) - var(--org-toggle-knob)) !important;
     }` : ""}` : `
     ${card._org.opts.frame ? `
@@ -1396,7 +1413,7 @@ origami_base:
     ` : ""}
     ${(() => {
       const org = card._org;
-      const env = { hass, renderTemplate };
+      const env = org.env;
       const list = card._orgSubs = org.subs(env, this.config, "origami_base");
       const rules = [];
       // A sub-button is a dropdown with sub_button_type: select, or without a type when its entity is a select or an input_select or when it has a select_attribute
@@ -1467,7 +1484,7 @@ origami_base:
     ${(() => {
       const org = card._org;
       // The keys of a play row show their state with dot and disabled, so Base never fills them
-      const plays = org.items(this.config).map((item, i) => org.slug(item.css_class) === "play" ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean);
+      const plays = org.classed(this.config, "play");
       // A module that styles the bottom sub-buttons itself, such as Button on a button card, sets data-org-fill="bottom", so Base fills only the main sub-buttons there
       const keep = ':not(.is-select):not(.readout):not(.plain)' + org.key + (plays.length ? ":not(:where(.bubble-sub-button-group:has(> :is(" + plays.join(", ") + ")) > *))" : "");
       // A module that styles its own sub-buttons sets data-org-fill="own" on the card. There, only a sub-button that sets a value or has accent is filled.

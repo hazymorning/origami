@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.0.1"
+  version: "1.0.2"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show."
@@ -107,8 +107,8 @@ origami_table:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_table needs origami_base 12.5 or later");
-      const env = { hass, renderTemplate };
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_table needs origami_base 13 or later");
+      const env = org.env;
       const cfg = this.config.origami_table ?? {};
       // columns is a list. Each column has a name, a width, an alignment and values for its cells.
       const cols = (Array.isArray(cfg.columns) ? cfg.columns : []).map((c, i) => ({

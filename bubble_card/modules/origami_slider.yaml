@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.11.0"
+  version: "1.11.1"
   supported:
     - button
     - sub-buttons
@@ -13,11 +13,11 @@ origami_slider:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12.5)) throw new Error("origami_slider needs origami_base 12.5 or later");
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_slider needs origami_base 13 or later");
       if (this.config.card_type === "sub-buttons") {
         // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
         // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
-        const env = { hass, renderTemplate };
+        const env = org.env;
         const width = String(this.config.origami_slider?.label_width ?? "").trim();
         const gap = "\u00a0".repeat(6);
         const rows = org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider" || (item.entity && (item.sub_button_type ?? "default") === "default"))
@@ -25,30 +25,31 @@ origami_slider:
             const name = org.name(hass, entity, item.name, env);
             const text = org.rename(name) ?? name;
             const slider = item.sub_button_type === "slider";
-            return { n, text, slider, on: !slider && org.power(hass.states[entity]) === true, word: slider ? "" : org.power(hass.states[entity]) === null ? "–" : org.word(hass, hass.states[entity]),
+            const st = hass.states[entity];
+            const power = org.power(st);
+            return { n, text, slider, on: !slider && power === true, word: slider ? "" : power === null ? "–" : org.word(hass, st),
               sel: slider ? "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")" : "ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-sub-button-" + n };
           });
+        const toggles = rows.filter((r) => !r.slider);
         card._orgSl = {
           width: width || "fit-content(30%)",
           names: rows.map((r) => r.sel + " { --org-name: " + org.str(r.text) + "; --org-name-loop: " + org.str(r.text + gap + r.text) + "; }").join("\n    "),
-          toggles: rows.filter((r) => !r.slider).map((r) => r.sel),
+          toggles: toggles.map((r) => r.sel),
           // The rows that show a name in their first column, which scrolls when it is too wide
-          rows: ":is(ha-card .bubble-sub-slider-wrapper.inline" + rows.filter((r) => !r.slider).map((r) => ", " + r.sel).join("") + ")",
-          lit: rows.filter((r) => !r.slider && r.on).map((r) => r.sel + " > .bubble-sub-button-name-container"),
-          words: rows.filter((r) => !r.slider).map((r) => r.sel + "::after { content: " + org.str(r.word) + "; }").join("\n    ")
+          rows: ":is(ha-card .bubble-sub-slider-wrapper.inline" + toggles.map((r) => ", " + r.sel).join("") + ")",
+          lit: toggles.filter((r) => r.on).map((r) => r.sel + " > .bubble-sub-button-name-container"),
+          words: toggles.map((r) => r.sel + "::after { content: " + org.str(r.word) + "; }").join("\n    ")
         };
         // A name wider than its column scrolls like Bubble Card's scrolling text, at the same speed. The fonts and the column width are known only after layout, so the rows are measured in the next frame.
         requestAnimationFrame(() => {
-          const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
           rows.forEach((r) => {
             const el = card.querySelector(r.sel.replace(/^ha-card /, ""));
             if (!el) return;
-            const cs = getComputedStyle(el, "::before");
-            pen.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
-            const room = parseFloat(cs.width);
-            const wide = pen.measureText(r.text).width;
+            const pen = org.pen(el);
+            const room = parseFloat(pen.cs.width);
+            const wide = pen.width(r.text);
             if (!(room > 0) || wide <= room + 0.5) return el.removeAttribute("data-org-scroll");
-            const shift = wide + pen.measureText(gap).width;
+            const shift = wide + pen.width(gap);
             el.style.setProperty("--org-name-shift", (-shift).toFixed(1) + "px");
             el.style.setProperty("--org-name-time", Math.max(1, shift / 8).toFixed(2) + "s");
             if (!el.hasAttribute("data-org-scroll")) el.setAttribute("data-org-scroll", "");
@@ -60,8 +61,7 @@ origami_slider:
       // The card is the track, so Base rounds its fill like a sub-button's slider
       if (card.dataset.orgTrack !== "") card.dataset.orgTrack = "";
       // With show_name, the card's name stands before the value, such as Gruppe · 30 %. A name from a template that returns nothing leaves only the value.
-      const st = hass.states[entity];
-      const own = this.config.show_name !== true ? "" : org.has(this.config.name) ? String(org.value({ hass, renderTemplate }, this.config.name, { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) ?? "").trim() : org.name(hass, entity);
+      const own = this.config.show_name !== true ? "" : org.has(this.config.name) ? String(org.value(org.env, this.config.name, org.ctx) ?? "").trim() : org.name(hass, entity);
       const sb = this.config.sub_button;
       card._orgOne = {
         name: own ? org.str(org.rename(own) ?? own) : "",
@@ -127,7 +127,7 @@ origami_slider:
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
-    ${card._orgSl.toggles.length ? card._orgSl.toggles.join(",\n    ") + ` {
+    ${card._orgSl.toggles.length ? card._org.each(card._orgSl.toggles, "") + ` {
       grid-column: 1 / -1;
       display: grid !important;
       grid-template-columns: subgrid;
@@ -141,10 +141,10 @@ origami_slider:
       background: none !important;
       box-shadow: none !important;
     }
-    ` + card._orgSl.toggles.map((s) => s + " > :not(.bubble-sub-button-name-container)").join(",\n    ") + ` {
+    ` + card._org.each(card._orgSl.toggles, " > :not(.bubble-sub-button-name-container)") + ` {
       display: none !important;
     }
-    ` + card._orgSl.toggles.map((s) => s + " > .bubble-sub-button-name-container").join(",\n    ") + ` {
+    ` + card._org.each(card._orgSl.toggles, " > .bubble-sub-button-name-container") + ` {
       grid-area: 1 / 2;
       display: flex !important;
       align-items: center;
@@ -158,7 +158,7 @@ origami_slider:
       font-size: 0 !important;
       transition: background-color var(--duration-normal) ease;
     }
-    ` + card._orgSl.toggles.map((s) => s + "::after").join(",\n    ") + ` {
+    ` + card._org.each(card._orgSl.toggles, "::after") + ` {
       grid-area: 1 / 2;
       justify-self: end;
       position: relative;
@@ -170,7 +170,7 @@ origami_slider:
       color: var(--secondary-text-color);
       white-space: nowrap;
     }` : ""}
-    ${card._orgSl.lit.length ? card._orgSl.lit.join(",\n    ") + ` {
+    ${card._orgSl.lit.length ? card._org.each(card._orgSl.lit, "") + ` {
       background-color: var(--org-slider-fill);
     }` : ""}
     ${card._orgSl.words}

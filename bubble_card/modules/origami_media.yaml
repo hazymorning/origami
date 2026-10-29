@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.10.0"
+  version: "5.10.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -104,29 +104,29 @@ origami_media:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12.8)) throw new Error("origami_media needs origami_base 12.8 or later");
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_media needs origami_base 13 or later");
       const own = this.config.origami_media ?? {};
       // Origami 2 named a TV's players art_entity and app_entity, and those still work as the TV layout with these players
       const old = [own.art_entity, own.app_entity].filter(Boolean);
       const cfg = old.length && !own.layout && !own.players ? { ...own, layout: "tv", players: old } : own;
-      const env = { hass, renderTemplate };
+      const { env, ctx } = org;
       const ent = hass.states[entity];
       const tv = cfg.layout === "tv";
       const m = org.media(hass, entity, { env, tv, cfg });
+      const moving = (p) => ["playing", "buffering"].includes(p?.state);
       // The cover option names one place or several, as a list or as words, also from a map from the state or a template, so a card can change its layout with the state without a helper. The background combines with the icon or with the square above the name.
-      const places = String(org.value(env, cfg.cover, { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} })).toLowerCase().split(/[^a-z]+/).filter(Boolean);
+      const places = String(org.value(env, cfg.cover, ctx)).toLowerCase().split(/[^a-z]+/).filter(Boolean);
       // A TV is on while its entity says so. When the entity has no answer, any player of the same device that is on decides.
       const power = m.power;
-      // A bottom sub-button with css_class play is the play key, and its row becomes the play row. Sub-buttons are found by number, because Bubble Card also turns a name such as Play into a class.
-      const numbered = (cls) => org.items(this.config).map((item, i) => org.slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean);
-      const play = numbered("play")[0] ?? null;
+      // A bottom sub-button with css_class play is the play key, and its row becomes the play row
+      const play = org.classed(this.config, "play")[0] ?? null;
       // The speaker shows its music while it plays, and its name at other times. A card with a play key also shows paused music, because the key resumes it.
       const music = !tv && !m.input && !!m.title && ((m.active && m.playing) || (!!play && m.player?.state === "paused"));
       card._orgM = {
         m,
         music,
         on: tv ? power === true : m.active,
-        playing: tv ? ["playing", "buffering"].includes(ent?.state) || m.playing : m.playing,
+        playing: tv ? moving(ent) || m.playing : m.playing,
         powered: tv ? power === true : org.power(ent) === true,
         art: m.art && (!tv || power) ? m.art : null,
         collapse: !!cfg.collapse,
@@ -158,7 +158,7 @@ origami_media:
         : music ? (keep ? [m.title, m.artist].filter(Boolean).join(" • ") : m.artist) || org.word(hass, m.player)
         : org.word(hass, m.show);
       // The State option replaces the state line while it has a value, such as a title from a template sensor
-      const set = org.value(env, cfg.state, { entity, state: ent?.state ?? "unknown", attr: ent?.attributes ?? {} });
+      const set = org.value(env, cfg.state, ctx);
       const shown = org.has(set) ? String(set) : line;
       // A State value that repeats the name hides the state line, so a template can leave a single line such as Nothing playing
       if (org.has(set) && shown === name) c.state = "none";
@@ -175,7 +175,7 @@ origami_media:
       // A sub-button with css_class members shows how many speakers play in the group, the leader included
       const n = [].concat(m.show?.attributes?.group_members ?? []).length;
       org.readouts(hass, this.config, entity, () => n > 1 ? org.num(hass, n) : "", "members");
-      c.members = numbered("members").map((sel) => "ha-card .bubble-sub-button" + sel);
+      c.members = org.classed(this.config, "members").map((sel) => "ha-card .bubble-sub-button" + sel);
       // A ring around the play key shows how far the track has played
       c.play = play;
       // A play key whose disabled key is set rests in the quiet fill with the disabled color, as any control that cannot work. Base reads the sub-buttons' own keys before Media runs.
@@ -183,6 +183,7 @@ origami_media:
       c.rest = !!play && org.yes((card._orgSubs ?? []).find((s) => s.n === pn)?.opt?.disabled);
       c.group = ".bubble-sub-button-group:has(> " + play + ")";
       c.row = "ha-card " + c.group;
+      c.playKey = c.row + " > .bubble-sub-button" + play;
       const key = play && card.querySelector(".bubble-sub-button" + play);
       if (key) {
         const ring = org.part(key, "org-ring", () => {
@@ -200,7 +201,6 @@ origami_media:
           return svg;
         });
         // The ring follows a player in players that plays or pauses as the shown music does, or else the player whose music shows. Radio and inputs have no length, so the ring goes and its place stays.
-        const moving = (p) => ["playing", "buffering"].includes(p?.state);
         // A player can lose track of the music, such as a Music Assistant player whose position stands still while the speaker plays on. Its position then stays the same across reports, runs past the end of the track, or it reports another title. The ring then follows the next player, and in the end the speaker itself.
         const seen = card._orgSeen ?? (card._orgSeen = new Map());
         const lost = (p) => {
@@ -229,12 +229,12 @@ origami_media:
             const a = src.attributes;
             const length = Number(a.media_duration);
             const since = Date.parse(a.media_position_updated_at);
-            const moving = ["playing", "buffering"].includes(src.state);
-            const p0 = Math.min(1, Math.max(0, (Number(a.media_position ?? 0) + (moving && Number.isFinite(since) ? (Date.now() - since) / 1000 : 0)) / length));
+            const runs = moving(src);
+            const p0 = Math.min(1, Math.max(0, (Number(a.media_position ?? 0) + (runs && Number.isFinite(since) ? (Date.now() - since) / 1000 : 0)) / length));
             const full = 2 * Math.PI * 31;
             arc.style.strokeDasharray = String(full);
             arc.style.strokeDashoffset = String(full * (1 - p0));
-            if (moving && p0 < 1 && arc.animate) arc.animate([{ strokeDashoffset: full * (1 - p0) }, { strokeDashoffset: 0 }], { duration: (1 - p0) * length * 1000, easing: "linear", fill: "forwards" });
+            if (runs && p0 < 1 && arc.animate) arc.animate([{ strokeDashoffset: full * (1 - p0) }, { strokeDashoffset: 0 }], { duration: (1 - p0) * length * 1000, easing: "linear", fill: "forwards" });
           }
         }
       }
@@ -246,25 +246,25 @@ origami_media:
       --org-chip-bg: ${card._orgM.on && !card._orgM.ink ? "var(--org-field)" : "var(--org-inset)"};
       --org-chip-ink: ${card._orgM.ink ?? (card._orgM.on ? "var(--org-color)" : "var(--org-chip-rest, var(--primary-text-color))")};
     }
-    ${card._orgM.members.length ? `${card._orgM.members.join(", ")} {
+    ${card._orgM.members.length ? `${card._org.each(card._orgM.members, "")} {
       gap: 0 !important;
       justify-content: center !important;
       width: auto !important;
       min-width: var(--tile-size) !important;
       padding: 0 var(--ha-space-3) !important;
     }
-    ${card._orgM.members.map((s) => s + ":has(.bubble-sub-button-name-container:not(:empty))").join(", ")} {
+    ${card._org.each(card._orgM.members, ":has(.bubble-sub-button-name-container:not(:empty))")} {
       min-width: var(--control-height-lg) !important;
     }
-    ${card._orgM.members.map((s) => s + " .bubble-sub-button-icon").join(", ")} {
+    ${card._org.each(card._orgM.members, " .bubble-sub-button-icon")} {
       --mdc-icon-size: var(--icon-size-s) !important;
     }
-    ${card._orgM.members.map((s) => s + " .bubble-sub-button-name-container").join(", ")} {
+    ${card._org.each(card._orgM.members, " .bubble-sub-button-name-container")} {
       margin-inline-start: var(--ha-space-1);
       font-size: var(--ha-font-size-m) !important;
       font-weight: var(--ha-font-weight-bold) !important;
     }
-    ${card._orgM.members.map((s) => s + " .bubble-sub-button-name-container:empty").join(", ")} {
+    ${card._org.each(card._orgM.members, " .bubble-sub-button-name-container:empty")} {
       display: none !important;
     }` : ""}
     ${card._orgM.play ? `
@@ -322,17 +322,17 @@ origami_media:
     ${card._orgM.row} > :is(.bubble-sub-button:has(+ ${card._orgM.play}), ${card._orgM.play} + .bubble-sub-button) .bubble-sub-button-icon:not(.hidden) {
       --mdc-icon-size: var(--control-height-icon);
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} {
+    ${card._orgM.playKey} {
       display: grid !important;
       place-items: center;
       width: var(--org-play-ring) !important;
       height: var(--org-play-ring) !important;
       isolation: isolate;
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} > :not(.org-ring) {
+    ${card._orgM.playKey} > :not(.org-ring) {
       grid-area: 1 / 1;
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {
+    ${card._orgM.playKey}::before {
       content: "";
       position: absolute;
       inset: calc((var(--org-play-ring) - var(--org-play)) / 2);
@@ -340,14 +340,14 @@ origami_media:
       border-radius: 50%;
       background-color: var(--fill-active);
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} .bubble-sub-button-icon:not(.hidden) {
+    ${card._orgM.playKey} .bubble-sub-button-icon:not(.hidden) {
       --mdc-icon-size: var(--org-play-icon);
       color: var(--text-color-active) !important;
     }
-    ${card._orgM.rest ? `${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {
+    ${card._orgM.rest ? `${card._orgM.playKey}::before {
       background-color: var(--fill-subtle);
     }
-    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} .bubble-sub-button-icon:not(.hidden) {
+    ${card._orgM.playKey} .bubble-sub-button-icon:not(.hidden) {
       color: var(--disabled-color) !important;
     }` : ""}
     ha-card .bubble-sub-button${card._orgM.play} .org-ring {
@@ -462,9 +462,7 @@ origami_media:
       width: var(--tile-size) !important;
       height: var(--tile-size) !important;
       border-radius: var(--radius-inner) !important;
-      transition: var(--transition-interactive);
-    }
-    .bubble-media-button {
       background-color: transparent !important;
+      transition: var(--transition-interactive);
     }
     ${card._org.fill(card._orgM.filled)}

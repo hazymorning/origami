@@ -121,7 +121,6 @@ Origami:
   # Scroller
   scroller-bleed: 'var(--view-bleed)'
   scroller-padding: 'var(--scroller-bleed) var(--scroller-bleed) var(--ha-space-10, 40px)'
-  scroller-mask: 'linear-gradient(to right, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%)'
 
   # Layout
   row-gap: '0px'

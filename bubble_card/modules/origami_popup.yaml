@@ -1,16 +1,15 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.7.0"
+  version: "4.7.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. The title can be a template. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 12.6)) throw new Error("origami_popup needs origami_base 12.6 or later");
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_popup needs origami_base 13 or later");
       const cfg = this.config.origami_popup ?? {};
-      const env = { hass, renderTemplate };
-      const ctx = { entity, state: hass.states[entity]?.state ?? "unknown", attr: hass.states[entity]?.attributes ?? {} };
+      const { env, ctx } = org;
       // Origami 2 named this option subtitle_style, and that name still works
       const chip = (cfg.value_style ?? cfg.subtitle_style) === "chip";
       // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.
@@ -52,7 +51,6 @@ origami_popup:
     .bubble-pop-up-container {
       --scroller-bleed: calc(2 * var(--ha-space-4));
       --scroller-padding: var(--scroller-bleed) var(--scroller-bleed) calc(var(--scroller-bleed) + var(--ha-space-4));
-      --scroller-mask: linear-gradient(to right, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%);
       ${card._orgP.gap ? `--bubble-pop-up-gap: ${card._orgP.gap};
       --org-header-above: ${card._orgP.gap};
       --org-header-below: 0px;` : ""}
