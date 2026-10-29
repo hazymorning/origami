@@ -18,6 +18,7 @@ These changes are in the `next` branch and come with the next release.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.
 - A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
 - Options that moved or were renamed in this release still work: `compact`, `animate`, `solid_controls`, `art_entity`, `app_entity` and `subtitle_style`.
+- The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
 
 #### Base
 
@@ -33,6 +34,7 @@ These changes are in the `next` branch and come with the next release.
 - A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
+- A sub-button's `label` key puts a small line under its text, such as CPU under 12 %, so a card can show values with labels beside its name.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
 - A slider's fill is the theme's `fill-loud`, a stronger step of its track's tint, so it keeps its contrast on a card, a tile or a cover behind a pop-up. Lamp sliders keep the light's color.
@@ -89,6 +91,7 @@ These changes are in the `next` branch and come with the next release.
 - `active` also matches the entity that a button's tap targets.
 - Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
 - A button with `css_class: divider` is a short line between two buttons.
+- The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
 
@@ -98,12 +101,11 @@ These changes are in the `next` branch and come with the next release.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 - Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles. The value stands in the track and ends where the track's corner begins, and it uses the medium weight.
-- The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
 
 #### Tiles
 
 - The `list` layout shows rows with an icon, a state line and a sign at the end. A chevron opens something, a switch toggles the entity, and a play sign runs a script or a scene.
-- `slim` makes one-line rows for facts and settings, and `dividers` draws lines between rows.
+- `slim` makes one-line rows for facts and settings, as tall as the one-line rows in Home Assistant's own lists, and `dividers` draws lines between rows.
 - New options: `sign` for every row, and the `state_color` and `image_size` keys for a tile.
 - Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.
 
@@ -152,6 +154,7 @@ These changes are in the `next` branch and come with the next release.
 - A sub-button slider takes its `custom_height`.
 - Numbers with a unit follow Home Assistant's format for the language, such as 33% in English and 48 % in German.
 - A header value with its icon on the right keeps a gap between its text and its icon.
+- In a header, an icon after a value's text sat lower than the icons without text. Every icon now stands in the middle of the line.
 - Button's `active` option also matches buttons whose name is a number.
 - With Base's `vertical` option, an accent sub-button that sets a value is filled only while its entity has that value.
 - Speaker Select keeps the line after the name in the middle of the row while it scrolls. Long lines in Media and Speaker Select also scroll when their text arrived while the pop-up was closed.

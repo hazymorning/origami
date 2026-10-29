@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.4.4"
+  version: "3.4.5"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
@@ -141,9 +141,9 @@ origami_tiles:
       return "";
     })()}
     ${card._org.unframe()}
-    /* In a list, a row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. A slim row is as tall as a button, and its icon and its sign are small. */
+    /* In a list, a row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. A slim row is as tall as a one-line row in Home Assistant's own lists, and its icon and its sign are small. */
     .bubble-sub-button-group${card._orgTi.group} {
-      --org-row-min: ${card._orgTi.slim ? "var(--control-height-icon)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))"};
+      --org-row-min: ${card._orgTi.slim ? "var(--control-height-list)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))"};
       display: grid !important;
       grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
       gap: ${card._orgTi.list ? "0" : "var(--ha-space-3)"} !important;

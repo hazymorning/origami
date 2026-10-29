@@ -60,7 +60,7 @@ customElements.define('ha-icon', class extends HTMLElement {
   static get observedAttributes() { return ['icon']; }
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' }).innerHTML = '<style>.i{display:var(--ha-icon-display,inline-flex);align-items:center;justify-content:center;fill:var(--icon-primary-color,currentcolor);width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;display:block}</style><span class="i"><svg viewBox="0 0 24 24"><path></path></svg></span>';
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>.i{display:var(--ha-icon-display,inline-flex);align-items:center;justify-content:center;position:relative;vertical-align:middle;fill:var(--icon-primary-color,currentcolor);width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;display:block}</style><span class="i"><svg viewBox="0 0 24 24"><path></path></svg></span>';
   }
   get icon() { return this.getAttribute('icon') ?? ''; }
   set icon(v) { if (v != null && this.getAttribute('icon') !== String(v)) this.setAttribute('icon', String(v)); }

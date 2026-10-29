@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.1.0"
+  version: "13.2.0"
   is_global: true
   supported:
     - button
@@ -1484,6 +1484,15 @@ origami_base:
         });
         write();
         org.later("drop" + n, write);
+      });
+      // A sub-button with a label shows its text over the label, such as 12 % over CPU, in the sizes of a card's name and state line. It is plain text without a key's fill or size, and two such values are as far apart as the first one is from the name.
+      list.forEach(({ n, opt }) => {
+        if (!org.has(opt?.label)) return;
+        const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
+        rules.push(sel + org.key + " { --org-sub-text: " + (org.opts.text || "var(--ha-font-size-m)") + "; flex-direction: column !important; justify-content: center !important; min-width: 0 !important; padding: 0 !important; background: none !important; box-shadow: none !important; }",
+          "ha-card .bubble-sub-button + .bubble-sub-button-" + n + org.key + " { margin-inline-start: var(--ha-space-2); }",
+          sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold); }",
+          sel + "::after { content: " + org.str(opt.label) + "; margin-top: var(--ha-space-1); font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); }");
       });
       // Under the icon, a sub-button without an action of its own passes the tap to the card
       if (org.opts.vertical) list.forEach((sub) => {

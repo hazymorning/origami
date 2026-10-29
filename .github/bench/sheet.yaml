@@ -57,6 +57,17 @@ sections:
           main:
             - {entity: light.kitchen, sub_button_type: slider, always_visible: true}
         rows: 1
+      # Two values with labels beside the name
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        name: Living room
+        icon: mdi:sofa
+        modules: [origami_base]
+        sub_button:
+          main:
+            - {entity: sensor.living_room_temperature, show_state: true, show_icon: false, origami_base: {label: Temperature}}
+            - {entity: sensor.living_room_humidity, show_state: true, show_icon: false, origami_base: {label: Humidity}}
       # A thermostat with minus, its target and plus in a tray
       - type: custom:bubble-card
         card_type: button

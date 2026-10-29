@@ -160,8 +160,9 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `disabled` | While true, the sub-button takes the disabled color, ignores taps and is never filled. |
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
 | `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
+| `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line, and the sub-button has no fill, as for the values on the server card. |
 
-All keys except `on` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
+All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
 Bubble Card writes the state line from `state_content`. Without it, a card has no state line unless it has `button_type: state`. Climate, Media and Speaker Select write their own state line, and Media also the name, so `state_content` has no effect there.
 
@@ -917,7 +918,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `icon_size` | `var(--icon-size-2xs)` | The icon size. |
 | `padding` | `0` | The space around the buttons. |
 | `press` | `true` | Buttons shrink a little while pressed, and segments get a stronger fill. |
-| `segmented` | `false` | `true` joins the buttons of each group into a bar, all in one row with equal widths, and fills the active segment. Segments are taller, with bold labels, and ignore `background`, `align`, `columns`, `active_style` and `scroll`. Group names instead of `true` make only those groups small switches, which can stand in any row. |
+| `segmented` | `false` | `true` joins the buttons of each group into a bar, all in one row with equal widths, and fills the active segment. Segments are taller, with bold labels, and ignore `background`, `align`, `columns`, `active_style` and `scroll`. Group names instead of `true` make only those groups small switches, which can stand in any row and fill their active segment the same way. |
 | `chips` | `false` | The buttons are chips, with the label in the text color and the icon in the secondary color. Active chips have a bold label. |
 | `pending` | `false` | After a tap, a button shows its next look, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, never segments or buttons that only open something. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
@@ -1353,7 +1354,7 @@ A row without an entity can get a state line, such as a short description, from 
 
 #### Slim list
 
-With `slim: true`, a list has low rows for facts and settings, such as a server's load, with a small icon and the state at the row's end. The name keeps at least 40 % of the row, or less if it is shorter, and long text ends with an ellipsis.
+With `slim: true`, a list has one-line rows for facts and settings, such as a server's load, with a small icon and the state at the row's end. The rows are as tall as the one-line rows in Home Assistant's own lists. The name keeps at least 40 % of the row, or less if it is shorter, and long text ends with an ellipsis.
 
 `dividers: true` draws lines between the rows of a list. The rows then keep their YAML order, and `order` has no effect.
 

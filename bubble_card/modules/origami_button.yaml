@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.3"
+  version: "3.9.4"
   supported:
     - sub-buttons
     - button
@@ -224,7 +224,7 @@ origami_button:
       const field = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim() || "var(--tile-size-lg)";
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
       const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", opts.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
-      // A small segmented switch is a track around its group, and its active segment takes the stronger fill
+      // A small segmented switch is a track around its group, and its active segment is filled like a segment of a whole bar
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
       const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle);}\n    "
@@ -439,8 +439,8 @@ origami_button:
     }` : ""}
     ${card._orgB.bars}
     ${card._orgB.barOn.length ? card._org.each(card._orgB.barOn, "") + ` {
-      background: var(--fill-strong) !important;
-      color: var(--primary-text-color) !important;
+      background: var(--fill-active) !important;
+      color: var(--text-color-active) !important;
     }
     ` + card._org.each(card._orgB.barOn, " .bubble-sub-button-name-container") + ` {
       font-weight: var(--ha-font-weight-bold) !important;
