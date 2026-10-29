@@ -236,6 +236,20 @@ window.__check = () => {
     report('players', fails, `${speakers.length} speaker shows the song of its player`);
   }
 
+  // Play key: beside a large cover above the name, the play key's fill is one step up from the 40 px keys beside it, and beside a small cover one step smaller. Its ring runs around it one step larger again.
+  {
+    const fails = [];
+    const keys = origami.map((card) => ({ card, key: card.root.querySelector('.bubble-sub-button.play') })).filter((k) => k.key && visible(k.key));
+    for (const { card, key } of keys) {
+      const above = [].concat(card.cfg.origami_media?.cover ?? []).includes('above');
+      const want = above ? ['var(--control-height-lg)', 'var(--tile-size-lg)'] : ['var(--control-height-sm)', 'var(--control-height-lg)'];
+      const fill = parseFloat(getComputedStyle(key, '::before').width), ring = key.getBoundingClientRect().width;
+      if (!near(fill, length(card, want[0])) || !near(ring, length(card, want[1]))) fails.push(`card ${card.i}: the play key's fill is ${r1(fill)} px and its ring ${r1(ring)} px, expected ${r1(length(card, want[0]))} and ${r1(length(card, want[1]))} with the cover ${above ? 'above' : 'in the icon'}`);
+    }
+    if (!keys.some((k) => [].concat(k.card.cfg.origami_media?.cover ?? []).includes('above')) || !keys.some((k) => ![].concat(k.card.cfg.origami_media?.cover ?? []).includes('above'))) fails.push('the sheet needs a play key beside a large cover and one beside a small cover');
+    report('play key', fails, `${keys.length} play keys are as large as their cover's place asks`);
+  }
+
   // Plain cards: Base does nothing on a card without an Origami module
   {
     const fails = [];

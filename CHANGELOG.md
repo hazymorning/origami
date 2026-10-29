@@ -35,6 +35,7 @@ These changes are in the `next` branch and come with the next release.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
+- A slider's fill is the theme's `fill-loud`, a stronger step of its track's tint, so it keeps its contrast on a card, a tile or a cover behind a pop-up. Lamp sliders keep the light's color.
 
 #### Media
 
@@ -47,7 +48,7 @@ These changes are in the `next` branch and come with the next release.
 - A play row for music pop-ups: a bottom sub-button with `css_class: play` is a large play key with a progress ring, between shuffle, previous, next and repeat. A sub-button with `css_class: members` shows how many speakers play in the group.
 - The ring skips a player that has lost track of the music, such as a Music Assistant player whose position stands still, and follows the speaker itself.
 - A disabled play key rests in a quiet fill, so the play row can stay in place while nothing plays.
-- The play key is the largest control after the cover: a 64 px fill with a 40 px icon, inside its ring at 80 px.
+- The play key is the largest control after the cover. Beside a large cover above the name, it has a 64 px fill with a 40 px icon inside its ring at 80 px, and beside a smaller cover it is one step smaller. Its ring has the tints of a slider: the track of `fill-strong` and the arc of `fill-loud`.
 - `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
 
 #### Speaker Select
@@ -96,7 +97,7 @@ These changes are in the `next` branch and come with the next release.
 - Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. `label_width` lines up the tracks of several cards.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
-- Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles, and the values use the medium weight.
+- Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles. The value stands in the track and ends where the track's corner begins, and it uses the medium weight.
 
 #### Tiles
 

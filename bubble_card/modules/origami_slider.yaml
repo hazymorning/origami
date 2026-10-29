@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.10.0"
+  version: "1.11.0"
   supported:
     - button
     - sub-buttons
@@ -74,7 +74,7 @@ origami_slider:
     ${card._org.unframe()}
     ha-card .bubble-sub-button-bottom-container {
       display: grid !important;
-      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr) minmax(var(--ha-space-11, 44px), max-content);
+      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
       gap: var(--ha-space-2) var(--ha-space-4) !important;
     }
     ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {
@@ -88,7 +88,7 @@ origami_slider:
       align-items: center;
       width: auto !important;
     }
-    /* Each row has three columns: the name, the track and the value, so the value never sits on the fill */
+    /* Each row has two columns: the name and the track, and the value stands in the track, as on a standalone slider */
     ha-card .bubble-sub-slider-wrapper.inline > [class*="bubble-sub-button-slider-"] {
       display: contents !important;
     }
@@ -102,12 +102,17 @@ origami_slider:
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
+    /* A value ends where its track's corner begins, on every slider */
     ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper {
-      grid-area: 1 / 3;
+      grid-area: 1 / 2;
+      position: relative;
+      z-index: 1;
       display: flex !important;
       justify-content: flex-end;
+      box-sizing: border-box;
+      width: auto !important;
       min-width: 0;
-      padding: 0 !important;
+      padding: 0 var(--radius-small) !important;
       opacity: 1 !important;
       pointer-events: none;
     }
@@ -154,8 +159,12 @@ origami_slider:
       transition: background-color var(--duration-normal) ease;
     }
     ` + card._orgSl.toggles.map((s) => s + "::after").join(",\n    ") + ` {
-      grid-area: 1 / 3;
+      grid-area: 1 / 2;
       justify-self: end;
+      position: relative;
+      z-index: 1;
+      padding-inline-end: var(--radius-small);
+      pointer-events: none;
       font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-medium);
       color: var(--secondary-text-color);
@@ -235,7 +244,8 @@ origami_slider:
       border-radius: var(--radius-control, 14px) !important;
     }
     .bubble-range-value {
-      inset-inline-end: var(--ha-space-2) !important;
+      inset-inline-end: var(--radius-control, 14px) !important;
+      padding: 0 !important;
       opacity: 1 !important;
       display: block !important;
       font-size: var(--ha-font-size-s);

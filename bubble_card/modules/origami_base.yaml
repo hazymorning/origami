@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.16.0"
+  version: "12.17.0"
   is_global: true
   supported:
     - button
@@ -842,7 +842,8 @@ origami_base:
       --bubble-sub-slider-height: var(--org-sub-h, var(--control-height-mini));
       --bubble-slider-fill-color: var(--org-slider-fill);
       --org-slider-base: color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background));
-      --org-slider-fill: var(--org-slider-base);
+      /* A slider's fill is the loud step of the tint that its track has, so the two keep their contrast on a card, a tile or a cover behind a pop-up */
+      --org-slider-fill: var(--fill-loud);
       --org-slider-mark: var(--primary-text-color);
     }
     /* A slider's corners follow its height, which Bubble Card's custom_height can set for one slider */

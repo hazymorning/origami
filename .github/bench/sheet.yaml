@@ -129,9 +129,29 @@ sections:
           main:
             - {icon: mdi:skip-next, show_background: true}
           bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
             - name: Volume
               group:
                 - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A speaker with its cover in the icon and a play row, whose play key is one step smaller than beside a large cover
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
       # A standalone volume slider with its name before the value and a key after the track
       - type: custom:bubble-card
         card_type: button
