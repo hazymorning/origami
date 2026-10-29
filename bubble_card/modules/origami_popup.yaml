@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.6.0"
+  version: "4.6.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. The title can be a template. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
@@ -72,7 +72,7 @@ origami_popup:
       --bubble-pop-up-mask-top-stop: var(--org-popup-pad) !important;
       --bubble-pop-up-mask-bottom-stop: var(--org-popup-pad) !important;
     }
-    ${card._orgP.art === null ? "" : card._org.backdrop(".bubble-pop-up-background::after", card._orgPArt, card._orgP.art ? card._orgP.mix : 0, card._orgP.cover, "var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0") + `
+    ${card._orgP.art === null ? "" : card._org.backdrop(".bubble-pop-up-background::after", card._orgPArt, card._orgP.art ? card._orgP.mix : 0, card._orgP.cover, "var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0", card.querySelector(".bubble-pop-up-background")) + `
     .bubble-pop-up-background::after {
       z-index: 0;
     }

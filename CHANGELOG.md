@@ -31,6 +31,7 @@ These changes are in the `next` branch and come with the next release.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
 - A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
+- A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
@@ -44,6 +45,8 @@ These changes are in the `next` branch and come with the next release.
 - Media writes the name and state lines through Bubble Card's own lines, and a card's `name` can be a template.
 - New options: `keep_name`, `state`, `badge` and `icon_color`. `players` accepts a template.
 - A play row for music pop-ups: a bottom sub-button with `css_class: play` is a large play key with a progress ring, between shuffle, previous, next and repeat. A sub-button with `css_class: members` shows how many speakers play in the group.
+- The ring skips a player that has lost track of the music, such as a Music Assistant player whose position stands still, and follows the speaker itself.
+- A disabled play key rests in a quiet fill, so the play row can stay in place while nothing plays.
 - `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
 
 #### Speaker Select

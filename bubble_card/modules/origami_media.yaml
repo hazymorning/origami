@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.7.1"
+  version: "5.8.0"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -178,6 +178,9 @@ origami_media:
       c.members = numbered("members").map((sel) => "ha-card .bubble-sub-button" + sel);
       // A ring around the play key shows how far the track has played
       c.play = play;
+      // A play key whose disabled key is set rests in the quiet fill with the disabled color, as any control that cannot work. Base reads the sub-buttons' own keys before Media runs.
+      const pn = play ? Number(play.match(/\d+/)[0]) : 0;
+      c.rest = !!play && org.yes((card._orgSubs ?? []).find((s) => s.n === pn)?.opt?.disabled);
       c.group = ".bubble-sub-button-group:has(> " + play + ")";
       c.row = "ha-card " + c.group;
       const key = play && card.querySelector(".bubble-sub-button" + play);
@@ -198,8 +201,23 @@ origami_media:
         });
         // The ring follows a player in players that plays or pauses as the shown music does, or else the player whose music shows. Radio and inputs have no length, so the ring goes and its place stays.
         const moving = (p) => ["playing", "buffering"].includes(p?.state);
-        const pool = m.input ? [] : [...m.twins.filter((p) => moving(p) === moving(m.player)), m.player];
-        const src = pool.find((p) => ["playing", "paused", "buffering"].includes(p?.state) && Number(p.attributes?.media_duration) > 0);
+        // A player can lose track of the music, such as a Music Assistant player whose position stands still while the speaker plays on. Its position then stays the same across reports, runs past the end of the track, or it reports another title. The ring then follows the next player, and in the end the speaker itself.
+        const seen = card._orgSeen ?? (card._orgSeen = new Map());
+        const lost = (p) => {
+          const a = p.attributes ?? {};
+          const title = String(a.media_title ?? "").trim();
+          if (m.title && title && title !== m.title) return true;
+          const pos = Number(a.media_position), at = Date.parse(a.media_position_updated_at), length = Number(a.media_duration);
+          if (!moving(p) || !Number.isFinite(pos) || !Number.isFinite(at)) return false;
+          if (pos + (Date.now() - at) / 1000 > length + 10) return true;
+          const was = seen.get(p.entity_id);
+          if (!was || was.title !== title) seen.set(p.entity_id, { pos, at, title, still: false });
+          else if (at - was.at >= 2000) seen.set(p.entity_id, { pos, at, title, still: pos - was.pos < (at - was.at) / 4000 });
+          return seen.get(p.entity_id).still;
+        };
+        const timed = (p) => ["playing", "paused", "buffering"].includes(p?.state) && Number(p.attributes?.media_duration) > 0;
+        const pool = m.input ? [] : [...m.twins.filter((p) => moving(p) === moving(m.player)), m.player, m.show].filter((p, i, all) => p && all.indexOf(p) === i);
+        const src = pool.find((p) => timed(p) && !lost(p)) ?? pool.find(timed);
         const arc = ring.querySelector(".org-ring-arc");
         const sig = src ? [src.entity_id, src.state, src.attributes.media_position, src.attributes.media_position_updated_at, src.attributes.media_duration].join("|") : "";
         ring.style.display = src ? "" : "none";
@@ -320,6 +338,12 @@ origami_media:
       --mdc-icon-size: 32px;
       color: var(--text-color-active) !important;
     }
+    ${card._orgM.rest ? `${card._orgM.row} > .bubble-sub-button${card._orgM.play}::before {
+      background-color: var(--fill-subtle);
+    }
+    ${card._orgM.row} > .bubble-sub-button${card._orgM.play} .bubble-sub-button-icon:not(.hidden) {
+      color: var(--disabled-color) !important;
+    }` : ""}
     ha-card .bubble-sub-button${card._orgM.play} .org-ring {
       position: absolute;
       inset: 0;
@@ -352,7 +376,7 @@ origami_media:
       display: none !important;
     }
     ` : ""}
-    ${card._org.cover(card._orgM.boxed ? card._orgM.art : null, "1")}
+    ${card._org.cover(card._orgM.boxed ? card._orgM.art : null, "1", card.querySelector(".bubble-main-icon-container"))}
     ${card._orgM.above ? `
     /* Above the name, the icon's box becomes a square cover as wide as the card's content, so a tap on the cover does what a tap on the icon does. Without a cover, it shows the card's icon. The name, the main sub-buttons and the rows below stay in their places, and the card grows with the cover. */
     .card-content,
@@ -406,7 +430,7 @@ origami_media:
     ha-card .bubble-background {
       overflow: hidden;
     }
-    ${card._org.backdrop("ha-card .bubble-background::before", card._orgMArt, card._orgM.art ? card._orgM.mix : 0, card._orgM.blur, "0px")}
+    ${card._org.backdrop("ha-card .bubble-background::before", card._orgMArt, card._orgM.art ? card._orgM.mix : 0, card._orgM.blur, "0px", card.querySelector(".bubble-background"))}
     ${card._orgM.art ? `ha-card {
       --org-inset: color-mix(in srgb, var(--ha-card-background) 70%, transparent);
     }` : ""}

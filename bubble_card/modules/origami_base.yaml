@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.12.1"
+  version: "12.13.0"
   is_global: true
   supported:
     - button
@@ -481,6 +481,18 @@ origami_base:
           return "";
         }
       };
+      // keep() holds the last picture of a cover under the next one until the next one has loaded, so a new cover never leaves its place empty. The cover's rules draw the picture in --org-under below their own.
+      const keep = (host, art) => {
+        if (!host || host._orgArt === art) return;
+        const was = host._orgArt;
+        host._orgArt = art;
+        if (!art || !was) return host.style.removeProperty("--org-under");
+        host.style.setProperty("--org-under", 'url("' + String(was).replace(/["\\\n]/g, encodeURIComponent) + '")');
+        const img = new Image();
+        const done = () => { if (host._orgArt === art) host.style.removeProperty("--org-under"); };
+        img.onload = img.onerror = done;
+        img.src = art;
+      };
       card._org = {
         // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, and 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest.
         version: 12.9,
@@ -620,8 +632,8 @@ origami_base:
           });
           return rules;
         },
-        // cover() returns the rules that show a cover in a media card's icon, or the icon itself at the given opacity while there is no cover
-        cover: (art, opacity) => `
+        // cover() returns the rules that show a cover in a media card's icon, or the icon itself at the given opacity while there is no cover. With the icon's box as host, the last cover stays until the next one has loaded.
+        cover: (art, opacity, host) => (keep(host, art), `
     ha-card .bubble-main-icon-container {
       position: relative;
       overflow: visible !important;
@@ -633,7 +645,7 @@ origami_base:
       inset: 0;
       z-index: 2;
       border-radius: inherit;
-      background: ${art ? "url(" + str(art) + ") center / cover no-repeat" : "none"};
+      background: ${art ? "url(" + str(art) + ") center / cover no-repeat, var(--org-under, none) center / cover no-repeat" : "none"};
     }
     .bubble-media-player .bubble-entity-picture,
     .bubble-main-icon-container .bubble-entity-picture {
@@ -643,12 +655,13 @@ origami_base:
       color: var(--org-chip-ink) !important;
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
       opacity: ${art ? "0" : opacity} !important;
-    }`,
-        // backdrop() returns the rules that show a cover behind a card's content, for Media's cover background and Popup's art. mix is the cover's share from 0 to 100 in a mix with the color below it, and blur blurs the cover. A blurred cover reaches past its layer, so the blur does not fade at the edges, and round rounds the corners of the part that shows.
-        backdrop: (sel, art, mix, blur, round) => {
+    }`),
+        // backdrop() returns the rules that show a cover behind a card's content, for Media's cover background and Popup's art. mix is the cover's share from 0 to 100 in a mix with the color below it, and blur blurs the cover. A blurred cover reaches past its layer, so the blur does not fade at the edges, and round rounds the corners of the part that shows. With the element that holds the layer as host, the last cover stays until the next one has loaded.
+        backdrop: (sel, art, mix, blur, round, host) => {
+          keep(host, art);
           const share = Math.min(100, Math.max(0, Number.parseFloat(mix)));
           const bleed = blur ? "100px" : "0px";
-          return sel + " { content: " + (art ? '""' : "none") + "; position: absolute; inset: -" + bleed + "; background: " + (art ? "url(" + str(art) + ") center / cover no-repeat" : "none") + "; opacity: " + (Number.isFinite(share) ? share / 100 : 0.25) + "; filter: " + (blur ? "blur(50px) saturate(170%)" : "none") + "; clip-path: inset(" + bleed + " round " + round + "); pointer-events: none; transition: opacity var(--duration-normal) ease; }";
+          return sel + " { content: " + (art ? '""' : "none") + "; position: absolute; inset: -" + bleed + "; background: " + (art ? "url(" + str(art) + ") center / cover no-repeat, var(--org-under, none) center / cover no-repeat" : "none") + "; opacity: " + (Number.isFinite(share) ? share / 100 : 0.25) + "; filter: " + (blur ? "blur(50px) saturate(170%)" : "none") + "; clip-path: inset(" + bleed + " round " + round + "); pointer-events: none; transition: opacity var(--duration-normal) ease; }";
         },
         // chips() returns the rules that turn the values in a container into chips, for Header and Popup. A value with show_background turned off stays plain.
         chips: (scope) => {

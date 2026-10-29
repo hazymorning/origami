@@ -1,6 +1,6 @@
 origami_speaker:
   name: "Origami • Speaker Select"
-  version: "5.3.0"
+  version: "5.3.1"
   supported:
     - media-player
     - button
@@ -110,7 +110,7 @@ origami_speaker:
       opacity: 0.2;
       pointer-events: none;
     }
-    ${card._org.cover(card._orgSp.art, card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)")}
+    ${card._org.cover(card._orgSp.art, card._orgSp.dead ? "var(--opacity-disabled)" : card._orgSp.audible || card._orgSp.chosen ? "1" : "var(--opacity-quiet)", card.querySelector(".bubble-main-icon-container"))}
     ha-card .bubble-sub-button-container {
       margin-inline-end: var(--ha-space-4) !important;
     }
