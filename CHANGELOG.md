@@ -156,6 +156,7 @@ These changes are in the `next` branch and come with the next release.
 - Numbers with a unit follow Home Assistant's format for the language, such as 33% in English and 48 % in German.
 - A header value with its icon on the right keeps a gap between its text and its icon.
 - In a header, an icon after a value's text sat lower than the icons without text. Every icon now stands in the middle of the line.
+- A press on the play key shows its feedback on the round key, instead of a square that started at its middle. Every key of the play row takes taps on at least a 40 px square, also where its icon is small.
 - Button's `active` option also matches buttons whose name is a number.
 - With Base's `vertical` option, an accent sub-button that sets a value is filled only while its entity has that value.
 - Speaker Select keeps the line after the name in the middle of the row while it scrolls. Long lines in Media and Speaker Select also scroll when their text arrived while the pop-up was closed.

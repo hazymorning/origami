@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.10.2"
+  version: "5.10.3"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -287,11 +287,13 @@ origami_media:
     ha-card .bubble-sub-button-group:has(> ${card._orgM.play}:is(.hidden, [style*="display: none"])) {
       display: none !important;
     }
+    /* Every key of the play row takes taps on at least a key's square, also where its icon is small */
     ${card._orgM.row} > .bubble-sub-button {
       position: relative;
       width: auto !important;
-      min-width: 0 !important;
+      min-width: var(--control-height-icon) !important;
       height: auto !important;
+      min-height: var(--control-height-icon) !important;
       padding: 0 !important;
       background: none !important;
       box-shadow: none !important;
@@ -327,8 +329,13 @@ origami_media:
       height: var(--org-play-ring) !important;
       isolation: isolate;
     }
-    ${card._orgM.playKey} > :not(.org-ring) {
+    ${card._orgM.playKey} > :not(.org-ring, ha-ripple) {
       grid-area: 1 / 1;
+    }
+    /* The press feedback covers the round fill, and not the middle of the key's grid */
+    ${card._orgM.playKey} > ha-ripple {
+      inset: calc((var(--org-play-ring) - var(--org-play)) / 2);
+      border-radius: 50%;
     }
     ${card._orgM.playKey}::before {
       content: "";
