@@ -1483,6 +1483,21 @@ The Popup module styles a pop-up's header, backdrop and close button, and it wor
 
 The pop-up's `name` can be a template. JavaScript in `${ }` shows at once, while Jinja in `{{ }}` leaves the title empty until Home Assistant answers. With `name: ${states('input_select.music_view')}`, the title names the view that a helper chooses.
 
+A dropdown among the values, such as a helper that picks a speaker, is a title of its own. It shows the chosen entity's name as large as the title with a small arrow after it, and its menu lists the entities' names and icons, as a dropdown on a card does. While the title is empty, the dropdown stands in its place, so this music pop-up names its speaker in the music view and its other views by their names:
+
+```yaml
+name: "${states('input_select.music_view') === 'Music' ? '' : states('input_select.music_view')}"
+origami_popup:
+  value_position: beside
+sub_button:
+  main:
+    - entity: input_select.selected_speaker
+      sub_button_type: select
+      show_icon: false
+      origami_popup:
+        hidden: ${states('input_select.music_view') !== 'Music'}
+```
+
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 
 The backdrop is blurred, unless the pop-up sets its own `backdrop_blur` or uses Bubble Card's performance mode.
@@ -1521,7 +1536,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, Tiles, which turns a sub-buttons card into a grid, and Speaker Select, which reads a media player with `media()`.
 
-Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, and 13.1 for `layout()` and `later()`. These are the helpers:
+Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, and 13.2 for `dropdown()`, `menu()` and `picker()`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1541,6 +1556,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size, list)` and `icon(element, icon)` | `text()` and `values()` return the CSS rules that show a text or a value's keys in a sub-button, and `values()` can take the list from `subs()`. `icon()` sets an element's icon, and without one gives back the element's own. |
 | `badge(role)` and `part(host, class, build)` | `badge()` marks the card's icon with a crown for a `leader` or a link for a `member`, and removes the mark without a role. `part()` returns the child of `host` with this class, built once with `build`, such as Media's progress ring. |
 | `cover(address, opacity, host)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | The CSS rules for a cover in a media card's icon, which keep the last cover until the next one has loaded when `host` is the icon's box, for the values in a container as chips or plain text, as in Header and Popup, and for filled active controls, as on Base's sub-buttons and Media's play and power buttons. |
+| `dropdown(sub)`, `menu(scope)` and `picker(hass, sub, selector, size)` | `dropdown()` tells whether a sub-button from `subs()` is a dropdown. `menu()` returns the rules that show the menus of the dropdowns in `scope` as list rows. `picker()` shows a dropdown whose options are entity IDs with the chosen entity's name in `size`, writes each menu item's name and icon, and returns the rules for the name, or `null` for a dropdown with other options. |
 | `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text, class)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text, and `write()` writes it. `readouts()` writes into every sub-button with `css_class: readout`, or the class in `class`, a text that `text` makes from that sub-button's entity. |
 | `rename(text)` | The word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` and `each(selectors, ...ends)` | `str()` returns a CSS string that Bubble Card's cleaner leaves as it is. `each()` adds each ending to every selector and joins the results into one list, or returns `.org-none`, which matches nothing, for an empty list. |

@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.2.1"
+  version: "13.3.0"
   is_global: true
   supported:
     - button
@@ -503,8 +503,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), and 13.1 added layout() and later().
-        version: 13.1,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), and 13.2 added dropdown(), menu() and picker().
+        version: 13.2,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -590,6 +590,50 @@ origami_base:
         },
         // classed() returns the sub-buttons with this css_class by their numbers, because Bubble Card also turns a name such as Play into a class
         classed: (cfg, cls) => items(cfg).map((item, i) => slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean),
+        // dropdown() tells whether a sub-button is a dropdown: it has sub_button_type: select, or it has no type and its entity is a select or an input_select, or it has a select_attribute
+        dropdown: ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute)),
+        // menu() returns the rules that show the menus of the dropdowns in scope as the rows of a list, so a row's corners follow the menu's corners less its padding. A row is as tall as a chip, and its text and icon are as large as a chip's text and arrow. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
+        menu: (scope) => [scope + " { --bubble-select-list-item-accent-color: var(--fill-active); }",
+          scope + " :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
+          scope + " :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--org-icon-size); }",
+          scope + " :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; font-weight: var(--ha-font-weight-bold) !important; }",
+          scope + " :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }"],
+        // picker() shows a dropdown whose options are entity IDs, such as a helper that picks a speaker. Its text is the chosen entity's name in the given size, as the card's words rename it, and each item of its menu shows its entity's name and an icon for the entity's state. A speaker shows a speaker icon for what it does, such as a pause sign while it plays. An option that is not an entity, such as None, stays as it is. It returns the rules for the text, or null for a dropdown with other options.
+        picker: (hass, { n, item, entity: id, opt }, sel, size) => {
+          const org = card._org;
+          const options = hass.states[id]?.attributes?.options;
+          if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return null;
+          const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
+          const speaker = (st) => {
+            if (st.entity_id.split(".")[0] !== "media_player" || st.attributes.device_class === "tv") return undefined;
+            const kind = !org.power(st) ? "off" : org.input(st.attributes.source) ?? (["playing", "buffering"].includes(st.state) ? "playing" : "");
+            return { off: "mdi:speaker-off", playing: "mdi:speaker-pause", bluetooth: "mdi:speaker-bluetooth", tv: "mdi:television-speaker" }[kind] ?? "mdi:speaker";
+          };
+          // Bubble Card builds new items when the options change and leaves them alone otherwise, so an item is written again only for a new state of its entity
+          const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
+            const st = hass.states[el.dataset.bubbleValue ?? el.value];
+            if (!st) return;
+            const name = label(st.entity_id);
+            if (el._orgSt === st && el._orgName === name) return;
+            el._orgSt = st;
+            el._orgName = name;
+            const text = [...el.childNodes].reverse().find((c) => c.nodeType === 3);
+            if (text && text.nodeValue !== name) text.nodeValue = name;
+            let icon = el.querySelector(":scope > ha-state-icon");
+            if (!icon) {
+              icon = document.createElement("ha-state-icon");
+              icon.slot = el.localName === "mwc-list-item" ? "graphic" : "icon";
+              if (el.localName === "mwc-list-item") el.graphic = "icon";
+              el.prepend(icon);
+            }
+            icon.hass = hass;
+            icon.stateObj = st;
+            icon.icon = speaker(st);
+          });
+          write();
+          org.later("drop" + n, write);
+          return org.has(opt?.name) ? [] : org.text(sel, item, label(hass.states[id].state), size);
+        },
         // shows() tells whether a sub-button shows a text of its own, which is its name or a state
         shows: (item) => (!!item.show_name && has(item.name)) || ["state_content", "show_state", "show_attribute", "attribute", "show_last_changed", "show_last_updated"].some((k) => has(item[k]) && item[k] !== false),
         // unframe() returns the rules that remove Bubble Card's frame from a sub-buttons card, so the bottom sub-buttons fill the card, as in Button, Slider, Table and Tiles. pad is the space around them.
@@ -1424,35 +1468,20 @@ origami_base:
       const env = org.env;
       const list = card._orgSubs = org.subs(env, this.config, "origami_base");
       const rules = [];
-      // A sub-button is a dropdown with sub_button_type: select, or without a type when its entity is a select or an input_select or when it has a select_attribute
-      const drop = ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute));
+      const drop = org.dropdown;
       const drops = list.filter(drop);
-      // A dropdown's menu shows its options as the rows of a list, so a row's corners follow the menu's corners less its padding. A row is as tall as the dropdown's chip, and its text and icon are as large as the chip's text and arrow. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
-      if (drops.length) rules.push("ha-card { --bubble-select-list-item-accent-color: var(--fill-active); }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--org-icon-size); }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; font-weight: var(--ha-font-weight-bold) !important; }",
-        "ha-card :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }");
-      // A speaker in a dropdown's menu shows a speaker icon for what it does, such as a pause sign while it plays, and other entities show Home Assistant's icon for their state
-      const speaker = (st) => {
-        if (st.entity_id.split(".")[0] !== "media_player" || st.attributes.device_class === "tv") return undefined;
-        const kind = !org.power(st) ? "off" : org.input(st.attributes.source) ?? (["playing", "buffering"].includes(st.state) ? "playing" : "");
-        return { off: "mdi:speaker-off", playing: "mdi:speaker-pause", bluetooth: "mdi:speaker-bluetooth", tv: "mdi:television-speaker" }[kind] ?? "mdi:speaker";
-      };
-      // A dropdown that picks an entity, such as a helper whose options are the entity IDs of speakers, shows the entities' names, as the card's words rename them, and its menu shows each entity's icon for its state. An option that is not an entity, such as None, stays as it is.
+      if (drops.length) rules.push(...org.menu("ha-card"));
       // The card's own sub-buttons come first, and the rows below follow
       const own = org.layout(this.config).mains;
-      drops.forEach(({ n, item, entity: id, opt }) => {
-        const options = hass.states[id]?.attributes?.options;
-        if (item.select_attribute || !Array.isArray(options) || !options.some((o) => hass.states[o])) return;
-        const label = (o) => hass.states[o] ? org.rename(o) ?? org.rename(org.name(hass, o)) ?? org.name(hass, o) : String(o ?? "");
-        const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + n;
+      drops.forEach((sub) => {
+        const sel = "ha-card .bubble-sub-button.bubble-sub-button-" + sub.n;
         // In the card's own row, the dropdown is as tall as the name and the state line together, and never smaller than a button. Its text has the size of a card's name, unless sub_button_text_size sets another size.
-        const top = card._org.opts.frame && n <= own;
+        const top = card._org.opts.frame && sub.n <= own;
         const h = top ? "max(var(--control-height-icon), var(--org-lines-h, 0px))" : "var(--control-height-icon)";
-        if (!org.has(opt?.name)) rules.push(...org.text(sel, item, label(hass.states[id].state), top ? card._org.opts.text || "var(--ha-font-size-m)" : "var(--org-sub-text, var(--ha-font-size-s))"));
+        const text = org.picker(hass, sub, sel, top ? card._org.opts.text || "var(--ha-font-size-m)" : "var(--org-sub-text, var(--ha-font-size-s))");
+        if (!text) return;
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The arrow is as large as the card's icons, as on a key. The chevron fills less than half of its icon, so the chip's end has less padding, and the chevron ends about as far from the edge as the name starts. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        rules.push(...text, sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; margin-inline-start: var(--ha-space-1); }",
           sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--org-icon-size); width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; color: inherit !important; }",
@@ -1461,29 +1490,6 @@ origami_base:
           sel + " .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; margin-inline-end: var(--ha-space-2) !important; color: inherit !important; opacity: 1 !important; }",
           // The open menu is the sign that the dropdown is open, so Bubble Card's ring in the accent color stays hidden
           sel + " .bubble-dropdown-inner-border { display: none !important; }");
-        // Bubble Card builds new items when the options change and leaves them alone otherwise, so an item is written again only for a new state of its entity
-        const write = () => card.querySelectorAll(".bubble-sub-button-" + n + " :is(ha-dropdown-item, mwc-list-item)").forEach((el) => {
-          const st = hass.states[el.dataset.bubbleValue ?? el.value];
-          if (!st) return;
-          const name = label(st.entity_id);
-          if (el._orgSt === st && el._orgName === name) return;
-          el._orgSt = st;
-          el._orgName = name;
-          const text = [...el.childNodes].reverse().find((c) => c.nodeType === 3);
-          if (text && text.nodeValue !== name) text.nodeValue = name;
-          let icon = el.querySelector(":scope > ha-state-icon");
-          if (!icon) {
-            icon = document.createElement("ha-state-icon");
-            icon.slot = el.localName === "mwc-list-item" ? "graphic" : "icon";
-            if (el.localName === "mwc-list-item") el.graphic = "icon";
-            el.prepend(icon);
-          }
-          icon.hass = hass;
-          icon.stateObj = st;
-          icon.icon = speaker(st);
-        });
-        write();
-        org.later("drop" + n, write);
       });
       // A sub-button with a label shows its text over the label, such as 12 % over CPU, in the sizes of a card's name and state line. Both end at the same edge, as the name and the state line start at one. It is plain text without a key's fill or size, so it keeps a key's padding only at its end, and two such values are as far apart as the first one is from the name.
       list.forEach(({ n, opt }) => {

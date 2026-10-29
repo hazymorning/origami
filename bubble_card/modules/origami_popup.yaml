@@ -1,13 +1,13 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.7.2"
+  version: "4.8.0"
   supported:
     - pop-up
-  description: "Popup styles a pop-up's header, backdrop and close button, and it can show a cover behind the content. The title can be a template. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
+  description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
   code: |-
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_popup needs origami_base 13 or later");
+      if (org?.hass !== hass || !(org.version >= 13.2)) throw new Error("origami_popup needs origami_base 13.2 or later");
       const cfg = this.config.origami_popup ?? {};
       const { env, ctx } = org;
       // Origami 2 named this option subtitle_style, and that name still works
@@ -16,9 +16,21 @@ origami_popup:
       const type = ["classic", "home-assistant"].includes(this.config.popup_style) ? "switch" : this.config.button_type || (this.config.entity ? "switch" : "name");
       // Popup writes the title, as Bubble Card would, so a title in ${ } reads the states at once, such as the view that a helper chooses. A header that shows only a name has no title without a name of its own, and a header with a button shows its entity's name.
       const own = this.config.name;
-      if (card.querySelector('.bubble-name')) card.querySelector('.bubble-name').textContent = type !== "name" ? org.name(hass, entity, own, env) : org.has(own) ? String(org.value(env, own, ctx) ?? "") : "";
+      const title = type !== "name" ? org.name(hass, entity, own, env) : org.has(own) ? String(org.value(env, own, ctx) ?? "") : "";
+      if (card.querySelector('.bubble-name')) card.querySelector('.bubble-name').textContent = title;
       // A value with a name of its own and no visibility conditions always shows, even while Bubble Card would hide it, so the header keeps the row for it
       const list = org.subs(env, this.config, "origami_popup");
+      // A dropdown that picks an entity, such as a helper that picks a speaker, is a title of its own: the chosen entity's name as large as the title, with a small arrow after it. Its menu lists the entities' names and icons, as on a card. While the title is empty, the dropdown stands in its place.
+      const picks = type !== "name" ? [] : list.filter(org.dropdown).flatMap((sub) => {
+        const sel = "div.bubble-header .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + sub.n;
+        const text = org.picker(hass, sub, sel, "var(--ha-font-size-2xl)");
+        return !text ? [] : [...text,
+          sel + " { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--primary-text-color) !important; }",
+          sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; line-height: var(--ha-line-height-condensed) !important; color: inherit !important; opacity: 1 !important; }",
+          sel + " .bubble-dropdown-container { width: var(--icon-size-m) !important; height: var(--icon-size-m) !important; margin-inline-start: var(--ha-space-1); }",
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-m); width: var(--icon-size-m) !important; height: var(--icon-size-m) !important; color: var(--secondary-text-color) !important; }",
+          sel + " .bubble-dropdown-inner-border { display: none !important; }"];
+      });
       const forced = list.filter(({ item, opt }) => org.has(opt?.name) && !item.visibility).map(({ n }) => ".bubble-sub-button-" + n);
       card._orgP = {
         chip,
@@ -33,7 +45,9 @@ origami_popup:
         art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
         mix: cfg.cover_mix ?? 16,
         cover: cfg.cover_blur === undefined || org.yes(cfg.cover_blur),
-        css: org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list).join("\n")
+        // The dropdown in the title's place
+        lead: picks.length > 0 && !title,
+        css: [...(picks.length ? org.menu("div.bubble-header") : []), ...picks, ...org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list)].join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
       // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
@@ -184,6 +198,24 @@ origami_popup:
       margin-inline: var(--ha-space-1) 0 !important;
     }
     ` : ""}
+    ${card._orgP.lead ? `
+    /* A dropdown in the title's place starts where the title starts. Its name ends with an ellipsis before the values beside it would reach the close button, and the values keep their size. */
+    div.bubble-header .bubble-name-container {
+      display: none !important;
+    }
+    div.bubble-header .bubble-sub-button-container {
+      flex: 1 1 auto !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+      margin-inline-start: 0 !important;
+    }
+    div.bubble-header .bubble-sub-button-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+    }
+    div.bubble-header .bubble-sub-button-container .bubble-sub-button.is-select {
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+    }` : ""}
     ${card._orgP.css}
   editor:
     - name: value_style
