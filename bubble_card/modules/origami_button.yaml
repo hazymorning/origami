@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.8.0"
+  version: "3.9.0"
   supported:
     - sub-buttons
     - button
@@ -87,6 +87,11 @@ origami_button:
             - label: Below
               value: below
       default: inside
+    - name: field_size
+      label: "Field size with labels below (such as 76px)"
+      selector:
+        text: {}
+      default: "var(--tile-size-lg)"
     - name: outline
       label: "Outlined button (template or text)"
       selector:
@@ -220,6 +225,8 @@ origami_button:
       const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
+      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default
+      const field = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim() || "var(--tile-size-lg)";
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
       const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", org.opts?.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
       // A small segmented switch is a track around its group, and its active segment takes the stronger fill
@@ -268,6 +275,7 @@ origami_button:
         values,
         pad: pad || "0",
         size,
+        field,
         height: opts.sub || "",
         text: opts.text || "",
         bare,
@@ -285,6 +293,7 @@ origami_button:
       --org-btn-bg: ${card._orgB.bg || card._orgB.seg ? "var(--fill-subtle)" : "transparent"};
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
+      --org-btn-field: ${card._orgB.field};
       --org-btn-lamp: ${card._orgB.lamp};
       --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
     }
@@ -421,7 +430,7 @@ origami_button:
     ${card._orgB.below ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
       flex-direction: column !important;
       justify-content: flex-start !important;
-      ${card._orgB.cols ? "" : "width: calc(var(--tile-size-lg) + var(--ha-space-2)) !important;"}
+      ${card._orgB.cols ? "" : "width: calc(var(--org-btn-field) + var(--ha-space-2)) !important;"}
       height: auto !important;
       padding: 0 !important;
       gap: 0 !important;
@@ -435,9 +444,9 @@ origami_button:
       box-sizing: border-box;
       order: -1;
       width: 100% !important;
-      height: var(--tile-size-lg) !important;
+      height: var(--org-btn-field) !important;
       margin: 0 !important;
-      border-radius: min(calc(var(--tile-size-lg) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
+      border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
       background: var(--org-value-chip, var(--org-btn-bg));
       transition: var(--transition-interactive);
     }
@@ -449,7 +458,7 @@ origami_button:
     ${!card._orgB.bare.length || card._orgB.cols || card._orgB.seg ? "" : card._orgB.below ? `
     /* A field without a name is a square, and no space for a name stays below it */
     ${card._orgB.each(card._orgB.bare, "")} {
-      width: var(--tile-size-lg) !important;
+      width: var(--org-btn-field) !important;
     }
     ${card._orgB.each(card._orgB.bare, " .bubble-sub-button-name-container")} {
       display: none !important;

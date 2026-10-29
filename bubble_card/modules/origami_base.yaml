@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.13.0"
+  version: "12.14.0"
   is_global: true
   supported:
     - button
@@ -628,6 +628,8 @@ origami_base:
             if (yes(opt.dot)) rules.push(sel + " { color: var(--primary-text-color) !important; }", sel + "::after { content: \"\"; position: absolute; top: calc(50% + var(--icon-size-s) / 2 + var(--ha-space-1)); inset-inline-start: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background-color: currentColor; }");
             // A disabled value takes the disabled color and ignores taps
             if (yes(opt.disabled)) rules.push(sel + ", " + sel + " .bubble-sub-button-icon:not(.hidden) { color: var(--disabled-color) !important; pointer-events: none !important; }");
+            // A hidden value takes no space, as with Bubble Card's visibility conditions, but its template can read any entity at once. The :not() with an ID gives the rule more weight than the rules that show a value with a name of its own.
+            if (yes(opt.hidden)) rules.push(sel + ":not(#org-none) { display: none !important; }");
             if (has(opt.icon)) org.icon(card.querySelector(scope + " .bubble-sub-button-" + n + " .bubble-sub-button-icon"), opt.icon);
           });
           return rules;

@@ -12,7 +12,7 @@ These changes are in the `next` branch and come with the next release.
 - The modules follow Home Assistant's rules for when an entity counts as on and which color it gets.
 - Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
 - A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
-- Sub-buttons have three new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, and `dot` marks a control that is on with a small dot.
+- Sub-buttons have four new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, `dot` marks a control that is on with a small dot, and `hidden` hides a sub-button from a template that can read any entity.
 - Templates in values have `num()`, `format()`, `word()`, `ago()` and `name()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.
@@ -83,7 +83,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Button
 
-- New options: `segmented`, `scroll`, `chips`, `labels: below`, `outline`, `start`, `pending`, `color` and `label_size`.
+- New options: `segmented`, `scroll`, `chips`, `labels: below`, `field_size`, `outline`, `start`, `pending`, `color` and `label_size`.
 - `active` also matches the entity that a button's tap targets.
 - Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
 - A button with `css_class: divider` is a short line between two buttons.

@@ -159,6 +159,7 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `on` | Fills the sub-button while true and keeps it neutral otherwise, in place of Base's own rule. No effect on pill switches, on plain, dropdown, slider and readout sub-buttons, or under `vertical` without `css_class: accent`. |
 | `disabled` | While true, the sub-button takes the disabled color, ignores taps and is never filled. |
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
+| `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
 
 All keys except `on` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
@@ -890,6 +891,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
+| `field_size` | `var(--tile-size-lg)` | With `labels: below`, the size of the icon fields, such as `76px`. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
 | `start` | | Takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end. |
 
