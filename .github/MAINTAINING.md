@@ -7,7 +7,8 @@ These rules are for work on Origami itself: its modules, theme, dashboard and do
 The user tests every change on a phone, in their own Home Assistant. Every round that changes a file the user has to paste, such as a module, a card, a pop-up or a script, ends the same way:
 
 - All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
-- A file goes on the page only when the user needs it for what they asked, because it changes what they see or can do. A cleanup that changes nothing for them stays off the page until a later round changes that file for them. A module that needs a newer Base brings Base along. All files go on the page only when the user asks for them.
+- The user keeps their own setup in step with the repository. A file counts as changed when its text differs from the version the user has, also after a cleanup that changes nothing they see. A file whose text is the same stays off the page.
+- Each file on the page says in one line what changed in it, such as a cleanup that looks and works the same, so the user knows why it is there.
 - The same page is updated for every round, so its link stays the same, and the reply gives that link.
 - Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
 - Replies put the important parts, such as a cause, a change the user has to make or the link to the page, in large headings, so the user sees them at once on the phone.
