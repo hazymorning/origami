@@ -9,6 +9,7 @@ The user tests every change on a phone, in their own Home Assistant. Every round
 - All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
 - The same page is updated for every round, so its link stays the same, and the reply gives that link.
 - Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
+- Replies put the important parts, such as a cause, a change the user has to make or the link to the page, in large headings, so the user sees them at once on the phone.
 
 ## The idea
 

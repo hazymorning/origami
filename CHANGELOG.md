@@ -32,14 +32,14 @@ These changes are in the `next` branch and come with the next release.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
 - A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
-- `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows.
+- `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
 
 #### Media
 
 - Groups come from `group_members` and covers from the speaker's own picture, so Media works with any integration that reports them. The new `players`, `leader`, `art`, `inputs` and `icons` options cover other setups.
-- The speaker's own music comes first. Another player in `players` only gives the title while the speaker itself plays nothing with a title.
+- The speaker's own music comes first. Another player in `players` only gives the title while the speaker itself plays nothing with a title, or while both play and its title changed last. So a song started in Music Assistant shows at once, even on a speaker that reports it seconds later.
 - `layout: tv` shows what is cast, the running app or the source.
 - Source names such as HDMI 1 or Line In 2 count as inputs. Short names such as TV, CD and FM count only on their own.
 - Media writes the name and state lines through Bubble Card's own lines, and a card's `name` can be a template.
@@ -93,6 +93,7 @@ These changes are in the `next` branch and come with the next release.
 
 - Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. `label_width` lines up the tracks of several cards.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
+- A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 
 #### Tiles
 

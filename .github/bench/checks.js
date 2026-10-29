@@ -173,6 +173,32 @@ window.__check = () => {
     report('frameless', fails, `${frameless.length} frameless card draws nothing behind its content, which reaches its edges, with one gap between its rows`);
   }
 
+  // Slider keys: on a standalone slider, the keys stand after the track, as tall as it and with its background, and the name stands before the value
+  {
+    const fails = [];
+    const sliders = origami.filter((c) => c.cfg.button_type === 'slider' && (c.cfg.modules || []).includes('origami_slider') && c.cfg.sub_button?.main?.length);
+    for (const card of sliders) {
+      const cb = card.haCard.getBoundingClientRect();
+      const track = card.root.querySelector('.bubble-range-slider');
+      const keys = [...card.root.querySelectorAll('.bubble-sub-button-container .bubble-sub-button')].filter(visible);
+      if (!track || !keys.length) { fails.push(`card ${card.i}: no track or no key`); continue; }
+      const t = track.getBoundingClientRect();
+      const gap = length(card, 'var(--ha-space-2)');
+      if (!near(t.left, cb.left)) fails.push(`card ${card.i}: the track starts ${r1(t.left - cb.left)} px from the edge, expected 0`);
+      if (!near(keys[0].getBoundingClientRect().left - t.right, gap)) fails.push(`card ${card.i}: ${r1(keys[0].getBoundingClientRect().left - t.right)} px between the track and its key, expected ${r1(gap)}`);
+      if (!near(keys.at(-1).getBoundingClientRect().right, cb.right)) fails.push(`card ${card.i}: the last key ends ${r1(cb.right - keys.at(-1).getBoundingClientRect().right)} px from the edge, expected 0`);
+      for (const key of keys) {
+        const k = key.getBoundingClientRect();
+        if (!near(k.height, t.height) || !near(k.width, t.height)) fails.push(`card ${card.i}: a key is ${r1(k.width)} × ${r1(k.height)} px, expected ${r1(t.height)} px square like the track`);
+        if (getComputedStyle(key).backgroundColor !== getComputedStyle(track).backgroundColor) fails.push(`card ${card.i}: a key's background ${getComputedStyle(key).backgroundColor} differs from the track's ${getComputedStyle(track).backgroundColor}`);
+      }
+      const before = getComputedStyle(card.root.querySelector('.bubble-range-value'), '::before').content;
+      if (card.cfg.show_name === true && card.cfg.name && !before.includes(card.cfg.name)) fails.push(`card ${card.i}: the value does not start with the name ${card.cfg.name}`);
+    }
+    if (!sliders.length) fails.push('the sheet has no standalone slider with a key');
+    report('slider keys', fails, `${sliders.length} standalone slider has its keys after the track, as tall as it and with its background`);
+  }
+
   // Plain cards: Base does nothing on a card without an Origami module
   {
     const fails = [];

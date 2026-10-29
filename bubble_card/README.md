@@ -135,7 +135,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `toggle` | `false` | Turns each sub-button into a pill switch for its entity, or the card's entity. Give it a tap action with `action: toggle`. |
 | `group` | `false` | Shows the sub-buttons as small keys in a tray. No effect with `toggle`. |
 | `tile` | `false` | A light gray card without a shadow. The icon and the sub-buttons get the card background and a shadow. |
-| `frameless` | `false` | A card without background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up. Its content reaches the card's edges, with the same gap between all its rows, and the icon and the sub-buttons look as on a tile. |
+| `frameless` | `false` | A card without background, shadow or padding, so its content stands on the page, such as a large cover in a pop-up. Its content reaches the card's edges, with the same gap between all its rows. The icon, the keys and the sliders have the subtle fill of a Button row's tiles. |
 | `vertical` | `false` | Puts the name under the icon, on button cards. See [Name under the icon](#name-under-the-icon). |
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
@@ -472,7 +472,7 @@ The Media options go under `origami_media:`.
 | Option | Default | Description |
 | --- | --- | --- |
 | `layout` | `speaker` | `speaker`, or `tv` for a TV. With `tv`, the card keeps its own icon, and its entity decides whether the TV is on. While that entity is unavailable or unknown, the players decide. |
-| `players` | | Other media players for the same device, such as a Cast or a Music Assistant player. The card's entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while both are paused and only that player has a title. Stream addresses and file paths do not count as titles. The app's name comes from the card's entity, or else from the first player that reports one. Accepts a template. |
+| `players` | | Other media players for the same device, such as a Cast or a Music Assistant player. The card's entity gives the music while it plays something with a title. Otherwise, another player gives the title, the artist and the picture while it plays, or while both are paused and only that player has a title. While both play different titles, the one that changed last shows, so a song started in Music Assistant shows at once, even on a speaker that reports it seconds later. Stream addresses and file paths do not count as titles. The app's name comes from the card's entity, or else from the first player that reports one. Accepts a template. |
 | `collapse` | `false` | Hides the bottom sub-buttons, such as a volume slider, while the speaker plays nothing and uses no input, or while the TV is off. |
 | `solid_controls` | `false` | Fills Bubble Card's play and pause button while media plays and its power button while the device is on. No effect on sub-buttons. |
 | `leader` | | The group leader's entity ID, for integrations without `group_members`. Accepts a template. A card for a stand-in entity, such as a universal media player, can name the real speaker here to show its music, source and group. |
@@ -779,7 +779,7 @@ rows: 1
 
 ### Slider
 
-The Slider module turns a slider button card into a standalone slider without icon, name or state, and it works with Base. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value.
+The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
 
@@ -806,6 +806,38 @@ rows: 1
 ```
 
 Use `slider_value_position: hidden` to hide the number.
+
+With `show_name: true`, the card's name stands before the value, such as Group · 30 %. The name can be a template, and a template that returns nothing leaves only the value. The main sub-buttons stand after the track as keys, as tall as the track and with its background. A tap on a key never moves the slider. This volume slider for a group of speakers has a key to a view with each speaker's volume, which shows only while the speaker plays in a group:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: number.group_volume
+name: "${(hass.states['media_player.living_room']?.attributes?.group_members?.length ?? 0) > 1 ? 'Group ·' : ''}"
+show_name: true
+show_state: false
+show_icon: false
+slider_value_position: right
+tap_action:
+  action: none
+modules:
+  - origami_base
+  - origami_slider
+sub_button:
+  main:
+    - icon: mdi:chevron-down
+      show_background: true
+      origami_base:
+        hidden: "${(hass.states['media_player.living_room']?.attributes?.group_members?.length ?? 0) <= 1}"
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.music_view
+        data:
+          option: Volume
+```
 
 On a sub-buttons card, a slider sub-button needs `always_visible: true` to become a row. `label_width` under `origami_slider` sets the width of the name column, which by default fits the longest name, up to 30 % of the card. Longer names scroll. For a sensor without a percentage, Bubble Card's `min_value` and `max_value` set the ends of the track.
 

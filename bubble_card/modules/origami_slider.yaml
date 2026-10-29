@@ -1,10 +1,10 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.8.2"
+  version: "1.9.0"
   supported:
     - button
     - sub-buttons
-  description: "Slider turns a slider button into a standalone slider, so the card is the track. On a sub-buttons card, each slider sub-button becomes a row with its name, its track and its value. A sub-button for a switch becomes a row whose track fills while the switch is on."
+  description: "Slider turns a slider button into a standalone slider, so the card is the track, with its keys after it. On a sub-buttons card, each slider sub-button becomes a row with its name, track and value, and a switch's sub-button becomes a row whose track fills while it is on."
   editor:
     - name: label_width
       label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
@@ -59,6 +59,15 @@ origami_slider:
       card._orgSl = null;
       // The card is the track, so Base rounds its fill like a sub-button's slider
       if (card.dataset.orgTrack !== "") card.dataset.orgTrack = "";
+      // With show_name, the card's name stands before the value, such as Gruppe · 30 %. A name from a template that returns nothing leaves only the value.
+      const st = hass.states[entity];
+      const own = this.config.show_name !== true ? "" : org.has(this.config.name) ? String(org.value({ hass, renderTemplate }, this.config.name, { entity, state: st?.state ?? "unknown", attr: st?.attributes ?? {} }) ?? "").trim() : org.name(hass, entity);
+      const sb = this.config.sub_button;
+      card._orgOne = {
+        name: own ? org.str(org.rename(own) ?? own) : "",
+        // The main sub-buttons stand after the track as keys
+        keys: (Array.isArray(sb) ? sb : sb?.main ?? []).length > 0
+      };
       return "";
     })()}
     ${card._orgSl ? `
@@ -232,4 +241,59 @@ origami_slider:
       font-weight: var(--ha-font-weight-bold);
       color: var(--secondary-text-color);
     }
+    ${card._orgOne.name ? `.bubble-range-value::before {
+      content: ${card._orgOne.name} "\\a0";
+    }` : ""}
+    ${card._orgOne.keys ? `
+    /* The keys stand after the track, as tall as it and with its background, and the track ends before them. Bubble Card measures the track itself, so a drag still runs from one of its ends to the other, and a tap on a key never moves the slider. */
+    ha-card .bubble-container {
+      display: flex !important;
+      gap: 0 !important;
+      overflow: visible !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+    ha-card .bubble-button-card {
+      display: contents !important;
+    }
+    ha-card .bubble-range-slider {
+      position: relative !important;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      background-color: var(--fill-subtle);
+      box-shadow: var(--card-ring);
+    }
+    ha-card .bubble-container .bubble-sub-button-container {
+      position: relative !important;
+      z-index: 1;
+      inset: auto !important;
+      display: flex !important;
+      flex: 0 0 auto;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+    }
+    /* Each key brings its own gap, so a hidden key leaves none */
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button {
+      box-sizing: border-box;
+      width: var(--control-height-icon) !important;
+      min-width: var(--control-height-icon) !important;
+      height: var(--control-height-icon) !important;
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-2) !important;
+      padding: 0 !important;
+      border-radius: var(--radius-control, 14px) !important;
+      background-color: transparent !important;
+      color: var(--primary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button.background-on {
+      background-color: var(--fill-subtle) !important;
+      box-shadow: var(--card-ring);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-s);
+      margin: 0 !important;
+    }` : ""}
     `}

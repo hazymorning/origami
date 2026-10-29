@@ -126,6 +126,21 @@ sections:
             - name: Volume
               group:
                 - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A standalone volume slider with its name before the value and a key after the track
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: media_player.living_room
+        name: Group ·
+        show_name: true
+        show_icon: false
+        show_state: false
+        slider_value_position: right
+        tap_action: {action: none}
+        modules: [origami_base, origami_slider]
+        sub_button:
+          main:
+            - {icon: mdi:chevron-down, show_background: true}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button

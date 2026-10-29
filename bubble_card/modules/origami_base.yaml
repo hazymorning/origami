@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "12.14.0"
+  version: "12.15.0"
   is_global: true
   supported:
     - button
@@ -404,6 +404,14 @@ origami_base:
         const t = String(p?.attributes?.media_title ?? "").trim();
         return t !== "" && !/^[a-z][a-z0-9+.-]*:\/\//i.test(t) && !/^(?:[a-z]:)?[\\/]/i.test(t) && !/[\\/][^\\/]*\.[a-z0-9]{2,4}$/i.test(t) && norm(t) !== norm(p?.attributes?.source);
       };
+      // heard() returns when a player's title last changed, or 0 for a title seen since the first look. All cards share these times, so a change that one card has seen counts for every card.
+      const titles = globalThis.__origamiTitles ?? (globalThis.__origamiTitles = new Map());
+      const heard = (p) => {
+        const t = real(p) ? norm(p.attributes.media_title) : "";
+        const was = titles.get(p.entity_id);
+        if (!was || was.t !== t) titles.set(p.entity_id, { t, at: was ? +now : 0 });
+        return titles.get(p.entity_id).at;
+      };
       const readable = (v) => typeof v === "string" && v && !(v.includes(".") && !v.includes(" ")) ? v : null;
       // An app's name comes from the card's words first, which can also name an app by its ID, then from the name the device reports
       const appOf = (p) => {
@@ -427,10 +435,13 @@ origami_base:
         // A TV's HDMI sources are where its pictures come from, so the TV layout counts no source as an input
         const inp = powered && !tv ? input(source, cfg.inputs) : null;
         // The speaker's own music comes first. Another player gives the music while it plays and the speaker does not, or while both are paused and only that player has a title. A speaker that is off or uses an input shows only itself.
+        // While players with a title play together, the one whose title changed last gives the music. A speaker that is polled, such as a LinkPlay speaker, reports a new song seconds after Music Assistant does, and a player that hangs keeps its old title.
         const pool = [show, ...twins].filter(Boolean);
+        const at = new Map(pool.map((p) => [p, heard(p)]));
         const tier = (states) => {
           const t = pool.filter((p) => states.includes(p.state));
-          return t.find(real) ?? t[0];
+          const titled = t.filter(real);
+          return titled.reduce((a, p) => (at.get(p) > at.get(a) ? p : a), titled[0]) ?? t[0];
         };
         const player = inp || powered === false ? show : tier(["playing", "buffering"]) ?? (show?.state === "paused" ? tier(["paused"]) : null) ?? show;
         const pa = player?.attributes ?? {};
@@ -731,7 +742,7 @@ origami_base:
         compact: !!(cfgB.compact ?? this.config.origami_media?.compact),
         tile: !!cfgB.tile,
         frameless,
-        // On a tile and on a frameless card, the content stands on a gray surface, the tile's own or the page's, so the icon, the keys and the sliders take the look for gray surfaces
+        // On a tile and on a frameless card, the content stands on a gray surface, the tile's own or the page's, so the keys take the look for gray surfaces. On a tile, the icon and the sliders are chips of the card's color with a shadow. On a frameless card, they have the keys' fill, as the tiles of a Button row have, so no chip edge shows on a dark page.
         gray: !!cfgB.tile || frameless,
         large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
@@ -959,8 +970,8 @@ origami_base:
       --org-color: ${card._org.me.color};
       --org-surface: ${card._org.opts.frameless ? "transparent" : card._org.opts.tile ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
       --org-surface-shadow: ${card._org.opts.gray ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
-      --org-inset: ${card._org.opts.gray ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
-      --org-inset-shadow: ${card._org.opts.gray ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
+      --org-inset: ${card._org.opts.tile ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
+      --org-inset-shadow: ${card._org.opts.tile ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
       --org-field: ${card._org.opts.gray ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
       --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-inset)"};
       /* An icon that is not lit takes the text color, and on a compact card the secondary text color, as in a slim list */
