@@ -185,31 +185,24 @@ origami_header:
     }
     ha-card .bubble-container > .bubble-name {
       display: block !important;
-      flex: 0 1 auto;
       min-width: 0;
       margin: 0 !important;
-      padding: 0 !important;
       font-size: ${card._orgH.large ? "var(--ha-font-size-2xl)" : "var(--ha-font-size-l)"} !important;
       ${card._orgH.large ? "line-height: var(--ha-line-height-condensed) !important;" : ""}
       font-weight: var(--ha-font-weight-bold) !important;
       color: var(--primary-text-color) !important;
-      white-space: nowrap !important;
       overflow-x: clip;
       overflow-y: visible;
-      text-overflow: ellipsis;
     }
     ha-card .bubble-sub-button-container {
-      position: relative !important;
       inset-inline-end: 0 !important;
       flex: 1 1 0% !important;
       display: flex !important;
-      align-items: center !important;
       justify-content: flex-end !important;
       height: auto !important;
       margin: 0 !important;
       margin-inline-start: var(--ha-space-3) !important;
       padding: 0 !important;
-      background: none !important;
     }
     ${card._org.plain("ha-card .bubble-sub-button-container", "var(--org-header-weight)")}
     ha-card .bubble-sub-button-container .bubble-sub-button {

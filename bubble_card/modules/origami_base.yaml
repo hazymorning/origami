@@ -596,7 +596,6 @@ origami_base:
         unframe: (pad = "0") => `
     ha-card .bubble-container {
       display: block !important;
-      box-sizing: border-box !important;
       height: auto !important;
       min-height: 0 !important;
       padding: ${pad} !important;
@@ -631,7 +630,7 @@ origami_base:
           // Bubble Card also hides the group and the lane around it, so they show again while they hold this sub-button. Only the hidden class gives this rule weight, so the vertical layout's rule for groups and lanes still wins.
           ...(item.visibility ? [] : [sel + ".hidden:not([style*='display: none']) { display: flex !important; }", ".hidden:where(.bubble-sub-button-group, .bubble-sub-button-alignment-lane):where(:has(" + sel.split(" ").pop() + ":not([style*='display: none']))) { display: flex !important; }"]),
           sel + " .bubble-sub-button-name-container, " + sel + " .bubble-sub-button-name-container:empty { display: flex !important; font-size: 0 !important; }",
-          sel + " .bubble-sub-button-name-container::before { content: " + str(text) + "; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: " + size + "; }"
+          sel + " .bubble-sub-button-name-container::before { content: " + str(text) + "; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: " + size + "; }"
         ],
         // values() applies the keys of each value in a header for Header and Popup. They are name, icon, color for the icon, name_color for the text and background for a chip.
         values: (env, cfg, key, scope, size, list) => {
@@ -659,7 +658,6 @@ origami_base:
         // cover() returns the rules that show a cover in a media card's icon, or the icon itself at the given opacity while there is no cover. With the icon's box as host, the last cover stays until the next one has loaded.
         cover: (art, opacity, host) => (keep(host, art), `
     ha-card .bubble-main-icon-container {
-      position: relative;
       overflow: visible !important;
       background-image: none !important;
     }
@@ -676,7 +674,6 @@ origami_base:
       display: none !important;
     }
     ha-card .bubble-main-icon-container .bubble-icon {
-      color: var(--org-chip-ink) !important;
       transition: opacity var(--duration-normal) ease, color var(--duration-normal) ease;
       opacity: ${art ? "0" : opacity} !important;
     }`),
@@ -700,8 +697,8 @@ origami_base:
           + card._org.each(sel, " :is(.bubble-sub-button-icon, .bubble-sub-button-name-container, .bubble-media-button-icon)") + " { color: var(--text-color-active) !important; --icon-primary-color: var(--text-color-active) !important; opacity: 1 !important; }",
         // plain() returns the rules that show the sub-buttons in a container as plain text values, for Header and Popup
         plain: (scope, weight) => scope + " { gap: var(--ha-space-3) !important; }\n"
-          + scope + " .bubble-sub-button { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; font-size: var(--ha-font-size-m) !important; font-weight: " + weight + " !important; color: var(--secondary-text-color) !important; white-space: nowrap !important; }\n"
-          + scope + " .bubble-sub-button-name-container { font-size: inherit !important; font-weight: inherit !important; color: inherit !important; opacity: 1 !important; }",
+          + scope + " .bubble-sub-button { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; font-size: var(--ha-font-size-m) !important; font-weight: " + weight + " !important; color: var(--secondary-text-color) !important; }\n"
+          + scope + " .bubble-sub-button-name-container { opacity: 1 !important; }",
         // part() returns a child element of the host with this class, and builds it once with the build function
         part: (host, cls, build) => {
           let el = host?.querySelector(":scope > ." + cls);
@@ -1070,8 +1067,6 @@ origami_base:
     .card-content {
       display: flex;
       align-items: center;
-      margin: 0;
-      box-shadow: none;
       border-radius: var(--ha-card-border-radius);
     }
     .card-content:not(:has(.with-bottom-buttons)) {
@@ -1251,7 +1246,6 @@ origami_base:
       position: static !important;
       order: 1;
       display: flex !important;
-      flex-direction: column !important;
       row-gap: var(--ha-space-5) !important;
       margin-top: max(var(--ha-space-1), var(--org-gap, 0px)) !important;
     }
@@ -1312,16 +1306,12 @@ origami_base:
       inset-inline-end: 0 !important;
     }
     ha-card .bubble-sub-button${card._org.key} {
-      display: flex;
-      align-items: center;
       justify-content: flex-end;
-      box-sizing: border-box;
       min-width: unset !important;
       width: var(--org-toggle-w) !important;
       height: var(--org-toggle-h) !important;
       padding: var(--ha-space-1);
       border-radius: calc(var(--org-toggle-h) / 2) !important;
-      color: var(--primary-text-color);
       background-color: var(--org-inset) !important;
       box-shadow: var(--card-ring), var(--org-inset-shadow);
       transition: var(--transition-interactive);
@@ -1344,10 +1334,6 @@ origami_base:
     /* A key is as tall as the card's icon, or as the sub-button height option says. Bubble Card's custom_height on one sub-button wins over both, and the corners follow the height. */
     ha-card .bubble-sub-button${card._org.key} {
       --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, var(--org-tile-size)));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
       min-width: var(--org-key-h) !important;
       width: auto !important;
       height: var(--org-key-h) !important;
@@ -1412,7 +1398,6 @@ origami_base:
       align-self: flex-start;
     }
     ha-card .bubble-sub-button${card._org.key} {
-      box-sizing: border-box;
       min-width: var(--org-group-key) !important;
       width: auto !important;
       height: var(--org-group-key) !important;

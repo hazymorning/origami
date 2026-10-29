@@ -447,9 +447,7 @@ origami_media:
     }
     .bubble-name,
     .bubble-state {
-      margin: 0 !important;
       line-height: var(--ha-line-height-normal);
-      overflow: hidden !important;
     }
     .bubble-state {
       display: ${card._orgM.state} !important;

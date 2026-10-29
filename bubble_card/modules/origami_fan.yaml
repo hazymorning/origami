@@ -1,6 +1,6 @@
 origami_fan:
   name: "Origami • Fan"
-  version: "3.0.1"
+  version: "3.0.2"
   supported:
     - button
   description: "Fan lets the fan icon spin at the fan's speed. The icon turns the other way while the fan runs in reverse, and it stands still when the device asks for less motion."
@@ -23,6 +23,5 @@ origami_fan:
     @media (prefers-reduced-motion: no-preference) {
       ha-card .bubble-icon {
         animation: ${card._orgFanSpin} !important;
-        transform-origin: center;
       }
     }

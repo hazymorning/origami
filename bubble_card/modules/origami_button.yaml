@@ -309,7 +309,6 @@ origami_button:
       display: contents !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
-      box-sizing: border-box !important;
       ${card._orgB.cols ? "" : `flex: ${card._orgB.seg ? "1 1 0" : "0 0 auto"} !important;`}
       ${card._orgB.below ? "flex-direction: column !important;" : ""}
       width: ${card._orgB.below && !card._orgB.cols ? "calc(var(--org-btn-field) + var(--ha-space-2))" : "auto"} !important;
@@ -317,14 +316,11 @@ origami_button:
       height: ${card._orgB.below ? "auto" : "var(--org-btn-height)"} !important;
       padding: ${card._orgB.below ? "0" : "var(--org-btn-padding)"} !important;
       justify-content: ${card._orgB.below ? "flex-start" : card._orgB.rev} !important;
-      align-items: center !important;
       gap: 0 !important;
       border-radius: ${card._orgB.seg ? "0" : "var(--org-btn-radius)"} !important;
       background: ${card._orgB.below ? "none" : "var(--org-value-chip, var(--org-btn-bg))"} !important;
-      box-shadow: none !important;
       color: ${card._orgB.seg || card._orgB.chips || card._orgB.below ? "var(--primary-text-color)" : "var(--secondary-text-color)"} !important;
       font-size: var(--ha-font-size-m) !important;
-      white-space: nowrap !important;
       transition: var(--transition-interactive) !important;
       ${card._orgB.seg ? "isolation: isolate;" : ""}
     }
@@ -354,7 +350,6 @@ origami_button:
       font-weight: ${card._orgB.seg ? "var(--ha-font-weight-bold)" : "var(--ha-font-weight-medium)"} !important;
       ${card._orgB.seg ? "font-variant-numeric: tabular-nums;" : ""}
       ${card._orgB.below ? "max-width: 100%;\n      margin-top: var(--ha-space-3) !important;" : ""}
-      color: inherit !important;
       opacity: var(--org-btn-opacity) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
@@ -369,8 +364,7 @@ origami_button:
       height: var(--org-btn-field) !important;
       margin: 0 !important;
       border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
-      background: var(--org-value-chip, var(--org-btn-bg));` : `margin-block: 0 !important;
-      margin-inline: 0 var(--ha-space-2) !important;`}
+      background: var(--org-value-chip, var(--org-btn-bg));` : "margin-inline: 0 var(--ha-space-2) !important;"}
       color: ${card._orgB.chips ? "var(--secondary-text-color)" : "inherit"} !important;
       opacity: ${card._orgB.seg ? "calc(var(--org-btn-opacity) * var(--opacity-strong))" : "var(--org-btn-opacity)"} !important;
       ${card._orgB.below ? "transition: var(--transition-interactive);" : ""}
