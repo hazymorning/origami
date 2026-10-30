@@ -488,7 +488,7 @@ The Media options go under `origami_media:`.
 | `state` | | Replaces the module's state line while it has a value. Accepts a template, such as one that reads a title from a template sensor. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | Marks the group leader with a crown and its members with a link on the icon, as in Speaker Select. |
 | `icon_color` | | Maps the same keys as `icons` to an icon color, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
-| `cover` | `icon` | Where the cover shows: `icon` in the icon, `above` as a large square above the name, or `background` filling the card. `background` combines with `icon` or `above` in a list, such as `[background, icon]`. Also accepts a map from the state or a template, as shown below. |
+| `cover` | `icon` | Where the cover shows: `icon` in the icon, `above` as a large square above the name, `only` as that square with nothing else on the card, or `background` filling the card. `background` combines with `icon` or `above` in a list, such as `[background, icon]`. Also accepts a map from the state or a template, as shown below. |
 | `cover_mix` | `25` | How strongly the cover shows while it fills the card, in percent. The card's color makes up the rest. |
 | `cover_blur` | `false` | Blurs the cover while it fills the card, so only its colors remain. |
 
@@ -583,6 +583,13 @@ origami_media:
   cover:
     playing: above
     paused: above
+```
+
+With `cover: only`, the card is just the square, with the card's padding around it. Its name, its keys and its rows below are left out. A template can switch between `above` and `only`, so a pop-up keeps its cover in every view while another view replaces the controls below it:
+
+```yaml
+origami_media:
+  cover: "${states('input_select.music_view') === 'Music' ? 'above' : 'only'}"
 ```
 
 #### Cover as background

@@ -178,6 +178,25 @@ sections:
             - name: Volume
               group:
                 - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A speaker that shows only its cover, so its name, its key and its play row stay hidden
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        origami_media: {cover: only}
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - {icon: mdi:skip-next, show_background: true}
+          bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
       # A speaker with its cover in the icon and a play row, whose play key is one step smaller than beside a large cover
       - type: custom:bubble-card
         card_type: media-player

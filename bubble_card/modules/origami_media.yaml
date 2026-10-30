@@ -1,9 +1,9 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.10.3"
+  version: "5.11.0"
   supported:
     - media-player
-  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
+  description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, alone, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
   editor:
     - name: layout
       label: "Layout"
@@ -79,6 +79,8 @@ origami_media:
               value: icon
             - label: Large, above the name
               value: above
+            - label: Large, without anything else
+              value: only
             - label: As the card's background
               value: background
             - label: In the icon and as the background
@@ -132,7 +134,9 @@ origami_media:
         collapse: !!cfg.collapse,
         // With background, the cover fills the card. Cover mix sets its share in a mix with the card's color, and Cover blur blurs it. The icon keeps the cover when the list also names icon or above, and without background it always does.
         back: places.includes("background"),
-        above: places.includes("above"),
+        // Only shows the cover as large as above the name and leaves out everything else, so a pop-up can keep the cover while another view replaces the controls below it
+        only: places.includes("only"),
+        above: places.includes("above") || places.includes("only"),
         boxed: !places.includes("background") || places.includes("icon") || places.includes("above"),
         mix: cfg.cover_mix ?? 25,
         blur: org.yes(cfg.cover_blur),
@@ -435,6 +439,17 @@ origami_media:
       position: static !important;
       order: 1;
       flex: 0 0 auto;
+    }` : ""}
+    ${card._orgM.only ? `
+    /* With only, the card is just its cover: the name, the keys and the rows below it go, and the cover keeps the card's padding on every side */
+    ha-card .bubble-name-container,
+    ha-card .bubble-sub-button-container,
+    ha-card .bubble-sub-button-bottom-container {
+      display: none !important;
+    }
+    ha-card .bubble-main-icon-container,
+    ha-card .bubble-main-icon-container.hidden {
+      margin-bottom: var(--org-pad) !important;
     }` : ""}
     ${card._orgM.back ? `
     /* On a cover, a slider's track and the keys with a background take mostly the card's color, so their text stays readable. Without a cover, the card keeps its own background. */

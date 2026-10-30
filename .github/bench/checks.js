@@ -250,6 +250,24 @@ window.__check = () => {
     report('play key', fails, `${keys.length} play keys are as large as their cover's place asks`);
   }
 
+  // Cover only: the card is its cover with the card's padding on every side, and its name, keys and rows are hidden
+  {
+    const fails = [];
+    const only = origami.filter((c) => c.cfg.origami_media?.cover === 'only');
+    for (const card of only) {
+      const box = card.root.querySelector('.bubble-container').getBoundingClientRect();
+      const cover = card.root.querySelector('.bubble-main-icon-container').getBoundingClientRect();
+      const pad = length(card, 'var(--org-pad)');
+      const sides = [cover.top - box.top, box.right - cover.right, box.bottom - cover.bottom, cover.left - box.left];
+      if (sides.some((s) => !near(s, pad, 1))) fails.push(`card ${card.i}: the cover is ${sides.map(r1).join(' / ')} px from the card's edges, expected ${r1(pad)} on every side`);
+      if (!near(cover.width, cover.height, 1)) fails.push(`card ${card.i}: the cover is ${r1(cover.width)}x${r1(cover.height)}, expected a square`);
+      const shown = [...card.root.querySelectorAll('.bubble-name-container, .bubble-sub-button')].filter(visible);
+      if (shown.length) fails.push(`card ${card.i}: ${shown.map(label).join(', ')} still show`);
+    }
+    if (!only.length) fails.push('the sheet has no card that shows only its cover');
+    report('cover only', fails, `${only.length} card shows only its cover, with the card's padding around it`);
+  }
+
   // Joined cards: cards in a vertical stack with Base's join option meet without a gap, and only the outer corners of their shared background are round
   {
     const fails = [];

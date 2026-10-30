@@ -52,7 +52,7 @@ These changes are in the `next` branch and come with the next release.
 - The ring skips a player that has lost track of the music, such as a Music Assistant player whose position stands still, and follows the speaker itself.
 - A disabled play key rests in a quiet fill, so the play row can stay in place while nothing plays.
 - The play key is the largest control after the cover. Beside a large cover above the name, it has a 64 px fill with a 40 px icon inside its ring at 80 px, and beside a smaller cover it is one step smaller. Its ring has the tints of a slider: the track of `fill-strong` and the arc of `fill-loud`.
-- `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
+- `cover` shows the cover in the icon, above the name as a large square, alone as that square with nothing else on the card, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
 
 #### Speaker Select
 
