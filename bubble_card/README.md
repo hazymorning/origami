@@ -139,7 +139,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `vertical` | `false` | Puts the name under the icon, on button cards. See [Name under the icon](#name-under-the-icon). |
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
-| `join` | | `first`, `middle` or `last`. Cards in a vertical stack share one background, as the rows of a list. A row is as tall as a row of a Tiles list, or of a slim list on a compact card. Only the outer corners are round, and each card after the first meets the card above it. |
+| `join` | | `first`, `middle` or `last`. Cards in a vertical stack share one background, as the rows of a list. The list keeps the card's padding at its top and bottom, and the rows' controls are 8 px apart, as the tracks of Slider's rows. A compact row's slider is as tall as those tracks. Only the outer corners are round, and each card after the first meets the card above it. |
 | `words` | | Maps a state or a value to the word that the modules write on the card. See Language above. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. It also sets the row's height, except on a compact card. |
 | `sub_button_height` | | The height of sub-buttons, sliders and the Button module's buttons, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |

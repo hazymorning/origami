@@ -269,15 +269,20 @@ window.__check = () => {
           const gap = box.getBoundingClientRect().top - joined[k - 1].shadowRoot.querySelector('.bubble-container').getBoundingClientRect().bottom;
           if (!near(gap, 0)) fails.push(`card ${stack.i}.${k}: ${r1(gap)} px from the card above, expected 0`);
         }
-        // A joined row is as tall as a list's row, a slim list's on a compact card, and the first and the last row also hold the list's space at its ends
+        // A joined row holds its controls and the 8 px gap above them, the first row the card's padding instead, and the last row the padding below them too. So the rows' controls stand closer to each other than to the list's edge.
         const scope = { haCard: el.shadowRoot.querySelector('ha-card') };
-        const row = length(scope, el.config.origami_base.compact ? 'var(--control-height-list)' : 'calc(var(--tile-size) + 2 * var(--ha-space-2))') + (pos === 'middle' ? 0 : length(scope, 'var(--ha-space-2)'));
-        const h = box.getBoundingClientRect().height;
-        if (want && !near(h, row)) fails.push(`card ${stack.i}.${k} (${pos}): ${r1(h)} px tall, expected ${r1(row)}`);
+        const pad = length(scope, 'var(--org-pad)'), gap = length(scope, 'var(--ha-space-2)');
+        const row = length(scope, el.config.origami_base.compact ? 'var(--control-height-mini)' : 'var(--tile-size)') + (pos === 'first' ? pad : gap) + (pos === 'last' ? pad : 0);
+        const b = box.getBoundingClientRect();
+        if (want && !near(b.height, row)) fails.push(`card ${stack.i}.${k} (${pos}): ${r1(b.height)} px tall, expected ${r1(row)}`);
+        if (!(gap < pad)) fails.push(`card ${stack.i}.${k}: the gap between rows is ${r1(gap)} px and the padding ${r1(pad)} px, expected a gap smaller than the padding`);
+        // The background fills the row, so no line shows where two rows meet
+        const bg = el.shadowRoot.querySelector('.bubble-background')?.getBoundingClientRect();
+        if (bg && (!near(bg.top, b.top) || !near(bg.bottom, b.bottom))) fails.push(`card ${stack.i}.${k}: the background runs from ${r1(bg.top - b.top)} to ${r1(bg.bottom - b.bottom)} px past the row's edges, expected 0`);
       });
     }
     if (!count) fails.push('the sheet has no joined cards');
-    report('joined cards', fails, `${count} joined cards share one background, in rows as tall as a list's`);
+    report('joined cards', fails, `${count} joined cards share one background, with the card's padding at its ends and smaller gaps between their rows`);
   }
 
   // Plain cards: Base does nothing on a card without an Origami module
