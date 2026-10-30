@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.8.1"
+  version: "4.8.2"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown. On a header that shows only a name, the sub-buttons become values below or beside the title, as text or chips, with Header's keys."
@@ -20,15 +20,15 @@ origami_popup:
       if (card.querySelector('.bubble-name')) card.querySelector('.bubble-name').textContent = title;
       // A value with a name of its own and no visibility conditions always shows, even while Bubble Card would hide it, so the header keeps the row for it
       const list = org.subs(env, this.config, "origami_popup");
-      // A dropdown that picks an entity, such as a helper that picks a speaker, is a title of its own: the chosen entity's name as large as the title, with a small arrow after it. Its menu lists the entities' names and icons, as on a card. While the title is empty, the dropdown stands in its place.
+      // A dropdown that picks an entity, such as a helper that picks a speaker, is a title of its own: the chosen entity's name as large as the title, with an arrow after it whose chevron is about as wide as the name's small letters. Its menu lists the entities' names and icons, as on a card. While the title is empty, the dropdown stands in its place.
       const picks = type !== "name" ? [] : list.filter(org.dropdown).flatMap((sub) => {
         const sel = "div.bubble-header .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + sub.n;
         const text = org.picker(hass, sub, sel, "var(--ha-font-size-2xl)");
         return !text ? [] : [...text,
           sel + " { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--primary-text-color) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; line-height: var(--ha-line-height-condensed) !important; color: inherit !important; opacity: 1 !important; }",
-          sel + " .bubble-dropdown-container { width: var(--icon-size-m) !important; height: var(--icon-size-m) !important; margin-inline-start: var(--ha-space-1); }",
-          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-m); width: var(--icon-size-m) !important; height: var(--icon-size-m) !important; color: var(--secondary-text-color) !important; }",
+          sel + " .bubble-dropdown-container { width: var(--icon-size-l) !important; height: var(--icon-size-l) !important; margin-inline-start: var(--ha-space-1); }",
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-l); width: var(--icon-size-l) !important; height: var(--icon-size-l) !important; color: var(--secondary-text-color) !important; }",
           sel + " .bubble-dropdown-inner-border { display: none !important; }"];
       });
       const forced = list.filter(({ item, opt }) => org.has(opt?.name) && !item.visibility).map(({ n }) => ".bubble-sub-button-" + n);
