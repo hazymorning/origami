@@ -90,7 +90,8 @@
     cards[id] = configs[id].map((cfg) => {
       const bubble = cfg.type === 'custom:bubble-card';
       const el = document.createElement(bubble ? 'bubble-card' : 'hui-card');
-      if (bubble) el.setConfig(cfg); else el.config = cfg;
+      // A stack builds its cards once it is on the page, so it needs hass before that
+      if (bubble) el.setConfig(cfg); else { el.config = cfg; el.hass = hass; }
       stack.appendChild(el);
       el.hass = hass;
       return el;

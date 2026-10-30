@@ -250,6 +250,31 @@ window.__check = () => {
     report('play key', fails, `${keys.length} play keys are as large as their cover's place asks`);
   }
 
+  // Joined cards: cards in a vertical stack with Base's join option meet without a gap, and only the outer corners of their shared background are round
+  {
+    const fails = [];
+    let count = 0;
+    for (const stack of cards.filter((c) => c.cfg.type === 'vertical-stack')) {
+      const joined = [...stack.el.querySelectorAll('bubble-card')].filter((el) => el.config?.origami_base?.join);
+      joined.forEach((el, k) => {
+        count++;
+        const pos = el.config.origami_base.join;
+        const box = el.shadowRoot.querySelector('.bubble-container');
+        const cs = getComputedStyle(box);
+        const got = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(parseFloat);
+        const want = { first: [cardRadius, cardRadius, 0, 0], middle: [0, 0, 0, 0], last: [0, 0, cardRadius, cardRadius] }[pos];
+        if (!want) fails.push(`card ${stack.i}.${k}: join is ${JSON.stringify(pos)}, expected first, middle or last`);
+        else if (got.some((r, n) => !near(r, want[n]))) fails.push(`card ${stack.i}.${k} (${pos}): corners ${got.map(r1).join(' ')}, expected ${want.join(' ')}`);
+        if (k > 0) {
+          const gap = box.getBoundingClientRect().top - joined[k - 1].shadowRoot.querySelector('.bubble-container').getBoundingClientRect().bottom;
+          if (!near(gap, 0)) fails.push(`card ${stack.i}.${k}: ${r1(gap)} px from the card above, expected 0`);
+        }
+      });
+    }
+    if (!count) fails.push('the sheet has no joined cards');
+    report('joined cards', fails, `${count} joined cards share one background`);
+  }
+
   // Plain cards: Base does nothing on a card without an Origami module
   {
     const fails = [];

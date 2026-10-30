@@ -139,6 +139,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `vertical` | `false` | Puts the name under the icon, on button cards. See [Name under the icon](#name-under-the-icon). |
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
+| `join` | | `first`, `middle` or `last`. Cards in a vertical stack share one background, as the rows of a list. Only the outer corners are round, and each card after the first meets the card above it. |
 | `words` | | Maps a state or a value to the word that the modules write on the card. See Language above. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. It also sets the row's height, except on a compact card. |
 | `sub_button_height` | | The height of sub-buttons, sliders and the Button module's buttons, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |
@@ -208,6 +209,8 @@ sub_button:
         action: toggle
 rows: 1
 ```
+
+Compact rows in a vertical stack can share one background, as the lamps of a pop-up do. Give the first card `join: first`, the last one `join: last` and the ones between `join: middle`.
 
 On a compact card, a slider sub-button with `always_visible: true` can take the place of the pill switch. It is as tall as the switch, as wide as a tray with three keys and shows no value. Bubble Card's `width` option on the sub-button sets another width.
 
@@ -806,7 +809,7 @@ modules:
 rows: 1
 ```
 
-Use `slider_value_position: hidden` to hide the number.
+Use `slider_value_position: hidden` to hide the number. While the entity is off, the value is Home Assistant's word for off, and while it is unavailable a dash.
 
 With `show_name: true`, the card's name stands before the value, such as Group · 30 %. The name can be a template, and a template that returns nothing leaves only the value. The main sub-buttons stand after the track as keys, as tall as the track and with its background. A tap on a key never moves the slider. This volume slider for a group of speakers has a key to a view with each speaker's volume, which shows only while the speaker plays in a group:
 

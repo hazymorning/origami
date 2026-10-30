@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.11.2"
+  version: "1.11.3"
   supported:
     - button
     - sub-buttons
@@ -63,8 +63,11 @@ origami_slider:
       // With show_name, the card's name stands before the value, such as Gruppe · 30 %. A name from a template that returns nothing leaves only the value.
       const own = this.config.show_name !== true ? "" : org.has(this.config.name) ? String(org.value(org.env, this.config.name, org.ctx) ?? "").trim() : org.name(hass, entity);
       const sb = this.config.sub_button;
+      const on = org.power(hass.states[entity]);
       card._orgOne = {
         name: own ? org.str(org.rename(own) ?? own) : "",
+        // While the entity is off, the value is Home Assistant's word for off instead of 0 %, and while it is unavailable a dash, as on a slider sub-button
+        off: on === true ? "" : org.str(on === null ? "–" : org.word(hass, hass.states[entity])),
         // The main sub-buttons stand after the track as keys
         keys: (Array.isArray(sb) ? sb : sb?.main ?? []).length > 0
       };
@@ -254,6 +257,16 @@ origami_slider:
     }
     ${card._orgOne.name ? `.bubble-range-value::before {
       content: ${card._orgOne.name} "\\a0";
+    }` : ""}
+    ${card._orgOne.off ? `.bubble-range-value {
+      font-size: 0 !important;
+    }
+    .bubble-range-value::before,
+    .bubble-range-value::after {
+      font-size: var(--ha-font-size-s);
+    }
+    .bubble-range-value::after {
+      content: ${card._orgOne.off};
     }` : ""}
     ${card._orgOne.keys ? `
     /* The keys stand after the track, as tall as it and with its background, and the track ends before them. Bubble Card measures the track itself, so a drag still runs from one of its ends to the other, and a tap on a key never moves the slider. */

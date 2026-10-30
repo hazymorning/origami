@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.3.0"
+  version: "13.4.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every Origami card, and it runs on each card with an Origami module. Its options create a slim row, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes and the card's own words."
+  description: "Base is the frame and shared core of every Origami card, and it runs on each card with an Origami module. Its options create slim and joined rows, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes and the card's words."
   editor:
     - name: compact
       label: "Compact"
@@ -54,6 +54,18 @@ origami_base:
       selector:
         boolean: {}
       default: false
+    - name: join
+      label: "Join (cards in a vertical stack share one background)"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: First card
+              value: first
+            - label: Middle card
+              value: middle
+            - label: Last card
+              value: last
     - name: padding
       label: "Padding (the space between the card's edge and its content, such as 20px)"
       selector:
@@ -814,6 +826,8 @@ origami_base:
         large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
         frame: ["button", "media-player"].includes(type),
+        // Cards in a vertical stack can share one background, as the rows of a list. The first and the last card keep their outer corners.
+        join: ["first", "middle", "last"].includes(cfgB.join) && ["button", "media-player"].includes(type) ? cfgB.join : "",
         // padding, sub_button_height and sub_button_text_size are lengths, such as 20px or var(--ha-space-5). A number counts as pixels.
         pad: length(cfgB.padding),
         sub: length(cfgB.sub_button_height),
@@ -1146,6 +1160,17 @@ origami_base:
     ${card._org.opts.frameless ? `/* A frameless card's content reaches its edges, so the card's corners do not cut into it, such as into a slider at the bottom */
     ha-card .bubble-container {
       border-radius: 0 !important;
+    }` : ""}
+    ${card._org.opts.join ? `/* A joined card has round corners only where the shared background ends, and each joined card after the first meets the card above it */
+    ha-card {
+      --org-join-radius: ${{ first: "var(--ha-card-border-radius) var(--ha-card-border-radius) 0 0", middle: "0", last: "0 0 var(--ha-card-border-radius) var(--ha-card-border-radius)" }[card._org.opts.join]};
+      ${card._org.opts.join === "first" ? "" : "margin-top: calc(-1 * var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)));"}
+    }
+    ha-card .card-content,
+    ha-card .bubble-container,
+    ha-card .bubble-wrapper,
+    ha-card .bubble-background {
+      border-radius: var(--org-join-radius) !important;
     }` : ""}
     .bubble-icon-container {
       min-width: var(--org-tile-size) !important;

@@ -57,6 +57,36 @@ sections:
           main:
             - {entity: light.kitchen, sub_button_type: slider, always_visible: true}
         rows: 1
+      # Three compact rows in a stack that share one background
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.kitchen
+            modules: [origami_base, origami_light]
+            origami_base: {compact: true, tile: true, join: first}
+            sub_button:
+              main:
+                - {entity: light.kitchen, sub_button_type: slider, always_visible: true}
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.printer
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, toggle: true, join: middle}
+            sub_button:
+              main:
+                - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: fan.bedroom
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, toggle: true, join: last}
+            sub_button:
+              main:
+                - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
       # Two values with labels beside the name
       - type: custom:bubble-card
         card_type: button

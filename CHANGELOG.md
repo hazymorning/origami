@@ -35,6 +35,7 @@ These changes are in the `next` branch and come with the next release.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - A sub-button's `label` key puts a small line under its text, such as CPU under 12 %, so a card can show values with labels beside its name.
+- `join` lets cards in a vertical stack share one background, as the rows of a list, such as the lamps of a pop-up.
 - Module authors get three new helpers: `shows()`, `unframe()` and `backdrop()`.
 - All cards share one number and date formatter, so they render with less work.
 - A slider's fill is the theme's `fill-loud`, a stronger step of its track's tint, so it keeps its contrast on a card, a tile or a cover behind a pop-up. Lamp sliders keep the light's color.
@@ -131,7 +132,7 @@ These changes are in the `next` branch and come with the next release.
 
 ### Bug fixes
 
-- A slider whose entity is off shows Home Assistant's word for off, and an unavailable one shows a dash.
+- A slider whose entity is off shows Home Assistant's word for off, also as a standalone slider, and an unavailable one shows a dash.
 - Color sliders, such as those for hue or color temperature, keep Bubble Card's colored track.
 - A slider that only shows a value has no mark at the end of its fill.
 - On a button card without an icon, the name keeps the card's padding.
