@@ -269,10 +269,15 @@ window.__check = () => {
           const gap = box.getBoundingClientRect().top - joined[k - 1].shadowRoot.querySelector('.bubble-container').getBoundingClientRect().bottom;
           if (!near(gap, 0)) fails.push(`card ${stack.i}.${k}: ${r1(gap)} px from the card above, expected 0`);
         }
+        // A joined row is as tall as a list's row, a slim list's on a compact card, and the first and the last row also hold the list's space at its ends
+        const scope = { haCard: el.shadowRoot.querySelector('ha-card') };
+        const row = length(scope, el.config.origami_base.compact ? 'var(--control-height-list)' : 'calc(var(--tile-size) + 2 * var(--ha-space-2))') + (pos === 'middle' ? 0 : length(scope, 'var(--ha-space-2)'));
+        const h = box.getBoundingClientRect().height;
+        if (want && !near(h, row)) fails.push(`card ${stack.i}.${k} (${pos}): ${r1(h)} px tall, expected ${r1(row)}`);
       });
     }
     if (!count) fails.push('the sheet has no joined cards');
-    report('joined cards', fails, `${count} joined cards share one background`);
+    report('joined cards', fails, `${count} joined cards share one background, in rows as tall as a list's`);
   }
 
   // Plain cards: Base does nothing on a card without an Origami module

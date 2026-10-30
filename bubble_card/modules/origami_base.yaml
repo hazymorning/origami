@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.4.0"
+  version: "13.4.1"
   is_global: true
   supported:
     - button
@@ -1161,9 +1161,10 @@ origami_base:
     ha-card .bubble-container {
       border-radius: 0 !important;
     }` : ""}
-    ${card._org.opts.join ? `/* A joined card has round corners only where the shared background ends, and each joined card after the first meets the card above it */
+    ${card._org.opts.join ? `/* Joined cards are the rows of one list, as in the Tiles module: a compact row is as tall as a slim list's row, and another row as tall as a list's row. The list has a list's space at its top and its bottom, so the first and the last row are taller by that space. Only the outer corners are round, and each joined card after the first meets the card above it. */
     ha-card {
       --org-join-radius: ${{ first: "var(--ha-card-border-radius) var(--ha-card-border-radius) 0 0", middle: "0", last: "0 0 var(--ha-card-border-radius) var(--ha-card-border-radius)" }[card._org.opts.join]};
+      ${card._org.opts.vertical ? "" : "--org-row-height: calc(" + (card._org.opts.compact ? "var(--control-height-list)" : "var(--tile-size) + 2 * var(--ha-space-2)") + (card._org.opts.join === "middle" ? "" : " + var(--ha-space-2)") + ");"}
       ${card._org.opts.join === "first" ? "" : "margin-top: calc(-1 * var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)));"}
     }
     ha-card .card-content,
@@ -1171,7 +1172,15 @@ origami_base:
     ha-card .bubble-wrapper,
     ha-card .bubble-background {
       border-radius: var(--org-join-radius) !important;
-    }` : ""}
+    }
+    /* Bubble Card gives the container a height of its own, which a list's row is lower than */
+    ha-card .card-content:not(:has(.with-bottom-buttons)) > .bubble-container {
+      height: 100% !important;
+    }
+    ${card._org.opts.join === "middle" || card._org.opts.vertical ? "" : `ha-card .bubble-wrapper {
+      box-sizing: border-box;
+      padding-${card._org.opts.join === "first" ? "top" : "bottom"}: var(--ha-space-2) !important;
+    }`}` : ""}
     .bubble-icon-container {
       min-width: var(--org-tile-size) !important;
       width: var(--org-tile-size) !important;
