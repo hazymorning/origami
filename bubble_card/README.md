@@ -140,6 +140,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `large` | `false` | A larger name, as on the card at the top of a pop-up. |
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
 | `join` | | `first`, `middle` or `last`. Cards in a vertical stack share one background, as the rows of a list. The list keeps the card's padding at its top and bottom, and the rows' controls are 8 px apart. A compact row's slider is 28 px tall, as its switch and the tracks of Slider's rows are, so two rows' sliders are 12 px apart. Only the outer corners are round, and each card after the first meets the card above it. |
+| `hidden` | | While true, the card takes no space, as a conditional card's, such as a list of lamps while its header is closed. It takes a template that can read any entity, and the card changes at the same moment as the cards around it. |
 | `words` | | Maps a state or a value to the word that the modules write on the card. See Language above. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. It also sets the row's height, except on a compact card. |
 | `sub_button_height` | | The height of sub-buttons, sliders and the Button module's buttons, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px, or 28 px in a row with a name before them, and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |
@@ -1510,7 +1511,7 @@ sub_button:
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 
-`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It grows out of the key, below it or above it where there's no room, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or closing the pop-up closes it. Its cards change together with the pop-up's other cards, and the pop-up builds them once it has opened, so the first tap shows them at once too. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
+`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It grows out of the key, below it or above it where there's no room, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or closing the pop-up closes it, and it shrinks back into its key. A card in it with Base's `hidden` takes no space while it is hidden. Its cards change together with the pop-up's other cards, and the pop-up builds them once it has opened, so the first tap shows them at once too. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
 
 ```yaml
 origami_popup:

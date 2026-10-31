@@ -100,7 +100,7 @@ customElements.define('ha-select', class extends HTMLElement {
 customElements.define('ha-dropdown-item', class extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<slot name="icon"></slot><slot></slot>'; }
 });
-// Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, conditional cards and Bubble cards, and draws an empty box for other cards.
+// Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, conditional cards and Bubble cards that hide themselves, and draws an empty box for other cards.
 const met = (c, h) => c.condition === 'or' ? (c.conditions || []).some((x) => met(x, h))
   : c.condition === 'and' ? (c.conditions || []).every((x) => met(x, h))
   : c.condition && c.condition !== 'state' ? true
@@ -133,6 +133,15 @@ customElements.define('hui-card', class extends HTMLElement {
     } else if (c.type === 'custom:bubble-card') {
       const el = document.createElement('bubble-card');
       el.setConfig(c); this.appendChild(el); el.hass = this._h; this._kids.push(el);
+      // A card may hide itself, as Home Assistant's hui-card allows: it sets hidden and says so with card-visibility-changed, and with connectedWhileHidden it stays on the page
+      const vis = () => {
+        const hide = !!el.hidden;
+        this.style.display = hide ? 'none' : 'block';
+        if (hide && el.connectedWhileHidden !== true && el.parentElement) this.removeChild(el);
+        else if (!el.parentElement && (!hide || el.connectedWhileHidden === true)) this.appendChild(el);
+      };
+      el.addEventListener('card-visibility-changed', (e) => { e.stopPropagation(); vis(); });
+      vis();
     } else {
       const box = document.createElement('div');
       box.textContent = c.type;

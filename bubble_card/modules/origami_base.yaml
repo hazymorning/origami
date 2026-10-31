@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.5.0"
+  version: "13.6.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every Origami card, and it runs on each card with an Origami module. Its options create slim and joined rows, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes and the card's words."
+  description: "Base is the frame and shared core of every card with an Origami module. Its options create slim and joined rows, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes, the card's words and a card that hides itself."
   editor:
     - name: compact
       label: "Compact"
@@ -78,6 +78,10 @@ origami_base:
       label: "Sub-button text size (such as var(--ha-font-size-m))"
       selector:
         text: {}
+    - name: hidden
+      label: "Hidden (while true, the card takes no space, such as with a template)"
+      selector:
+        template: {}
     - name: words
       label: "Words (a map from a state or a value to the word that the modules write on the card)"
       selector:
@@ -842,6 +846,15 @@ origami_base:
         dark: !!hass.themes?.darkMode
       };
       card._org.me = look(hass, entity);
+      // With hidden, the card hides itself as Home Assistant lets a card do: it sets hidden, says so, and stays on the page while hidden, so it still follows the states. A stack, a section or a mini pop-up then gives it no space and no gap, as for a conditional card.
+      if (type !== "pop-up" && (cfgB.hidden !== undefined || this.hidden)) {
+        const hide = yes(value(card._org.env, cfgB.hidden, card._org.ctx));
+        this.connectedWhileHidden = true;
+        if (this.hidden !== hide) {
+          this.hidden = hide;
+          this.dispatchEvent(new Event("card-visibility-changed", { bubbles: true, composed: true }));
+        }
+      }
       // With animate, a card on the page also glides to its new height when its content changes, such as a row of controls that appears or goes. A button or media player card glides, and so does a pop-up. Base watches the box that holds the content, and it ignores the changes that the glide itself causes. For each frame, Base holds the height in the element's own style, because a style there wins over the modules' fixed heights.
       const pop = type === "pop-up";
       const box = opts.animate && (opts.frame || pop) && typeof ResizeObserver === "function" ? (pop ? card : card.querySelector(".bubble-container")) : null;

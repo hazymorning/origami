@@ -328,6 +328,26 @@ window.__check = async () => {
     report('plain cards', fails, `Base leaves ${plain.length} card without an Origami module alone`);
   }
 
+  // Hidden cards: a card whose hidden is true hides itself as Home Assistant lets a card do, so its stack gives it no space and no gap, and it stays on the page to see the state that shows it again
+  {
+    const fails = [];
+    const stacks = cards.filter((c) => c.cfg.type === 'vertical-stack' && (c.cfg.cards || []).some((x) => x.origami_base?.hidden !== undefined));
+    if (!stacks.length) fails.push('the sheet has no stack with a hidden card');
+    for (const s of stacks) {
+      const col = s.el.firstElementChild;
+      const kids = [...col.children];
+      s.cfg.cards.forEach((cc, i) => {
+        if (cc.origami_base?.hidden === undefined) return;
+        if (getComputedStyle(kids[i]).display !== 'none') fails.push(`card ${i + 1} of the stack takes space while it is hidden`);
+        if (!kids[i].querySelector('bubble-card')?.isConnected) fails.push(`card ${i + 1} of the stack left the page while it is hidden`);
+      });
+      const shown = kids.filter((k) => getComputedStyle(k).display !== 'none');
+      const want = shown.reduce((a, k) => a + k.getBoundingClientRect().height, 0) + parseFloat(getComputedStyle(col).rowGap) * (shown.length - 1);
+      if (!near(col.getBoundingClientRect().height, want)) fails.push(`the stack is ${r1(col.getBoundingClientRect().height)} px tall, expected ${r1(want)} px for the cards that show`);
+    }
+    report('hidden cards', fails, 'a hidden card takes no space and no gap in its stack, and stays on the page');
+  }
+
   // Mini pop-ups: a key in a pop-up opens one below or above the key, as wide as the pop-up's cards, with a card's corners, 16 px of padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
   {
     const fails = [];
@@ -365,8 +385,8 @@ window.__check = async () => {
         const mini = () => shell()?.querySelector('dialog.org-mini[open]');
         if (!(await until(() => mini(), 2000))) fails.push('the key did not open the mini pop-up');
         else {
-          // It is measured once it has grown to its size
-          await until(() => mini().getAnimations().every((a) => a.playState !== 'running'), 3000);
+          // It is measured once it has grown to its size. Its motion waits a frame before it runs, so a paused motion has not ended yet.
+          await until(() => mini().getAnimations().every((a) => a.playState === 'finished'), 3000);
           const m = mini();
           const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
           const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();

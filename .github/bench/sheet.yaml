@@ -249,6 +249,22 @@ sections:
           players:
             - "${entity + '_ma'}"
         hide: {power_button: true, previous_button: true, next_button: true, volume_button: true}
+      # A stack whose second card hides itself while the printer is off, so the stack is as tall as its first card
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: Living room
+            icon: mdi:sofa
+            modules: [origami_base]
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.printer
+            modules: [origami_base]
+            origami_base:
+              hidden: "${states('switch.printer') === 'off'}"
       # A pop-up whose key opens a mini pop-up with a title and a volume row of its own
       - type: custom:bubble-card
         card_type: pop-up

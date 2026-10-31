@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.9.1"
+  version: "4.9.2"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -82,21 +82,27 @@ origami_popup:
         };
         // A spring that settles without a visible bounce: with a damping ratio of 0.8 it overshoots by about 1 %
         const spring = "linear(" + Array.from({ length: 41 }, (_, i) => (1 - Math.exp(-7.2 * i / 40) * (Math.cos(5.4 * i / 40) + 4 / 3 * Math.sin(5.4 * i / 40))).toFixed(4)).join(", ") + ")";
-        // motion() grows the mini pop-up from its key on the spring while it fades in quicker, and the dim behind it fades in on its own time. On the way out, all of it fades away quickly.
+        // motion() grows the mini pop-up from its key on the spring while it fades in quicker, and the dim behind it fades in on its own time. On the way out, it shrinks back into its key while it and the dim fade away.
         const motion = (o, open) => {
           o.anims.forEach((a) => a.cancel());
           const run = (frames, opts) => {
             try { return o.el.animate(frames, opts); } catch (e) { return o.el.animate(frames, { ...opts, easing: read("--ease-standard") || "ease-out" }); }
           };
-          const fast = time("--duration-fast", 150);
+          const normal = time("--duration-normal", 250);
           o.anims = open ? [
             run([{ transform: "scale(0.85)" }, { transform: "none" }], { duration: time("--duration-slow", 350), easing: spring }),
-            run([{ opacity: 0 }, { opacity: 1 }], { duration: fast, easing: "linear" }),
-            run([{ opacity: 0 }, { opacity: 1 }], { duration: time("--duration-normal", 250), easing: "ease-out", pseudoElement: "::backdrop" })
+            run([{ opacity: 0 }, { opacity: 1 }], { duration: time("--duration-fast", 150), easing: "linear" }),
+            run([{ opacity: 0 }, { opacity: 1 }], { duration: normal, easing: "ease-out", pseudoElement: "::backdrop" })
           ] : [
-            run([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.95)" }], { duration: fast, easing: "ease-in", fill: "forwards" }),
-            run([{ opacity: 1 }, { opacity: 0 }], { duration: fast, easing: "ease-in", fill: "forwards", pseudoElement: "::backdrop" })
+            run([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.85)" }], { duration: normal, easing: "ease-in", fill: "forwards" }),
+            run([{ opacity: 1 }, { opacity: 0 }], { duration: normal, easing: "ease-in", fill: "forwards", pseudoElement: "::backdrop" })
           ];
+          // In the frame after the tap, a phone lays out and draws the mini pop-up's cards for the first time, which can take longer than the motion's first steps. So the motion holds its start through that frame and plays from the next one, where all of it shows.
+          if (open) {
+            const at = o.run;
+            o.anims.forEach((a) => a.pause());
+            requestAnimationFrame(() => requestAnimationFrame(() => { if (o.run === at) o.anims.forEach((a) => a.play()); }));
+          }
           // True once the motion has run to its end, false when another one stopped it
           return Promise.all(o.anims.map((a) => a.finished)).then(() => true, () => false);
         };
@@ -394,6 +400,8 @@ origami_popup:
       outline: none;
       overflow-y: auto;
       overscroll-behavior: contain;
+      /* The browser draws it in its first frame, while it is still clear, so its motion starts at once in the next one */
+      will-change: opacity;
       --org-header-above: 0px;
       --org-header-below: 0px;
     }
