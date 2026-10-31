@@ -56,13 +56,13 @@ On a gray surface, such as a tile, a list or a card with Base's `tile` option, t
 
 Base and the Tiles module follow Home Assistant's rules for when an entity is on and which color it takes, with two exceptions: a paused or idle media player counts as off, and a thermostat that reports its action counts as on only while it heats, cools, dries or runs its fan.
 
-Controls stay neutral. An active control is filled with `fill-active`, the text color, like a Home Assistant switch that is on.
+Controls stay neutral. An active control is filled with `fill-active`, the text color, like a Home Assistant switch that is on. An open dropdown shows its menu without Bubble Card's ring in the accent color.
 
 - A sub-button is filled while its entity, or the card's entity, is on and has a state color, unless it has `show_background: false`.
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. A menu is as wide as its longest option, and each icon has the same space to its row's start as above and below it. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 

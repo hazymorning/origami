@@ -31,7 +31,7 @@ These changes are in the `next` branch and come with the next release.
 - A compact card's icon has no background, as in a slim list.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
-- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
+- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state, and it is as wide as its longest option. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - A sub-button's `label` key puts a small line under its text, such as CPU under 12 %, so a card can show values with labels beside its name.
@@ -132,6 +132,8 @@ These changes are in the `next` branch and come with the next release.
 
 ### Bug fixes
 
+- An open dropdown with an icon and no name, such as a key that picks a source, no longer shows Bubble Card's ring in the accent color.
+- The icons in a dropdown's menu are as large as in a slim list, and the space around them is even.
 - A slider whose entity is off shows Home Assistant's word for off, also as a standalone slider, and an unavailable one shows a dash.
 - Color sliders, such as those for hue or color temperature, keep Bubble Card's colored track.
 - A slider that only shows a value has no mark at the end of its fill.

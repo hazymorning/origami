@@ -268,6 +268,19 @@ window.__check = () => {
     report('cover only', fails, `${only.length} card shows only its cover, with the card's padding around it`);
   }
 
+  // Dropdown ring: an open dropdown shows its menu without Bubble Card's ring in the accent color, also a key with an icon and no name. Bubble Card shows the ring through the element's own style while the menu is open, so the check does the same.
+  {
+    const fails = [];
+    const rings = origami.flatMap((card) => [...card.root.querySelectorAll('.bubble-dropdown-inner-border')].map((ring) => ({ card, ring })));
+    for (const { card, ring } of rings) {
+      ring.style.display = 'block';
+      if (getComputedStyle(ring).display !== 'none') fails.push(`card ${card.i} ${label(ring.closest('.bubble-sub-button') || ring)}: the ring shows while the menu is open`);
+      ring.style.display = 'none';
+    }
+    if (!rings.some(({ ring }) => !ring.closest('.bubble-sub-button')?.querySelector('.bubble-sub-button-name-container:not(:empty)'))) fails.push('the sheet has no dropdown with an icon and no name');
+    report('dropdown ring', fails, `${rings.length} dropdowns show no ring while open`);
+  }
+
   // Joined cards: cards in a vertical stack with Base's join option meet without a gap, and only the outer corners of their shared background are round
   {
     const fails = [];

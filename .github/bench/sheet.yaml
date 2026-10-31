@@ -4,7 +4,10 @@ width: 396
 states:
   media_player.living_room:
     state: playing
-    attributes: {friendly_name: Living room, volume_level: 0.35, media_title: Midnight City, media_artist: M83, group_members: [media_player.living_room]}
+    attributes: {friendly_name: Living room, volume_level: 0.35, media_title: Midnight City, media_artist: M83, group_members: [media_player.living_room], source: WiFi, source_list: [WiFi, Bluetooth, Line In]}
+  input_select.music_speaker:
+    state: media_player.living_room
+    attributes: {friendly_name: Speaker, options: [media_player.living_room, media_player.kitchen_speaker]}
   light.kitchen:
     state: 'on'
     attributes: {friendly_name: Kitchen, brightness: 160, supported_color_modes: [brightness], color_mode: brightness}
@@ -178,6 +181,16 @@ sections:
             - name: Volume
               group:
                 - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A speaker with a dropdown that picks it and a key whose dropdown picks its source
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        sub_button:
+          main:
+            - {entity: input_select.music_speaker, sub_button_type: select, show_icon: false}
+            - {entity: media_player.living_room, sub_button_type: select, select_attribute: source_list, icon: mdi:dots-horizontal, show_arrow: false, show_background: true}
       # A speaker that shows only its cover, so its name, its key and its play row stay hidden
       - type: custom:bubble-card
         card_type: media-player
