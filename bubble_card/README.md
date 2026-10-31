@@ -41,7 +41,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Header](#header) | `origami_header` | separator | A section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Grids and lists of tiles. |
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
-| [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button. |
+| [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
 
 Give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a slider at the bottom `rows: '2.2'`, also in pop-ups. Cards with Base's `vertical` option need no `rows`. A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
 
@@ -1478,7 +1478,7 @@ The office has no thermostat, so its temperature cell names its column. The clim
 
 ### Popup
 
-The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the sub-buttons are values below or beside the title, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title ends with an ellipsis instead of scrolling. A header with a button, a switch or a slider keeps Bubble Card's layout.
+The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the sub-buttons are values below or beside the title, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title ends with an ellipsis instead of scrolling. A header with a button, a switch or a slider keeps Bubble Card's layout. A key in the pop-up can open a mini pop-up, a small pop-up with cards of its own.
 
 <details>
 <summary>Options and example</summary>
@@ -1509,6 +1509,44 @@ sub_button:
 ```
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
+
+`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens below the key, or above it where there's no room, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or closing the pop-up closes it. Its cards change together with the pop-up's other cards, and the pop-up builds them once it has opened, so the first tap shows them at once too. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
+
+```yaml
+origami_popup:
+  mini_popups:
+    volume:
+      - type: custom:bubble-card
+        card_type: separator
+        name: Volume
+        modules:
+          - origami_header
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_slider
+        sub_button:
+          bottom:
+            - entity: media_player.living_room
+              name: Living room
+              sub_button_type: slider
+              always_visible: true
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    button_type: slider
+    entity: media_player.living_room
+    modules:
+      - origami_base
+      - origami_slider
+    sub_button:
+      main:
+        - icon: mdi:chevron-down
+          show_background: true
+          tap_action:
+            action: fire-dom-event
+            mini_popup: volume
+```
 
 The backdrop is blurred, unless the pop-up sets its own `backdrop_blur` or uses Bubble Card's performance mode.
 

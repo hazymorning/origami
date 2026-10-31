@@ -1,5 +1,5 @@
 // The design checks. Each one measures the cards on the sheet and returns what it found.
-window.__check = () => {
+window.__check = async () => {
   const doc = getComputedStyle(document.documentElement);
   const ratio = parseFloat(doc.getPropertyValue('--radius-ratio')) || 0.35;
   const cardRadius = parseFloat(doc.getPropertyValue('--ha-card-border-radius')) || 22;
@@ -34,7 +34,8 @@ window.__check = () => {
       return visible(el) && b.top + b.height / 2 > band.top && b.top + b.height / 2 < band.bottom;
     });
   };
-  const origami = cards.filter((c) => c.origami && c.root);
+  // A pop-up has no card of its own to measure while it is closed, and the mini pop-up check below opens and measures it
+  const origami = cards.filter((c) => c.origami && c.root && c.cfg.card_type !== 'pop-up');
 
   // Corners: a shape's radius is its height times the ratio, at most a card's radius. A shape inside another one takes the outer radius less the space between them. Only switches and dots are round.
   {
@@ -325,6 +326,69 @@ window.__check = () => {
     }
     if (!plain.length) fails.push('the sheet has no card without an Origami module');
     report('plain cards', fails, `Base leaves ${plain.length} card without an Origami module alone`);
+  }
+
+  // Mini pop-ups: a key in a pop-up opens one below or above the key, as wide as the pop-up's cards, with a card's corners and padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
+  {
+    const fails = [];
+    const until = async (f, ms = 5000) => {
+      for (const t = performance.now(); !f(); await new Promise((r) => setTimeout(r, 50))) if (performance.now() - t > ms) return false;
+      return true;
+    };
+    const deep = (root, sel) => {
+      const hit = root.querySelector(sel);
+      if (hit) return hit;
+      for (const el of root.querySelectorAll('*')) {
+        const inner = el.shadowRoot && deep(el.shadowRoot, sel);
+        if (inner) return inner;
+      }
+      return null;
+    };
+    const host = cards.find((c) => c.cfg.card_type === 'pop-up' && c.cfg.origami_popup?.mini_popups);
+    const go = (hash) => {
+      history.pushState(null, '', location.pathname + location.search + hash);
+      window.dispatchEvent(new Event('location-changed'));
+    };
+    if (!host) fails.push('the sheet has no pop-up with a mini pop-up');
+    else {
+      go(host.cfg.hash);
+      const shell = () => host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened:not(.is-opening)');
+      const key = () => shell() && deep(shell(), 'bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button-1');
+      if (!(await until(() => key()))) fails.push('the pop-up did not open with its key');
+      else {
+        await new Promise((r) => setTimeout(r, 400));
+        const k = key();
+        // The tap as Bubble Card sends it
+        const tap = new Event('hass-action', { bubbles: true, composed: true });
+        tap.detail = { config: { tap_action: k.closest ? JSON.parse(k.dataset.tapAction) : {} }, action: 'tap' };
+        k.dispatchEvent(tap);
+        const mini = () => shell()?.querySelector('dialog.org-mini[open]');
+        if (!(await until(() => mini(), 2000))) fails.push('the key did not open the mini pop-up');
+        else {
+          // It is measured once it has grown to its size
+          await until(() => mini().getAnimations().every((a) => a.playState !== 'running'), 3000);
+          const m = mini();
+          const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
+          const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();
+          const cs = getComputedStyle(m);
+          const pad = parseFloat(doc.getPropertyValue('--card-padding'));
+          if (!near(b.left, col.left) || !near(b.width, col.width)) fails.push(`it spans ${r1(b.left)} to ${r1(b.right)} px, expected the pop-up's cards from ${r1(col.left)} to ${r1(col.right)} px`);
+          if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`it covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
+          if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
+          if (!near(parseFloat(cs.paddingTop), pad) || !near(parseFloat(cs.paddingLeft), pad)) fails.push(`its padding is ${cs.padding}, expected the card padding of ${pad}px`);
+          const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
+          if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
+          // A tap beside it lands on its backdrop
+          m.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, clientX: 2, clientY: 2 }));
+          if (!(await until(() => !mini(), 3000))) fails.push('a tap beside it left it open');
+          if (!shell()) fails.push('a tap beside it closed the pop-up too');
+        }
+      }
+      go('');
+      await until(() => !host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened'), 2000);
+    }
+    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards, with a card\'s corners and padding, and a tap beside it closes only the mini pop-up');
   }
   return results;
 };

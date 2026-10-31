@@ -86,6 +86,7 @@ These changes are in the `next` branch and come with the next release.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
+- `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One opens next to its key over the dimmed pop-up and shows at once, so it can stand in for a view that a helper switches.
 
 #### Button
 

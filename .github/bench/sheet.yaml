@@ -249,6 +249,39 @@ sections:
           players:
             - "${entity + '_ma'}"
         hide: {power_button: true, previous_button: true, next_button: true, volume_button: true}
+      # A pop-up whose key opens a mini pop-up with a title and a volume row of its own
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: '#sheet'
+        name: Living room
+        button_type: name
+        show_header: true
+        show_icon: false
+        modules: [origami_base, origami_popup]
+        origami_popup:
+          mini_popups:
+            volume:
+              - type: custom:bubble-card
+                card_type: separator
+                name: Volume
+                modules: [origami_header]
+              - type: custom:bubble-card
+                card_type: sub-buttons
+                modules: [origami_slider]
+                sub_button:
+                  main: []
+                  bottom:
+                    - {entity: media_player.living_room, name: Living room, sub_button_type: slider, always_visible: true}
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: slider
+            entity: media_player.living_room
+            show_icon: false
+            modules: [origami_base, origami_slider]
+            sub_button:
+              main:
+                - {icon: mdi:chevron-down, show_background: true, tap_action: {action: fire-dom-event, mini_popup: volume}}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button
