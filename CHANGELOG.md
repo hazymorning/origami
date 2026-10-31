@@ -101,7 +101,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Slider
 
-- Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. `label_width` lines up the tracks of several cards.
+- Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. `label_width` lines up the tracks of several cards.
 - A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 - `master: true` makes a standalone slider for a whole group, such as all lamps above a row for each lamp. It is one step taller, with its name at the start of the track, its value at the end and no grip.

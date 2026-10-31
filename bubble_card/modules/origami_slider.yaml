@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.13.0"
+  version: "1.14.0"
   supported:
     - button
     - sub-buttons
@@ -188,6 +188,7 @@ origami_slider:
       background-color: var(--org-slider-fill);
     }` : ""}
     ${card._orgSl.words}
+    /* A row's name has the size and weight of a name in a list */
     ${card._orgSl.rows}::before {
       content: var(--org-name, "");
       grid-area: 1 / 1;
@@ -195,9 +196,13 @@ origami_slider:
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: var(--ha-font-size-s);
-      font-weight: var(--ha-font-weight-bold);
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-medium);
       color: var(--primary-text-color);
+    }
+    /* A row's track has no grip at the end of its fill, so its value never meets one */
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-fill::after {
+      display: none !important;
     }
     ${card._orgSl.rows}[data-org-scroll]::before {
       content: var(--org-name-loop, "");

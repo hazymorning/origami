@@ -791,7 +791,7 @@ rows: 1
 
 ### Slider
 
-The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
+The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
 
