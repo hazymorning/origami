@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.11.3"
+  version: "1.12.0"
   supported:
     - button
     - sub-buttons
@@ -13,7 +13,7 @@ origami_slider:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_slider needs origami_base 13.1 or later");
+      if (org?.hass !== hass || !(org.version >= 13.3)) throw new Error("origami_slider needs origami_base 13.3 or later");
       if (this.config.card_type === "sub-buttons") {
         // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
         // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
@@ -75,10 +75,14 @@ origami_slider:
     })()}
     ${card._orgSl ? `
     ${card._org.unframe()}
+    /* A row's track is a little lower than a key, as Base sets it, and the rows stand 12 px apart */
+    ha-card {
+      --bubble-sub-slider-height: var(--org-sub-h, var(--org-row-slider-h));
+    }
     ha-card .bubble-sub-button-bottom-container {
       display: grid !important;
       grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
-      gap: var(--ha-space-2) var(--ha-space-4) !important;
+      gap: var(--ha-space-3) var(--ha-space-4) !important;
     }
     ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {
       display: contents !important;
@@ -101,7 +105,7 @@ origami_slider:
       box-sizing: border-box;
       height: var(--bubble-sub-slider-height);
       overflow: hidden;
-      border-radius: var(--radius-small);
+      border-radius: var(--org-slider-r);
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
@@ -115,7 +119,7 @@ origami_slider:
       box-sizing: border-box;
       width: auto !important;
       min-width: 0;
-      padding: 0 var(--radius-small) !important;
+      padding: 0 var(--org-slider-r) !important;
       opacity: 1 !important;
       pointer-events: none;
     }
@@ -155,7 +159,7 @@ origami_slider:
       height: 100%;
       margin: 0 !important;
       padding: 0 !important;
-      border-radius: var(--radius-small);
+      border-radius: var(--org-slider-r);
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
       font-size: 0 !important;
@@ -166,7 +170,7 @@ origami_slider:
       justify-self: end;
       position: relative;
       z-index: 1;
-      padding-inline-end: var(--radius-small);
+      padding-inline-end: var(--org-slider-r);
       pointer-events: none;
       font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-medium);

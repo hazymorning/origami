@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.9.0"
+  version: "4.9.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -80,12 +80,25 @@ origami_popup:
           o.el.style.top = top + "px";
           o.el.style.transformOrigin = Math.min(Math.max(k.left + k.width / 2 - col.left, 0), col.width) + "px " + (top >= k.bottom ? 0 : h) + "px";
         };
-        // fade() runs the mini pop-up's and its backdrop's motion, and stops the one before
-        const fade = (o, from, to, ms, ease, end) => {
+        // A spring that settles without a visible bounce: with a damping ratio of 0.8 it overshoots by about 1 %
+        const spring = "linear(" + Array.from({ length: 41 }, (_, i) => (1 - Math.exp(-7.2 * i / 40) * (Math.cos(5.4 * i / 40) + 4 / 3 * Math.sin(5.4 * i / 40))).toFixed(4)).join(", ") + ")";
+        // motion() grows the mini pop-up from its key on the spring while it fades in quicker, and the dim behind it fades in on its own time. On the way out, all of it fades away quickly.
+        const motion = (o, open) => {
           o.anims.forEach((a) => a.cancel());
-          o.anims = [o.el.animate([from, to], { duration: ms, easing: ease, fill: end ? "forwards" : "none" }),
-            o.el.animate([{ opacity: from.opacity }, { opacity: to.opacity }], { duration: ms, easing: ease, fill: end ? "forwards" : "none", pseudoElement: "::backdrop" })];
-          return o.anims[0].finished;
+          const run = (frames, opts) => {
+            try { return o.el.animate(frames, opts); } catch (e) { return o.el.animate(frames, { ...opts, easing: read("--ease-standard") || "ease-out" }); }
+          };
+          const fast = time("--duration-fast", 150);
+          o.anims = open ? [
+            run([{ transform: "scale(0.85)" }, { transform: "none" }], { duration: time("--duration-slow", 350), easing: spring }),
+            run([{ opacity: 0 }, { opacity: 1 }], { duration: fast, easing: "linear" }),
+            run([{ opacity: 0 }, { opacity: 1 }], { duration: time("--duration-normal", 250), easing: "ease-out", pseudoElement: "::backdrop" })
+          ] : [
+            run([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.95)" }], { duration: fast, easing: "ease-in", fill: "forwards" }),
+            run([{ opacity: 1 }, { opacity: 0 }], { duration: fast, easing: "ease-in", fill: "forwards", pseudoElement: "::backdrop" })
+          ];
+          // True once the motion has run to its end, false when another one stopped it
+          return Promise.all(o.anims.map((a) => a.finished)).then(() => true, () => false);
         };
         mini.close = (now) => {
           const o = mini.open;
@@ -98,7 +111,7 @@ origami_popup:
             if (o.el.open) o.el.close();
           };
           if (now || still()) return done();
-          fade(o, { opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.96)" }, time("--duration-fast", 150), "ease-in", true).then(done, () => {});
+          motion(o, false).then((ended) => { if (ended) done(); });
         };
         // build() builds a mini pop-up's cards once and keeps them in the pop-up, so they show at once when it opens
         mini.build = (name) => {
@@ -149,7 +162,7 @@ origami_popup:
           try { if (!o.el.open) o.el.showModal(); } catch (e) { return; }
           mini.open = o;
           mini.place();
-          if (!still()) fade(o, { opacity: 0, transform: "scale(0.94)" }, { opacity: 1, transform: "none" }, time("--duration-normal", 250), read("--ease-standard") || "ease-out");
+          if (!still()) motion(o, true);
         };
         mini.away = () => mini.close(true);
         // Bubble Card runs a tap through a hass-action event that passes the pop-up on its way up, so the pop-up takes the taps that open a mini pop-up and hands on all others
@@ -370,9 +383,9 @@ origami_popup:
       max-width: none;
       display: flex;
       flex-direction: column;
-      gap: var(--ha-space-3);
+      gap: var(--ha-space-4);
       margin: 0;
-      padding: var(--card-padding);
+      padding: var(--ha-space-4);
       border: none;
       border-radius: var(--ha-card-border-radius);
       background: var(--popup-background);

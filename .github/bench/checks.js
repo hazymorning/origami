@@ -328,7 +328,7 @@ window.__check = async () => {
     report('plain cards', fails, `Base leaves ${plain.length} card without an Origami module alone`);
   }
 
-  // Mini pop-ups: a key in a pop-up opens one below or above the key, as wide as the pop-up's cards, with a card's corners and padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
+  // Mini pop-ups: a key in a pop-up opens one below or above the key, as wide as the pop-up's cards, with a card's corners, 16 px of padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
   {
     const fails = [];
     const until = async (f, ms = 5000) => {
@@ -371,12 +371,12 @@ window.__check = async () => {
           const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
           const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();
           const cs = getComputedStyle(m);
-          const pad = parseFloat(doc.getPropertyValue('--card-padding'));
+          const pad = parseFloat(doc.getPropertyValue('--ha-space-4'));
           if (!near(b.left, col.left) || !near(b.width, col.width)) fails.push(`it spans ${r1(b.left)} to ${r1(b.right)} px, expected the pop-up's cards from ${r1(col.left)} to ${r1(col.right)} px`);
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`it covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
           if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
           if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
-          if (!near(parseFloat(cs.paddingTop), pad) || !near(parseFloat(cs.paddingLeft), pad)) fails.push(`its padding is ${cs.padding}, expected the card padding of ${pad}px`);
+          if (!near(parseFloat(cs.paddingTop), pad) || !near(parseFloat(cs.paddingLeft), pad)) fails.push(`its padding is ${cs.padding}, expected ${pad}px`);
           const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
           if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
           // A tap beside it lands on its backdrop
@@ -388,7 +388,7 @@ window.__check = async () => {
       go('');
       await until(() => !host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened'), 2000);
     }
-    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards, with a card\'s corners and padding, and a tap beside it closes only the mini pop-up');
+    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards, with a card\'s corners and 16 px of padding, and a tap beside it closes only the mini pop-up');
   }
   return results;
 };

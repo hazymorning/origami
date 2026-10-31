@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.4.3"
+  version: "13.5.0"
   is_global: true
   supported:
     - button
@@ -515,8 +515,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), and 13.2 added dropdown(), menu() and picker().
-        version: 13.2,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), and 13.3 added the height of a slider in a row with a name in --org-row-slider-h.
+        version: 13.3,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -927,6 +927,8 @@ origami_base:
       }
     }` : ""}
     ha-card {
+      /* A slider in a row with a name before it, as in Slider's rows and a list of compact cards, is a little lower than a key, so the name keeps its weight and two rows' sliders stand 12 px apart */
+      --org-row-slider-h: var(--ha-space-7, 28px);
       --org-toggle-w: calc(var(--tile-size) + var(--ha-space-2));
       --org-toggle-h: var(--control-height-mini);
       --org-toggle-knob: var(--icon-size-m);
@@ -1163,7 +1165,7 @@ origami_base:
     ha-card .bubble-container {
       border-radius: 0 !important;
     }` : ""}
-    ${card._org.opts.join ? `/* Joined cards are the rows of one list, as Slider's rows are: the list keeps the card's padding at its top and its bottom, and two rows' controls are 8 px apart, closer to each other than to the list's edge. A compact row's slider is as tall as a track of Slider's rows. Each row holds the gap above its controls, so all rows are multiples of 8 px and meet on whole pixels of the screen. Only the outer corners are round, and each joined card after the first meets the card above it. */
+    ${card._org.opts.join ? `/* Joined cards are the rows of one list, as Slider's rows are: the list keeps the card's padding at its top and its bottom, and two rows' controls are 8 px apart, closer to each other than to the list's edge. A compact row's slider is as tall as a track of Slider's rows and as its switch, so two rows' sliders are 12 px apart. Each row holds the gap above its controls, so all rows are multiples of 8 px and meet on whole pixels of the screen. Only the outer corners are round, and each joined card after the first meets the card above it. */
     ha-card {
       --org-join-radius: ${{ first: "var(--ha-card-border-radius) var(--ha-card-border-radius) 0 0", middle: "0", last: "0 0 var(--ha-card-border-radius) var(--ha-card-border-radius)" }[card._org.opts.join]};
       --org-join-above: ${card._org.opts.join === "first" ? "var(--org-pad)" : "var(--ha-space-2)"};
@@ -1172,7 +1174,8 @@ origami_base:
       ${card._org.opts.join === "first" ? "" : "margin-top: calc(-1 * var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)));"}
     }
     ${card._org.opts.compact ? `ha-card .card-content .bubble-sub-button-container {
-      --bubble-sub-slider-height: var(--org-sub-h, var(--control-height-mini));
+      --bubble-sub-slider-height: var(--org-sub-h, var(--org-row-slider-h));
+      --org-slider-r: calc(var(--bubble-sub-slider-height) * var(--radius-ratio, 0.35));
     }` : ""}
     ha-card .card-content,
     ha-card .bubble-container,
