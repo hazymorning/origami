@@ -382,11 +382,11 @@ window.__check = async () => {
         const tap = new Event('hass-action', { bubbles: true, composed: true });
         tap.detail = { config: { tap_action: k.closest ? JSON.parse(k.dataset.tapAction) : {} }, action: 'tap' };
         k.dispatchEvent(tap);
-        const mini = () => shell()?.querySelector('dialog.org-mini[open]');
+        const mini = () => shell()?.querySelector('.org-mini.open');
         if (!(await until(() => mini(), 2000))) fails.push('the key did not open the mini pop-up');
         else {
-          // It is measured once it has grown to its size. Its motion waits a frame before it runs, so a paused motion has not ended yet.
-          await until(() => mini().getAnimations().every((a) => a.playState === 'finished'), 3000);
+          // It is measured once it has grown to its size
+          await until(() => mini() && mini().getAnimations().length === 0, 3000);
           const m = mini();
           const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
           const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();
@@ -399,8 +399,10 @@ window.__check = async () => {
           if (!near(parseFloat(cs.paddingTop), pad) || !near(parseFloat(cs.paddingLeft), pad)) fails.push(`its padding is ${cs.padding}, expected ${pad}px`);
           const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
           if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
-          // A tap beside it lands on its backdrop
-          m.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, clientX: 2, clientY: 2 }));
+          // A tap beside it lands on the dim
+          const dim = shell().querySelector('.org-mini-dim.open');
+          if (!dim) fails.push('no dim covers the pop-up behind it');
+          else dim.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, clientX: 2, clientY: 2 }));
           if (!(await until(() => !mini(), 3000))) fails.push('a tap beside it left it open');
           if (!shell()) fails.push('a tap beside it closed the pop-up too');
         }

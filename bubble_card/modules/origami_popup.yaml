@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.9.2"
+  version: "4.10.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -52,97 +52,80 @@ origami_popup:
       if (card._orgP.art) card._orgPArt = card._orgP.art;
       // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
       card._orgP.gap = String(cfg.gap ?? "").trim();
-      // A mini pop-up is a small pop-up over this one, with cards of its own under mini_popups and a name. A key anywhere in the pop-up opens it with tap_action: fire-dom-event and mini_popup: that name. It opens next to the key, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or the pop-up closing closes it. Bubble Card hands the pop-up every change of the states, and the pop-up passes them to the open mini pop-up's cards, so they change together with its other cards.
+      // A mini pop-up is a small pop-up over this one, with cards of its own under mini_popups and a name. A key anywhere in the pop-up opens it with tap_action: fire-dom-event and mini_popup: that name. It opens next to the key, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or the pop-up closing closes it.
       const mini = card._orgMini ?? (card._orgMini = { built: {} });
       mini.hass = this._hass;
       mini.defs = cfg.mini_popups && typeof cfg.mini_popups === "object" ? cfg.mini_popups : {};
       card._orgP.mini = Object.keys(mini.defs).length > 0;
       if (card._orgP.mini && !mini.show) {
-        const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const read = (v) => getComputedStyle(card).getPropertyValue(v).trim();
-        const time = (v, d) => { const t = read(v); return t ? parseFloat(t) * (t.endsWith("ms") ? 1 : 1000) : d; };
-        // place() puts the mini pop-up below its key, or above it where there is no room below, and lines it up with the pop-up's cards. It grows from the key.
-        mini.place = () => {
-          const o = mini.open;
-          if (!o) return;
-          if (o.key?.isConnected && o.key.getClientRects().length) o.at = o.key.getBoundingClientRect();
-          const col = (card.querySelector(".bubble-cards-container") ?? card.querySelector(".bubble-pop-up-container"))?.getBoundingClientRect();
-          if (!col || !o.at) return;
-          const gap = parseFloat(read("--ha-space-2")) || 8;
-          o.el.style.width = col.width + "px";
-          o.el.style.maxHeight = innerHeight - 2 * gap + "px";
-          const h = o.el.offsetHeight;
-          const k = o.at;
-          let top = k.bottom + gap;
-          if (top + h > innerHeight - gap && k.top - gap - h >= gap) top = k.top - gap - h;
-          top = Math.max(gap, Math.min(top, innerHeight - gap - h));
-          o.el.style.left = col.left + "px";
-          o.el.style.top = top + "px";
-          o.el.style.transformOrigin = Math.min(Math.max(k.left + k.width / 2 - col.left, 0), col.width) + "px " + (top >= k.bottom ? 0 : h) + "px";
+        // As with Home Assistant's menus, the mini pop-ups and the dim behind them wait in the top layer while the pop-up is open, drawn but clear and inert. A tap then only fades and scales one in, so the whole motion shows, even on a slow phone.
+        const layer = (cls) => {
+          const el = document.createElement("div");
+          el.className = cls;
+          el.setAttribute("popover", "manual");
+          el.inert = true;
+          // Touches stay in it, so a drag never slides the pop-up closed
+          el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
+          return el;
         };
-        // A spring that settles without a visible bounce: with a damping ratio of 0.8 it overshoots by about 1 %
-        const spring = "linear(" + Array.from({ length: 41 }, (_, i) => (1 - Math.exp(-7.2 * i / 40) * (Math.cos(5.4 * i / 40) + 4 / 3 * Math.sin(5.4 * i / 40))).toFixed(4)).join(", ") + ")";
-        // motion() grows the mini pop-up from its key on the spring while it fades in quicker, and the dim behind it fades in on its own time. On the way out, it shrinks back into its key while it and the dim fade away.
-        const motion = (o, open) => {
-          o.anims.forEach((a) => a.cancel());
-          const run = (frames, opts) => {
-            try { return o.el.animate(frames, opts); } catch (e) { return o.el.animate(frames, { ...opts, easing: read("--ease-standard") || "ease-out" }); }
-          };
-          const normal = time("--duration-normal", 250);
-          o.anims = open ? [
-            run([{ transform: "scale(0.85)" }, { transform: "none" }], { duration: time("--duration-slow", 350), easing: spring }),
-            run([{ opacity: 0 }, { opacity: 1 }], { duration: time("--duration-fast", 150), easing: "linear" }),
-            run([{ opacity: 0 }, { opacity: 1 }], { duration: normal, easing: "ease-out", pseudoElement: "::backdrop" })
-          ] : [
-            run([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.85)" }], { duration: normal, easing: "ease-in", fill: "forwards" }),
-            run([{ opacity: 1 }, { opacity: 0 }], { duration: normal, easing: "ease-in", fill: "forwards", pseudoElement: "::backdrop" })
-          ];
-          // In the frame after the tap, a phone lays out and draws the mini pop-up's cards for the first time, which can take longer than the motion's first steps. So the motion holds its start through that frame and plays from the next one, where all of it shows.
-          if (open) {
-            const at = o.run;
-            o.anims.forEach((a) => a.pause());
-            requestAnimationFrame(() => requestAnimationFrame(() => { if (o.run === at) o.anims.forEach((a) => a.play()); }));
-          }
-          // True once the motion has run to its end, false when another one stopped it
-          return Promise.all(o.anims.map((a) => a.finished)).then(() => true, () => false);
+        const host = () => card.querySelector(".bubble-pop-up-container") ?? card;
+        const shown = (el) => el.matches(":popover-open");
+        // A tap on the dim closes the mini pop-up. The dim is inside the pop-up, so Bubble Card doesn't count it as a tap beside the pop-up.
+        mini.dim = layer("org-mini-dim");
+        mini.dim.addEventListener("click", () => mini.close());
+        // Esc closes only the mini pop-up, before Bubble Card closes the pop-up on an Esc that reaches the window
+        mini.esc = (e) => {
+          if (e.key !== "Escape" || !mini.open) return;
+          e.stopImmediatePropagation();
+          mini.close();
         };
-        mini.close = (now) => {
+        // up() puts the dim and the built mini pop-ups into the top layer, the dim first so it stays below them, and down() takes them out again
+        mini.up = () => {
+          const els = [mini.dim, ...Object.values(mini.built).map((o) => o.el)];
+          els.forEach((el) => { if (el.parentNode !== host()) host().appendChild(el); });
+          if (!shown(mini.dim)) els.forEach((el) => { if (shown(el)) el.hidePopover(); });
+          els.forEach((el) => { if (!shown(el)) try { el.showPopover(); } catch (e) {} });
+          const col = (card.querySelector(".bubble-cards-container") ?? card)?.getBoundingClientRect();
+          if (col) els.slice(1).forEach((el) => { if (!el.classList.contains("open")) el.style.width = col.width + "px"; });
+        };
+        mini.down = () => [mini.dim, ...Object.values(mini.built).map((o) => o.el)].forEach((el) => { if (shown(el)) el.hidePopover(); });
+        // place() puts the mini pop-up below its key, or above it where there is more room, lined up with the pop-up's cards. The edge next to the key stays where it is while the mini pop-up is open, so a change of its cards or of the pop-up behind it never moves it, and content that grows past the screen scrolls.
+        mini.place = (o) => {
+          const col = (card.querySelector(".bubble-cards-container") ?? card)?.getBoundingClientRect();
+          if (!col) return;
+          const gap = parseFloat(getComputedStyle(card).getPropertyValue("--ha-space-2")) || 8;
+          const k = o.key?.isConnected && o.key.getClientRects().length ? o.key.getBoundingClientRect() : null;
+          const below = k ? innerHeight - k.bottom - 2 * gap : innerHeight - 2 * gap;
+          const above = k ? k.top - 2 * gap : 0;
+          const down = o.el.scrollHeight <= below || below >= above;
+          Object.assign(o.el.style, {
+            width: col.width + "px",
+            left: col.left + "px",
+            top: down ? (k ? k.bottom + gap : gap) + "px" : "auto",
+            bottom: down ? "auto" : innerHeight - k.top + gap + "px",
+            maxHeight: Math.max(down ? below : above, 0) + "px",
+            transformOrigin: (k ? Math.min(Math.max(k.left + k.width / 2 - col.left, 0), col.width) + "px " : "50% ") + (down ? "0" : "100%")
+          });
+        };
+        mini.close = () => {
           const o = mini.open;
           if (!o) return;
           mini.open = null;
-          const run = ++o.run;
-          const done = () => {
-            if (o.run !== run) return;
-            o.anims.forEach((a) => a.cancel());
-            if (o.el.open) o.el.close();
-          };
-          if (now || still()) return done();
-          motion(o, false).then((ended) => { if (ended) done(); });
+          o.el.classList.remove("open");
+          mini.dim.classList.remove("open");
+          o.el.inert = true;
+          mini.dim.inert = true;
+          window.removeEventListener("keydown", mini.esc, true);
         };
-        // build() builds a mini pop-up's cards once and keeps them in the pop-up, so they show at once when it opens
+        // build() builds a mini pop-up's cards once and keeps them in the pop-up
         mini.build = (name) => {
           const src = mini.defs[name];
           let o = mini.built[name];
           if (!o || o.src !== src) {
             o?.el.remove();
-            // A modal dialog, so its backdrop takes the taps beside it and the pop-up behind it can't be used while it is open
-            const el = document.createElement("dialog");
-            el.className = "org-mini";
-            el.setAttribute("autofocus", "");
-            // The mini pop-up keeps its touches, so a drag on it never slides the pop-up closed
-            el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
-            // Esc closes only the mini pop-up, because Bubble Card closes the pop-up on an Esc that reaches the window
-            el.addEventListener("keydown", (e) => { if (e.key === "Escape") e.stopPropagation(); });
-            el.addEventListener("cancel", (e) => {
-              e.preventDefault();
-              mini.close();
-            });
-            // A tap on the dimmed pop-up lands on the mini pop-up's backdrop, outside its box
-            el.addEventListener("click", (e) => {
-              if (e.target !== el) return;
-              const r = el.getBoundingClientRect();
-              if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) mini.close();
-            });
+            const el = layer("org-mini");
+            el.tabIndex = -1;
+            el.setAttribute("role", "dialog");
             const kids = [].concat(src ?? []).filter((c) => c && typeof c === "object").map((c) => {
               const k = document.createElement("hui-card");
               k.hass = mini.hass;
@@ -150,27 +133,35 @@ origami_popup:
               if (typeof k.load === "function") k.load();
               return el.appendChild(k);
             });
-            o = mini.built[name] = { name, el, kids, src, run: 0, anims: [] };
+            o = mini.built[name] = { name, el, kids, src };
           }
-          const host = card.querySelector(".bubble-pop-up-container") ?? card;
-          if (o.el.parentNode !== host) host.appendChild(o.el);
+          if (o.el.parentNode !== host()) host().appendChild(o.el);
           return o;
         };
         mini.show = (name, key) => {
           if (mini.open?.name === name) return mini.close();
-          mini.close(true);
+          mini.close();
           const o = mini.build(name);
+          // A mini pop-up that the pop-up had no time to draw ahead is drawn now, and its motion starts in the frame after that
+          const fresh = !shown(o.el) || !shown(mini.dim);
+          mini.up();
           o.kids.forEach((k) => { k.hass = mini.hass; });
           o.key = key;
-          o.at = key?.getBoundingClientRect?.() ?? null;
-          o.run++;
-          o.anims.forEach((a) => a.cancel());
-          try { if (!o.el.open) o.el.showModal(); } catch (e) { return; }
+          mini.place(o);
           mini.open = o;
-          mini.place();
-          if (!still()) motion(o, true);
+          o.el.inert = false;
+          mini.dim.inert = false;
+          window.addEventListener("keydown", mini.esc, true);
+          const go = () => {
+            if (mini.open !== o) return;
+            o.el.classList.add("open");
+            mini.dim.classList.add("open");
+            o.el.focus({ preventScroll: true });
+          };
+          if (fresh) requestAnimationFrame(() => requestAnimationFrame(go));
+          else go();
         };
-        mini.away = () => mini.close(true);
+        mini.away = () => mini.close();
         // Bubble Card runs a tap through a hass-action event that passes the pop-up on its way up, so the pop-up takes the taps that open a mini pop-up and hands on all others
         card.addEventListener("hass-action", (e) => {
           const act = e.detail?.config?.[(e.detail?.action ?? "tap") + "_action"];
@@ -188,30 +179,32 @@ origami_popup:
           window.addEventListener("popstate", mini.away);
         }
         if (typeof onTeardown === "function") onTeardown(() => {
-          mini.close(true);
+          mini.close();
+          mini.down();
           mini.live = false;
           window.removeEventListener("location-changed", mini.away);
           window.removeEventListener("popstate", mini.away);
         });
-        // Once the pop-up has opened, it builds its mini pop-ups one by one while nothing else runs, so even the first tap opens one at once
-        const missing = () => Object.keys(mini.defs).find((n) => mini.built[n]?.src !== mini.defs[n] || !mini.built[n].el.isConnected);
-        if (!mini.idle && card.classList.contains("is-popup-opened") && !card.classList.contains("is-opening") && missing() !== undefined) {
-          mini.idle = true;
-          const later = (f) => window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 300);
-          const next = () => {
-            const n = missing();
-            if (n === undefined || !card.classList.contains("is-popup-opened")) return mini.idle = false;
-            mini.build(n);
+        const open = card.classList.contains("is-popup-opened") && !card.classList.contains("is-closing");
+        if (!open || (mini.open && !mini.defs[mini.open.name])) mini.close();
+        if (!open) mini.down();
+        else {
+          // Bubble Card hands the pop-up every change of the states, and the pop-up passes them to the cards of all its mini pop-ups, so they are up to date before one opens
+          Object.values(mini.built).forEach((o) => o.kids.forEach((k) => { if (k.hass !== mini.hass) k.hass = mini.hass; }));
+          // Once the pop-up has opened, it builds its mini pop-ups one by one and puts them in the top layer while nothing else runs
+          const missing = () => Object.keys(mini.defs).find((n) => mini.built[n]?.src !== mini.defs[n] || !mini.built[n].el.isConnected);
+          if (!mini.idle && !card.classList.contains("is-opening") && (missing() !== undefined || !mini.dim.matches(":popover-open"))) {
+            mini.idle = true;
+            const later = (f) => window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 300);
+            const next = () => {
+              if (!card.classList.contains("is-popup-opened") || card.classList.contains("is-closing")) return mini.idle = false;
+              const n = missing();
+              if (n !== undefined) mini.build(n);
+              mini.up();
+              if (n === undefined) return mini.idle = false;
+              later(next);
+            };
             later(next);
-          };
-          later(next);
-        }
-        // While the pop-up is open, the open mini pop-up's cards get the new states and it follows its key
-        if (mini.open) {
-          if (!card.classList.contains("is-popup-opened") || card.classList.contains("is-closing") || !mini.defs[mini.open.name]) mini.close(true);
-          else {
-            mini.open.kids.forEach((k) => { k.hass = mini.hass; });
-            mini.place();
           }
         }
       }
@@ -381,18 +374,24 @@ origami_popup:
       margin-inline-end: auto !important;
     }` : ""}
     ${card._orgP.mini ? `
-    /* A mini pop-up has a card's corners and padding on the pop-up's background, and it dims the pop-up behind it as a dialog does. A Header at its top has no space above its title. */
-    .org-mini[open] {
+    /* A mini pop-up has a card's corners and padding on the pop-up's background, and a dim covers the pop-up behind it, as Home Assistant's dialogs do. A Header at its top has no space above its title. While closed, both are clear and take no taps. */
+    .org-mini, .org-mini-dim {
       position: fixed;
-      inset: auto;
       box-sizing: border-box;
+      margin: 0;
+      border: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-fast) ease, scale var(--duration-fast) ease;
+    }
+    .org-mini {
+      inset: auto;
       max-width: none;
+      height: auto;
       display: flex;
       flex-direction: column;
       gap: var(--ha-space-4);
-      margin: 0;
       padding: var(--ha-space-4);
-      border: none;
       border-radius: var(--ha-card-border-radius);
       background: var(--popup-background);
       box-shadow: var(--shadow-elevated);
@@ -400,13 +399,24 @@ origami_popup:
       outline: none;
       overflow-y: auto;
       overscroll-behavior: contain;
-      /* The browser draws it in its first frame, while it is still clear, so its motion starts at once in the next one */
+      /* It grows out of its key as Home Assistant's menus do, from 90 % with a fade, in the time of Home Assistant's dialogs, and it shrinks back the same way. The browser draws it ahead while it is clear, so the motion runs on its own. */
+      scale: 0.9;
       will-change: opacity;
       --org-header-above: 0px;
       --org-header-below: 0px;
     }
-    .org-mini::backdrop {
+    .org-mini-dim {
+      inset: 0;
+      width: auto;
+      height: auto;
+      padding: 0;
       background: var(--mdc-dialog-scrim-color);
+      touch-action: none;
+    }
+    .org-mini.open, .org-mini-dim.open {
+      opacity: 1;
+      scale: 1;
+      pointer-events: auto;
     }` : ""}
     ${card._orgP.css}
   editor:
