@@ -904,7 +904,7 @@ modules:
   - origami_slider
   - origami_light
 origami_slider:
-  label_width: 80px
+  label_width: 96px
 sub_button:
   main: []
   bottom:
