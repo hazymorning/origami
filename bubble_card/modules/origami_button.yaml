@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.4"
+  version: "3.9.5"
   supported:
     - sub-buttons
     - button
@@ -129,7 +129,7 @@ origami_button:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_button needs origami_base 13.1 or later");
+      if (org?.hass !== hass || !(org.version >= 13.4)) throw new Error("origami_button needs origami_base 13.4 or later");
       const cfg = this.config.origami_button ?? {};
       const lang = hass.locale?.language ?? hass.language ?? "en";
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
@@ -180,29 +180,7 @@ origami_button:
         return named || r === "set" || (r !== null && !!item.entity && item.show_background !== false) ? n : 0;
       }).filter(Boolean);
       // pending shows a tapped button with the look it is about to get, at reduced opacity and without taps, until its state changes or 10 seconds pass
-      const pend = card._orgPend ?? (card._orgPend = new Map());
-      const mark = (el, p) => {
-        el?.classList.toggle("org-pending-on", !!p && !p.was);
-        el?.classList.toggle("org-pending-off", !!p && p.was);
-      };
-      subs.forEach(({ n, item, opt }) => {
-        const p = pend.get(n);
-        if (p && (active.includes(n) !== p.was || Date.now() > p.until || !pendingOn(opt, item, n))) pend.delete(n);
-        mark(card.querySelector(".bubble-sub-button-bottom-container .bubble-sub-button-" + n), pend.get(n));
-      });
-      // Bubble Card runs a tap through a hass-action event, so a tap on a button marks it there
-      if (!card._orgPendOn) {
-        card._orgPendOn = true;
-        card.addEventListener("hass-action", (e) => {
-          const el = e.composedPath().find((x) => x.classList?.contains("bubble-sub-button"));
-          const n = Number(el?.className.match(/bubble-sub-button-(\d+)/)?.[1]);
-          if (e.detail?.action !== "tap" || !card._orgB?.pending?.includes(n)) return;
-          const p = { was: card._orgB.active.includes(n), until: Date.now() + 10000 };
-          pend.set(n, p);
-          mark(el, p);
-          setTimeout(() => { if (pend.get(n) === p) { pend.delete(n); mark(el, null); } }, 10000);
-        });
-      }
+      org.pending(active, subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n));
       const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
       const at = (n) => base + ".bubble-sub-button-" + n;
@@ -254,7 +232,6 @@ origami_button:
         scroll,
         chips,
         active,
-        pending: subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n),
         bars: barCss,
         barOn,
         dividers,

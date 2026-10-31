@@ -851,6 +851,26 @@ sub_button:
           option: Volume
 ```
 
+With `master: true` under `origami_slider`, the slider sets a whole group, such as all lamps above a row for each lamp. It is one step taller, its name stands at the start of the track and its value at the end, and it has no grip, so neither of them ever meets one:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.living_room
+name: All lamps
+show_name: true
+show_state: false
+show_icon: false
+tap_action:
+  action: none
+modules:
+  - origami_base
+  - origami_slider
+origami_slider:
+  master: true
+```
+
 On a sub-buttons card, a slider sub-button needs `always_visible: true` to become a row. `label_width` under `origami_slider` sets the width of the name column, which by default fits the longest name, up to 30 % of the card. Longer names scroll. For a sensor without a percentage, Bubble Card's `min_value` and `max_value` set the ends of the track.
 
 ```yaml
@@ -1238,7 +1258,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles or a list, each w
 
 <br>
 
-On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default. A list has the card options `slim`, `dividers` and `sign`, described below. All other keys go under each tile's own `origami_tiles` key.
+On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default. A list has the card options `slim`, `dividers`, `sign`, `pending` and `background`, described below. All other keys go under each tile's own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -1250,7 +1270,9 @@ On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid h
 | `image_size` | `cover` | The picture's size. `230%` shows only its middle. |
 | `name_color` | | The name's color. |
 | `state_color` | | The state's color. |
-| `sign` | Set by the tap action | In a list, the sign at the row's end: `open`, `run`, `switch` or `none`. It wins over the card's `sign`. |
+| `sign` | Set by the tap action | In a list, the sign at the row's end: `open`, `run`, `switch`, `check` or `none`. It wins over the card's `sign`. |
+| `on` | The entity's state | In a list, whether the row's switch is on or its check is set, such as a template that reads whether a speaker is in a group. |
+| `pending` | The card's `pending` | In a list, whether the row waits after a tap. |
 
 ```yaml
 type: custom:bubble-card
@@ -1302,6 +1324,8 @@ With `layout: list`, each sub-button is a row of one list, as in a settings app.
 - A row that runs a script, a scene or another action shows a play sign. With `script.toggle`, it shows a stop sign while the script runs. So does a row with `action: toggle` and `sign: run` while its entity is on.
 
 A row's `sign` key sets another sign, such as `open` for a script that opens a pop-up. Two rows with opposite visibility conditions can share one place, as the two TV rows below do: one turns the TV on, the other opens the TV pop-up.
+
+With `pending: true`, a row with a switch or a check that you tap shows the sign it is about to get, faded and without taps, until its state changes or 10 seconds pass. A row's own `pending` key decides for that row.
 
 ```yaml
 type: custom:bubble-card
@@ -1396,6 +1420,38 @@ sub_button:
     - entity: sensor.system_monitor_disk_usage
       name: Disk
       icon: mdi:harddisk
+```
+
+#### Checklist
+
+With `sign: check`, each row of a list has a circle at its end that shows a check while the row is chosen, as in a list of rooms to clean or of speakers to group. A row is chosen while its entity is on, or while its own `on` key is true. A row with a check never shows its entity's state, and its `state` key can show a quiet hint instead, such as why a speaker is busy.
+
+With `background: false`, a list has no panel of its own, and its rows stand on the card or the mini pop-up around them.
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_tiles
+origami_tiles:
+  layout: list
+  slim: true
+  dividers: true
+  sign: check
+  pending: true
+sub_button:
+  main: []
+  bottom:
+    - entity: input_boolean.clean_kitchen
+      name: Kitchen
+      icon: mdi:silverware-fork-knife
+      tap_action:
+        action: toggle
+    - entity: input_boolean.clean_living_room
+      name: Living room
+      icon: mdi:sofa
+      tap_action:
+        action: toggle
 ```
 
 </details>
@@ -1585,7 +1641,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, Tiles, which turns a sub-buttons card into a grid, and Speaker Select, which reads a media player with `media()`.
 
-Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, and 13.2 for `dropdown()`, `menu()` and `picker()`. These are the helpers:
+Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, and 13.4 for `pending()`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1609,6 +1665,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text, class)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text, and `write()` writes it. `readouts()` writes into every sub-button with `css_class: readout`, or the class in `class`, a text that `text` makes from that sub-button's entity. |
 | `rename(text)` | The word that the card's `words` option sets for a name or a value, or `null`. |
 | `str(value)` and `each(selectors, ...ends)` | `str()` returns a CSS string that Bubble Card's cleaner leaves as it is. `each()` adds each ending to every selector and joins the results into one list, or returns `.org-none`, which matches nothing, for an empty list. |
+| `pending(on, wait)` | Shows a tapped bottom sub-button with the look it is about to get until its look changes or 10 seconds pass, as Button's and Tiles' `pending` options do. `on` lists the numbers of the sub-buttons that look on now, and `wait` those that wait after a tap. The module styles the classes `org-pending-on` and `org-pending-off`. |
 | `later(key, work)` | Runs `work` in the next frame, once per card and `key` however many style passes ask for it, with the `work` of the last pass. Bubble Card runs several passes for one change, about seven while a pop-up opens, so work that reads the layout, such as measuring a name, is done once. |
 | `fade(selector, start)` and `pen(element, pseudo)` | `fade()` returns the rules that fade a scrolling row out at both ends, in both directions of writing, from `start` to 48 px before the end. `pen()` measures texts in the font of an element's `::before`, or of `pseudo`, and returns the computed style as `cs` and a `width(text)` function. |
 | `shows(item)` and `unframe(pad)` | `shows()` tells whether a sub-button shows its name or a state. `unframe()` returns the rules that remove a sub-buttons card's frame, so the bottom sub-buttons fill it with `pad` around them, as in Button, Slider, Table and Tiles. |

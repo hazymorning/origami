@@ -265,6 +265,28 @@ sections:
             modules: [origami_base]
             origami_base:
               hidden: "${states('switch.printer') === 'off'}"
+      # A checklist without a panel of its own: the lamp is on and checked, the printer is off
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_tiles]
+        origami_tiles: {layout: list, slim: true, dividers: true, sign: check, pending: true, background: false}
+        sub_button:
+          main: []
+          bottom:
+            - {entity: light.kitchen, name: Kitchen, icon: mdi:lightbulb, tap_action: {action: toggle}}
+            - {entity: switch.printer, name: Printer, icon: mdi:printer-outline, tap_action: {action: toggle}}
+      # A master slider for a whole group, one step taller with its name at the start of the track
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.kitchen
+        name: All lamps
+        show_name: true
+        show_state: false
+        show_icon: false
+        tap_action: {action: none}
+        modules: [origami_base, origami_slider]
+        origami_slider: {master: true}
       # A pop-up whose key opens a mini pop-up with a title and a volume row of its own
       - type: custom:bubble-card
         card_type: pop-up

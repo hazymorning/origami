@@ -1,15 +1,20 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.12.0"
+  version: "1.13.0"
   supported:
     - button
     - sub-buttons
-  description: "Slider turns a slider button into a standalone slider, so the card is the track, with its keys after it. On a sub-buttons card, each slider sub-button becomes a row with its name, track and value, and a switch's sub-button becomes a row whose track fills while it is on."
+  description: "Slider turns a slider button into a standalone slider, so the card is the track with keys after it, and a master slider is one step taller. On a sub-buttons card, slider sub-buttons become rows with a name, track and value, and a switch a row that fills while on."
   editor:
     - name: label_width
       label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
       selector:
         text: {}
+    - name: master
+      label: "Master slider, such as one for all lamps: one step taller, with its name at the start of the track"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
@@ -69,7 +74,9 @@ origami_slider:
         // While the entity is off, the value is Home Assistant's word for off instead of 0 %, and while it is unavailable a dash, as on a slider sub-button
         off: on === true ? "" : org.str(on === null ? "–" : org.word(hass, hass.states[entity])),
         // The main sub-buttons stand after the track as keys
-        keys: (Array.isArray(sb) ? sb : sb?.main ?? []).length > 0
+        keys: (Array.isArray(sb) ? sb : sb?.main ?? []).length > 0,
+        // A master slider sets a whole group, such as all lamps above a row for each lamp. It is one step taller, and its name stands at the start of the track, with the value at its end.
+        master: org.yes(this.config.origami_slider?.master)
       };
       return "";
     })()}
@@ -219,8 +226,11 @@ origami_slider:
     }
     ${card._orgSl.names}
     ` : `
+    /* The track is as tall as a key, or one step taller on a master slider, and its corners follow its height */
     ha-card {
-      --org-row-height: var(--control-height-icon);
+      --org-one-h: ${card._orgOne.master ? "var(--control-height-list)" : "var(--control-height-icon)"};
+      --org-one-r: calc(var(--org-one-h) * var(--radius-ratio, 0.35));
+      --org-row-height: var(--org-one-h);
       --bubble-border: none;
     }
     .large .bubble-container {
@@ -228,8 +238,8 @@ origami_slider:
     }
     .bubble-button-card-container,
     .bubble-container {
-      height: var(--control-height-icon) !important;
-      min-height: var(--control-height-icon) !important;
+      height: var(--org-one-h) !important;
+      min-height: var(--org-one-h) !important;
     }
     .bubble-content-container,
     .bubble-icon-container,
@@ -241,25 +251,44 @@ origami_slider:
     }
     .bubble-container {
       overflow: hidden;
-      border-radius: var(--radius-control, 14px) !important;
+      border-radius: var(--org-one-r) !important;
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
     .bubble-range-slider,
     .bubble-background,
     .card-content {
-      border-radius: var(--radius-control, 14px) !important;
+      border-radius: var(--org-one-r) !important;
     }
     .bubble-range-value {
-      inset-inline-end: var(--radius-control, 14px) !important;
+      inset-inline-end: var(--org-one-r) !important;
       padding: 0 !important;
       opacity: 1 !important;
       display: block !important;
-      font-size: var(--ha-font-size-s);
+      font-size: ${card._orgOne.master ? "var(--ha-font-size-m)" : "var(--ha-font-size-s)"};
       font-weight: var(--ha-font-weight-medium);
-      color: var(--secondary-text-color);
+      color: ${card._orgOne.master ? "var(--primary-text-color)" : "var(--secondary-text-color)"};
     }
-    ${card._orgOne.name ? `.bubble-range-value::before {
+    ${card._orgOne.master ? `/* A master slider has no grip at the end of its fill, so the name at its start and the value at its end never meet one */
+    ha-card .bubble-range-fill::after {
+      display: none !important;
+    }` : ""}
+    ${card._orgOne.name && card._orgOne.master ? `.bubble-range-slider::before {
+      content: ${card._orgOne.name};
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      inset-inline-start: var(--org-one-r);
+      max-width: 60%;
+      translate: 0 -50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--primary-text-color);
+      pointer-events: none;
+    }` : card._orgOne.name ? `.bubble-range-value::before {
       content: ${card._orgOne.name} "\\a0";
     }` : ""}
     ${card._orgOne.off ? `.bubble-range-value {
@@ -267,7 +296,7 @@ origami_slider:
     }
     .bubble-range-value::before,
     .bubble-range-value::after {
-      font-size: var(--ha-font-size-s);
+      font-size: ${card._orgOne.master ? "var(--ha-font-size-m)" : "var(--ha-font-size-s)"};
     }
     .bubble-range-value::after {
       content: ${card._orgOne.off};
@@ -305,13 +334,13 @@ origami_slider:
     /* Each key brings its own gap, so a hidden key leaves none */
     ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button {
       box-sizing: border-box;
-      width: var(--control-height-icon) !important;
-      min-width: var(--control-height-icon) !important;
-      height: var(--control-height-icon) !important;
+      width: var(--org-one-h) !important;
+      min-width: var(--org-one-h) !important;
+      height: var(--org-one-h) !important;
       margin: 0 !important;
       margin-inline-start: var(--ha-space-2) !important;
       padding: 0 !important;
-      border-radius: var(--radius-control, 14px) !important;
+      border-radius: var(--org-one-r) !important;
       background-color: transparent !important;
       color: var(--primary-text-color) !important;
     }

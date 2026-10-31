@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.4.5"
+  version: "3.5.0"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, an icon at each row's end shows what a tap does. A list can have slim rows and lines between them."
+  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
   editor:
     - name: layout
       label: "Layout"
@@ -49,21 +49,36 @@ origami_tiles:
               value: run
             - label: Switch
               value: switch
+            - label: Check
+              value: check
             - label: None
               value: none
       default: auto
+    - name: pending
+      label: "After a tap, a row with a check or a switch shows its next look, faded, until its state changes (list)"
+      selector:
+        boolean: {}
+      default: false
+    - name: background
+      label: "A panel behind the rows (list). Without it, the rows stand on the card or the mini pop-up around them"
+      selector:
+        boolean: {}
+      default: true
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_tiles needs origami_base 13.1 or later");
+      if (org?.hass !== hass || !(org.version >= 13.4)) throw new Error("origami_tiles needs origami_base 13.4 or later");
       const env = org.env;
       const cfg = this.config.origami_tiles ?? {};
       const list = cfg.layout === "list";
       // A slim list has low rows with plain icons and the state at the row's end, and dividers draw a line between the rows of any list
-      const t = card._orgTi = { list, cols: list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers) };
-      const signKeys = ["open", "run", "switch", "none"];
+      const t = card._orgTi = { list, cols: list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers), panel: !list || cfg.background === undefined || org.yes(cfg.background) };
+      const signKeys = ["open", "run", "switch", "check", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
-      const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [] };
+      const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [], check: [], checked: [] };
+      // The rows that look on now and the rows that wait after a tap, for Base's pending()
+      const lit = [];
+      const wait = [];
       const named = [];
       const free = [];
       t.css = org.subs(env, this.config, "origami_tiles").map(({ n, item, entity, ctx, opt }) => {
@@ -75,9 +90,23 @@ origami_tiles:
         const obj = hass.states[entity];
         const name = org.has(o.name) ? o.name : org.name(hass, entity, item.name, env);
         if (t.slim) named.push([n, String(name)]);
-        // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does
+        // In the list, the sign at a row's end says what a tap does. A tap that opens something shows a chevron, a toggle shows Base's pill switch, a check marks a row that is chosen, and any other action shows a key that Base's rule fills.
+        const tap = org.act(item);
+        // A tap with action: toggle counts as a toggle, so a play sign set by the sign key shows a stop sign while the entity is on
+        const [domain, verb] = (tap.action === "toggle" ? "homeassistant.toggle" : org.service(item)).split(".");
+        // The sign follows the entity that the tap acts on, and a row's on key wins for a switch or a check
+        const target = org.targets(item)[0];
+        const id = (target === "entity" ? null : target) ?? entity;
+        const sign = !list ? "" : signKeys.includes(o.sign) ? o.sign
+          : signKeys.includes(cfg.sign) ? cfg.sign
+          : org.links.includes(tap.action) ? "open"
+          : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
+          : ["perform-action", "call-service"].includes(tap.action) ? "run"
+          : "none";
+        const on = o && "on" in o ? org.yes(o.on) : org.look(hass, id).on;
+        // Without a state of its own, a tile shows the sub-button's state_content or attribute, the way Bubble Card does. A row with a check is a choice, so it shows only a state of its own, such as a hint why a speaker is busy.
         const parts = item.state_content ?? (item.attribute ? [item.attribute] : ["state"]);
-        const state = org.has(o.state) ? o.state : obj ? org.state(hass, entity, parts) : "";
+        const state = org.has(o.state) ? o.state : obj && sign !== "check" ? org.state(hass, entity, parts) : "";
         // A tile takes the state color while its entity is on, by the same rule as Base
         const look = org.look(hass, entity);
         const color = org.has(o.color) ? o.color : look.lit ? look.color : "";
@@ -89,23 +118,16 @@ origami_tiles:
         if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
         if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
         if (list) {
-          // The sign follows Base's rules. A tap that opens something shows a chevron, a toggle shows Base's pill switch, and any other action shows a key that Base's rule fills.
-          const tap = org.act(item);
-          // A tap with action: toggle counts as a toggle, so a play sign set by the sign key shows a stop sign while the entity is on
-          const [domain, verb] = (tap.action === "toggle" ? "homeassistant.toggle" : org.service(item)).split(".");
-          // The sign follows the entity that the tap acts on
-          const target = org.targets(item)[0];
-          const id = (target === "entity" ? null : target) ?? entity;
-          const sign = signKeys.includes(o.sign) ? o.sign
-            : signKeys.includes(cfg.sign) ? cfg.sign
-            : org.links.includes(tap.action) ? "open"
-            : tap.action === "toggle" || (verb === "toggle" && domain !== "script") ? "switch"
-            : ["perform-action", "call-service"].includes(tap.action) ? "run"
-            : "none";
           if (sign === "open") signs.open.push(one);
-          if (sign === "switch") signs[org.look(hass, id).on ? "on" : "switch"].push(one);
+          if (sign === "switch") signs[on ? "on" : "switch"].push(one);
+          if (sign === "check") signs[on ? "checked" : "check"].push(one);
           // A key that runs something is filled by Base's rule for its target, and it shows a stop sign when a second tap stops it
           if (sign === "run") signs[!org.filled(hass, item, id) ? "run" : ["toggle", "turn_off"].includes(verb) ? "stop" : "running"].push(one);
+          // A row with a switch or a check can wait after a tap, with the card's pending option or its own pending key
+          if (["switch", "check"].includes(sign)) {
+            if (on) lit.push(n);
+            if (![...org.links, "none"].includes(tap.action) && (o && "pending" in o ? org.yes(o.pending) : org.yes(cfg.pending))) wait.push(n);
+          }
         }
         if (org.has(o.name_color)) rules.push(sel + " .bubble-sub-button-name-container { color: " + o.name_color + "; }");
         if (org.has(o.state_color)) rules.push(sel + " .bubble-sub-button-name-container::after { color: " + o.state_color + "; }");
@@ -125,13 +147,17 @@ origami_tiles:
           if (el.style.getPropertyValue("--org-name-w") !== w) el.style.setProperty("--org-name-w", w);
         });
       });
+      // A tapped row that waits shows the look it is about to get, faded and without taps, until its state changes or 10 seconds pass
+      if (list) org.pending(lit, wait);
       // at() returns a selector list for the rows with these signs, with the same ending on each selector
       const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
       // The signs are icons from Material Design Icons, drawn as masks in the text color. Only the list builds them.
       const mask = (d) => "url(" + org.str("data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='" + d + "'/></svg>")) + ")";
       t.sign = list && {
         at,
-        all: "open run running stop switch on",
+        all: "open run running stop switch on check checked",
+        circle: mask("M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"),
+        tick: mask("M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"),
         chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
         play: mask("M8,5.14V19.14L19,12.14L8,5.14Z"),
         stop: mask("M18,18H6V6H18V18Z"),
@@ -151,10 +177,11 @@ origami_tiles:
       ${card._orgTi.list ? `--org-sign-col: ${card._orgTi.slim ? "var(--icon-size-s)" : "var(--tile-size)"};
       --org-sign-size: ${card._orgTi.slim ? "var(--icon-size-s)" : "var(--icon-size-m)"};
       --org-sign-gap: ${card._orgTi.slim ? "var(--ha-space-3)" : "var(--ha-space-2)"};
+      --org-list-pad: ${card._orgTi.panel ? "var(--ha-space-2)" : "0px"};
       box-sizing: border-box;
-      padding: var(--ha-space-2);
+      padding: var(--org-list-pad);
       border-radius: var(--ha-card-border-radius);
-      background-color: var(--tile-background, var(--fill-subtle));` : ""}
+      background-color: ${card._orgTi.panel ? "var(--tile-background, var(--fill-subtle))" : "transparent"};` : ""}
     }
     ${card._orgTi.free ? `
     /* A tile without an icon shows its name and state, and its lane stays with it */
@@ -172,8 +199,8 @@ origami_tiles:
       min-width: 0 !important;
       height: auto !important;
       min-height: var(--org-row-min) !important;
-      padding: ${card._orgTi.list ? "var(--ha-space-2)" : "var(--ha-space-4)"} !important;
-      border-radius: ${card._orgTi.list ? "calc(var(--ha-card-border-radius) - var(--ha-space-2))" : "var(--ha-card-border-radius)"} !important;
+      padding: ${card._orgTi.list ? "var(--ha-space-2) var(--org-list-pad)" : "var(--ha-space-4)"} !important;
+      border-radius: ${!card._orgTi.list ? "var(--ha-card-border-radius)" : card._orgTi.panel ? "calc(var(--ha-card-border-radius) - var(--ha-space-2))" : "calc(var(--org-row-min) * var(--radius-ratio, 0.35))"} !important;
       background-color: ${card._orgTi.list ? "transparent" : "var(--tile-background, var(--fill-subtle))"} !important;
       color: var(--primary-text-color) !important;
       transition: var(--transition-interactive) !important;
@@ -245,13 +272,13 @@ origami_tiles:
     }
     /* The sign at a row's end is an icon in the middle of a column as wide as the icons' column on the other side. It is quiet, and it stands out while what it controls is on or runs. */
     ${card._orgTi.sign.at(card._orgTi.sign.all)} {
-      padding-inline-end: calc(var(--ha-space-2) + var(--org-sign-col) + var(--org-sign-gap)) !important;
+      padding-inline-end: calc(var(--org-list-pad) + var(--org-sign-col) + var(--org-sign-gap)) !important;
     }
     ${card._orgTi.sign.at(card._orgTi.sign.all, "::after")} {
       content: "";
       position: absolute;
       top: 50%;
-      inset-inline-end: calc(var(--ha-space-2) + (var(--org-sign-col) - var(--org-sign-size)) / 2);
+      inset-inline-end: calc(var(--org-list-pad) + (var(--org-sign-col) - var(--org-sign-size)) / 2);
       width: var(--org-sign-size);
       height: var(--org-sign-size);
       translate: 0 -50%;
@@ -280,9 +307,44 @@ origami_tiles:
     ${card._orgTi.sign.at("on", "::after")} {
       --org-sign-icon: ${card._orgTi.sign.on};
     }
-    ${card._orgTi.sign.at("running stop on", "::after")} {
+    ${card._orgTi.sign.at("check", "::after")} {
+      --org-sign-icon: ${card._orgTi.sign.circle};
+    }
+    ${card._orgTi.sign.at("checked", "::after")} {
+      --org-sign-icon: ${card._orgTi.sign.tick};
+    }
+    ${card._orgTi.sign.at("running stop on checked", "::after")} {
       background-color: var(--primary-text-color);
       opacity: 1;
+    }
+    /* A row with a check is a choice, and its state is a quiet hint next to the check */
+    ${card._orgTi.sign.at("check checked", " .bubble-sub-button-name-container::after")} {
+      font-weight: var(--ha-font-weight-normal);
+    }
+    /* A row that waits after a tap shows the sign it is about to get, faded and without taps */
+    .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
+      opacity: var(--opacity-muted) !important;
+      pointer-events: none !important;
+    }
+    ${card._orgTi.sign.at("check", ".org-pending-on::after")} {
+      --org-sign-icon: ${card._orgTi.sign.tick};
+    }
+    ${card._orgTi.sign.at("checked", ".org-pending-off::after")} {
+      --org-sign-icon: ${card._orgTi.sign.circle};
+    }
+    ${card._orgTi.sign.at("switch", ".org-pending-on::after")} {
+      --org-sign-icon: ${card._orgTi.sign.on};
+    }
+    ${card._orgTi.sign.at("on", ".org-pending-off::after")} {
+      --org-sign-icon: ${card._orgTi.sign.off};
+    }
+    ${card._orgTi.sign.at("check switch", ".org-pending-on::after")} {
+      background-color: var(--primary-text-color);
+      opacity: 1;
+    }
+    ${card._orgTi.sign.at("checked on", ".org-pending-off::after")} {
+      background-color: var(--secondary-text-color);
+      opacity: var(--opacity-muted);
     }
     ${card._orgTi.lines ? `
     /* With dividers, each shown row after another shown row draws the line above it. The line spans the row's content, and the content keeps the same space to the line above as to the line below. */
@@ -290,7 +352,8 @@ origami_tiles:
       min-height: calc(var(--org-row-min) + var(--org-line-width)) !important;
       padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
       background-image: linear-gradient(var(--org-line-color), var(--org-line-color)) !important;
-      background-size: calc(100% - 2 * var(--ha-space-2)) var(--org-line-width) !important;
+      background-size: calc(100% - 2 * var(--org-list-pad)) var(--org-line-width) !important;
       background-position: center top !important;
       background-repeat: no-repeat !important;
+      ${card._orgTi.panel ? "" : "border-radius: calc((var(--org-row-min) + var(--org-line-width)) * var(--radius-ratio, 0.35)) !important;"}
     }` : ""}` : ""}

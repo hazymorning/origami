@@ -63,9 +63,9 @@ window.__check = async () => {
         }
         if (clipped) continue;
         count++;
-        // The card itself keeps a card's radius at any height
+        // The card itself keeps a card's radius at any height, except a standalone slider, whose card is its track and follows the rule for its height
         const cb = card.haCard.getBoundingClientRect();
-        const own = near(b.width, cb.width, 1) && near(b.height, cb.height, 1) ? cardRadius : Math.min(h * ratio, cardRadius);
+        const own = near(b.width, cb.width, 1) && near(b.height, cb.height, 1) && !card.haCard.hasAttribute('data-org-track') ? cardRadius : Math.min(h * ratio, cardRadius);
         const round = r >= h / 2 - 0.5;
         const allowedRound = (toggle && el.closest('.bubble-sub-button')) || h <= 16;
         if (!(near(r, own) || (nested !== null && near(r, nested)) || (round && allowedRound))) {

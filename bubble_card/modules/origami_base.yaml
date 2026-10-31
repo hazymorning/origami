@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.6.0"
+  version: "13.7.0"
   is_global: true
   supported:
     - button
@@ -519,8 +519,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), and 13.3 added the height of a slider in a row with a name in --org-row-slider-h.
-        version: 13.3,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, and 13.4 added pending().
+        version: 13.4,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -590,6 +590,35 @@ origami_base:
             job();
           });
           queue.set(key, fn);
+        },
+        // pending() shows a tapped bottom sub-button with the look it is about to get until its look changes or 10 seconds pass, for Button and Tiles. on lists the numbers of the sub-buttons that look on now, and wait the numbers of those that wait after a tap. The module styles .org-pending-on and .org-pending-off.
+        pending: (on, wait) => {
+          const st = card._orgPending ?? (card._orgPending = { pend: new Map() });
+          st.on = on;
+          st.wait = wait;
+          const at = (n) => card.querySelector(".bubble-sub-button-bottom-container .bubble-sub-button-" + n);
+          const mark = (el, p) => {
+            el?.classList.toggle("org-pending-on", !!p && !p.was);
+            el?.classList.toggle("org-pending-off", !!p && p.was);
+          };
+          st.pend.forEach((p, n) => {
+            if (on.includes(n) !== p.was || Date.now() > p.until || !wait.includes(n)) st.pend.delete(n);
+          });
+          card.querySelectorAll(".bubble-sub-button-bottom-container :is(.org-pending-on, .org-pending-off)").forEach((el) => mark(el, null));
+          st.pend.forEach((p, n) => mark(at(n), p));
+          // Bubble Card runs a tap through a hass-action event, so a tap on a sub-button marks it there
+          if (!st.listen) {
+            st.listen = true;
+            card.addEventListener("hass-action", (e) => {
+              const el = e.composedPath().find((x) => x.classList?.contains("bubble-sub-button"));
+              const n = Number(el?.className.match(/bubble-sub-button-(\d+)/)?.[1]);
+              if (e.detail?.action !== "tap" || !st.wait.includes(n)) return;
+              const p = { was: st.on.includes(n), until: Date.now() + 10000 };
+              st.pend.set(n, p);
+              mark(el, p);
+              setTimeout(() => { if (st.pend.get(n) === p) { st.pend.delete(n); mark(el, null); } }, 10000);
+            });
+          }
         },
         // readouts() writes a text into each sub-button with css_class readout, or another class, made by text() from that sub-button's own entity
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {
