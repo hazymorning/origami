@@ -2,12 +2,24 @@
 
 These rules are for work on Origami itself: its modules, theme, dashboard and docs in the hazymorning/origami repository. They hold what the code alone does not show, and coding agents follow them too.
 
+## Handing files to the user
+
+The user tests every change on a phone, in their own Home Assistant. Every round that changes a file the user has to paste, such as a module, a card, a pop-up or a script, ends the same way:
+
+- All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
+- The user keeps their own setup in step with the repository. A file counts as changed when its text differs from the version the user has, also after a cleanup that changes nothing they see. A file whose text is the same stays off the page.
+- Each file on the page says in one line what changed in it, such as a cleanup that looks and works the same, so the user knows why it is there.
+- The same page is updated for every round, so its link stays the same, and the reply gives that link.
+- Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
+- Replies put the important parts, such as a cause, a change the user has to make or the link to the page, in large headings, so the user sees them at once on the phone.
+
 ## The idea
 
 Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
 
 - Prefer a clean solution with what Home Assistant and Bubble Card offer over a workaround.
 - Every part works on its own and says what it needs.
+- Less is more. A feature never adds a new sensor, helper or script while Bubble Card, the modules or a template in the card itself can do it, even with a few more sub-buttons or a little JavaScript in the card. A tap that needs a value from a template becomes one sub-button for each value, each with its own fixed action, shown or hidden by `hidden`. Only when there is no other way does an existing sensor or script grow, and a new one comes last.
 
 ## For everyone
 
@@ -27,19 +39,24 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 ## README from 3.0
 
-The README is the main documentation and shows the finished result. People scroll through it and pick the parts they want, so it has to be easy to scan.
+The README is the main documentation, and it is written for people. Most readers are beginners who scroll through it and pick the parts they like, so it has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
 
-- It is a series of short sections in the order of the dashboard, one per part. Each section starts with its image, and the images show what the part does.
-- Below each image, one or two sentences say what the part is. Everything else, such as setup steps, YAML, options and the entities to replace, sits in collapsed `<details>` blocks. There are no walls of text.
-- The core setup comes first: the theme, the font and the modules, which give every part the Origami look.
-- Each part says clearly what it needs. First what it needs to work, such as other cards, integrations, helpers and scripts, with links to its files. Then what it needs for the Origami look, which is the theme and the modules it uses.
-- No section depends on another one, except the core setup.
+- It folds. At first glance, each part is its image, its name and one or two sentences. Everything else sits in folded `<details>` blocks, so people open what they want on purpose. Every part uses the same blocks in the same order, and the first part that gets written sets them.
+- Each step, explanation and term lives in one place, and other places link there. Installing the theme, the font and the modules is explained once, in the core setup at the top.
+- A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again. History and reasons stay out, and how a module works inside belongs in the module reference.
+- It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
+- Each part says what it needs to work, such as cards, integrations, helpers and scripts, with links to its files. Then it says what it needs for the Origami look. No part depends on another one, except the core setup.
+
+The README is done when the rule checks pass and every claim matches the files. Then the maintainer reads it from top to bottom, and someone who doesn't know Origami sets up the core and one part with nothing but the README.
 
 ## Building
 
 A new custom card is often the easiest path for an agent, but it is rarely the right one here. Home Assistant and Bubble Card should do as much as possible.
 
 - Build with Bubble Card's card types and the Origami modules, the other cards that the dashboard already uses and Home Assistant's own features, such as template sensors and scripts. If Bubble cards need a new look or behavior, write or extend a module, even when a custom card would be faster.
+- All modules follow one design logic. The theme's tokens and Base's sizes set every radius, gap, line and shadow, and `themes/origami.yaml` explains the corner rule. A module uses those instead of its own values, and the design checks measure the result.
+- Shared code lives in Base, and no module repeats what Base or another module already does. Less code keeps the dashboard fast.
+- Grouping speakers always uses the link icon, `mdi:link-variant`, as the badge of a group member does. Speaker icons stand for choosing a speaker, so a control that groups never uses one.
 - Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
 - Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
 
@@ -50,6 +67,7 @@ Two checks keep the rules that a script can measure. Run them before each commit
 - `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules. It takes a second.
 - `node .github/bench/bench.mjs` renders example cards with the modules and the theme in Chromium and measures the design rules, such as corners, row ends, the end column and line widths. It takes a few seconds. Run `npm ci` and `npx playwright install chromium` in `.github/bench` once before.
 - `node .github/bench/bench.mjs shot <scenario.yaml> <folder>` takes screenshots of any cards, such as the user's own, which stay outside the repository.
+- `node .github/bench/compare.mjs [--ref <commit>] <scenario.yaml ...>` renders scenarios with the modules of a commit and with the working tree, and compares every element's style and the pixels. A change that should look the same, such as a cleanup, is done only when every render is the same. `python3 .github/bench/options.py <folder>` writes scenarios with every module option alone and in the pairs that interact, and the user's own cards belong in the comparison too.
 
 A failing check means that the change breaks a rule. Fix the change, not the check. A check changes only with its rule, and a new design rule gets a check in `.github/bench/checks.js` and an example card in `.github/bench/sheet.yaml`.
 
@@ -75,15 +93,23 @@ Commit messages, PR titles and the README stay plain.
 
 ## Writing
 
-All text is short, plain English, the way a person would write it. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
+All text is written for people: short, plain English, the way you'd explain something to a friend next to you. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
+- Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
+- No text about the text, such as `this section explains` or `the first three are`. Headings already say what follows.
+- No buzzwords, tech slang, filler or metaphors, such as `seamless`, `under the hood`, `swap`, `squash a bug` or `simply`. `check_rules.py` has the full list.
 - Leave out test logs, earlier attempts and measurements, unless the reader needs the number.
 - When a text changes, rewrite it instead of adding to it.
-- Short list items and colons are fine. Avoid dashes, semicolons and exclamation marks.
-- No first person, buzzwords, marketing words, idioms or metaphors, such as seamless, powerful, under the hood or out of the box.
+- Short list items and colons are fine. Avoid dashes, semicolons, exclamation marks and the first person.
 - A module's description has 50 words at most. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
-- Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
+- Check every claim against the files before writing it. The entities are examples from one home, so say what is optional.
+
+| Instead of | Write |
+| --- | --- |
+| Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
+| The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or your browser still shows an old version of the page. |
+| The room's climate sensor writes `temp_rank`, and the Table module gives every cell in its column this icon. | The warmest and the coldest room get an arrow. |
 
 ## Commits and pull requests
 

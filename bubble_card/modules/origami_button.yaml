@@ -1,9 +1,10 @@
 origami_button:
   name: "Origami • Button"
-  version: "1.0.1"
+  version: "3.9.5"
   supported:
     - sub-buttons
-  description: "The Button module creates rows and grids of buttons on a sub-buttons card. Put every button in the bottom list under sub_button, and turn on show_name for each one. With Background on, the buttons are filled. With Background off, they are plain text. Setting Columns to 0 sizes the buttons to their text, and 1 to 6 creates an even grid. Active takes a template or plain text and highlights every button whose name or css_class matches it. Separate several values with commas. A button whose entity is on is also highlighted."
+    - button
+  description: "Button turns the bottom sub-buttons of a sub-buttons or button card into rows, grids, chips, segmented bars, labeled tiles or a scrolling row. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
   editor:
     - name: background
       label: "Background"
@@ -16,11 +17,11 @@ origami_button:
         select:
           mode: dropdown
           options:
-            - label: Left
+            - label: Start
               value: start
             - label: Center
               value: center
-            - label: Right
+            - label: End
               value: end
       default: start
     - name: columns
@@ -33,7 +34,7 @@ origami_button:
           mode: box
       default: 0
     - name: muted
-      label: "Muted"
+      label: "Dimmed text and icons"
       selector:
         boolean: {}
       default: false
@@ -51,6 +52,10 @@ origami_button:
       label: "Active button (template or text)"
       selector:
         template: {}
+    - name: color
+      label: "Lamp color (a color, a map from the card entity's state or a template)"
+      selector:
+        template: {}
     - name: active_style
       label: "Active style"
       selector:
@@ -62,8 +67,57 @@ origami_button:
             - label: Toggle
               value: toggle
       default: lamp
-    - name: animate
-      label: "Fade in"
+    - name: segmented
+      label: "Segmented (true for all groups, or the names of groups that become small switches)"
+      selector:
+        text: {}
+    - name: chips
+      label: "Chips"
+      selector:
+        boolean: {}
+      default: false
+    - name: labels
+      label: "Labels"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Inside
+              value: inside
+            - label: Below
+              value: below
+      default: inside
+    - name: field_size
+      label: "Field size with labels below (such as 76px)"
+      selector:
+        text: {}
+      default: "var(--tile-size-lg)"
+    - name: outline
+      label: "Outlined button (template or text)"
+      selector:
+        template: {}
+    - name: start
+      label: "Button that starts the row (template or text)"
+      selector:
+        template: {}
+    - name: pending
+      label: "Show a tapped button's next look until its state changes"
+      selector:
+        boolean: {}
+      default: false
+    - name: label_size
+      label: "Segment label size"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Large
+              value: large
+            - label: Normal
+              value: normal
+      default: large
+    - name: scroll
+      label: "Scroll sideways"
       selector:
         boolean: {}
       default: false
@@ -74,141 +128,360 @@ origami_button:
       default: true
   code: |
     ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13.4)) throw new Error("origami_button needs origami_base 13.4 or later");
       const cfg = this.config.origami_button ?? {};
-      const norm = (v) => String(v ?? "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-      const raw = cfg.active ? String((typeof renderTemplate === "function" ? renderTemplate(cfg.active) : cfg.active) ?? "").trim() : "";
-      let list = [];
-      if (raw.startsWith("[")) {
-        try { list = JSON.parse(raw); } catch (e) { list = [raw]; }
-      } else if (raw) {
-        list = raw.split(",");
-      }
-      const classes = (Array.isArray(list) ? list : [list]).map(norm).filter(Boolean);
+      const lang = hass.locale?.language ?? hass.language ?? "en";
+      // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
+      const low = (v) => String(v ?? "").trim().toLocaleLowerCase(lang);
+      const { env, ctx } = org;
+      // pick() reads active, outline or start as a list of names, css classes or entity IDs, and hit() tells whether a button matches such a list
+      const pick = (v) => {
+        const raw = String(org.value(env, v, ctx) ?? "").trim();
+        let list = [];
+        if (raw.startsWith("[")) {
+          try { list = JSON.parse(raw); } catch (e) { list = [raw]; }
+        } else if (raw) {
+          list = raw.split(",");
+        }
+        const want = (Array.isArray(list) ? list : [list]).map(low).filter(Boolean);
+        return { want, slugs: want.map(org.slug).filter(Boolean) };
+      };
+      const hit = (item, m) => {
+        if (!m.want.length) return false;
+        const names = [item.name, item.css_class].filter((v) => ["string", "number"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v))).map(String);
+        return names.some((v) => m.want.includes(low(v)) || m.slugs.includes(org.slug(v))) || org.targets(item).map(low).some((v) => m.want.includes(v));
+      };
+      const want = pick(cfg.active);
+      // segmented is true for one bar of all groups. A list of group names makes only those groups small segmented switches, which can sit in any row.
+      const segRaw = cfg.segmented;
+      const seg = segRaw === true || (!Array.isArray(segRaw) && org.yes(segRaw));
+      const segNames = seg ? [] : [].concat(segRaw ?? []).flatMap((v) => String(v).split(",")).map(low).filter((v) => v && v !== "false");
+      // On a button card, the main sub-buttons come before the bottom ones, and Button leaves them to Base
+      const own = this.config.card_type === "sub-buttons";
+      const { mains, bottom } = org.layout(this.config);
+      const bars = bottom.filter((x) => x.group && segNames.includes(low(x.name))).map((x) => ({ name: low(x.name), n: x.n }));
+      const inBar = bars.flatMap((g) => g.n);
+      // A button is active when its name, its css_class or an entity its tap targets matches, when its tap sets what its entity shows now, or while its own entity is on. Its own on key decides before all of these.
+      const lamps = [];
+      const subs = org.subs(env, this.config, "origami_button").filter(({ n }) => n > mains);
+      // A button waits only while its look can change. A tap that only opens something never changes it, and segments show their choice at once. A button's own pending key decides for that button.
+      const keyed = (opt, k) => !!opt && k in opt;
+      const changes = (opt, item) => keyed(opt, "on") || !!item.entity || cfg.active !== undefined || org.matches(hass, item, item.entity ?? entity) !== null;
+      const pendingOn = (opt, item, n) => !seg && !inBar.includes(n) && ![...org.links, "none"].includes(org.act(item).action) && (keyed(opt, "pending") ? org.yes(opt.pending) : !!cfg.pending && changes(opt, item));
+      const active = subs.map(({ n, item, opt }) => {
+        const mine = item.entity ? org.look(hass, item.entity) : null;
+        // A button whose own entity is on takes that entity's state color as its lamp
+        if (mine?.lit) lamps.push([n, mine.color]);
+        if (keyed(opt, "on") || org.yes(opt?.disabled)) return org.why(hass, item, item.entity ?? entity, opt) ? n : 0;
+        const named = hit(item, want);
+        // A tap that sets a value lights the button while its entity has that value. Otherwise, a button with an entity of its own and a background follows Base's rule for that entity.
+        const r = org.why(hass, item, item.entity ?? entity);
+        return named || r === "set" || (r !== null && !!item.entity && item.show_background !== false) ? n : 0;
+      }).filter(Boolean);
+      // pending shows a tapped button with the look it is about to get, at reduced opacity and without taps, until its state changes or 10 seconds pass
+      org.pending(active, subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n));
+      const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
-      const sel = [base + ".background-on"].concat(classes.map((c) => base + "." + CSS.escape(c)));
-      const align = ["start", "center", "end"].includes(cfg.align) ? cfg.align : "start";
-      const cols = Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
+      const at = (n) => base + ".bubble-sub-button-" + n;
+      // Base's sub_button_height and sub_button_text_size set the buttons' height and the size of their text, as on Base's own cards
+      const opts = org.opts ?? {};
+      // A button without a name or a state of its own shows only its icon, and it is a square
+      const bare = subs.filter(({ n, item, opt }) => !org.shows(item) && !org.has(opt?.name) && org.slug(item.css_class) !== "divider" && !inBar.includes(n)).map(({ n }) => at(n));
+      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => at(n) + ":not(.org-pending-off)"), base + ".org-pending-on"];
+      const chips = !!cfg.chips;
+      const scroll = !!cfg.scroll && !seg;
+      // With labels below, each button is a large icon field with its name under it, as for scenes
+      const below = cfg.labels === "below" && !seg;
+      // Segments fill one row and center their content, and a scrolling row is a single line, so both ignore Columns
+      const align = seg ? "center" : ["start", "center", "end"].includes(cfg.align) ? cfg.align : "start";
+      const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
-      const size = String(cfg.icon_size ?? "").trim();
+      const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
+      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default
+      const field = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim() || "var(--tile-size-lg)";
+      // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
+      const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", opts.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
+      // A small segmented switch is a track around its group, and its active segment is filled like a segment of a whole bar
+      const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
+      // In a row that does not scroll, a switch fills the free width and its segments share it
+      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle);}\n    "
+        + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; }").join("\n    ");
+      const barOn = bars.flatMap((g) => g.n.filter((n) => active.includes(n)).map((n) => bar(g) + " > .bubble-sub-button.bubble-sub-button-" + n));
+      // A divider is a short line between two buttons, and it shows while its group shows
+      const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => at(n));
+      // outline rings the matching buttons that are not active, such as the scene for the time of day
+      const ring = pick(cfg.outline);
+      const rings = subs.filter(({ n, item }) => !active.includes(n) && hit(item, ring)).map(({ n }) => at(n) + (below ? " .bubble-sub-button-icon:not(.hidden)" : ""));
+      // start lets the row begin at the matching button, and the buttons before it follow at the end, as in a cycle of scenes for the times of day
+      const seq = bottom.flatMap((x) => x.n);
+      const first = pick(cfg.start);
+      const s = seq.findIndex((n) => hit(subs.find((x) => x.n === n)?.item ?? {}, first));
+      // A button card leaves its own row, its main sub-buttons and their fill to Base
+      if (!own && card.dataset.orgFill !== "bottom") card.dataset.orgFill = "bottom";
       card._orgB = {
+        own,
+        below,
+        rings,
+        order: s < 0 ? "" : seq.map((n, i) => at(n) + " { order: " + ((i - s + seq.length) % seq.length) + "; }").join("\n    "),
         bg: cfg.background ?? true,
         muted: !!cfg.muted,
-        toggle: cfg.active_style === "toggle",
-        animate: !!cfg.animate,
+        // The active segment is filled like the Toggle style
+        toggle: seg || cfg.active_style === "toggle",
+        seg,
+        scroll,
+        chips,
+        active,
+        bars: barCss,
+        barOn,
+        dividers,
         press: cfg.press ?? true,
+        large: cfg.label_size !== "normal",
+        // The Lamp style tints active buttons in the lamp color, or in the state color of a button's own entity
+        lamp: lamp || "var(--lamp-color)",
+        lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => at(n) + " { --org-btn-lamp: " + c + "; }").join("\n    "),
         cols,
+        values,
         pad: pad || "0",
-        size: size || "var(--icon-size-2xs)",
-        row: { start: "flex-start", center: "center", end: "flex-end" }[align],
+        size,
+        field,
+        height: opts.sub || "",
+        text: opts.text || "",
+        bare,
+        row: (scroll && align !== "start" ? "safe " : "") + { start: "flex-start", center: "center", end: "flex-end" }[align],
         rev: { start: "flex-end", center: "center", end: "flex-start" }[align],
-        active: sel.join(",\n    ")
+        // on() adds each suffix it receives to every active button's selector and joins the results into one list
+        on: (...ends) => org.each(sel, ...ends)
       };
       return "";
     })()}
     ha-card {
-      --org-btn-height: ${card._orgB.bg ? "var(--control-height-icon)" : "auto"};
-      --org-btn-padding: ${card._orgB.bg ? "0 var(--ha-space-4)" : "var(--ha-space-2) var(--ha-space-4)"};
-      --org-btn-bg: ${card._orgB.bg ? "var(--fill-subtle)" : "transparent"};
+      --org-btn-height: ${card._orgB.seg ? card._orgB.height || "var(--control-height)" : card._orgB.bg ? card._orgB.height || "var(--control-height-icon)" : "auto"};
+      /* A button's sides have 40 % of its height as padding, which is 16 px on a 40 px button */
+      --org-btn-padding: ${card._orgB.seg ? "0 var(--ha-space-2)" : card._orgB.bg ? "0 calc(var(--org-btn-height) * 0.4)" : "var(--ha-space-2) var(--ha-space-4)"};
+      --org-btn-bg: ${card._orgB.bg || card._orgB.seg ? "var(--fill-subtle)" : "transparent"};
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
+      --org-btn-field: ${card._orgB.field};
+      --org-btn-lamp: ${card._orgB.lamp};
+      --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
     }
-    ha-card .bubble-container {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      padding: ${card._orgB.pad} !important;
-      box-sizing: border-box !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-    ha-card .bubble-container > .bubble-sub-button-container {
-      display: none !important;
-    }
+    ${card._orgB.lamps}
+    ${card._orgB.values}
+    ${card._orgB.order}
+    ${card._orgB.own ? card._org.unframe(card._orgB.pad) : ""}
     ha-card .bubble-sub-button-bottom-container {
       position: static !important;
       inset: auto !important;
-      width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      gap: var(--ha-space-2) !important;
+      gap: ${card._orgB.seg ? "0" : "var(--ha-space-2)"} !important;
       pointer-events: auto !important;
       ${card._orgB.cols ? `display: grid !important;
       grid-template-columns: repeat(${card._orgB.cols}, minmax(0, 1fr)) !important;` : `display: flex !important;
-      flex-wrap: wrap !important;
+      flex-direction: row !important;
+      flex-wrap: ${card._orgB.seg || card._orgB.scroll ? "nowrap" : "wrap"} !important;
       justify-content: ${card._orgB.row} !important;`}
-      ${card._orgB.animate ? `opacity: 0;
-      transform: translateY(10px);
-      animation: origami-button-in var(--duration-slow) ease-in forwards;` : ""}
-    }
-    @keyframes origami-button-in {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane,
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(.hidden) {
       display: contents !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
-      box-sizing: border-box !important;
-      ${card._orgB.cols ? "width: auto !important;" : "flex: 0 0 auto !important;\n      width: auto !important;"}
+      ${card._orgB.cols ? "" : `flex: ${card._orgB.seg ? "1 1 0" : "0 0 auto"} !important;`}
+      ${card._orgB.below ? "flex-direction: column !important;" : ""}
+      width: ${card._orgB.below && !card._orgB.cols ? "calc(var(--org-btn-field) + var(--ha-space-2))" : "auto"} !important;
       min-width: 0 !important;
-      height: var(--org-btn-height) !important;
-      padding: var(--org-btn-padding) !important;
-      justify-content: ${card._orgB.rev} !important;
-      align-items: center !important;
+      height: ${card._orgB.below ? "auto" : "var(--org-btn-height)"} !important;
+      padding: ${card._orgB.below ? "0" : "var(--org-btn-padding)"} !important;
+      justify-content: ${card._orgB.below ? "flex-start" : card._orgB.rev} !important;
       gap: 0 !important;
-      border-radius: var(--radius-inner) !important;
-      background: var(--org-btn-bg) !important;
-      box-shadow: none !important;
-      color: var(--secondary-text-color) !important;
+      border-radius: ${card._orgB.seg ? "0" : "var(--org-btn-radius)"} !important;
+      background: ${card._orgB.below ? "none" : "var(--org-value-chip, var(--org-btn-bg))"} !important;
+      color: ${card._orgB.seg || card._orgB.chips || card._orgB.below ? "var(--primary-text-color)" : "var(--secondary-text-color)"} !important;
       font-size: var(--ha-font-size-m) !important;
-      white-space: nowrap !important;
       transition: var(--transition-interactive) !important;
+      ${card._orgB.seg ? "isolation: isolate;" : ""}
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right {
       justify-content: ${card._orgB.row} !important;
+      ${card._orgB.chips ? "padding-inline-end: calc(var(--org-btn-height) * 0.3) !important;" : ""}
     }
-    ${card._orgB.press ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
+      height: auto !important;
+      min-height: calc(2 * var(--org-btn-height)) !important;
+      padding: var(--ha-space-3) var(--ha-space-2) !important;
+      justify-content: center !important;
+      gap: var(--ha-space-2) !important;
+    }
+    ${!card._orgB.press ? "" : card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
+      --org-btn-bg: var(--fill-strong);
+      --org-value-chip: var(--fill-strong);
+    }` : `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       transform: scale(var(--press-scale));
-    }` : ""}
+    }`}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-name-container {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap !important;
-      font-size: var(--ha-font-size-s) !important;
-      font-weight: var(--ha-font-weight-medium) !important;
-      color: inherit !important;
+      font-size: ${card._orgB.text || (card._orgB.seg ? (card._orgB.large ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : card._orgB.below ? "var(--ha-font-size-m)" : "var(--ha-font-size-s)")} !important;
+      font-weight: ${card._orgB.seg ? "var(--ha-font-weight-bold)" : "var(--ha-font-weight-medium)"} !important;
+      ${card._orgB.seg ? "font-variant-numeric: tabular-nums;" : ""}
+      ${card._orgB.below ? "max-width: 100%;\n      margin-top: var(--ha-space-3) !important;" : ""}
       opacity: var(--org-btn-opacity) !important;
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
-      display: block !important;
+      display: ${card._orgB.below ? "flex" : "block"} !important;
       flex-shrink: 0;
       --mdc-icon-size: var(--org-btn-icon-size) !important;
-      margin: 0 var(--ha-space-2) 0 0 !important;
-      color: inherit !important;
-      opacity: var(--org-btn-opacity) !important;
+      ${card._orgB.below ? `align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      order: -1;
+      width: 100% !important;
+      height: var(--org-btn-field) !important;
+      margin: 0 !important;
+      border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
+      background: var(--org-value-chip, var(--org-btn-bg));` : "margin-inline: 0 var(--ha-space-2) !important;"}
+      color: ${card._orgB.chips ? "var(--secondary-text-color)" : "inherit"} !important;
+      opacity: ${card._orgB.seg ? "calc(var(--org-btn-opacity) * var(--opacity-strong))" : "var(--org-btn-opacity)"} !important;
+      ${card._orgB.below ? "transition: var(--transition-interactive);" : ""}
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-      margin: 0 0 0 var(--ha-space-2) !important;
+      margin-block: 0 !important;
+      margin-inline: var(--ha-space-2) 0 !important;
     }
-    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden) {
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon.icon-without-state:not(.hidden),
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-icon:not(.hidden) {
       margin: 0 !important;
     }
-    ${card._orgB.active} {
-      ${card._orgB.bg ? (card._orgB.toggle ? "background: var(--toggle-on) !important;" : "background: var(--lamp-tint) !important;") : ""}
-      color: ${card._orgB.toggle ? "var(--ha-card-background)" : "var(--primary-text-color)"} !important;
+    ${card._orgB.chips ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
+      margin-inline: var(--ha-space-1) 0 !important;
+    }` : ""}
+    ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:first-child, :nth-child(1 of .bubble-sub-button:not(.hidden))) {
+      border-start-start-radius: var(--org-btn-radius) !important;
+      border-end-start-radius: var(--org-btn-radius) !important;
     }
-    ${card._orgB.active.split(",\n    ").map((s) => s + " .bubble-sub-button-icon:not(.hidden)").join(",\n    ")} {
-      color: ${card._orgB.toggle ? "var(--ha-card-background)" : "var(--lamp-color)"} !important;
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
+      border-start-end-radius: var(--org-btn-radius) !important;
+      border-end-end-radius: var(--org-btn-radius) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:not(:is(:last-child, :nth-last-child(1 of .bubble-sub-button-group:not(.hidden)))) > .bubble-sub-button:is(:last-child, :nth-last-child(1 of .bubble-sub-button:not(.hidden))) {
+      margin-inline-end: var(--ha-space-3);
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:not(.hidden) ~ .bubble-sub-button::after {
+      content: "";
+      position: absolute;
+      inset-block: 25%;
+      inset-inline-start: 0;
+      width: var(--org-line-width);
+      background-color: var(--org-line-color);
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button::before {
+      --org-btn-inset: calc((var(--org-btn-height) - var(--control-height-row)) / 2);
+      content: "";
+      position: absolute;
+      inset: var(--org-btn-inset);
+      z-index: -1;
+      border-radius: calc(var(--org-btn-radius) - var(--org-btn-inset));
+      background-color: var(--fill-active);
+      opacity: 0;
+      transition: opacity var(--duration-normal) ease;
+    }
+    ${card._orgB.on("::before")} {
+      opacity: 1;
+    }
+    ${card._orgB.on("::after", " + .bubble-sub-button::after")} {
+      display: none;
+    }` : ""}
+    ${!card._orgB.bare.length || card._orgB.cols || card._orgB.seg ? "" : card._orgB.below ? `
+    /* A field without a name is a square, and no space for a name stays below it */
+    ${card._org.each(card._orgB.bare, "")} {
+      width: var(--org-btn-field) !important;
+    }
+    ${card._org.each(card._orgB.bare, " .bubble-sub-button-name-container")} {
+      display: none !important;
+    }` : card._orgB.bg ? `
+    /* A button with only its icon is a square, and a button that stacks its icon and name is as wide as it is tall */
+    ${card._org.each(card._orgB.bare, "")} {
+      width: var(--org-btn-height) !important;
+      padding: 0 !important;
+      justify-content: center !important;
+    }
+    ${card._org.each(card._orgB.bare, ":is(.content-icon-top, .content-icon-bottom)")} {
+      width: calc(2 * var(--org-btn-height)) !important;
+    }` : ""}
+    ${card._orgB.rings.length ? card._org.each(card._orgB.rings, "") + ` {
+      background: transparent !important;
+      box-shadow: inset 0 0 0 var(--org-line-width) var(--org-line-color) !important;
+    }` : ""}
+    ${card._orgB.bars}
+    ${card._orgB.barOn.length ? card._org.each(card._orgB.barOn, "") + ` {
+      background: var(--fill-active) !important;
+      color: var(--text-color-active) !important;
+    }
+    ` + card._org.each(card._orgB.barOn, " .bubble-sub-button-name-container") + ` {
+      font-weight: var(--ha-font-weight-bold) !important;
+    }` : ""}
+    ${card._orgB.dividers.length ? card._org.each(card._orgB.dividers, "") + ` {
+      flex: 0 0 var(--org-line-width) !important;
+      width: var(--org-line-width) !important;
+      min-width: var(--org-line-width) !important;
+      height: var(--icon-size-s) !important;
+      align-self: center;
+      margin-inline: var(--ha-space-1) !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: var(--org-line-color) !important;
+      pointer-events: none;
+    }
+    ` + card._org.each(card._orgB.dividers, ".hidden:not([style*='display: none'])") + ` {
+      display: flex !important;
+    }
+    ` + card._org.each(card._orgB.dividers, " > *") + ` {
+      display: none !important;
+    }` : ""}
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
+      opacity: var(--opacity-muted) !important;
+      pointer-events: none !important;
+    }
+    ${card._orgB.scroll && card._orgB.own ? `/* The row reaches past the card by its padding, so the buttons scroll to the screen's edge and their shadows show. The card reaches as far and lies over the cards around it, so only the buttons take taps, and a tap beside them reaches the card below, such as a slider. A swipe on a button still scrolls the row. */
+    ha-card {
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      width: auto !important;
+      margin: calc(-1 * var(--scroller-bleed)) !important;
+      padding: ${card._orgB.chips ? "var(--scroller-bleed)" : "var(--scroller-padding)"} !important;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      pointer-events: none !important;
+    }
+    ${card._org.fade(".bubble-sub-button-bottom-container", "var(--scroller-bleed)")}
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+      pointer-events: auto;
+    }` : ""}
+    ${card._orgB.scroll && !card._orgB.own ? `ha-card .bubble-sub-button-bottom-container {
+      box-sizing: border-box !important;
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 var(--ha-space-4) var(--ha-space-4) !important;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    ${card._org.fade(".bubble-sub-button-bottom-container", "var(--ha-space-4)")}` : ""}
+    ${card._orgB.on("")} {
+      ${card._orgB.seg || card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : card._orgB.bg ? "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;" : ""}
+      color: ${card._orgB.toggle && !card._orgB.below ? "var(--text-color-active)" : "var(--primary-text-color)"} !important;
+    }
+    ${card._orgB.on(" .bubble-sub-button-icon:not(.hidden)")} {
+      ${!card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;"}
+      color: ${card._orgB.toggle ? "var(--text-color-active)" : "var(--org-btn-lamp)"} !important;
       opacity: 1 !important;
     }
-    ${card._orgB.active.split(",\n    ").map((s) => s + " .bubble-sub-button-name-container").join(",\n    ")} {
+    ${card._orgB.on(" .bubble-sub-button-name-container")} {
       opacity: 1 !important;
-      ${card._orgB.toggle ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
+      ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }

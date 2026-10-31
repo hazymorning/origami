@@ -104,10 +104,10 @@ Open each repository in HACS. If HACS asks you to add the repository, select **A
 | Repository | Used for | Link |
 | --- | --- | --- |
 | [Origami](https://github.com/hazymorning/origami) | The theme | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme) |
-| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting, the server card, the room cards, the climate table and the buttons in the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
-| [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
+| [Paper Buttons Row](https://github.com/jcwillox/lovelace-paper-buttons-row) | The greeting and the fan pop-up | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=jcwillox&repository=lovelace-paper-buttons-row&category=plugin) |
+| [Bubble Card](https://github.com/Clooos/Bubble-Card) | The favorites, the section headers, the room cards and the pop-ups | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) |
 | [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) | Loading the Bubble Card modules | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration) |
-| [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
+| [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) | The navigation bar at the bottom, from version 1.8.0 | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) |
 | [Origami Notifications](https://github.com/hazymorning/origami_notifications) | The notifications next to the greeting | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_notifications&category=plugin) |
 | [Origami Weather](https://github.com/hazymorning/origami_weather) | The weather card | [Open in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_weather&category=plugin) |
 
@@ -324,7 +324,7 @@ cards:
       .texts { min-height: calc(var(--origami-tile) + 2 * var(--origami-pad)); }
       .slide { gap: var(--ha-space-1); }
       .icon {
-        border-radius: var(--radius-inner);
+        border-radius: calc(var(--origami-tile) * var(--radius-ratio, 0.35));
         background: color-mix(in srgb, var(--tile-color) var(--tint-strength), var(--ha-card-background, var(--card-background-color)));
         box-shadow: var(--ha-card-box-shadow, none);
       }
@@ -363,15 +363,9 @@ The menu comes from [Origami Header](https://github.com/hazymorning/origami_head
 <br>
 
 - The menu is an Origami Header card with `mode: menu`, and you decide what it contains. This example contains a server card and buttons for the File editor app, automations, the sidebar and edit mode. If you do not use the File editor app, change or delete the **Files** button.
-- The server card shows a status, the uptime, the processor load and the memory use. Tap the processor or memory value to open its details. Tap anywhere else on the card to open the server pop-up, which is not included yet.
-- The status consists of an icon and a short message. The icon shows the overall state, and the message gives the reason, for example **Backup due**.
-
-  | Icon | Meaning |
-  | --- | --- |
-  | Green check | Everything is fine. |
-  | Arrow in the accent color | Updates are available. |
-  | Orange | The disk is more than 80% full, the memory use is above 85%, the processor load is above 80%, the last automatic backup is older than 3 days, or System Monitor sends no data. |
-  | Red | The disk is more than 90% full, the memory use or processor load is above 95%, or the last automatic backup is older than 7 days. |
+- The server card is a Bubble card with the Base module, so it has the same tile and text styles as the other Bubble cards. It shows a short status message, the uptime, the processor load and the memory use. Tap the processor or memory value to open its details. Tap anywhere else on the card to open the server pop-up, which is not included yet.
+- The message names the most urgent problem, for example **Backup due**. A disk that is more than 90% full comes first. Next come a memory use or processor load above 95% and a last automatic backup that is older than 3 days. After these, the message names a disk above 80%, a memory use above 85% or a processor load above 80%. Without data from System Monitor, it says **No data**. Otherwise, it names the number of available updates or says **All good**.
+- The card's own styles place each value above its label, in the sizes of the card's name and state line.
 
 </details>
 
@@ -392,7 +386,7 @@ The menu comes from [Origami Header](https://github.com/hazymorning/origami_head
 
 <br>
 
-The menu is one Origami Header card with a Paper Buttons Row inside. It needs Origami Header, which step 5 of the [setup](#setup) installs, and Paper Buttons Row.
+The menu is one Origami Header card with a Bubble card inside. It needs Origami Header, which step 5 of the [setup](#setup) installs, and Bubble Card with the Origami modules.
 
 <!-- dashboard.yaml type=custom:origami-header-card -->
 
@@ -420,171 +414,90 @@ buttons:
     icon: mdi:pencil-outline
     special: edit
 cards:
-  type: custom:paper-buttons-row
-  extra_styles: '.flex-box:active { transform: scale(var(--press-scale)) }'
-  styles:
-    position: relative
-    gap: var(--ha-space-3)
-    padding: var(--ha-space-4) var(--ha-space-5) var(--ha-space-4) var(--ha-space-4)
-    background-color: var(--ha-card-background)
-    border-radius: var(--ha-card-border-radius)
-    box-shadow: var(--ha-card-box-shadow)
-  base_config:
-    layout: name|state
-    tooltip: false
-    styles:
-      button:
-        flex-direction: column
-        padding: 0px
-      name:
-        padding: 0px
-        white-space: nowrap
-        font-weight: var(--ha-font-weight-bold)
-        line-height: var(--ha-line-height-normal)
-      state:
-        padding: 0px
-        margin-top: var(--ha-space-1)
-        white-space: nowrap
-        font-size: 12px
-        font-weight: var(--ha-font-weight-medium)
-        line-height: var(--ha-line-height-condensed)
-        color: var(--secondary-text-color)
-  buttons:
-    # An invisible overlay opens the server pop-up when the card is tapped. CPU and RAM have their own tap actions.
-    - layout: name
-      name: ' '
-      tap_action:
-        action: navigate
-        navigation_path: '#popup_server'
-      styles:
-        button:
-          position: absolute
-          inset: 0px
-    # Status icon for ok, info (updates), warn and crit
-    - layout: icon
-      icon: mdi:check-bold
-      state: >-
-        {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
-        {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
-        {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
-        {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
-        {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
-        {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
-        {%- if s > 90 or r > 95 or c > 95 or a > 604800 -%}crit
-        {%- elif s > 80 or r > 85 or c > 80 or a > 259200 or (c < 0 and r < 0 and s < 0) -%}warn
-        {%- elif u > 0 -%}info
-        {%- else -%}ok
-        {%- endif -%}
-      state_icons:
-        info: mdi:arrow-up-thick
-        warn: mdi:exclamation-thick
-        crit: mdi:close-thick
-      state_styles:
-        info:
-          button:
-            color: var(--accent-color)
-        warn:
-          button:
-            color: var(--warning-color)
-        crit:
-          button:
-            color: var(--error-color)
-      tap_action:
-        action: none
-      styles:
-        button:
-          color: var(--success-color)
-          pointer-events: none
-        icon:
-          display: flex
-          align-items: center
-          justify-content: center
-          width: var(--control-height-icon)
-          height: var(--control-height-icon)
-          border-radius: var(--radius-inner)
-          background-color: currentColor
-          box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 12%, transparent)
-          --mdc-icon-size: var(--icon-size-xs)
-          --icon-primary-color: var(--text-color-active)
-    # Status text and uptime
-    - name: >-
-        {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
-        {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
-        {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
-        {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
-        {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
-        {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
-        {%- if s > 90 -%}Disk almost full
-        {%- elif r > 95 -%}Memory low
-        {%- elif c > 95 -%}CPU high
-        {%- elif a > 259200 -%}Backup due
-        {%- elif s > 80 -%}Disk almost full
-        {%- elif r > 85 -%}Memory low
-        {%- elif c > 80 -%}CPU high
-        {%- elif c < 0 and r < 0 and s < 0 -%}No data
-        {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
-        {%- else -%}All good
-        {%- endif -%}
-      state: >-
-        {%- set n = as_timestamp(states('sensor.system_monitor_last_boot'), default=none) -%}
-        {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
-        {%- if d < 0 -%}Uptime unknown
-        {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
-        {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
-        {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
-        {%- endif -%}
-      tap_action:
-        action: none
-      styles:
-        button:
-          flex: 1
-          min-width: 0px
-          align-items: flex-start
-          pointer-events: none
-        name:
-          max-width: 100%
-          overflow: hidden
-          text-overflow: ellipsis
-          font-size: var(--ha-font-size-l)
-        state:
-          max-width: 100%
-          overflow: hidden
-          text-overflow: ellipsis
-    # CPU and memory, colored when high
-    - name: >-
-        {%- set v = states('sensor.system_monitor_processor_use') | float(none) -%}
-        {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
-      state: CPU
-      tap_action:
-        action: more-info
-        entity: sensor.system_monitor_processor_use
-      styles:
-        button:
-          min-width: 44px
-          align-items: flex-end
-        name:
-          font-size: var(--ha-font-size-m)
-          font-variant-numeric: tabular-nums
-          color: >-
-            {%- set v = states('sensor.system_monitor_processor_use') | float(0) -%}
-            {{ 'var(--error-color)' if v > 95 else ('var(--warning-color)' if v > 80 else 'var(--primary-text-color)') }}
-    - name: >-
-        {%- set v = states('sensor.system_monitor_memory_usage') | float(none) -%}
-        {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
-      state: RAM
-      tap_action:
-        action: more-info
-        entity: sensor.system_monitor_memory_usage
-      styles:
-        button:
-          min-width: 44px
-          align-items: flex-end
-        name:
-          font-size: var(--ha-font-size-m)
-          font-variant-numeric: tabular-nums
-          color: >-
-            {%- set v = states('sensor.system_monitor_memory_usage') | float(0) -%}
-            {{ 'var(--error-color)' if v > 95 else ('var(--warning-color)' if v > 85 else 'var(--primary-text-color)') }}
+  # The server card. Its name gives the most urgent problem, and the line below it gives the uptime.
+  # A tap on CPU or RAM opens its details, and a tap anywhere else opens the server pop-up.
+  type: custom:bubble-card
+  card_type: button
+  button_type: state
+  entity: sensor.system_monitor_last_boot
+  icon: mdi:server
+  name: >-
+    {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
+    {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
+    {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
+    {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
+    {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
+    {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
+    {%- if s > 90 -%}Disk almost full
+    {%- elif r > 95 -%}Memory low
+    {%- elif c > 95 -%}CPU high
+    {%- elif a > 259200 -%}Backup due
+    {%- elif s > 80 -%}Disk almost full
+    {%- elif r > 85 -%}Memory low
+    {%- elif c > 80 -%}CPU high
+    {%- elif c < 0 and r < 0 and s < 0 -%}No data
+    {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
+    {%- else -%}All good
+    {%- endif -%}
+  state_content: >-
+    {%- set n = as_timestamp(states('sensor.system_monitor_last_boot'), default=none) -%}
+    {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
+    {%- if d < 0 -%}Uptime unknown
+    {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
+    {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
+    {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
+    {%- endif -%}
+  scrolling_effect: false
+  modules:
+    - origami_base
+  tap_action:
+    action: navigate
+    navigation_path: '#popup_server'
+  button_action:
+    tap_action:
+      action: navigate
+      navigation_path: '#popup_server'
+  sub_button:
+    main:
+      - entity: sensor.system_monitor_processor_use
+        name: >-
+          {%- set v = states('sensor.system_monitor_processor_use') | float(none) -%}
+          {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
+        show_name: true
+        show_icon: false
+        show_background: false
+        tap_action:
+          action: more-info
+      - entity: sensor.system_monitor_memory_usage
+        name: >-
+          {%- set v = states('sensor.system_monitor_memory_usage') | float(none) -%}
+          {{ ((v | round(0) | int) ~ ' %') if v is not none else '–' }}
+        show_name: true
+        show_icon: false
+        show_background: false
+        tap_action:
+          action: more-info
+  # Each value stands above its label, in the sizes of the card's name and state line
+  styles: |-
+    .bubble-sub-button {
+      flex-direction: column;
+      justify-content: center;
+    }
+    .bubble-sub-button-name-container {
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-bold);
+    }
+    .bubble-sub-button::after {
+      margin-top: var(--ha-space-1);
+      font-size: var(--ha-font-size-s);
+      color: var(--secondary-text-color);
+    }
+    .bubble-sub-button-1::after {
+      content: "CPU";
+    }
+    .bubble-sub-button-2::after {
+      content: "RAM";
+    }
 css: |-
   .scrim {
     backdrop-filter: blur(14px);
@@ -593,7 +506,7 @@ css: |-
       color-mix(in srgb, var(--primary-background-color) 28%, transparent);
   }
   .sheet {
-    padding: var(--ha-space-5) var(--ha-space-5) var(--ha-space-6, 24px) var(--ha-space-5);
+    padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px);
     gap: var(--ha-space-5);
     box-shadow: var(--ha-card-box-shadow);
   }
@@ -817,7 +730,7 @@ button_containers:
 
 ### Favorites
 
-The favorites are tiles for devices and tasks that are relevant at the moment. Most tiles appear only at certain times or in certain states. The tiles use Bubble Card with the [Header](bubble_card/README.md#header) and [Tiles](bubble_card/README.md#tiles) modules.
+The favorites are tiles for devices and tasks that are relevant at the moment. Most tiles appear only at certain times or in certain states. The tiles use Bubble Card with the [Base](bubble_card/README.md#base), [Header](bubble_card/README.md#header) and [Tiles](bubble_card/README.md#tiles) modules.
 
 <img width="800" alt="Six favorite tiles in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/favorites.webp">
 
@@ -867,6 +780,7 @@ type: custom:bubble-card
 card_type: separator
 name: Favorites
 modules:
+  - origami_base
   - origami_header
 origami_header:
   icon_size: var(--icon-size-m)
@@ -886,12 +800,13 @@ sub_button:
 
 The second card contains the tiles.
 
-<!-- dashboard.yaml modules.0=origami_tiles -->
+<!-- dashboard.yaml modules.1=origami_tiles -->
 
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
+  - origami_base
   - origami_tiles
 grid_options:
   columns: full
@@ -919,10 +834,7 @@ sub_button:
     - name: Fan
       entity: fan.bedroom
       icon: mdi:fan
-      origami_tiles:
-        state:
-          'on': ${attr.percentage} %
-          'off': 'Off'
+      state_content: percentage
       visibility:
         - condition: state
           entity: fan.bedroom
@@ -951,6 +863,7 @@ sub_button:
       origami_tiles:
         state: Dinner
         image: ${attr.recipe?.image}
+        image_size: 230%
       visibility:
         - condition: state
           entity: sensor.dinner
@@ -988,12 +901,12 @@ sub_button:
       force_icon: true
       origami_tiles:
         name: >-
-          ${(p => Number.isNaN(p) || p < 0 ? 'Error'
-          : ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
-          : p + ' %')(Math.round(states('number.robot_cleaning_progress')))}
+          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+          : Number.isNaN(p) ? '' : p < 0 ? 'Error'
+          : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
         state:
-          docked: 'Off'
-          idle: 'Off'
+          docked: ${word('off')}
+          idle: ${word('off')}
           cleaning: Vacuum
         order:
           cleaning: -1
@@ -1008,7 +921,7 @@ sub_button:
       icon: mdi:shower
       origami_tiles:
         name:
-          'on': ${minutesUntil('input_datetime.bath_time_end')} min
+          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
         state:
           'on': Running
           'off': Ready
@@ -1033,12 +946,9 @@ sub_button:
       icon: mdi:printer-outline
       origami_tiles:
         name:
-          'on': ${minutesUntil('input_datetime.printer_end')} min
+          'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
         state:
           'on': Running
-          'off': 'Off'
-        name_color:
-          'on': initial
       tap_action:
         action: toggle
       hold_action:
@@ -1058,7 +968,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-- Each room card is a single Paper Buttons Row. Tap anywhere on the card to open the room's [pop-up](#room).
+- Each room card is a Bubble card with the [Base module](bubble_card/README.md#base), whose [`vertical` option](bubble_card/README.md#name-under-the-icon) places the name under the icon. Tap anywhere on the card to open the room's [pop-up](#room), or hold it to open the details for the room's light.
 - The icon is colored while the room's light is on.
 - Below the name, a colored dot shows the room's temperature, from blue when it is cold to red when it is hot. A window icon follows if the room has a window contact. The temperature and humidity come last.
 - The rooms header shows the average temperature and the number of open windows. Tap one of these values or the arrow to open or close the climate table.
@@ -1073,7 +983,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 | Entity | Purpose |
 | --- | --- |
-| `light.<room>` | The icon color |
+| `light.<room>` | The icon color, and the details that open when you hold the card |
 | `sensor.climate_<room>` | The dot color, temperature and humidity, from the [helpers](#helpers) |
 | `binary_sensor.<room>_window` | The window icon. In the living room, this is a balcony door. |
 | `sensor.climate_home` | The average temperature and the open windows in the header |
@@ -1086,7 +996,7 @@ Each room has a card. The first four rooms are always visible, and **All rooms**
 
 <br>
 
-The rooms header and **All rooms** are Bubble cards, and each room card is a Paper Buttons Row. All of them read [helpers](#helpers). The rooms header is the first card.
+The rooms header, the room cards and **All rooms** are Bubble cards, and all of them read [helpers](#helpers). All of them also need the [Base module](bubble_card/README.md#base). The rooms header and **All rooms** also need the [Header module](bubble_card/README.md#header). The rooms header is the first card.
 
 <!-- dashboard.yaml card_type=separator name=Rooms -->
 
@@ -1095,6 +1005,7 @@ type: custom:bubble-card
 card_type: separator
 name: Rooms
 modules:
+  - origami_base
   - origami_header
 origami_header:
   value_style: chip
@@ -1108,7 +1019,7 @@ sub_button:
       entity: sensor.climate_home
       icon: mdi:thermometer
       origami_header:
-        name: ${attr.temperature_average}°
+        name: ${num(attr.temperature_average)}°
       tap_action:
         action: perform-action
         perform_action: input_boolean.toggle
@@ -1122,7 +1033,7 @@ sub_button:
       state_content: windows_open
       origami_header:
         icon: "${attr.windows_open > 0 ? 'mdi:window-open-variant' : ''}"
-        color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
+        name_color: "${attr.windows_open > 0 ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}"
         background: "${attr.windows_open > 0 ? 'var(--tint)' : ''}"
       tap_action:
         action: perform-action
@@ -1146,130 +1057,48 @@ sub_button:
 
 The living room's card follows. The dashboard puts the room cards in a grid card with two columns.
 
-<!-- dashboard.yaml base_config.tap_action.navigation_path=#popup_living_room -->
+<!-- dashboard.yaml button_action.tap_action.navigation_path=#popup_living_room -->
 
 ```yaml
-type: custom:paper-buttons-row
-styles:
-  position: relative
-  display: flex
-  flex-wrap: wrap
-  justify-content: flex-start
-  align-items: center
-  padding: var(--ha-space-4)
-  background-color: var(--fill-subtle)
-  border-radius: var(--ha-card-border-radius)
-base_config:
-  layout: icon
-  active: []
+type: custom:bubble-card
+card_type: button
+button_type: name
+entity: light.living_room
+name: Living
+icon: mdi:sofa
+modules:
+  - origami_base
+origami_base:
+  tile: true
+  vertical: true
+button_action:
   tap_action:
     action: navigate
     navigation_path: '#popup_living_room'
-  styles:
-    button:
-      padding: 0px
-      margin-bottom: var(--ha-space-3)
-      justify-content: flex-start
-      pointer-events: none
-    name:
-      padding: 0px
-      font-size: var(--ha-font-size-m)
-      font-weight: var(--ha-font-weight-bold)
-      white-space: nowrap
-    state:
-      padding: 0px
-      font-size: var(--ha-font-size-s)
-      font-weight: var(--ha-font-weight-medium)
-      color: var(--secondary-text-color)
-buttons:
-  # Invisible overlay that catches the tap for the whole card
-  - entity: light.living_room
-    layout: name
-    name: false
-    styles:
-      button:
-        z-index: 3
-        pointer-events: all
-        position: absolute
-        top: 0px
-        left: 0px
-        width: 100%
-        height: 100%
-        border-radius: var(--ha-card-border-radius)
-  # Icon, colored while the room's lights are on
-  - entity: light.living_room
-    icon: mdi:sofa
-    state_styles:
-      'on':
-        icon:
-          background-color: var(--tint)
-          color: var(--state-light-active-color)
-    styles:
-      button:
-        width: calc(100% - var(--control-height-icon))
-      icon:
-        --mdc-icon-size: var(--icon-size-m)
-        width: var(--tile-size)
-        height: var(--tile-size)
-        display: flex
-        justify-content: center
-        align-items: center
-        border-radius: var(--radius-inner)
-        background-color: var(--ha-card-background)
-        box-shadow: var(--ha-card-box-shadow)
-        transition: var(--transition-interactive)
-  - icon: mdi:chevron-right
-    styles:
-      button:
-        width: var(--control-height-icon)
-        justify-content: center
-      icon:
-        --mdc-icon-size: var(--icon-size-l)
-        opacity: var(--opacity-quiet)
-  - name: Living
-    layout: name
-    styles:
-      button:
-        width: 100%
-        margin: var(--ha-space-2) 0px 0px 0px
+  hold_action:
+    action: more-info
+sub_button:
+  main:
+    - icon: mdi:chevron-right
   # Comfort dot, window, temperature and humidity
-  - layout: icon
-    icon: mdi:circle
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-      icon:
-        --mdc-icon-size: var(--dot-size)
-        margin: -3px 0px 0px 0px
-        color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
-  - entity: binary_sensor.living_room_balcony_door
-    layout: icon
-    icon: mdi:window-closed-variant
-    state_icons:
-      'on': mdi:window-open-variant
-      'off': mdi:window-closed-variant
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-2) 0px 0px
-      icon:
-        --mdc-icon-size: var(--dot-size)
-        margin: -3px 0px 0px 0px
-  - entity: sensor.climate_living_room
-    layout: state
-    state:
-      attribute: temperature
-      postfix: ° |
-    styles:
-      button:
-        margin: var(--ha-space-2) var(--ha-space-1) 0px 0px
-  - entity: sensor.climate_living_room
-    layout: state
-    state:
-      attribute: humidity
-      postfix: '%'
-    styles:
-      button:
-        margin: var(--ha-space-2) 0px 0px 0px
+  bottom:
+    - entity: sensor.climate_living_room
+      icon: mdi:circle
+      origami_base:
+        color: ${attr.color_code ?? "transparent"}
+    - entity: binary_sensor.living_room_balcony_door
+      icon: mdi:window-closed-variant
+      origami_base:
+        icon:
+          'on': mdi:window-open-variant
+    - entity: sensor.climate_living_room
+      show_icon: false
+      origami_base:
+        name: ${num(attr.temperature)}° |
+    - entity: sensor.climate_living_room
+      show_icon: false
+      origami_base:
+        name: ${num(attr.humidity, 0, '%')}
 ```
 
 **All rooms** is the last card. It turns `input_boolean.all_rooms` on and off, and the rooms after the fourth are conditional cards that appear while this toggle is on.
@@ -1280,6 +1109,7 @@ buttons:
 type: custom:bubble-card
 card_type: separator
 modules:
+  - origami_base
   - origami_header
 origami_header:
   icon_size: var(--icon-size-l)
@@ -1308,9 +1138,6 @@ styles: |-
     justify-content: center !important;
     margin: 0 !important;
   }
-  ha-card .bubble-sub-button-container .bubble-sub-button.content-icon-right .bubble-sub-button-icon:not(.hidden) {
-    margin-left: var(--ha-space-1) !important;
-  }
 ```
 
 </details>
@@ -1330,7 +1157,7 @@ The climate table shows all rooms at once. It opens under the rooms header.
 - Each row shows one room with its colored dot, name, window, thermostat, temperature and humidity. The living room row also shows the front door.
 - An open window or door turns cyan, and a thermostat that is heating turns deep orange. Arrows mark the warmest and coldest rooms and the most and least humid rooms.
 - Tap a room to open its thermostat. Tap a window or the door to open its contact sensor.
-- The table is a single Paper Buttons Row with a grid layout. Keep the room names short so that the table fits on a phone. To add a room, copy a row and increase the 6 in `repeat(6, …)`.
+- The table is a Bubble card with the [Table](bubble_card/README.md#table) module. Each room is a group of sub-buttons, and each cell joins its column through its `css_class`. The columns give their cells the icons and the values, so a cell only names its entity and its column. Keep the room names short so that the table fits on a phone. To add a room, copy a group.
 
 </details>
 
@@ -1346,7 +1173,7 @@ The climate table shows all rooms at once. It opens under the rooms header.
 | `climate.<room>` | The target temperature and whether the thermostat is heating |
 | `input_boolean.room_climate_card` | Whether the table is open |
 
-If a room has no thermostat or window contact, delete that button. The cell stays empty, as in the office row.
+If a room has no thermostat or window contact, delete that cell. The column stays empty in that row, as in the office row.
 
 </details>
 
@@ -1355,472 +1182,191 @@ If a room has no thermostat or window contact, delete that button. The cell stay
 
 <br>
 
-The table is a Paper Buttons Row inside a grid card, and it reads the room [helpers](#helpers). The grid's `visibility` condition shows the table while `input_boolean.room_climate_card` is on. The header above the table is the rooms header from the [Rooms](#rooms) section.
+The table is a Bubble card with the Base and Table modules, and it reads the room [helpers](#helpers). Its `visibility` condition shows the table while `input_boolean.room_climate_card` is on. The header above the table is the rooms header from the [Rooms](#rooms) section.
 
 <!-- dashboard.yaml visibility.0.entity=input_boolean.room_climate_card -->
 
 ```yaml
-type: grid
-square: false
-columns: 1
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_table
+origami_base:
+  animate: true
+# The columns give their cells the same icons and values, so each cell only names its entity
+origami_table:
+  columns:
+    - name: room
+      icon: mdi:circle
+      color_template: ${attr.color_code ?? "transparent"}
+    - name: window
+      icon_states:
+        'on': mdi:window-open-variant
+        'off': mdi:window-closed-variant
+    - name: thermostat
+      icon: mdi:thermostat
+      text_template: ${num(attr.temperature)}°
+    # The door column takes the free space, so the values stand at the end
+    - name: door
+      width: 1fr
+      align: start
+      icon_states:
+        'on': mdi:door-open
+        'off': mdi:door-closed
+    # Arrows mark the warmest and the coldest room, and the warmest room stands out
+    - name: temperature
+      icon_template: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
+      color_template: "${attr.temp_rank === 'coldest' ? 'var(--secondary-text-color)' : ''}"
+      text_template: ${num(attr.temperature)}°
+      'on': "${attr.temp_rank === 'warmest'}"
+    - name: humidity
+      icon_template: "${attr.humidity_rank === 'most_humid' ? 'mdi:arrow-up' : attr.humidity_rank === 'driest' ? 'mdi:arrow-down' : 'mdi:water-percent'}"
+      color_template: "${attr.humidity_rank === 'driest' ? 'var(--secondary-text-color)' : ''}"
+      text_template: ${num(attr.humidity, 0, '%')}
+      'on': "${attr.humidity_rank === 'most_humid'}"
+grid_options:
+  columns: full
+  rows: auto
 visibility:
   - condition: state
     entity: input_boolean.room_climate_card
     state: 'on'
-cards:
-  - type: custom:paper-buttons-row
-    extra_styles: |
-      @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) } }
-    styles:
-      display: grid
-      grid-template-columns: auto auto auto 1fr auto auto
-      grid-template-rows: repeat(6, var(--control-height-icon))
-      column-gap: var(--ha-space-1)
-      padding: 0px var(--ha-space-2)
-      margin-bottom: var(--ha-space-5)
-      border-radius: var(--ha-card-border-radius)
-      opacity: 0
-      transform: translateY(10px)
-      animation: fadeInUp var(--duration-slow) ease-in forwards
-      background-image: >-
-        repeating-linear-gradient(to bottom, transparent, transparent var(--control-height-icon),
-        var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(var(--control-height-icon) * 2))
-    base_config:
-      layout: icon|name
-      tap_action:
-        action: more-info
-      state_icons:
-        warmest: mdi:arrow-up
-        coldest: mdi:arrow-down
-        most_humid: mdi:arrow-up
-        driest: mdi:arrow-down
-      state_styles:
-        'on':
-          button:
-            background-color: var(--tint)
-            color: var(--state-binary_sensor-window-on-color)
-          icon:
-            color: var(--state-binary_sensor-window-on-color)
-        heating:
-          button:
-            background-color: var(--tint)
-            color: var(--state-climate-heat-color)
-          icon:
-            color: var(--state-climate-heat-color)
-          name:
-            color: var(--primary-text-color)
-        warmest:
-          button:
-            background-color: var(--fill-subtle)
-            color: var(--primary-text-color)
-          icon:
-            opacity: 1
-        most_humid:
-          button:
-            background-color: var(--fill-subtle)
-            color: var(--primary-text-color)
-          icon:
-            opacity: 1
-        coldest:
-          icon:
-            opacity: 1
-        driest:
-          icon:
-            opacity: 1
-      styles:
-        button:
-          padding: 0px 6px
-          min-height: var(--icon-size-m)
-          justify-content: center
-          border-radius: var(--radius-inner)
-        icon:
-          --mdc-icon-size: var(--icon-size-2xs)
-          margin-right: var(--ha-space-1)
-          display: flex
-          align-items: center
-          justify-content: center
-        name:
-          padding: 0px
-          font-size: var(--ha-font-size-s)
-          font-weight: var(--ha-font-weight-bold)
-          font-variant-numeric: tabular-nums
-          white-space: nowrap
-        state:
-          padding: 0px
-    buttons:
-      # Living
-      - entity: sensor.climate_living_room
-        icon: mdi:circle
-        name: Living
-        tap_action:
-          entity: climate.living_room
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
-      - entity: binary_sensor.living_room_balcony_door
-        layout: icon
-        state_icons:
-          'on': mdi:window-open-variant
-          'off': mdi:window-closed-variant
-        styles:
-          button:
-            grid-column: 2
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: climate.living_room
-        icon: mdi:thermostat
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: hvac_action
-        styles:
-          button:
-            grid-column: 3
-            color: var(--secondary-text-color)
-      - entity: binary_sensor.front_door
-        layout: icon
-        state_icons:
-          'on': mdi:door-open
-          'off': mdi:door-closed
-        styles:
-          button:
-            grid-column: 4
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: sensor.climate_living_room
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        tap_action:
-          entity: climate.living_room
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_living_room
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        tap_action:
-          entity: climate.living_room
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      # Bedroom
-      - entity: sensor.climate_bedroom
-        icon: mdi:circle
-        name: Bed
-        tap_action:
-          entity: climate.bedroom
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_bedroom", "color_code") }}'
-      - entity: binary_sensor.bedroom_window
-        layout: icon
-        state_icons:
-          'on': mdi:window-open-variant
-          'off': mdi:window-closed-variant
-        styles:
-          button:
-            grid-column: 2
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: climate.bedroom
-        icon: mdi:thermostat
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: hvac_action
-        styles:
-          button:
-            grid-column: 3
-            color: var(--secondary-text-color)
-      - entity: sensor.climate_bedroom
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        tap_action:
-          entity: climate.bedroom
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_bedroom
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        tap_action:
-          entity: climate.bedroom
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      # Office
-      - entity: sensor.climate_office
-        icon: mdi:circle
-        name: Office
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_office", "color_code") }}'
-      - entity: sensor.climate_office
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_office
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      # Bath
-      - entity: sensor.climate_bathroom
-        icon: mdi:circle
-        name: Bath
-        tap_action:
-          entity: climate.bathroom
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_bathroom", "color_code") }}'
-      - entity: binary_sensor.bathroom_window
-        layout: icon
-        state_icons:
-          'on': mdi:window-open-variant
-          'off': mdi:window-closed-variant
-        styles:
-          button:
-            grid-column: 2
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: climate.bathroom
-        icon: mdi:thermostat
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: hvac_action
-        styles:
-          button:
-            grid-column: 3
-            color: var(--secondary-text-color)
-      - entity: sensor.climate_bathroom
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        tap_action:
-          entity: climate.bathroom
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_bathroom
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        tap_action:
-          entity: climate.bathroom
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      # Kitchen
-      - entity: sensor.climate_kitchen
-        icon: mdi:circle
-        name: Kitchen
-        tap_action:
-          entity: climate.kitchen
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_kitchen", "color_code") }}'
-      - entity: binary_sensor.kitchen_window
-        layout: icon
-        state_icons:
-          'on': mdi:window-open-variant
-          'off': mdi:window-closed-variant
-        styles:
-          button:
-            grid-column: 2
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: climate.kitchen
-        icon: mdi:thermostat
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: hvac_action
-        styles:
-          button:
-            grid-column: 3
-            color: var(--secondary-text-color)
-      - entity: sensor.climate_kitchen
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        tap_action:
-          entity: climate.kitchen
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_kitchen
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        tap_action:
-          entity: climate.kitchen
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      # WC
-      - entity: sensor.climate_small_bathroom
-        icon: mdi:circle
-        name: WC
-        tap_action:
-          entity: climate.small_bathroom
-        styles:
-          button:
-            grid-column: 1
-            justify-content: flex-start
-          icon:
-            color: '{{ state_attr("sensor.climate_small_bathroom", "color_code") }}'
-      - entity: binary_sensor.small_bathroom_window
-        layout: icon
-        state_icons:
-          'on': mdi:window-open-variant
-          'off': mdi:window-closed-variant
-        styles:
-          button:
-            grid-column: 2
-            padding: 0px
-            width: var(--icon-size-m)
-          icon:
-            margin-right: 0px
-      - entity: climate.small_bathroom
-        icon: mdi:thermostat
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: hvac_action
-        styles:
-          button:
-            grid-column: 3
-            color: var(--secondary-text-color)
-      - entity: sensor.climate_small_bathroom
-        icon: mdi:thermometer
-        name:
-          attribute: temperature
-          postfix: °
-        state:
-          attribute: temp_rank
-        tap_action:
-          entity: climate.small_bathroom
-        styles:
-          button:
-            grid-column: 5
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
-      - entity: sensor.climate_small_bathroom
-        icon: mdi:water-percent
-        name:
-          attribute: humidity
-          postfix: ' %'
-        state:
-          attribute: humidity_rank
-        tap_action:
-          entity: climate.small_bathroom
-        styles:
-          button:
-            grid-column: 6
-            color: var(--secondary-text-color)
-          icon:
-            opacity: var(--opacity-muted)
+styles: |-
+  ha-card {
+    margin-bottom: var(--ha-space-5);
+  }
+sub_button:
+  bottom_layout: rows
+  main: []
+  bottom:
+    - name: Living
+      group:
+        - entity: sensor.climate_living_room
+          css_class: room
+          name: Living
+          show_name: true
+          tap_action:
+            action: more-info
+            entity: climate.living_room
+        - entity: binary_sensor.living_room_balcony_door
+          css_class: window
+        - entity: climate.living_room
+          css_class: thermostat
+        - entity: binary_sensor.front_door
+          css_class: door
+        - entity: sensor.climate_living_room
+          css_class: temperature
+          tap_action:
+            action: more-info
+            entity: climate.living_room
+        - entity: sensor.climate_living_room
+          css_class: humidity
+          tap_action:
+            action: more-info
+            entity: climate.living_room
+    - name: Bedroom
+      group:
+        - entity: sensor.climate_bedroom
+          css_class: room
+          name: Bed
+          show_name: true
+          tap_action:
+            action: more-info
+            entity: climate.bedroom
+        - entity: binary_sensor.bedroom_window
+          css_class: window
+        - entity: climate.bedroom
+          css_class: thermostat
+        - entity: sensor.climate_bedroom
+          css_class: temperature
+          tap_action:
+            action: more-info
+            entity: climate.bedroom
+        - entity: sensor.climate_bedroom
+          css_class: humidity
+          tap_action:
+            action: more-info
+            entity: climate.bedroom
+    - name: Office
+      group:
+        - entity: sensor.climate_office
+          css_class: room
+          name: Office
+          show_name: true
+        - entity: sensor.climate_office
+          css_class: temperature
+        - entity: sensor.climate_office
+          css_class: humidity
+    - name: Bath
+      group:
+        - entity: sensor.climate_bathroom
+          css_class: room
+          name: Bath
+          show_name: true
+          tap_action:
+            action: more-info
+            entity: climate.bathroom
+        - entity: binary_sensor.bathroom_window
+          css_class: window
+        - entity: climate.bathroom
+          css_class: thermostat
+        - entity: sensor.climate_bathroom
+          css_class: temperature
+          tap_action:
+            action: more-info
+            entity: climate.bathroom
+        - entity: sensor.climate_bathroom
+          css_class: humidity
+          tap_action:
+            action: more-info
+            entity: climate.bathroom
+    - name: Kitchen
+      group:
+        - entity: sensor.climate_kitchen
+          css_class: room
+          name: Kitchen
+          show_name: true
+          tap_action:
+            action: more-info
+            entity: climate.kitchen
+        - entity: binary_sensor.kitchen_window
+          css_class: window
+        - entity: climate.kitchen
+          css_class: thermostat
+        - entity: sensor.climate_kitchen
+          css_class: temperature
+          tap_action:
+            action: more-info
+            entity: climate.kitchen
+        - entity: sensor.climate_kitchen
+          css_class: humidity
+          tap_action:
+            action: more-info
+            entity: climate.kitchen
+    - name: WC
+      group:
+        - entity: sensor.climate_small_bathroom
+          css_class: room
+          name: WC
+          show_name: true
+          tap_action:
+            action: more-info
+            entity: climate.small_bathroom
+        - entity: binary_sensor.small_bathroom_window
+          css_class: window
+        - entity: climate.small_bathroom
+          css_class: thermostat
+        - entity: sensor.climate_small_bathroom
+          css_class: temperature
+          tap_action:
+            action: more-info
+            entity: climate.small_bathroom
+        - entity: sensor.climate_small_bathroom
+          css_class: humidity
+          tap_action:
+            action: more-info
+            entity: climate.small_bathroom
 ```
 
 </details>
@@ -1840,7 +1386,7 @@ The navigation bar is a [Navbar Card](https://github.com/joseluis9595/lovelace-n
 - Hold **Music** to play or pause the active speaker, unless the speaker is playing TV audio. Tap **TV** to open the [TV pop-up](#tv), or hold it to open the TV entity's controls.
 - Hold **Lights** to open a menu. The menu contains the living room scenes and a button that turns all lights on or off. The active scene is amber.
 - **More** opens the Origami Header menu. Administrators see a dot on this button while updates are available.
-- The card above the bar shows either the TV or the most relevant speaker, which comes from `sensor.active_speaker`.
+- The card above the bar shows either the TV or the most relevant speaker, which comes from `sensor.active_speaker`. A line along its bottom edge shows how far the track has played. It spans the whole card, it is as strong as a dividing line, and the part that has played takes the media color. Radio has no length, so the line only shows for tracks.
 - In Navbar Card's `[[[ ]]]` templates, read a state with `states['sensor.x'].state`. The `states('sensor.x')` function only works in Jinja and in the `${ }` templates of the Bubble Card modules.
 
 <img width="600" alt="The light scenes, which open when you hold Lights" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/navbar-scenes.webp">
@@ -2055,7 +1601,7 @@ styles: |
     -webkit-backdrop-filter: var(--blur-strong);
     margin-bottom: 0px !important;
     border-radius: var(--ha-card-border-radius) var(--ha-card-border-radius) 0px 0px !important;
-    border-top: 2px solid var(--border-color);
+    border-top: 2px solid var(--fill-strong);
   }
 
   ha-ripple {
@@ -2215,8 +1761,8 @@ styles: |
 
   .label {
     padding: 0px 0px 0px var(--ha-space-4) !important;
-    font-size: var(--ha-font-size-l) !important;
-    font-weight: 600 !important;
+    font-size: var(--ha-font-size-m) !important;
+    font-weight: var(--ha-font-weight-bold) !important;
   }
 
   /* Pop-ups that open to the right, such as the light scenes, need mirrored padding */
@@ -2234,7 +1780,7 @@ styles: |
     color: inherit !important;
   }
 
-  /* The now playing card is as wide as the dashboard cards.
+  /* The now playing card is as wide as the dashboard cards, and it has a card's padding and the space between a card's icon and its text.
      It stays above the content, so it uses the elevated shadow. */
   .navbar.mobile {
     gap: var(--ha-space-3) !important;
@@ -2245,8 +1791,9 @@ styles: |
     background: var(--ha-card-background) !important;
     box-shadow: var(--shadow-elevated) !important;
     border-radius: var(--ha-card-border-radius) !important;
-    padding: var(--card-padding) !important;
-    gap: var(--ha-space-3) !important;
+    --player-pad: var(--ha-space-4);
+    padding: var(--player-pad) !important;
+    gap: var(--ha-space-4) !important;
   }
 
   .media-player.mobile {
@@ -2278,10 +1825,15 @@ styles: |
     text-overflow: ellipsis !important;
   }
 
-  /* The progress bar is hidden. The card only reads media_position and does not update in between,
-     so the bar would not move smoothly. */
+  /* The progress is a line as strong as a dividing line along the card's bottom edge. It spans the whole card, and the card's corners round its ends.
+     The part that has played takes the media color, and Navbar Card 1.8 moves it smoothly while music plays. */
   .media-player .media-player-progress-bar {
-    display: none !important;
+    height: 2px;
+    background: var(--fill-strong);
+  }
+
+  .media-player:dir(rtl) .media-player-progress-bar-fill {
+    transform-origin: right;
   }
 
   .media-player-image {
@@ -2301,11 +1853,12 @@ styles: |
     font-size: var(--ha-font-size-m) !important;
     font-weight: var(--ha-font-weight-bold) !important;
     line-height: var(--ha-line-height-normal);
-    margin-bottom: 3px;
+    margin-bottom: var(--ha-space-1);
   }
 
   .media-player-artist {
     font-size: var(--ha-font-size-s) !important;
+    font-weight: var(--ha-font-weight-medium) !important;
     color: var(--secondary-text-color) !important;
     line-height: var(--ha-line-height-normal);
   }
@@ -2326,12 +1879,12 @@ styles: |
     color: var(--text-color-active) !important;
   }
 
-  /* The group badge on the cover is a tinted circle with a link icon in the media color.
+  /* The group badge on the cover is the same as the badge on a speaker's icon in Origami's cards. It is a tinted circle with a link icon in the media color.
      The subtitle template sets --navbar-player-group to 1 when the speaker is grouped and to 0 otherwise. */
   .media-player {
     --g-on: var(--navbar-player-group, 0);
-    --g-size: var(--icon-size-s);
-    --g-gap: 3px;
+    --g-size: 16px;
+    --g-gap: 2px;
     --g-out: 3px;
     --g-reach: calc(var(--g-size) / 2 + var(--g-gap));
   }
@@ -2343,7 +1896,7 @@ styles: |
     z-index: 2;
     width: var(--g-size);
     height: var(--g-size);
-    left: calc(var(--card-padding) + var(--tile-size) - var(--g-size) + var(--g-out));
+    left: calc(var(--player-pad) + var(--tile-size) - var(--g-size) + var(--g-out));
     top: calc(50% - var(--tile-size) / 2 - var(--g-out));
     scale: var(--g-on);
     transition: scale var(--duration-normal) var(--ease-standard);
@@ -2364,8 +1917,8 @@ styles: |
 
   .media-player::after {
     background: var(--state-media_player-active-color);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z'/%3E%3C/svg%3E") center / calc(var(--g-size) * .6) no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z'/%3E%3C/svg%3E") center / calc(var(--g-size) * .6) no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z'/%3E%3C/svg%3E") center / calc(var(--g-size) * .625) no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z'/%3E%3C/svg%3E") center / calc(var(--g-size) * .625) no-repeat;
   }
 
   /* The TV card is recognized by its cover or its fallback icon. It has no group
@@ -2414,7 +1967,7 @@ styles: |
 
   .navbar.desktop.right .navbar-card.desktop.right {
     border-radius: var(--ha-card-border-radius) 0px 0px var(--ha-card-border-radius) !important;
-    border: 2px solid var(--border-color) !important;
+    border: 2px solid var(--fill-strong) !important;
     border-right: none !important;
     padding: var(--ha-space-4) var(--ha-space-4) var(--ha-space-4) var(--ha-space-3) !important;
     margin: 0px !important;
@@ -2430,7 +1983,7 @@ styles: |
   }
 
   .navbar-card.mobile .route {
-    height: 50px !important;
+    height: var(--tile-size) !important;
   }
 
   .navbar-card.mobile .route .button {
@@ -2517,10 +2070,10 @@ bg_blur: '0'
 shadow_opacity: '12'
 hide_backdrop: false
 modules:
-  - default
+  - origami_base
   - origami_popup
 origami_popup:
-  subtitle_style: text
+  value_style: text
 # Hides the scenes again when you close the pop-up
 close_action:
   action: perform-action
@@ -2553,8 +2106,9 @@ cards:
                 - origami_base
                 - origami_media
               origami_media:
-                art_entity: media_player.living_room_tv_cast
-                app_entity: media_player.living_room_tv
+                layout: tv
+                players:
+                  - media_player.living_room_tv_cast
               hide:
                 power_button: true
                 previous_button: true
@@ -2582,7 +2136,6 @@ cards:
                     sub_button_type: slider
                     always_visible: true
               rows: '2.2'
-              state_content: state
           - type: conditional
             conditions:
               - condition: state
@@ -2605,6 +2158,15 @@ cards:
                 - origami_media
               origami_base:
                 group: true
+                # Home Assistant's word for this source is the source's own name
+                words:
+                  optical in: TV input
+              origami_media:
+                # The icon shows what the speaker does
+                icons:
+                  'off': mdi:speaker-off
+                  bluetooth: mdi:speaker-bluetooth
+                  tv: mdi:television-speaker
               hide:
                 power_button: true
                 previous_button: true
@@ -2682,7 +2244,6 @@ cards:
                     sub_button_type: slider
                     always_visible: true
               rows: '2.2'
-              state_content: state
           # A plug as a compact row with a switch
           - type: custom:bubble-card
             card_type: button
@@ -2711,6 +2272,7 @@ cards:
             card_type: separator
             name: Lights
             modules:
+              - origami_base
               - origami_header
             origami_header:
               icon_size: var(--icon-size-s)
@@ -2774,10 +2336,12 @@ cards:
               type: custom:bubble-card
               card_type: sub-buttons
               modules:
+                - origami_base
                 - origami_button
+              origami_base:
+                animate: true
               origami_button:
                 columns: 2
-                animate: true
                 padding: var(--ha-space-1) 0 0 0
                 # The scene that was turned on last is highlighted
                 active: "{{ states('sensor.living_room_scene') }}"
@@ -2824,10 +2388,10 @@ cards:
             card_type: separator
             name: Climate
             modules:
+              - origami_base
               - origami_header
             origami_header:
-              # The dot uses the comfort color
-              icon_color: '{{ state_attr("sensor.climate_living_room", "color_code") }}'
+              icon_size: var(--dot-size)
             grid_options:
               rows: auto
             sub_button:
@@ -2837,7 +2401,9 @@ cards:
                   show_name: true
                   show_background: false
                   origami_header:
-                    name: ${attr.temperature}° / ${attr.humidity} %
+                    name: ${num(attr.temperature)}° / ${num(attr.humidity, 0, '%')}
+                    # The dot uses the comfort color
+                    color: ${attr.color_code ?? "transparent"}
                   tap_action:
                     action: more-info
           - type: conditional
@@ -2909,9 +2475,7 @@ cards:
                         entity_id: fan.living_room
                       data:
                         percentage: 100
-              state_content:
-                - state
-                - percentage
+              state_content: percentage
               rows: 1.375
           - type: custom:bubble-card
             card_type: button
@@ -2925,6 +2489,11 @@ cards:
             origami_base:
               group: true
               tile: true
+            origami_climate:
+              icons:
+                heating: mdi:radiator
+                preheating: mdi:radiator
+                'off': mdi:radiator-off
             scrolling_effect: false
             tap_action:
               action: more-info
@@ -2957,13 +2526,13 @@ cards:
                     data:
                       thermostat: climate.living_room
                       step: 0.5
-            state_content: []
             rows: 1.375
 
       # Turns everything in the room off, shown as a plain text button
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
+          - origami_base
           - origami_button
         origami_button:
           background: false
@@ -2999,12 +2568,13 @@ The TV pop-up is a remote control for the TV. It opens from **TV** in the naviga
 <br>
 
 - The top card shows the TV, its current program and its power button. A separate speaker plays the TV's sound, and the card's slider sets the speaker's volume. A blurred picture of the current program appears behind the pop-up.
-- The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input, and it is filled while the speaker uses that input.
-- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker.
-- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`.
-- The remote has a back button, a home button and a round pad with an OK button. Hold an arrow button to repeat its command.
+- The input button sends the `TV_INPUT` command to the TV. The **TV** button switches the speaker to its TV input. Its tap selects that source, so it is filled while the speaker uses that input.
+- The minus and plus buttons change the volume by 1%. A double tap changes it by 5%, and holding the button changes it by 10%. Tap the number to mute the speaker. While the speaker is muted, a muted icon replaces the number, and a tap on the icon turns the sound back on.
+- The app buttons scroll sideways, and the running app's button is filled. Tap an app to start it with `media_player.select_source`. The Base module fills a button while the TV reports its app as the source, the `app_name` or the `app_id`.
+- The remote has a back button, a home button and a round pad with an OK button.
+- Every card inside the pop-up's vertical stack is a Bubble card. The row with the input and volume buttons, the row of apps and the remote are sub-buttons cards with the [Button](bubble_card/README.md#button) module. Its `segmented` option joins each group of buttons into one bar, and its `scroll` option lets the apps scroll. The remote's own `styles` place its buttons in a grid and draw the round pad.
 
-The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons need your TV's source names.
+The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/) integration. Other remotes use different command names. The app buttons call `media_player.select_source`, which the [Android Debug Bridge](https://www.home-assistant.io/integrations/androidtv/) integration offers, and they need your TV's app names or app IDs. With Android TV Remote alone, call `media_player.play_media` with `media_content_type: app` and the app's ID as `media_content_id` instead. Base fills those buttons by the app's ID too.
 
 </details>
 
@@ -3015,7 +2585,7 @@ The commands, such as `DPAD_UP`, `DPAD_CENTER` and `TV_INPUT`, are for the [Andr
 
 | Entity | Purpose |
 | --- | --- |
-| `media_player.living_room_tv` | The TV and its apps, from Android TV Remote |
+| `media_player.living_room_tv` | The TV and its apps, from Android Debug Bridge |
 | `remote.living_room_tv` | The remote, from Android TV Remote |
 | `media_player.living_room_tv_cast` | The current program and its picture, from Google Cast |
 | `media_player.living_room` | The speaker that plays the TV's sound |
@@ -3030,7 +2600,7 @@ In this example, the speaker's TV input is called `Optical In`. If you do not ha
 
 <br>
 
-This pop-up needs Bubble Card, Paper Buttons Row and `script.volume` from the [package](packages/origami.yaml).
+This pop-up needs Bubble Card and `script.volume` from the [package](packages/origami.yaml).
 
 <!-- dashboard.yaml hash=#popup_tv -->
 
@@ -3049,6 +2619,7 @@ popup_mode: adaptive-dialog
 with_bottom_offset: true
 performance_mode: performance
 modules:
+  - origami_base
   - origami_popup
 # A blurred picture of the current program appears behind the pop-up
 styles: |-
@@ -3092,8 +2663,9 @@ cards:
           - origami_media
           - '!default'
         origami_media:
-          art_entity: media_player.living_room_tv_cast
-          app_entity: media_player.living_room_tv
+          layout: tv
+          players:
+            - media_player.living_room_tv_cast
         scrolling_effect: false
         slider_live_update: false
         cover_background: false
@@ -3121,410 +2693,308 @@ cards:
             - entity: media_player.living_room
               sub_button_type: slider
               always_visible: true
-              custom_height: 26
         rows: '2.2'
-        state_content: state
 
-      # Input, TV sound through the speaker, and the volume in steps
-      - type: custom:paper-buttons-row
-        extra_styles: >-
-          paper-button:active { background-color: var(--fill-strong) !important }
-          paper-button[data-state="optical in" i], paper-button[data-state="optical in" i] + paper-button { background-image: none !important }
-        styles:
-          align-items: stretch
-          margin: var(--ha-space-2) 0px
-          padding: 0px
-          background-color: transparent
-          box-shadow: none
-          --pbs-button-bg-color: var(--fill-subtle)
-        base_config:
-          layout: icon
-          tap_action:
-            action: call-service
-            service: script.volume
-          styles:
-            button:
-              flex: 1
-              height: var(--control-height)
-              padding: 0px
-              border-radius: 0px
-              box-shadow: none
-              background-image: linear-gradient(var(--fill-loud), var(--fill-loud))
-              background-repeat: no-repeat
-              background-size: 2px 50%
-              background-position: left center
-              transition: var(--transition-interactive)
-            icon:
-              --mdc-icon-size: var(--icon-size-m)
-              margin-right: 0px
-              opacity: var(--opacity-strong)
-        buttons:
-          - icon: mdi:import
-            tooltip: Input
-            tap_action:
-              service: remote.send_command
-              target:
-                entity_id: remote.living_room_tv
-              service_data:
-                command: TV_INPUT
-            styles:
-              button:
-                border-radius: var(--radius-inner) 0px 0px var(--radius-inner)
-                background-image: none
-          # The button is filled while the speaker plays the TV's sound, like the active buttons in the fan pop-up
-          - layout: name
-            name: TV
-            tooltip: TV sound through the speaker
-            state:
-              entity: media_player.living_room
-              attribute: source
-            active:
-              - optical in
-            state_styles:
-              optical in:
-                button:
-                  background-color: var(--fill-subtle)
-                name:
-                  color: var(--ha-card-background)
-                  background-color: var(--fill-active)
-                  opacity: 1
-            tap_action:
-              service: media_player.select_source
-              target:
-                entity_id: media_player.living_room
-              service_data:
-                source: Optical In
-            styles:
-              button:
-                box-sizing: border-box
-                padding: var(--ha-space-1)
-                margin-right: var(--ha-space-3)
-                border-radius: 0px var(--radius-inner) var(--radius-inner) 0px
-              name:
-                display: flex
-                align-items: center
-                justify-content: center
-                box-sizing: border-box
-                width: 100%
-                height: 100%
-                padding: 0px
-                border-radius: calc(var(--radius-inner) - var(--ha-space-1))
-                font-size: var(--ha-font-size-l)
-                font-weight: var(--ha-font-weight-bold)
-                transition: var(--transition-interactive)
-          # A tap changes the volume by 1%, a double tap by 5% and holding by 10%
-          - icon: mdi:minus
-            tooltip: Quieter
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                step: -0.01
-            double_tap_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: -0.05
-            hold_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: -0.1
-            styles:
-              button:
-                border-radius: var(--radius-inner) 0px 0px var(--radius-inner)
-                background-image: none
-          # Shows the volume, or a muted icon while the speaker is muted. A tap mutes the speaker.
-          - layout: state|icon
-            icon: mdi:volume-off
-            tooltip: Mute
-            state: >-
-              {% set s = 'media_player.living_room' %}{{ 'off' if states(s) in ['unavailable', 'unknown', 'off']
-              else 'muted' if state_attr(s, 'is_volume_muted')
-              else ((state_attr(s, 'volume_level') | float(0)) * 100) | round(0) | int }}
-            state_text:
-              'off': –
-              muted: ' '
-            state_styles:
-              muted:
-                state:
-                  transform: scale(0)
-                icon:
-                  transform: scale(1)
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                mute: true
-            hold_action:
-              action: more-info
-              entity: media_player.living_room
-            styles:
-              button:
-                position: relative
-              state:
-                padding: 0px
-                font-size: var(--ha-font-size-l)
-                font-weight: var(--ha-font-weight-bold)
-                font-variant-numeric: tabular-nums
-                transition: transform var(--duration-normal) ease
-              icon:
-                --mdc-icon-size: var(--icon-size-s)
-                position: absolute
-                transform: scale(0)
-                transition: transform var(--duration-normal) ease
-          - icon: mdi:plus
-            tooltip: Louder
-            tap_action:
-              service_data:
-                speaker: media_player.living_room
-                step: 0.01
-            double_tap_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: 0.05
-            hold_action:
-              action: call-service
-              service: script.volume
-              service_data:
-                speaker: media_player.living_room
-                step: 0.1
-            styles:
-              button:
-                border-radius: 0px var(--radius-inner) var(--radius-inner) 0px
+      # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          segmented: true
+          icon_size: var(--icon-size-m)
+          padding: var(--ha-space-2) 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Sources
+              group:
+                - name: Input
+                  icon: mdi:import
+                  tap_action:
+                    action: perform-action
+                    perform_action: remote.send_command
+                    target:
+                      entity_id: remote.living_room_tv
+                    data:
+                      command: TV_INPUT
+                # The button is filled while the speaker uses this source, because its tap selects it
+                - name: TV
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.select_source
+                    target:
+                      entity_id: media_player.living_room
+                    data:
+                      source: Optical In
+            # A tap changes the volume by 1%, a double tap by 5% and holding by 10%
+            - name: Volume
+              group:
+                - name: Quieter
+                  icon: mdi:minus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.1
+                # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes or unmutes the speaker.
+                - name: >-
+                    {% set s = 'media_player.living_room' %}{{ '–' if states(s) in ['unavailable', 'unknown', 'off']
+                    else '' if state_attr(s, 'is_volume_muted')
+                    else ((state_attr(s, 'volume_level') | float(0)) * 100) | round(0) | int }}
+                  icon: >-
+                    {% set s = 'media_player.living_room' %}{{ 'mdi:volume-off' if states(s) not in ['unavailable', 'unknown', 'off']
+                    and state_attr(s, 'is_volume_muted') else '' }}
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      mute: true
+                  hold_action:
+                    action: more-info
+                    entity: media_player.living_room
+                - name: Louder
+                  icon: mdi:plus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.1
 
-      # The app buttons scroll sideways. The running app's button is filled.
-      - type: custom:paper-buttons-row
-        extra_styles: >-
-          paper-button.button-active { background-color: var(--fill-active) !important; box-shadow: none !important }
-          paper-button.button-active span { color: var(--ha-card-background) !important; opacity: 1 !important }
-        styles:
-          justify-content: start
-          gap: var(--ha-space-2)
-          margin: calc(var(--scroller-bleed) * -1)
-          padding: var(--scroller-padding)
-          overflow-x: scroll
-          overscroll-behavior-x: contain
-          scroll-snap-type: x mandatory
-          scrollbar-width: none
-          mask-image: var(--scroller-mask)
-        base_config:
-          layout: name
-          state:
-            entity: media_player.living_room_tv
-            attribute: app_id
-          tap_action:
-            action: call-service
-            service: media_player.select_source
-            target:
-              entity_id: media_player.living_room_tv
-          styles:
-            button:
-              scroll-snap-align: start
-              scroll-margin-left: var(--scroller-bleed)
-              padding: calc(var(--control-padding-x) / 1.4) var(--control-padding-x)
-              border-radius: var(--ha-card-border-radius)
-              background-color: var(--fill-subtle)
-              box-shadow: var(--card-ring)
-              transition: var(--transition-interactive)
-            name:
-              padding: 0px
-              font-size: var(--ha-font-size-m)
-              font-weight: var(--ha-font-weight-normal)
-              white-space: nowrap
-        buttons:
-          - name: Netflix
-            active:
-              - com.netflix.ninja
-            tap_action:
-              service_data:
-                source: Netflix
-          - name: YouTube
-            active:
-              - com.google.android.youtube.tv
-            tap_action:
-              service_data:
-                source: YouTube
-          - name: Prime Video
-            active:
-              - com.amazon.amazonvideo.livingroom
-            tap_action:
-              service_data:
-                source: Prime Video
-          - name: Disney+
-            active:
-              - com.disney.disneyplus
-            tap_action:
-              service_data:
-                source: Disney+
-          - name: Spotify
-            active:
-              - com.spotify.tv.android
-            tap_action:
-              service_data:
-                source: Spotify
-          - name: Plex
-            active:
-              - com.plexapp.android
-            tap_action:
-              service_data:
-                source: Plex
+      # The app buttons scroll sideways. A button is filled while the TV runs its app, because the TV reports the running app as its source.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          scroll: true
+          active_style: toggle
+        sub_button:
+          main: []
+          bottom:
+            - name: Netflix
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Netflix
+            - name: YouTube
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: YouTube
+            - name: Prime Video
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Prime Video
+            - name: Disney+
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Disney+
+            - name: Spotify
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Spotify
+            - name: Plex
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Plex
 
-      # The remote has back and home buttons and a round pad. Holding an arrow repeats its command.
-      - type: custom:paper-buttons-row
-        extra_styles: 'paper-button:active { transform: scale(var(--press-scale)) }'
-        styles:
-          display: grid
-          grid-template-columns: 1fr var(--control-height-lg) var(--control-height-lg) var(--control-height-lg) 1fr
-          grid-template-rows: repeat(3, var(--control-height-lg))
-          grid-template-areas: '"back . up . home" ". left ok right ." ". . down . ."'
-          gap: var(--ha-space-2)
-          margin-top: var(--ha-space-2)
-          align-items: center
-          justify-items: center
-        base_config:
-          layout: icon
-          tap_action:
-            action: call-service
-            service: remote.send_command
-            target:
-              entity_id: remote.living_room_tv
-          hold_action:
-            action: call-service
-            service: remote.send_command
-            target:
-              entity_id: remote.living_room_tv
-            repeat: 300
-          styles:
-            button:
-              width: var(--control-height)
-              height: var(--control-height)
-              padding: 0px
-              border-radius: var(--radius-inner)
-              background-color: transparent
-              box-shadow: none
-            icon:
-              --mdc-icon-size: var(--icon-size-l)
-              margin-right: 0px
-              opacity: var(--opacity-strong)
-            name:
-              padding: 0px
-        buttons:
-          # The round pad behind the arrows
-          - layout: name
-            name: ' '
-            tooltip: false
-            tap_action:
-              action: none
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-row: 1 / 4
-                grid-column: 2 / 5
-                width: calc(var(--control-height-lg) * 3 + var(--ha-space-2) * 2)
-                height: calc(var(--control-height-lg) * 3 + var(--ha-space-2) * 2)
-                border-radius: var(--radius-circle)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-                pointer-events: none
-          - icon: mdi:arrow-left
-            tooltip: Back
-            tap_action:
-              service_data:
-                command: BACK
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: back
-                justify-self: start
-                width: var(--control-height-sm)
-                height: var(--control-height-sm)
-                border-radius: var(--ha-card-border-radius)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-              icon:
-                --mdc-icon-size: var(--icon-size-m)
-          - icon: mdi:home
-            tooltip: Home
-            tap_action:
-              service_data:
-                command: HOME
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: home
-                justify-self: end
-                width: var(--control-height-sm)
-                height: var(--control-height-sm)
-                border-radius: var(--ha-card-border-radius)
-                background-color: var(--fill-subtle)
-                box-shadow: var(--card-ring)
-              icon:
-                --mdc-icon-size: var(--icon-size-m)
-          - icon: mdi:chevron-up
-            tap_action:
-              service_data:
-                command: DPAD_UP
-            hold_action:
-              service_data:
-                command: DPAD_UP
-            styles:
-              button:
-                grid-area: up
-          - icon: mdi:chevron-left
-            tap_action:
-              service_data:
-                command: DPAD_LEFT
-            hold_action:
-              service_data:
-                command: DPAD_LEFT
-            styles:
-              button:
-                grid-area: left
-          - layout: name
-            name: OK
-            tap_action:
-              service_data:
-                command: DPAD_CENTER
-            hold_action:
-              action: none
-            styles:
-              button:
-                grid-area: ok
-                width: var(--control-height-lg)
-                height: var(--control-height-lg)
-                border-radius: var(--radius-circle)
-                background-color: var(--ha-card-background)
-                box-shadow: var(--ha-card-box-shadow)
-              name:
-                font-size: var(--ha-font-size-m)
-                font-weight: var(--ha-font-weight-bold)
-                opacity: var(--opacity-muted)
-          - icon: mdi:chevron-right
-            tap_action:
-              service_data:
-                command: DPAD_RIGHT
-            hold_action:
-              service_data:
-                command: DPAD_RIGHT
-            styles:
-              button:
-                grid-area: right
-          - icon: mdi:chevron-down
-            tap_action:
-              service_data:
-                command: DPAD_DOWN
-            hold_action:
-              service_data:
-                command: DPAD_DOWN
-            styles:
-              button:
-                grid-area: down
+      # The remote has back and home buttons and a round pad with an OK button
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          icon_size: var(--icon-size-l)
+          padding: var(--ha-space-2) 0 0
+        # The styles place the buttons by their css_class, draw the round pad and set the button sizes. They exist only on this card.
+        styles: |-
+          ha-card .bubble-sub-button-bottom-container {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) repeat(3, var(--control-height-lg)) minmax(0, 1fr);
+            grid-template-rows: repeat(3, var(--control-height-lg));
+            grid-template-areas: "back . up . home" ". left ok right ." ". . down . .";
+            place-items: center;
+          }
+          ha-card .bubble-sub-button-bottom-container::before {
+            content: "";
+            grid-area: 1 / 2 / 4 / 5;
+            place-self: stretch;
+            border-radius: var(--radius-circle);
+            background-color: var(--fill-subtle);
+            box-shadow: var(--card-ring);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+            width: var(--control-height) !important;
+            height: var(--control-height) !important;
+            padding: 0 !important;
+            color: var(--primary-text-color) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+            opacity: var(--opacity-strong) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.back, .home) {
+            width: var(--control-height-sm) !important;
+            height: var(--control-height-sm) !important;
+            border-radius: var(--ha-card-border-radius) !important;
+            background-color: var(--fill-subtle) !important;
+            box-shadow: var(--card-ring) !important;
+            --org-btn-icon-size: var(--icon-size-m);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok {
+            width: var(--control-height-lg) !important;
+            height: var(--control-height-lg) !important;
+            border-radius: var(--radius-circle) !important;
+            background-color: var(--ha-card-background) !important;
+            box-shadow: var(--ha-card-box-shadow) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok .bubble-sub-button-name-container {
+            font-size: var(--ha-font-size-m) !important;
+            font-weight: var(--ha-font-weight-bold) !important;
+            opacity: var(--opacity-muted) !important;
+          }
+          .back { grid-area: back; justify-self: start; }
+          .home { grid-area: home; justify-self: end; }
+          .up { grid-area: up; }
+          .left { grid-area: left; }
+          .ok { grid-area: ok; }
+          .right { grid-area: right; }
+          .down { grid-area: down; }
+        sub_button:
+          main: []
+          bottom:
+            - name: Back
+              css_class: back
+              icon: mdi:arrow-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: BACK
+            - name: Home
+              css_class: home
+              icon: mdi:home
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: HOME
+            - name: Up
+              css_class: up
+              icon: mdi:chevron-up
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_UP
+            - name: Left
+              css_class: left
+              icon: mdi:chevron-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_LEFT
+            - name: OK
+              css_class: ok
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_CENTER
+            - name: Right
+              css_class: right
+              icon: mdi:chevron-right
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_RIGHT
+            - name: Down
+              css_class: down
+              icon: mdi:chevron-down
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_DOWN
 ```
 
 </details>
@@ -3592,6 +3062,7 @@ hide_backdrop: false
 popup_mode: fit-content
 with_bottom_offset: true
 modules:
+  - origami_base
   - origami_popup
 styles: '.bubble-pop-up-container { mask-image: none !important; }'
 # Hides the timer row again when you close the pop-up
@@ -3953,7 +3424,7 @@ cards:
               background-color: var(--fill-subtle)
               border-radius: 0px
               box-shadow: none
-              background-image: linear-gradient(var(--fill-loud), var(--fill-loud))
+              background-image: linear-gradient(var(--fill-strong), var(--fill-strong))
               background-repeat: no-repeat
               background-size: 2px 50%
               background-position: left center
@@ -4246,14 +3717,14 @@ The sensor finds the TV input and Bluetooth by name in the speaker's `source`. I
 
 ## Techniques
 
-These techniques appear in several places in the dashboard. The first three are the building blocks from [How Origami is built](#how-origami-is-built). The last three apply to the cards that still use Paper Buttons Row, which Origami 3 will replace with Bubble cards in most places.
+These techniques appear in several places in the dashboard. The first three are the building blocks from [How Origami is built](#how-origami-is-built). The last two apply to the cards that still use Paper Buttons Row, which Origami 3 will replace with Bubble cards in most places.
 
 <details>
 <summary>A Bubble card with a module</summary>
 
 <br>
 
-The favorites, the section headers and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light writes the brightness into the state line. These are the card's first lines.
+The favorites, the section headers, the room cards and the pop-ups are Bubble cards. Bubble Card does most of the work, and the Origami modules change the look and add what is missing. The light card in the room pop-up uses only Bubble Card's own options and two modules. Base sets the frame and the colors, and Light colors the slider. Bubble Card itself writes the state and the brightness into the state line, in Home Assistant's words. These are the card's first lines.
 
 ```yaml
 type: custom:bubble-card
@@ -4267,6 +3738,9 @@ modules:
   - origami_light
 origami_base:
   tile: true
+state_content:
+  - state
+  - brightness
 ```
 
 The [module reference](bubble_card/README.md) explains every module and its options.
@@ -4278,19 +3752,12 @@ The [module reference](bubble_card/README.md) explains every module and its opti
 
 <br>
 
-Where possible, a sensor turns numbers into a single word, and the card changes its look based on that word. In this example from the climate table, a room gets an arrow when it is the warmest or the coldest room.
+Where possible, a sensor turns numbers into a single word, and the card changes its look based on that word. In this example from the climate table, a room gets an arrow when it is the warmest or the coldest room. The room's climate sensor in the [package](packages/origami.yaml) writes `temp_rank`, and the temperature column of the [Table](bubble_card/README.md#table) module gives every cell in it this icon.
 
 ```yaml
-- entity: sensor.climate_living_room
-  icon: mdi:thermometer
-  name:
-    attribute: temperature
-    postfix: °
-  state:
-    attribute: temp_rank
-  state_icons:
-    warmest: mdi:arrow-up
-    coldest: mdi:arrow-down
+- name: temperature
+  text_template: ${num(attr.temperature)}°
+  icon_template: "${attr.temp_rank === 'warmest' ? 'mdi:arrow-up' : attr.temp_rank === 'coldest' ? 'mdi:arrow-down' : 'mdi:thermometer'}"
 ```
 
 </details>
@@ -4348,7 +3815,7 @@ origami_tiles:
 - State changes affect colors, but never sizes.
 - The room helpers return `?` instead of an empty value.
 - Elements that appear and disappear either take no space while they are hidden or keep their space and scale in and out.
-- Templates run in the browser where possible. The `${ }` templates in the Header and Tiles modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
+- Templates run in the browser where possible. The `${ }` templates in the Origami modules and the `[[[ ]]]` templates in Navbar Card render in the first frame. Jinja templates have to wait for the server.
 - The font loads from Home Assistant itself. A font that loads late makes all text redraw.
 - The main view uses grid cards instead of stack cards where it needs a wrapper.
 
@@ -4382,7 +3849,7 @@ The group badge on the cover scales with this variable.
 
 <br>
 
-Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the climate table. The room cards, the climate table and the server card are each a single Paper Buttons Row.
+Paper Buttons Row has no background when you use it as a card. To make it look like a card, give the row a background, a corner radius and padding. With `display: grid`, you can arrange the buttons in rows and columns, as in the status row on desktop.
 
 ```yaml
 type: custom:paper-buttons-row
@@ -4392,56 +3859,6 @@ styles:
   border-radius: var(--ha-card-border-radius)
 buttons:
   - entity: light.living_room
-```
-
-</details>
-
-<details>
-<summary>One tap target for each card</summary>
-
-<br>
-
-Give the row `position: relative`. An invisible button covers the whole row and receives every tap. All other buttons get `pointer-events: none`.
-
-```yaml
-type: custom:paper-buttons-row
-styles:
-  position: relative
-base_config:
-  styles:
-    button:
-      pointer-events: none
-buttons:
-  - entity: light.living_room
-    layout: name
-    name: false
-    tap_action:
-      action: navigate
-      navigation_path: '#popup_living_room'
-    styles:
-      button:
-        position: absolute
-        inset: 0px
-        z-index: 3
-        pointer-events: all
-        border-radius: var(--ha-card-border-radius)
-```
-
-</details>
-
-<details>
-<summary>Striped rows</summary>
-
-<br>
-
-The climate table's background is a single repeating gradient, which is as tall as two table rows. In `repeat(6, …)`, the 6 is the number of rooms.
-
-```yaml
-styles:
-  grid-template-rows: repeat(6, var(--control-height-icon))
-  background-image: >-
-    repeating-linear-gradient(to bottom, transparent, transparent var(--control-height-icon),
-    var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(var(--control-height-icon) * 2))
 ```
 
 </details>
@@ -4457,7 +3874,7 @@ The theme is a set of tokens. Home Assistant reads these tokens, and so do the c
 
 Color mostly shows that something is on. The icon is colored, and the area behind it uses `tint`, which mixes the same color into the card background. The mix is 14% in light mode and 4% in dark mode. `tint` uses `currentColor`, so set `color` on the same element.
 
-Home Assistant decides which color a device gets, for example deep orange for heating and light blue for media. Origami adjusts the tone of these colors and changes a few of them. Switches and other entities without a color of their own are green instead of amber when they are on, and open windows are cyan. Paused media players and people who are away use the secondary text color, and closed covers and disarmed alarm panels use the accent color.
+Home Assistant decides which color a device gets, for example deep orange for heating and light blue for media. Origami adjusts the tone of these colors and changes a few of them. Switches and other entities without a color of their own are green instead of amber when they are on, and open windows and doors are cyan. Paused media players and people who are away use the secondary text color, and closed covers and disarmed alarm panels use the accent color.
 
 To change a color, add `state-<domain>-active-color` to your copy of the theme. Domains with a color for each state need `state-<domain>-<state>-color`, such as `state-climate-heat-color`.
 
@@ -4468,7 +3885,7 @@ To change a color, add `state-<domain>-active-color` to your copy of the theme. 
 
 <br>
 
-The name Origami comes from Paper Buttons Row, because origami is folded paper. Paper Buttons Row has its own color variables, `pbs-button-*`, and the theme sets them to the text color. Entity buttons that are on still use their state color. To turn this off, set `active: []`, as in the room cards. The `rgb` variables need a triplet such as `var(--rgb-primary-text-color)`, because a hex value breaks the color.
+The name Origami comes from Paper Buttons Row, because origami is folded paper. Paper Buttons Row has its own color variables, `pbs-button-*`, and the theme sets them to the text color. Entity buttons that are on still use their state color. To turn this off, set `active: []` in the row's `base_config`. The `rgb` variables need a triplet such as `var(--rgb-primary-text-color)`, because a hex value breaks the color.
 
 </details>
 
@@ -4480,13 +3897,13 @@ The name Origami comes from Paper Buttons Row, because origami is folded paper. 
 | Token | Purpose |
 | --- | --- |
 | `ha-space-1` … `ha-space-5` | Spacing from 4 to 20 px |
-| `ha-card-border-radius` | The card corner radius, 22 px. `radius-inner` is this value divided by 1.3, about 17 px. `radius-small` is 8 px. |
+| `ha-card-border-radius`, `radius-ratio`, `radius-small`, `radius-control`, `radius-inner` | Every corner follows one rule. A shape's radius is its height times `radius-ratio`, which is 0.35, and no shape is rounder than a card, whose radius is 22 px. `radius-small`, `radius-control` and `radius-inner` are the radii of shapes that are 32, 40 and 48 px tall, such as a chip, a button and an icon's background. A shape close inside another shape takes the outer radius less the space between them, so their corners run in parallel. Switches, dots and rings are round. |
 | `border-width`, `border-contrast` | Card outlines, which are off by default |
-| `card-shadow`, `card-shadow-flat`, `shadow-elevated` | Shadows for each mode. `card-shadow-flat` only has the small contact shadow, and the card above the navigation bar uses `shadow-elevated`. |
+| `card-shadow`, `card-shadow-flat`, `chip-shadow`, `shadow-edge`, `shadow-tint`, `shadow-elevated` | Shadows for each mode. Each shadow has a fine edge, which is `shadow-edge`, a contact shadow and a soft drop below, all in `shadow-tint`, a dark tone of the background's warm hue. `card-shadow-flat` has the edge and the contact shadow, `chip-shadow` is the smaller shadow for icons, switches and keys, and the card above the navigation bar uses `shadow-elevated`. |
 | `fill-subtle`, `fill-strong`, `fill-loud` | Neutral surfaces, mixed from `fill-base` so that they stay warm |
 | `fill-contrast` | The strength of `fill-subtle`, 8% in light mode and 5% in dark mode |
 | `fill-active`, `toggle-on` | The text color at 85% on the card background, for switch tracks and active buttons |
-| `tile-background`, `tile-chip-background` | A tile's background and its icon's background |
+| `tile-background`, `tile-chip-background`, `tile-chip-shadow` | A tile's background, and the background and shadow behind icons, switches and keys on gray surfaces such as tiles and lists. `tile-chip-shadow` is `chip-shadow`. With `tile-chip-background: var(--fill-subtle)` and `tile-chip-shadow: none`, these backgrounds are muted and flat. |
 | `opacity-disabled`, `opacity-quiet`, `opacity-muted`, `opacity-strong` | Opacity levels of 0.3, 0.45, 0.6 and 0.8 |
 | `control-height-mini`, `-icon`, `-row`, `-list`, `-sm`, `control-height`, `-lg` | Fixed control heights of 32, 40, 44, 48, 52, 56 and 64 px |
 | `tile-size`, `tile-size-lg`, `dot-size` | Icon backgrounds of 48 and 80 px, and dots of 12 px |
@@ -4544,7 +3961,7 @@ In a browser, open `/local/fonts/montserrat.css` on your Home Assistant server, 
 
 <br>
 
-The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page.
+The modules are not loaded. Check that Bubble Card Tools is added as an integration and that the module files are in `/config/bubble_card/modules/`. Then reload the page. A card with an Origami module also looks plain while `origami_base` is missing from its `modules` or comes after the card's other Origami modules.
 
 </details>
 
@@ -4580,7 +3997,7 @@ Instead of copying the font files, you can add `https://fonts.googleapis.com/css
 Origami was built by hand over many years. Many of its details have reasons that the YAML alone does not show, so an AI assistant that guesses instead of reading usually gets them wrong. The repository is also large, and adapting it to your home takes time, even with AI.
 
 - Use the most capable model that you have access to, and turn on extended thinking if your app offers it.
-- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section.
+- Give the assistant the files from this repository, not only a link or a screenshot. Before it writes anything, it should read [How Origami is built](#how-origami-is-built), the README section of the part that you want to change and the [Techniques](#techniques) section. For Bubble cards, such as the room cards and the TV pop-up, it should also read the [module reference](bubble_card/README.md).
 - Ask it to follow the order in [How Origami is built](#how-origami-is-built). Otherwise, it often writes a new custom card or uses card-mod, because that is easier than learning how Bubble Card and the modules work.
 - Give it your real entity IDs. The assistant cannot see your Home Assistant, so it invents any ID that you do not give it.
 - Ask for the changed cards only, and save a copy of your configuration before you paste anything.

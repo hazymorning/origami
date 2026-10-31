@@ -1,19 +1,18 @@
 origami_fan:
-  name: Origami • Fan
-  version: "2.4.2"
+  name: "Origami • Fan"
+  version: "3.0.2"
   supported:
     - button
-  description: "The Fan module styles fan cards. It works with Base and its Grouped sub-buttons option. The icon spins at the fan's speed. The power button and the button for the current speed are filled while the fan runs. Sub-button 1 is the power button, and the next sub-buttons are the speed buttons."
-  code: |-
+  description: "Fan lets the fan icon spin at the fan's speed. The icon turns the other way while the fan runs in reverse, and it stands still when the device asks for less motion."
+  code: |
     ${(() => {
-      card._orgStateClaim = hass;
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_fan needs origami_base 12 or later");
       const st = hass.states[entity];
-      const on = st?.state === "on";
       const pct = Math.min(Math.max(Number(st?.attributes?.percentage) || 0, 0), 100);
-      card._orgFanSpin = on ? "origami-fan-spin " + (2.8 - pct / 100 * 2.1).toFixed(2) + "s linear infinite" : "none";
-      const level = !on ? 0 : pct <= 34 ? 1 : pct <= 67 ? 2 : 3;
-      card._orgFanPower = on ? ".bubble-sub-button.bubble-sub-button-1:not([class*='bubble-sub-button-slider-'])" : ".origami-inactive";
-      card._orgFanStep = level ? ".bubble-sub-button.bubble-sub-button-" + (level + 1) + ":not([class*='bubble-sub-button-slider-'])" : ".origami-inactive";
+      card._orgFanSpin = st?.state === "on"
+        ? "origami-fan-spin " + (2.8 - (pct / 100) * 2.1).toFixed(2) + "s linear infinite" + (st.attributes?.direction === "reverse" ? " reverse" : "")
+        : "none";
       return "";
     })()}
     @keyframes origami-fan-spin {
@@ -21,41 +20,8 @@ origami_fan:
         transform: rotate(360deg);
       }
     }
-    ha-card .bubble-icon {
-      animation: ${card._orgFanSpin} !important;
-      transform-origin: center;
+    @media (prefers-reduced-motion: no-preference) {
+      ha-card .bubble-icon {
+        animation: ${card._orgFanSpin} !important;
+      }
     }
-    ha-card .bubble-sub-button.background-on:not([class*='bubble-sub-button-slider-']),
-    ha-card .bubble-sub-button.background-off:not([class*='bubble-sub-button-slider-']) {
-      background-color: ${this.config.origami_base?.group ? "var(--org-key-bg)" : "var(--org-tile-bg, var(--org-inset))"} !important;
-    }
-    ha-card .bubble-sub-button:not([class*='bubble-sub-button-slider-']) .bubble-sub-button-icon {
-      color: var(--primary-text-color) !important;
-    }
-    ha-card ${card._orgFanPower},
-    ha-card ${card._orgFanStep} {
-      color: var(--text-color-active);
-      background-color: var(--fill-active) !important;
-      box-shadow: none !important;
-    }
-    ha-card ${card._orgFanPower} .bubble-sub-button-icon,
-    ha-card ${card._orgFanStep} .bubble-sub-button-icon,
-    ha-card ${card._orgFanStep} .bubble-sub-button-name-container {
-      color: var(--text-color-active) !important;
-      opacity: 1 !important;
-    }
-    ${(() => {
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const st = hass.states[entity];
-      const pct = Math.round(Number(st?.attributes?.percentage) || 0);
-      const w = String(hass.locale?.language ?? hass.language ?? "").startsWith("de")
-        ? { on: "An", off: "Aus", error: "Fehler" }
-        : { on: "On", off: "Off", error: "Error" };
-      const next = !st || ["unavailable", "unknown"].includes(st.state) ? w.error
-        : st.state !== "on" ? w.off
-        : pct ? pct + " %"
-        : w.on;
-      if (el.innerText !== next) card.querySelector('.bubble-state').innerText = next;
-      return "";
-    })()}

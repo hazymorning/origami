@@ -1,12 +1,241 @@
 origami_slider:
-  name: Origami • Slider
-  version: "1.3.1"
+  name: "Origami • Slider"
+  version: "1.14.0"
   supported:
     - button
-  description: "The Slider module turns a slider button into a standalone slider. List Base first, then Slider. The module hides the icon, name and state, so the card itself is the track. Set rows to 1."
+    - sub-buttons
+  description: "Slider turns a slider button into a standalone slider, so the card is the track with keys after it, and a master slider is one step taller. On a sub-buttons card, slider sub-buttons become rows with a name, track and value, and a switch a row that fills while on."
+  editor:
+    - name: label_width
+      label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
+      selector:
+        text: {}
+    - name: master
+      label: "Master slider, such as one for all lamps: one step taller, with its name at the start of the track"
+      selector:
+        boolean: {}
+      default: false
   code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13.3)) throw new Error("origami_slider needs origami_base 13.3 or later");
+      if (this.config.card_type === "sub-buttons") {
+        // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
+        // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
+        const env = org.env;
+        const width = String(this.config.origami_slider?.label_width ?? "").trim();
+        const gap = "\u00a0".repeat(6);
+        const rows = org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider" || (item.entity && (item.sub_button_type ?? "default") === "default"))
+          .map(({ n, item, entity }) => {
+            const name = org.name(hass, entity, item.name, env);
+            const text = org.rename(name) ?? name;
+            const slider = item.sub_button_type === "slider";
+            const st = hass.states[entity];
+            const power = org.power(st);
+            return { n, text, slider, on: !slider && power === true, word: slider ? "" : power === null ? "–" : org.word(hass, st),
+              sel: slider ? "ha-card .bubble-sub-slider-wrapper:has(> .bubble-sub-button-slider-" + n + ")" : "ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-sub-button-" + n };
+          });
+        const toggles = rows.filter((r) => !r.slider);
+        card._orgSl = {
+          width: width || "fit-content(30%)",
+          names: rows.map((r) => r.sel + " { --org-name: " + org.str(r.text) + "; --org-name-loop: " + org.str(r.text + gap + r.text) + "; }").join("\n    "),
+          toggles: toggles.map((r) => r.sel),
+          // The rows that show a name in their first column, which scrolls when it is too wide
+          rows: ":is(ha-card .bubble-sub-slider-wrapper.inline" + toggles.map((r) => ", " + r.sel).join("") + ")",
+          lit: toggles.filter((r) => r.on).map((r) => r.sel + " > .bubble-sub-button-name-container"),
+          words: toggles.map((r) => r.sel + "::after { content: " + org.str(r.word) + "; }").join("\n    ")
+        };
+        // A name wider than its column scrolls like Bubble Card's scrolling text, at the same speed. The fonts and the column width are known only after layout, so the rows are measured in the next frame.
+        org.later("slider", () => {
+          rows.forEach((r) => {
+            const el = card.querySelector(r.sel.replace(/^ha-card /, ""));
+            if (!el) return;
+            const pen = org.pen(el);
+            const room = parseFloat(pen.cs.width);
+            const wide = pen.width(r.text);
+            if (!(room > 0) || wide <= room + 0.5) return el.removeAttribute("data-org-scroll");
+            const shift = wide + pen.width(gap);
+            el.style.setProperty("--org-name-shift", (-shift).toFixed(1) + "px");
+            el.style.setProperty("--org-name-time", Math.max(1, shift / 8).toFixed(2) + "s");
+            if (!el.hasAttribute("data-org-scroll")) el.setAttribute("data-org-scroll", "");
+          });
+        });
+        return "";
+      }
+      card._orgSl = null;
+      // The card is the track, so Base rounds its fill like a sub-button's slider
+      if (card.dataset.orgTrack !== "") card.dataset.orgTrack = "";
+      // With show_name, the card's name stands before the value, such as Gruppe · 30 %. A name from a template that returns nothing leaves only the value.
+      const own = this.config.show_name !== true ? "" : org.has(this.config.name) ? String(org.value(org.env, this.config.name, org.ctx) ?? "").trim() : org.name(hass, entity);
+      const sb = this.config.sub_button;
+      const on = org.power(hass.states[entity]);
+      card._orgOne = {
+        name: own ? org.str(org.rename(own) ?? own) : "",
+        // While the entity is off, the value is Home Assistant's word for off instead of 0 %, and while it is unavailable a dash, as on a slider sub-button
+        off: on === true ? "" : org.str(on === null ? "–" : org.word(hass, hass.states[entity])),
+        // The main sub-buttons stand after the track as keys
+        keys: (Array.isArray(sb) ? sb : sb?.main ?? []).length > 0,
+        // A master slider sets a whole group, such as all lamps above a row for each lamp. It is one step taller, and its name stands at the start of the track, with the value at its end.
+        master: org.yes(this.config.origami_slider?.master)
+      };
+      return "";
+    })()}
+    ${card._orgSl ? `
+    ${card._org.unframe()}
+    /* A row's track is a little lower than a key, as Base sets it, and the rows stand 12 px apart */
     ha-card {
-      --org-row-height: var(--control-height-icon);
+      --bubble-sub-slider-height: var(--org-sub-h, var(--org-row-slider-h));
+    }
+    ha-card .bubble-sub-button-bottom-container {
+      display: grid !important;
+      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
+      gap: var(--ha-space-3) var(--ha-space-4) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline:not([style*="display: none"]) {
+      grid-column: 1 / -1;
+      display: grid !important;
+      grid-template-columns: subgrid;
+      gap: normal !important;
+      align-items: center;
+      width: auto !important;
+    }
+    /* Each row has two columns: the name and the track, and the value stands in the track, as on a standalone slider */
+    ha-card .bubble-sub-slider-wrapper.inline > [class*="bubble-sub-button-slider-"] {
+      display: contents !important;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-slider {
+      grid-area: 1 / 2;
+      position: relative !important;
+      box-sizing: border-box;
+      height: var(--bubble-sub-slider-height);
+      overflow: hidden;
+      border-radius: var(--org-slider-r);
+      background-color: var(--fill-subtle);
+      box-shadow: var(--card-ring);
+    }
+    /* A value ends where its track's corner begins, on every slider */
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-sub-button-info-wrapper {
+      grid-area: 1 / 2;
+      position: relative;
+      z-index: 1;
+      display: flex !important;
+      justify-content: flex-end;
+      box-sizing: border-box;
+      width: auto !important;
+      min-width: 0;
+      padding: 0 var(--org-slider-r) !important;
+      opacity: 1 !important;
+      pointer-events: none;
+    }
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-value {
+      position: static !important;
+      display: block !important;
+      height: auto !important;
+      padding: 0 !important;
+      transform: none !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    ${card._orgSl.toggles.length ? card._org.each(card._orgSl.toggles, "") + ` {
+      grid-column: 1 / -1;
+      display: grid !important;
+      grid-template-columns: subgrid;
+      align-items: center;
+      width: auto !important;
+      min-width: 0 !important;
+      height: var(--bubble-sub-slider-height) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+    ` + card._org.each(card._orgSl.toggles, " > :not(.bubble-sub-button-name-container)") + ` {
+      display: none !important;
+    }
+    ` + card._org.each(card._orgSl.toggles, " > .bubble-sub-button-name-container") + ` {
+      grid-area: 1 / 2;
+      display: flex !important;
+      align-items: center;
+      box-sizing: border-box;
+      height: 100%;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: var(--org-slider-r);
+      background-color: var(--fill-subtle);
+      box-shadow: var(--card-ring);
+      font-size: 0 !important;
+      transition: background-color var(--duration-normal) ease;
+    }
+    ` + card._org.each(card._orgSl.toggles, "::after") + ` {
+      grid-area: 1 / 2;
+      justify-self: end;
+      position: relative;
+      z-index: 1;
+      padding-inline-end: var(--org-slider-r);
+      pointer-events: none;
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--secondary-text-color);
+      white-space: nowrap;
+    }` : ""}
+    ${card._orgSl.lit.length ? card._org.each(card._orgSl.lit, "") + ` {
+      background-color: var(--org-slider-fill);
+    }` : ""}
+    ${card._orgSl.words}
+    /* A row's name has the size and weight of a name in a list */
+    ${card._orgSl.rows}::before {
+      content: var(--org-name, "");
+      grid-area: 1 / 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--primary-text-color);
+    }
+    /* A row's track has no grip at the end of its fill, so its value never meets one */
+    ha-card .bubble-sub-slider-wrapper.inline .bubble-range-fill::after {
+      display: none !important;
+    }
+    ${card._orgSl.rows}[data-org-scroll]::before {
+      content: var(--org-name-loop, "");
+      text-overflow: clip;
+      mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent);
+      animation: origami-name-scroll var(--org-name-time) linear infinite;
+    }
+    ${card._orgSl.rows}[data-org-scroll]:dir(rtl)::before {
+      mask-image: linear-gradient(to left, transparent 0, black 8px, black calc(100% - 8px), transparent);
+    }
+    @keyframes origami-name-scroll {
+      from { text-indent: 0; }
+      to { text-indent: var(--org-name-shift); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ${card._orgSl.rows}[data-org-scroll]::before {
+        animation: none;
+        content: var(--org-name, "");
+        text-overflow: ellipsis;
+      }
+    }
+    /* Every track has the subtle fill, as a standalone slider and a Button row's tiles have */
+    ha-card [class*="bubble-sub-button-slider-"] {
+      --org-inset: var(--fill-subtle);
+      height: 100% !important;
+    }
+    ${card._orgSl.names}
+    ` : `
+    /* The track is as tall as a key, or one step taller on a master slider, and its corners follow its height */
+    ha-card {
+      --org-one-h: ${card._orgOne.master ? "var(--control-height-list)" : "var(--control-height-icon)"};
+      --org-one-r: calc(var(--org-one-h) * var(--radius-ratio, 0.35));
+      --org-row-height: var(--org-one-h);
       --bubble-border: none;
     }
     .large .bubble-container {
@@ -14,8 +243,8 @@ origami_slider:
     }
     .bubble-button-card-container,
     .bubble-container {
-      height: var(--control-height-icon) !important;
-      min-height: var(--control-height-icon) !important;
+      height: var(--org-one-h) !important;
+      min-height: var(--org-one-h) !important;
     }
     .bubble-content-container,
     .bubble-icon-container,
@@ -27,23 +256,105 @@ origami_slider:
     }
     .bubble-container {
       overflow: hidden;
-      border-radius: var(--radius-small) !important;
+      border-radius: var(--org-one-r) !important;
       background-color: var(--fill-subtle);
       box-shadow: var(--card-ring);
     }
     .bubble-range-slider,
     .bubble-background,
     .card-content {
-      border-radius: var(--radius-small) !important;
-    }
-    .bubble-range-fill {
-      border-radius: var(--radius-small) 4px 4px var(--radius-small) !important;
+      border-radius: var(--org-one-r) !important;
     }
     .bubble-range-value {
-      right: var(--ha-space-2) !important;
+      inset-inline-end: var(--org-one-r) !important;
+      padding: 0 !important;
       opacity: 1 !important;
       display: block !important;
-      font-size: var(--ha-font-size-s);
-      font-weight: var(--ha-font-weight-bold);
-      color: var(--secondary-text-color);
+      font-size: ${card._orgOne.master ? "var(--ha-font-size-m)" : "var(--ha-font-size-s)"};
+      font-weight: var(--ha-font-weight-medium);
+      color: ${card._orgOne.master ? "var(--primary-text-color)" : "var(--secondary-text-color)"};
     }
+    ${card._orgOne.master ? `/* A master slider has no grip at the end of its fill, so the name at its start and the value at its end never meet one */
+    ha-card .bubble-range-fill::after {
+      display: none !important;
+    }` : ""}
+    ${card._orgOne.name && card._orgOne.master ? `.bubble-range-slider::before {
+      content: ${card._orgOne.name};
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      inset-inline-start: var(--org-one-r);
+      max-width: 60%;
+      translate: 0 -50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--ha-font-size-m);
+      font-weight: var(--ha-font-weight-medium);
+      color: var(--primary-text-color);
+      pointer-events: none;
+    }` : card._orgOne.name ? `.bubble-range-value::before {
+      content: ${card._orgOne.name} "\\a0";
+    }` : ""}
+    ${card._orgOne.off ? `.bubble-range-value {
+      font-size: 0 !important;
+    }
+    .bubble-range-value::before,
+    .bubble-range-value::after {
+      font-size: ${card._orgOne.master ? "var(--ha-font-size-m)" : "var(--ha-font-size-s)"};
+    }
+    .bubble-range-value::after {
+      content: ${card._orgOne.off};
+    }` : ""}
+    ${card._orgOne.keys ? `
+    /* The keys stand after the track, as tall as it and with its background, and the track ends before them. Bubble Card measures the track itself, so a drag still runs from one of its ends to the other, and a tap on a key never moves the slider. */
+    ha-card .bubble-container {
+      display: flex !important;
+      gap: 0 !important;
+      overflow: visible !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+    ha-card .bubble-button-card {
+      display: contents !important;
+    }
+    ha-card .bubble-range-slider {
+      position: relative !important;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      background-color: var(--fill-subtle);
+      box-shadow: var(--card-ring);
+    }
+    ha-card .bubble-container .bubble-sub-button-container {
+      z-index: 1;
+      inset: auto !important;
+      display: flex !important;
+      flex: 0 0 auto;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+    }
+    /* Each key brings its own gap, so a hidden key leaves none */
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button {
+      box-sizing: border-box;
+      width: var(--org-one-h) !important;
+      min-width: var(--org-one-h) !important;
+      height: var(--org-one-h) !important;
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-2) !important;
+      padding: 0 !important;
+      border-radius: var(--org-one-r) !important;
+      background-color: transparent !important;
+      color: var(--primary-text-color) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-sub-button.background-on {
+      background-color: var(--fill-subtle) !important;
+      box-shadow: var(--card-ring);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon {
+      --mdc-icon-size: var(--icon-size-s);
+      margin: 0 !important;
+    }` : ""}
+    `}

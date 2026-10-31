@@ -1,0 +1,328 @@
+# The design sheet: example cards that show the rules the checks measure.
+# Only the example home's entities go here. Cards from a real home stay outside the repository.
+width: 396
+states:
+  media_player.living_room:
+    state: playing
+    attributes: {friendly_name: Living room, volume_level: 0.35, media_title: Midnight City, media_artist: M83, group_members: [media_player.living_room], source: WiFi, source_list: [WiFi, Bluetooth, Line In]}
+  input_select.music_speaker:
+    state: media_player.living_room
+    attributes: {friendly_name: Speaker, options: [media_player.living_room, media_player.kitchen_speaker]}
+  light.kitchen:
+    state: 'on'
+    attributes: {friendly_name: Kitchen, brightness: 160, supported_color_modes: [brightness], color_mode: brightness}
+  climate.bedroom:
+    state: heat
+    attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 20.5, current_temperature: 19.8, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
+  switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+  fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 50}}
+  sensor.living_room_temperature: {state: '21.5', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Temperature}}
+  sensor.living_room_humidity: {state: '48', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Humidity}}
+  media_player.kitchen_speaker:
+    state: playing
+    attributes: {friendly_name: Kitchen speaker, media_title: The last song, media_artist: Polled late, group_members: [media_player.kitchen_speaker]}
+  media_player.kitchen_speaker_ma:
+    state: playing
+    attributes: {friendly_name: Kitchen speaker MA, media_title: The new song, media_artist: Music Assistant}
+  scene.living_room_evening: {state: '2026-10-28T18:00:00+00:00', attributes: {friendly_name: Evening}}
+  scene.living_room_dinner: {state: '2026-10-27T19:00:00+00:00', attributes: {friendly_name: Dinner}}
+  scene.living_room_movie: {state: '2026-10-25T20:00:00+00:00', attributes: {friendly_name: Movie}}
+sections:
+  - id: sheet
+    cards:
+      # A speaker with a tray of three keys and a volume row
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        origami_base: {group: true}
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - {icon: mdi:play, show_background: true}
+            - {icon: mdi:skip-next, show_background: false}
+            - {icon: mdi:bluetooth, show_background: false}
+          bottom:
+            - name: Volume
+              group:
+                - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A compact lamp whose slider stands in for the switch
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: light.kitchen
+        modules: [origami_base, origami_light]
+        origami_base: {compact: true, tile: true}
+        sub_button:
+          main:
+            - {entity: light.kitchen, sub_button_type: slider, always_visible: true}
+        rows: 1
+      # Three compact rows in a stack that share one background
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.kitchen
+            modules: [origami_base, origami_light]
+            origami_base: {compact: true, tile: true, join: first}
+            sub_button:
+              main:
+                - {entity: light.kitchen, sub_button_type: slider, always_visible: true}
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.printer
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, toggle: true, join: middle}
+            sub_button:
+              main:
+                - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: fan.bedroom
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, toggle: true, join: last}
+            sub_button:
+              main:
+                - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+      # Two values with labels beside the name
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        name: Living room
+        icon: mdi:sofa
+        modules: [origami_base]
+        sub_button:
+          main:
+            - {entity: sensor.living_room_temperature, show_state: true, show_icon: false, origami_base: {label: Temperature}}
+            - {entity: sensor.living_room_humidity, show_state: true, show_icon: false, origami_base: {label: Humidity}}
+      # A thermostat with minus, its target and plus in a tray
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: climate.bedroom
+        modules: [origami_base, origami_climate]
+        origami_base: {group: true, tile: true}
+        sub_button:
+          main:
+            - {icon: mdi:minus, show_background: true}
+            - {entity: climate.bedroom, css_class: readout, show_icon: false, show_name: false, show_background: false, state_content: temperature}
+            - {icon: mdi:plus, show_background: true}
+        rows: 1.375
+      # A fan with a pill switch
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: fan.bedroom
+        modules: [origami_base, origami_fan]
+        origami_base: {toggle: true}
+        sub_button:
+          main:
+            - {entity: fan.bedroom, tap_action: {action: toggle}}
+      # A list, and a slim list with dividers
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_tiles]
+        origami_tiles: {layout: list}
+        sub_button:
+          bottom:
+            - {entity: switch.printer, name: Printer, icon: mdi:printer-outline, tap_action: {action: toggle}}
+            - {entity: scene.living_room_movie, name: Movie, icon: mdi:movie-open-outline, origami_tiles: {sign: run}}
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_tiles]
+        origami_tiles: {layout: list, slim: true, dividers: true, sign: none}
+        sub_button:
+          bottom:
+            - {entity: sensor.living_room_temperature, name: Temperature, icon: mdi:thermometer}
+            - {entity: sensor.living_room_humidity, name: Humidity, icon: mdi:water-percent}
+      # Chips, and scenes as large fields, with and without names
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_button]
+        origami_button: {chips: true, scroll: true}
+        sub_button:
+          bottom:
+            - {name: Evening, icon: mdi:weather-sunset, show_name: true}
+            - {icon: mdi:heart, show_name: false}
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_button]
+        origami_button: {labels: below, scroll: true}
+        sub_button:
+          bottom:
+            - {entity: scene.living_room_evening, name: Evening, icon: mdi:weather-sunset, show_name: true}
+            - {entity: scene.living_room_dinner, icon: mdi:silverware-fork-knife, show_name: false}
+      # A frameless speaker with its cover above the name
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        origami_base: {frameless: true}
+        origami_media: {cover: above}
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - {icon: mdi:skip-next, show_background: true}
+          bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
+            - name: Volume
+              group:
+                - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+      # A speaker with a dropdown that picks it and a key whose dropdown picks its source
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        sub_button:
+          main:
+            - {entity: input_select.music_speaker, sub_button_type: select, show_icon: false}
+            - {entity: media_player.living_room, sub_button_type: select, select_attribute: source_list, icon: mdi:dots-horizontal, show_arrow: false, show_background: true}
+      # A speaker that shows only its cover, so its name, its key and its play row stay hidden
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        origami_media: {cover: only}
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - {icon: mdi:skip-next, show_background: true}
+          bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
+      # A speaker with its cover in the icon and a play row, whose play key is one step smaller than beside a large cover
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.living_room
+        modules: [origami_base, origami_media]
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          bottom:
+            - name: Play
+              group:
+                - {icon: mdi:skip-previous}
+                - {icon: mdi:play, css_class: play}
+                - {icon: mdi:skip-next}
+      # A standalone volume slider with its name before the value and a key after the track
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: media_player.living_room
+        name: Group ·
+        show_name: true
+        show_icon: false
+        show_state: false
+        slider_value_position: right
+        tap_action: {action: none}
+        modules: [origami_base, origami_slider]
+        sub_button:
+          main:
+            - {icon: mdi:chevron-down, show_background: true}
+      # A speaker whose Music Assistant player comes from a template in a list, and which shows that player's song
+      - type: custom:bubble-card
+        card_type: media-player
+        entity: media_player.kitchen_speaker
+        modules: [origami_base, origami_media]
+        origami_media:
+          players:
+            - "${entity + '_ma'}"
+        hide: {power_button: true, previous_button: true, next_button: true, volume_button: true}
+      # A stack whose second card hides itself while the printer is off, so the stack is as tall as its first card
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: Living room
+            icon: mdi:sofa
+            modules: [origami_base]
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.printer
+            modules: [origami_base]
+            origami_base:
+              hidden: "${states('switch.printer') === 'off'}"
+      # A checklist without a panel of its own: the lamp is on and checked, the printer is off
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_tiles]
+        origami_tiles: {layout: list, slim: true, dividers: true, sign: check, pending: true, background: false}
+        sub_button:
+          main: []
+          bottom:
+            - {entity: light.kitchen, name: Kitchen, icon: mdi:lightbulb, tap_action: {action: toggle}}
+            - {entity: switch.printer, name: Printer, icon: mdi:printer-outline, tap_action: {action: toggle}}
+      # A master slider for a whole group, one step taller with its name at the start of the track
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.kitchen
+        name: All lamps
+        show_name: true
+        show_state: false
+        show_icon: false
+        tap_action: {action: none}
+        modules: [origami_base, origami_slider]
+        origami_slider: {master: true}
+      # A pop-up whose key opens a mini pop-up with a title and a volume row of its own
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: '#sheet'
+        name: Living room
+        button_type: name
+        show_header: true
+        show_icon: false
+        modules: [origami_base, origami_popup]
+        origami_popup:
+          mini_popups:
+            volume:
+              - type: custom:bubble-card
+                card_type: separator
+                name: Volume
+                modules: [origami_header]
+              - type: custom:bubble-card
+                card_type: sub-buttons
+                modules: [origami_slider]
+                sub_button:
+                  main: []
+                  bottom:
+                    - {entity: media_player.living_room, name: Living room, sub_button_type: slider, always_visible: true}
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: slider
+            entity: media_player.living_room
+            show_icon: false
+            modules: [origami_base, origami_slider]
+            sub_button:
+              main:
+                - {icon: mdi:chevron-down, show_background: true, tap_action: {action: fire-dom-event, mini_popup: volume}}
+      # A Bubble card without Origami modules, which Base leaves alone
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: light.kitchen
+        name: Plain

@@ -1,10 +1,215 @@
 origami_popup:
-  name: Origami • Popup
-  version: "3.3.2"
+  name: "Origami • Popup"
+  version: "4.10.0"
   supported:
     - pop-up
-  description: "The Popup module styles a pop-up's header, backdrop and close button. The pop-up's sub-buttons appear below the title, as text or as chips."
+  description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
   code: |-
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13.2)) throw new Error("origami_popup needs origami_base 13.2 or later");
+      const cfg = this.config.origami_popup ?? {};
+      const { env, ctx } = org;
+      // Origami 2 named this option subtitle_style, and that name still works
+      const chip = (cfg.value_style ?? cfg.subtitle_style) === "chip";
+      // Bubble Card draws a header with an entity as a switch, unless it has a button_type of its own. Such a header keeps Bubble Card's own layout.
+      const type = ["classic", "home-assistant"].includes(this.config.popup_style) ? "switch" : this.config.button_type || (this.config.entity ? "switch" : "name");
+      // Popup writes the title, as Bubble Card would, so a title in ${ } reads the states at once, such as the view that a helper chooses. A header that shows only a name has no title without a name of its own, and a header with a button shows its entity's name.
+      const own = this.config.name;
+      const title = type !== "name" ? org.name(hass, entity, own, env) : org.has(own) ? String(org.value(env, own, ctx) ?? "") : "";
+      if (card.querySelector('.bubble-name')) card.querySelector('.bubble-name').textContent = title;
+      // A value with a name of its own and no visibility conditions always shows, even while Bubble Card would hide it, so the header keeps the row for it
+      const list = org.subs(env, this.config, "origami_popup");
+      // A dropdown that picks an entity, such as a helper that picks a speaker, is a title of its own: the chosen entity's name as large as the title, with an arrow after it whose chevron is about as wide as the name's small letters. Its menu lists the entities' names and icons, as on a card. While the title is empty, the dropdown stands in its place.
+      const picks = type !== "name" ? [] : list.filter(org.dropdown).flatMap((sub) => {
+        const sel = "div.bubble-header .bubble-sub-button-container .bubble-sub-button.bubble-sub-button-" + sub.n;
+        const text = org.picker(hass, sub, sel, "var(--ha-font-size-2xl)");
+        return !text ? [] : [...text,
+          sel + " { width: auto !important; min-width: 0 !important; height: auto !important; padding: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--primary-text-color) !important; }",
+          sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; line-height: var(--ha-line-height-condensed) !important; color: inherit !important; opacity: 1 !important; }",
+          sel + " .bubble-dropdown-container { width: var(--icon-size-l) !important; height: var(--icon-size-l) !important; margin-inline-start: var(--ha-space-1); }",
+          sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--icon-size-l); width: var(--icon-size-l) !important; height: var(--icon-size-l) !important; color: var(--secondary-text-color) !important; }",
+          sel + " .bubble-dropdown-inner-border { display: none !important; }"];
+      });
+      const forced = list.filter(({ item, opt }) => org.has(opt?.name) && !item.visibility).map(({ n }) => ".bubble-sub-button-" + n);
+      card._orgP = {
+        chip,
+        title: type === "name",
+        // With value_position: beside, the values stand at the right of the title, before the close button
+        beside: cfg.value_position === "beside",
+        // The icon passes its tap to the card, unless the pop-up has an entity whose icon Bubble Card makes tappable
+        icon: !this.config.entity,
+        any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
+        blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance",
+        // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
+        art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
+        mix: cfg.cover_mix ?? 16,
+        cover: cfg.cover_blur === undefined || org.yes(cfg.cover_blur),
+        // The dropdown in the title's place
+        lead: picks.length > 0 && !title,
+        css: [...(picks.length ? org.menu("div.bubble-header") : []), ...picks, ...org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list)].join("\n")
+      };
+      if (card._orgP.art) card._orgPArt = card._orgP.art;
+      // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
+      card._orgP.gap = String(cfg.gap ?? "").trim();
+      // A mini pop-up is a small pop-up over this one, with cards of its own under mini_popups and a name. A key anywhere in the pop-up opens it with tap_action: fire-dom-event and mini_popup: that name. It opens next to the key, as wide as the pop-up's cards, and the pop-up behind it dims. A tap beside it, Esc or the pop-up closing closes it.
+      const mini = card._orgMini ?? (card._orgMini = { built: {} });
+      mini.hass = this._hass;
+      mini.defs = cfg.mini_popups && typeof cfg.mini_popups === "object" ? cfg.mini_popups : {};
+      card._orgP.mini = Object.keys(mini.defs).length > 0;
+      if (card._orgP.mini && !mini.show) {
+        // As with Home Assistant's menus, the mini pop-ups and the dim behind them wait in the top layer while the pop-up is open, drawn but clear and inert. A tap then only fades and scales one in, so the whole motion shows, even on a slow phone.
+        const layer = (cls) => {
+          const el = document.createElement("div");
+          el.className = cls;
+          el.setAttribute("popover", "manual");
+          el.inert = true;
+          // Touches stay in it, so a drag never slides the pop-up closed
+          el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
+          return el;
+        };
+        const host = () => card.querySelector(".bubble-pop-up-container") ?? card;
+        const shown = (el) => el.matches(":popover-open");
+        // A tap on the dim closes the mini pop-up. The dim is inside the pop-up, so Bubble Card doesn't count it as a tap beside the pop-up.
+        mini.dim = layer("org-mini-dim");
+        mini.dim.addEventListener("click", () => mini.close());
+        // Esc closes only the mini pop-up, before Bubble Card closes the pop-up on an Esc that reaches the window
+        mini.esc = (e) => {
+          if (e.key !== "Escape" || !mini.open) return;
+          e.stopImmediatePropagation();
+          mini.close();
+        };
+        // up() puts the dim and the built mini pop-ups into the top layer, the dim first so it stays below them, and down() takes them out again
+        mini.up = () => {
+          const els = [mini.dim, ...Object.values(mini.built).map((o) => o.el)];
+          els.forEach((el) => { if (el.parentNode !== host()) host().appendChild(el); });
+          if (!shown(mini.dim)) els.forEach((el) => { if (shown(el)) el.hidePopover(); });
+          els.forEach((el) => { if (!shown(el)) try { el.showPopover(); } catch (e) {} });
+          const col = (card.querySelector(".bubble-cards-container") ?? card)?.getBoundingClientRect();
+          if (col) els.slice(1).forEach((el) => { if (!el.classList.contains("open")) el.style.width = col.width + "px"; });
+        };
+        mini.down = () => [mini.dim, ...Object.values(mini.built).map((o) => o.el)].forEach((el) => { if (shown(el)) el.hidePopover(); });
+        // place() puts the mini pop-up below its key, or above it where there is more room, lined up with the pop-up's cards. The edge next to the key stays where it is while the mini pop-up is open, so a change of its cards or of the pop-up behind it never moves it, and content that grows past the screen scrolls.
+        mini.place = (o) => {
+          const col = (card.querySelector(".bubble-cards-container") ?? card)?.getBoundingClientRect();
+          if (!col) return;
+          const gap = parseFloat(getComputedStyle(card).getPropertyValue("--ha-space-2")) || 8;
+          const k = o.key?.isConnected && o.key.getClientRects().length ? o.key.getBoundingClientRect() : null;
+          const below = k ? innerHeight - k.bottom - 2 * gap : innerHeight - 2 * gap;
+          const above = k ? k.top - 2 * gap : 0;
+          const down = o.el.scrollHeight <= below || below >= above;
+          Object.assign(o.el.style, {
+            width: col.width + "px",
+            left: col.left + "px",
+            top: down ? (k ? k.bottom + gap : gap) + "px" : "auto",
+            bottom: down ? "auto" : innerHeight - k.top + gap + "px",
+            maxHeight: Math.max(down ? below : above, 0) + "px",
+            transformOrigin: (k ? Math.min(Math.max(k.left + k.width / 2 - col.left, 0), col.width) + "px " : "50% ") + (down ? "0" : "100%")
+          });
+        };
+        mini.close = () => {
+          const o = mini.open;
+          if (!o) return;
+          mini.open = null;
+          o.el.classList.remove("open");
+          mini.dim.classList.remove("open");
+          o.el.inert = true;
+          mini.dim.inert = true;
+          window.removeEventListener("keydown", mini.esc, true);
+        };
+        // build() builds a mini pop-up's cards once and keeps them in the pop-up
+        mini.build = (name) => {
+          const src = mini.defs[name];
+          let o = mini.built[name];
+          if (!o || o.src !== src) {
+            o?.el.remove();
+            const el = layer("org-mini");
+            el.tabIndex = -1;
+            el.setAttribute("role", "dialog");
+            const kids = [].concat(src ?? []).filter((c) => c && typeof c === "object").map((c) => {
+              const k = document.createElement("hui-card");
+              k.hass = mini.hass;
+              k.config = c;
+              if (typeof k.load === "function") k.load();
+              return el.appendChild(k);
+            });
+            o = mini.built[name] = { name, el, kids, src };
+          }
+          if (o.el.parentNode !== host()) host().appendChild(o.el);
+          return o;
+        };
+        mini.show = (name, key) => {
+          if (mini.open?.name === name) return mini.close();
+          mini.close();
+          const o = mini.build(name);
+          // A mini pop-up that the pop-up had no time to draw ahead is drawn now, and its motion starts in the frame after that
+          const fresh = !shown(o.el) || !shown(mini.dim);
+          mini.up();
+          o.kids.forEach((k) => { k.hass = mini.hass; });
+          o.key = key;
+          mini.place(o);
+          mini.open = o;
+          o.el.inert = false;
+          mini.dim.inert = false;
+          window.addEventListener("keydown", mini.esc, true);
+          const go = () => {
+            if (mini.open !== o) return;
+            o.el.classList.add("open");
+            mini.dim.classList.add("open");
+            o.el.focus({ preventScroll: true });
+          };
+          if (fresh) requestAnimationFrame(() => requestAnimationFrame(go));
+          else go();
+        };
+        mini.away = () => mini.close();
+        // Bubble Card runs a tap through a hass-action event that passes the pop-up on its way up, so the pop-up takes the taps that open a mini pop-up and hands on all others
+        card.addEventListener("hass-action", (e) => {
+          const act = e.detail?.config?.[(e.detail?.action ?? "tap") + "_action"];
+          const name = act?.action === "fire-dom-event" && act.mini_popup !== undefined ? String(act.mini_popup) : null;
+          if (name === null || !mini.defs[name] || !mini.show) return;
+          e.stopPropagation();
+          const path = e.composedPath();
+          mini.show(name, path.find((x) => x.classList?.contains("bubble-sub-button")) ?? path.find((x) => x.nodeType === 1));
+        });
+      }
+      if (mini.show) {
+        if (!mini.live && card._orgP.mini) {
+          mini.live = true;
+          window.addEventListener("location-changed", mini.away);
+          window.addEventListener("popstate", mini.away);
+        }
+        if (typeof onTeardown === "function") onTeardown(() => {
+          mini.close();
+          mini.down();
+          mini.live = false;
+          window.removeEventListener("location-changed", mini.away);
+          window.removeEventListener("popstate", mini.away);
+        });
+        const open = card.classList.contains("is-popup-opened") && !card.classList.contains("is-closing");
+        if (!open || (mini.open && !mini.defs[mini.open.name])) mini.close();
+        if (!open) mini.down();
+        else {
+          // Bubble Card hands the pop-up every change of the states, and the pop-up passes them to the cards of all its mini pop-ups, so they are up to date before one opens
+          Object.values(mini.built).forEach((o) => o.kids.forEach((k) => { if (k.hass !== mini.hass) k.hass = mini.hass; }));
+          // Once the pop-up has opened, it builds its mini pop-ups one by one and puts them in the top layer while nothing else runs
+          const missing = () => Object.keys(mini.defs).find((n) => mini.built[n]?.src !== mini.defs[n] || !mini.built[n].el.isConnected);
+          if (!mini.idle && !card.classList.contains("is-opening") && (missing() !== undefined || !mini.dim.matches(":popover-open"))) {
+            mini.idle = true;
+            const later = (f) => window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 300);
+            const next = () => {
+              if (!card.classList.contains("is-popup-opened") || card.classList.contains("is-closing")) return mini.idle = false;
+              const n = missing();
+              if (n !== undefined) mini.build(n);
+              mini.up();
+              if (n === undefined) return mini.idle = false;
+              later(next);
+            };
+            later(next);
+          }
+        }
+      }
+      return "";
+    })()}
     .bubble-pop-up {
       gap: 0px !important;
       --org-popup-pad: var(--ha-space-4);
@@ -14,35 +219,68 @@ origami_popup:
         display: none;
     }
     .bubble-pop-up-container {
+      --scroller-bleed: calc(2 * var(--ha-space-4));
+      --scroller-padding: var(--scroller-bleed) var(--scroller-bleed) calc(var(--scroller-bleed) + var(--ha-space-4));
+      ${card._orgP.gap ? `--bubble-pop-up-gap: ${card._orgP.gap};
+      --org-header-above: ${card._orgP.gap};
+      --org-header-below: 0px;` : ""}
       margin-top: 0px !important;
-      padding: var(--org-popup-pad) calc(2 * var(--ha-space-4)) !important;
+      padding-top: var(--org-popup-pad) !important;
+      padding-inline: calc(2 * var(--ha-space-4)) !important;
+    }
+    /* Without a header, Bubble Card keeps a strip for dragging and pulls the content over part of it. The content then starts at the same padding as below a header. */
+    .bubble-pop-up.no-header:not(.popup-style-home-assistant):not(.popup-mode-adaptive-dialog) > .bubble-pop-up-container {
+      margin-top: calc(-1 * var(--ha-space-6, 24px)) !important;
+      padding-top: var(--org-popup-pad) !important;
+    }
+    .bubble-pop-up:is(.popup-mode-fit-content, .popup-mode-centered, .popup-mode-adaptive-dialog, .is-standalone-pop-up, .editor) .bubble-pop-up-container {
+      padding-bottom: max(var(--org-popup-pad), var(--safe-area-inset-bottom, 0px)) !important;
     }
     .bubble-pop-up-container.is-scrollable {
       --bubble-pop-up-mask-top-stop: var(--org-popup-pad) !important;
       --bubble-pop-up-mask-bottom-stop: var(--org-popup-pad) !important;
     }
-    .bubble-backdrop {
+    ${card._orgP.art === null ? "" : card._org.backdrop(".bubble-pop-up-background::after", card._orgPArt, card._orgP.art ? card._orgP.mix : 0, card._orgP.cover, "var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0", card.querySelector(".bubble-pop-up-background")) + `
+    .bubble-pop-up-background::after {
+      z-index: 0;
+    }`}
+    ${card._orgP.blur ? `.bubble-backdrop {
       backdrop-filter: blur(4px) !important;
-    }
-    div.bubble-header .bubble-button-card-container,
-    .bubble-icon-container {
-      background: transparent !important;
-    }
-    .bubble-icon-container {
-      pointer-events: none;
-    }
-    .bubble-icon {
-      --mdc-icon-size: 36px;
-    }
+    }` : ""}
     .bubble-header-container {
-      margin: 0px !important;
       padding: calc(2 * var(--ha-space-4)) calc(2 * var(--ha-space-4)) var(--org-header-pad-bottom) !important;
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon)) !important;
       z-index: 4 !important;
     }
     .bubble-header-container > .bubble-header-actions {
       height: var(--control-height-icon) !important;
-      align-items: center !important;
+    }
+    .bubble-close-button {
+      border-radius: var(--radius-control, 14px) !important;
+      background-color: transparent !important;
+      opacity: var(--opacity-quiet);
+      font-weight: var(--ha-font-weight-medium) !important;
+      min-width: var(--control-height-icon) !important;
+      min-height: var(--control-height-icon) !important;
+      margin-inline-end: 0px !important;
+    }
+    .bubble-close-icon {
+      --mdc-icon-size: 32px;
+    }
+    .bubble-header-action-icon svg {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    ${card._orgP.title ? `
+    div.bubble-header .bubble-button-card-container,
+    .bubble-icon-container {
+      background: transparent !important;
+    }
+    ${card._orgP.icon ? `.bubble-icon-container {
+      pointer-events: none;
+    }` : ""}
+    .bubble-icon {
+      --mdc-icon-size: 36px;
     }
     div.bubble-header .bubble-container {
       height: var(--control-height-icon) !important;
@@ -54,35 +292,30 @@ origami_popup:
       min-height: 0px !important;
     }
     .bubble-name {
-      font-size: 24px !important;
+      font-size: var(--ha-font-size-2xl) !important;
       font-weight: var(--ha-font-weight-bold);
       line-height: var(--ha-line-height-condensed) !important;
-      margin-left: 0px !important;
+      margin-inline-start: 0px !important;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 1 !important;
     }
-    .bubble-close-button {
-      display: flex;
-      border-radius: var(--radius-inner) !important;
-      background-color: transparent !important;
-      opacity: var(--opacity-quiet);
-      font-weight: var(--ha-font-weight-medium) !important;
-      min-width: var(--control-height-icon) !important;
-      min-height: var(--control-height-icon) !important;
-      margin-right: 0px !important;
-    }
-    .bubble-close-icon {
-      --mdc-icon-size: 32px;
-    }
-    .bubble-header-action-icon svg {
-      width: 32px !important;
-      height: 32px !important;
-    }
-    .bubble-header-container:has(.bubble-sub-button) {
+    ${card._orgP.beside ? `
+    /* Beside the title, the values are small text */
+    div.bubble-header .bubble-sub-button-container {
+      inset: auto !important;
+      align-self: center !important;
+      flex: 0 0 auto !important;
+      margin-inline-start: var(--ha-space-3) !important;
+    }` : `
+    .bubble-header-container:has(${card._orgP.any}) {
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button) .bubble-container {
+    div.bubble-header:has(${card._orgP.any}) .bubble-container {
       height: calc(var(--control-height-icon) + var(--control-height-mini)) !important;
     }
-    div.bubble-header:has(.bubble-sub-button) .bubble-wrapper {
+    div.bubble-header:has(${card._orgP.any}) .bubble-wrapper {
       display: grid !important;
       grid-template-areas: "i n a" "i b a" !important;
       grid-template-columns: auto 1fr auto !important;
@@ -103,64 +336,92 @@ origami_popup:
     }
     div.bubble-header .bubble-sub-button-container {
       grid-area: b !important;
-      position: relative !important;
       justify-self: start !important;
       align-self: center !important;
       justify-content: flex-start !important;
       width: auto !important;
       inset-inline-end: 0px !important;
-      margin: 0px auto 0px 0px !important;
-      padding: 0px !important;
-    }
-    div.bubble-header .bubble-sub-button {
-      width: auto !important;
-      min-width: 0px !important;
-    }
-    ${this.config.origami_popup?.subtitle_style === "chip" ? `
-    div.bubble-header .bubble-sub-button-container {
-      gap: var(--ha-space-2) !important;
-    }
-    div.bubble-header .bubble-sub-button {
-      height: var(--control-height-mini) !important;
-      padding: 0px var(--ha-space-2) !important;
-      border-radius: var(--radius-inner) !important;
-      background-color: var(--fill-subtle) !important;
-      box-shadow: var(--card-ring);
-    }
-    div.bubble-header .bubble-sub-button,
-    div.bubble-header .bubble-sub-button-name-container,
-    div.bubble-header .bubble-sub-button-state {
-      font-size: var(--font-size-compact) !important;
-      font-weight: var(--ha-font-weight-bold) !important;
-      color: var(--primary-text-color) !important;
-    }
-    ` : `
-    div.bubble-header .bubble-sub-button-container {
-      gap: var(--ha-space-3) !important;
-    }
-    div.bubble-header .bubble-sub-button {
-      height: auto !important;
-      padding: 0px !important;
-      border-radius: 0px !important;
-      background: none !important;
-      box-shadow: none !important;
-    }
-    div.bubble-header .bubble-sub-button,
-    div.bubble-header .bubble-sub-button-name-container,
-    div.bubble-header .bubble-sub-button-state {
-      font-size: var(--ha-font-size-m) !important;
-      font-weight: var(--ha-font-weight-medium) !important;
-      color: var(--secondary-text-color) !important;
-    }
-    `}
+      margin-inline-end: auto !important;
+    }`}
+    ${card._org.plain("div.bubble-header .bubble-sub-button-container", "var(--ha-font-weight-medium)")}
+    ${card._orgP.chip ? card._org.chips("div.bubble-header .bubble-sub-button-container") : ""}
     div.bubble-header .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-2xs) !important;
-      margin: 0px var(--ha-space-1) 0px 0px !important;
+      margin-inline-end: var(--ha-space-1) !important;
       opacity: var(--opacity-muted);
     }
+    div.bubble-header .bubble-sub-button.content-icon-right .bubble-sub-button-icon {
+      margin-inline: var(--ha-space-1) 0 !important;
+    }
+    ` : ""}
+    ${card._orgP.lead ? `
+    /* A dropdown in the title's place starts where the title starts, and the values after it stand at the end, before the close button. The dropdown's name ends with an ellipsis before it would reach them, and the values keep their size. */
+    div.bubble-header .bubble-name-container {
+      display: none !important;
+    }
+    div.bubble-header .bubble-sub-button-container {
+      flex: 1 1 auto !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+      margin-inline-start: 0 !important;
+    }
+    div.bubble-header .bubble-sub-button-container .bubble-sub-button {
+      flex: 0 0 auto !important;
+    }
+    div.bubble-header .bubble-sub-button-container .bubble-sub-button.is-select {
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+      margin-inline-end: auto !important;
+    }` : ""}
+    ${card._orgP.mini ? `
+    /* A mini pop-up has a card's corners and padding on the pop-up's background, and a dim covers the pop-up behind it, as Home Assistant's dialogs do. A Header at its top has no space above its title. While closed, both are clear and take no taps. */
+    .org-mini, .org-mini-dim {
+      position: fixed;
+      box-sizing: border-box;
+      margin: 0;
+      border: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-fast) ease, scale var(--duration-fast) ease;
+    }
+    .org-mini {
+      inset: auto;
+      max-width: none;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ha-space-4);
+      padding: var(--ha-space-4);
+      border-radius: var(--ha-card-border-radius);
+      background: var(--popup-background);
+      box-shadow: var(--shadow-elevated);
+      color: var(--primary-text-color);
+      outline: none;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      /* It grows out of its key as Home Assistant's menus do, from 90 % with a fade, in the time of Home Assistant's dialogs, and it shrinks back the same way. The browser draws it ahead while it is clear, so the motion runs on its own. */
+      scale: 0.9;
+      will-change: opacity;
+      --org-header-above: 0px;
+      --org-header-below: 0px;
+    }
+    .org-mini-dim {
+      inset: 0;
+      width: auto;
+      height: auto;
+      padding: 0;
+      background: var(--mdc-dialog-scrim-color);
+      touch-action: none;
+    }
+    .org-mini.open, .org-mini-dim.open {
+      opacity: 1;
+      scale: 1;
+      pointer-events: auto;
+    }` : ""}
+    ${card._orgP.css}
   editor:
-    - name: subtitle_style
-      label: "Sub-button style"
+    - name: value_style
+      label: "Value style"
       selector:
         select:
           mode: dropdown
@@ -169,3 +430,41 @@ origami_popup:
               value: text
             - label: Chips
               value: chip
+    - name: value_position
+      label: "Values"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Below the title
+              value: below
+            - label: Beside the title
+              value: beside
+      default: below
+    - name: art
+      label: "Art (a media player, a cover's address or a template, behind the content)"
+      selector:
+        text: {}
+    - name: cover_mix
+      label: "Cover mix (the art's share in percent)"
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 2
+          mode: slider
+          unit_of_measurement: "%"
+      default: 16
+    - name: cover_blur
+      label: "Cover blur"
+      selector:
+        boolean: {}
+      default: true
+    - name: gap
+      label: "Space between the cards in a vertical stack (for example var(--ha-space-4))"
+      selector:
+        text: {}
+    - name: mini_popups
+      label: "Mini pop-ups (each with a name and its cards, opened by a key with fire-dom-event and mini_popup)"
+      selector:
+        object: {}

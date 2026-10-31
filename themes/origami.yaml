@@ -3,6 +3,7 @@
 Origami:
 
   # Space
+  # A space between the parts inside a container is never wider than the container's padding, so the parts read as one group. In a list, the rows touch, and two icons are as far apart as an icon is from the list's edge.
   ha-space-1: '4px'
   ha-space-2: '8px'
   ha-space-3: '12px'
@@ -13,10 +14,16 @@ Origami:
   view-bleed: 'var(--ha-space-6, 24px)'
 
   # Radii
+  # Every corner follows one rule. A shape's radius is 35 % of its height, so a 32 px chip, a 40 px button and a 48 px icon background have the same shape, and no shape is rounder than a card. A shape close inside another shape takes the outer radius less the space between them, so their corners run in parallel. Switches, dots and rings are round.
   ha-card-border-radius: '22px'
-  radius-inner: 'calc(var(--ha-card-border-radius) / 1.3)'
+  radius-ratio: '0.35'
+  # The radius of a 48 px shape, such as an icon's background or a key
+  radius-inner: 'calc(var(--tile-size) * var(--radius-ratio))'
+  # The radius of a 40 px shape, such as a button or a dropdown
+  radius-control: 'calc(var(--control-height-icon) * var(--radius-ratio))'
+  # The radius of a 32 px shape, such as a chip, a slider or a small key
+  radius-small: 'calc(var(--control-height-mini) * var(--radius-ratio))'
   radius-circle: 'var(--ha-border-radius-circle, 50%)'
-  radius-small: '8px'
 
   # Borders
   border-width: '0'
@@ -43,7 +50,7 @@ Origami:
   # A tile is a flat surface without a shadow. Its icon background uses the card background and a shadow.
   tile-background: 'var(--fill-subtle)'
   tile-chip-background: 'var(--ha-card-background)'
-  tile-chip-shadow: 'var(--ha-card-box-shadow)'
+  tile-chip-shadow: 'var(--chip-shadow)'
 
   # Opacity
   opacity-disabled: '.3'
@@ -114,7 +121,6 @@ Origami:
   # Scroller
   scroller-bleed: 'var(--view-bleed)'
   scroller-padding: 'var(--scroller-bleed) var(--scroller-bleed) var(--ha-space-10, 40px)'
-  scroller-mask: 'linear-gradient(to right, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%)'
 
   # Layout
   row-gap: '0px'
@@ -135,7 +141,7 @@ Origami:
   ha-card-border-width: '0px'
   ha-card-border-color: 'var(--border-color)'
   ha-card-box-shadow: 'var(--card-elevation)'
-  ha-badge-border-radius: 'var(--radius-inner)'
+  ha-badge-border-radius: 'calc(var(--ha-badge-size, 36px) * var(--radius-ratio))'
   card-item-background: 'var(--fill-subtle)'
   ha-color-form-background: 'var(--fill-subtle)'
   outline-color: 'var(--border-color)'
@@ -182,6 +188,7 @@ Origami:
   state-switch-active-color: 'var(--state-active-color)'
   state-binary_sensor-active-color: 'var(--state-active-color)'
   state-binary_sensor-window-on-color: 'var(--cyan-color)'
+  state-binary_sensor-door-on-color: 'var(--cyan-color)'
   state-media_player-paused-color: 'var(--secondary-text-color)'
   state-cover-closed-color: 'var(--accent-color)'
   state-person-not_home-color: 'var(--secondary-text-color)'
@@ -320,6 +327,8 @@ Origami:
   bubble-select-main-background-color: 'var(--ha-card-background)'
   bubble-media-player-main-background-color: 'var(--ha-card-background)'
   bubble-select-list-width: '140px'
+  # The chosen option in a dropdown's menu has a quiet fill, as a pressed row in a list
+  bubble-select-list-item-accent-color: 'var(--fill-subtle)'
   modes:
 
     light:
@@ -379,11 +388,12 @@ Origami:
       lamp-field: '#F7E8CA'
       lamp-ink: 'var(--primary-text-color)'
 
-      # Each shadow combines a small contact shadow with a softer main shadow. The blur is about three times the offset, and no shadow reaches upward.
+      # Shadows fall straight down from a light above. Each one has a fine edge, a contact shadow and a soft drop in a dark tone of the background's warm hue, so it reads as depth without a halo or a color of its own. Smaller shapes get smaller shadows, and no shadow reaches upward.
       shadow-tint: '60, 50, 40'
-      shadow-contact: '0 1px 2px rgba(var(--shadow-tint), 0.04)'
-      card-shadow: 'var(--shadow-contact), 0 4px 12px -4px rgba(var(--shadow-tint), 0.07)'
-      card-shadow-flat: 'var(--shadow-contact)'
+      shadow-edge: '0 0 0 0.5px rgba(var(--shadow-tint), 0.08)'
+      card-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.05), 0 4px 10px -4px rgba(var(--shadow-tint), 0.1)'
+      card-shadow-flat: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.05)'
+      chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.06), 0 2px 6px -2px rgba(var(--shadow-tint), 0.1)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.15)'
       card-item-shadow: '0 1px 2px rgba(var(--shadow-tint), 0.1)'
       shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 16px 40px -12px rgba(var(--shadow-tint), 0.22)'
@@ -483,12 +493,13 @@ Origami:
       lamp-field: 'color-mix(in srgb, var(--state-light-active-color) var(--tint-strength), var(--ha-card-background))'
       lamp-ink: 'var(--state-light-active-color)'
 
-      # Shadows. In dark mode, a card's lighter tone shows its height, and the shadow only supports it.
+      # Shadows. In dark mode, a card's lighter tone shows its height. A faint light line marks the top edge, and a dark edge, a contact shadow and a soft drop fall below.
       shadow-tint: '0, 0, 0'
       shadow-hairline: 'inset 0 1px 0 rgba(255, 255, 255, 0.03)'
-      shadow-contact: '0 1px 2px rgba(var(--shadow-tint), 0.35)'
-      card-shadow: 'var(--shadow-hairline), var(--shadow-contact), 0 6px 16px -6px rgba(var(--shadow-tint), 0.45)'
-      card-shadow-flat: 'var(--shadow-hairline), var(--shadow-contact)'
+      shadow-edge: 'inset 0 0.5px 0 rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(var(--shadow-tint), 0.35)'
+      card-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3), 0 6px 14px -6px rgba(var(--shadow-tint), 0.5)'
+      card-shadow-flat: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3)'
+      chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3), 0 3px 7px -3px rgba(var(--shadow-tint), 0.45)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.65)'
       card-item-shadow: 'var(--shadow-hairline), 0 1px 2px rgba(var(--shadow-tint), 0.4)'
       shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 20px 48px -12px rgba(var(--shadow-tint), 0.7)'
