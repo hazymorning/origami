@@ -34,18 +34,21 @@ This rule comes first. Origami is for every home, and every home has other entit
 ## Repository layout from 3.0
 
 - The theme, the font and the modules are the core that every user installs.
-- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, one file for each script or automation.
+- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML, one file for each script or automation it needs, and a README with its steps.
 - There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
 
 ## README from 3.0
 
 The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
 
-- It folds. At first glance, each part is its image, its name and one or two sentences. Everything else sits in folded `<details>` blocks, so people open what they want on purpose. Every part uses the same blocks in the same order, and the first part that gets written sets them.
-- Each step, explanation and term lives in one place, and other places link there. Installing the theme, the font and the modules is explained once, in the core setup at the top.
+- It's light. The main README is a gallery: each part is its image, its name and one sentence, with a link to its folder. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
+- Every part's README has the same sections in the same order, and the first one that gets written sets them.
+- Each step, explanation and term lives in one place, and other places link there. Setting up the theme, the font, Bubble Card and a module is explained once, under Get started in the main README.
+- It's said in plain words, the way you'd explain it to a friend who uses Home Assistant. A sentence says what something does for the reader, not how it's built, and a technical term only shows up where the reader has to type or find it.
+- No step needs access to the `/config` folder when Home Assistant's UI can do it. A module is added in Bubble Card's editor and the font as a resource, and copying files is only mentioned for people who already work that way.
 - A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again. History and reasons stay out, and how a module works inside belongs in the module reference.
 - It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
-- Each part says what it needs to work, such as cards, integrations, helpers and scripts, with links to its files. Then it says what it needs for the Origami look. No part depends on another one, except the core setup.
+- Each part's README says what it needs to work, such as cards, integrations, modules, helpers and scripts, with links to its files. No part depends on another one, except Get started.
 
 The README is done when the rule checks pass and every claim matches the files. Then the maintainer reads it from top to bottom, and someone who doesn't know Origami sets up the core and one part with nothing but the README.
 
@@ -129,9 +132,9 @@ All text is written for people: short, plain English, the way you'd explain some
 
 ## README cards
 
-The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, the README shows only one, because more copies add nothing but noise.
+The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, its folder has only one, because more copies add nothing but noise.
 
-The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After any change to the dashboard, run `python3 .github/scripts/fold_cards.py` to copy them again. A comment above each code block names its card, and the Fold cards workflow fails while a copy is out of date.
+The READMEs hold no copies of a part's YAML. A part's README links to the files in its folder, so each file exists once.
 
 ## Branches and releases
 
@@ -141,7 +144,7 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- The README for the release is written on `next` while the dashboard is still fine-tuned, one part after another in the order of the dashboard. Each part gets its feature folder from the user's setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`, and its README part is written around that folder, following "README from 3.0". A later change to a documented part updates its folder and its README part in the same round. The screenshots come last, in one pass, once nothing changes.
+- The README for the release is written on `next` while the dashboard is still fine-tuned, one part after another in the order of the dashboard. Each part gets its feature folder from the user's setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`, and its README is written in that folder, following "README from 3.0", with its entry in the main README's gallery. A later change to a documented part updates its folder and its README in the same round. The screenshots come last, in one pass, once nothing changes.
 - Every change is tested in the user's own Home Assistant before the release.
 - A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
 - For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.

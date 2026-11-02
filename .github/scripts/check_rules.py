@@ -97,7 +97,7 @@ for path in [ROOT / "README.md", *sorted((ROOT / "dashboard").glob("**/*.yaml"))
 
 # Writing rules, in the docs that follow them
 def prose(text):
-    text = re.sub(r"^```.*?^```", "", text, flags=re.M | re.S)
+    text = re.sub(r"^[ \t]*```.*?^[ \t]*```", "", text, flags=re.M | re.S)
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
     text = re.sub(r"`[^`\n]*`", "", text)
     text = re.sub(r"\]\([^)]*\)", "]", text)

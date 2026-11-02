@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#core-setup) for its tokens. The main README explains [how Origami is built](../README.md#how-origami-is-built) and why the modules exist.
+This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, especially for card heights, so details may still change. The modules work as shown in the dashboard.
@@ -9,18 +9,7 @@ This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bub
 
 ## Installation
 
-1. Install [Bubble Card](https://github.com/Clooos/Bubble-Card) 3.4 or later and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) from HACS. Bubble Card Tools is an integration that stores modules as files. Restart Home Assistant, then [add Bubble Card Tools](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools).
-2. Copy the files from [`modules`](modules) to `/config/bubble_card/modules/`.
-3. Reload the dashboard. The modules appear in the Bubble Card editor under **Modules**.
-
-<details>
-<summary>Installation without copying files</summary>
-
-<br>
-
-In the editor of any Bubble card, go to **Modules**, then **My Modules**, then **Import from YAML**, and paste one module file. Repeat for each module. This also needs Bubble Card Tools.
-
-</details>
+Set up Bubble Card and add the modules you need as described under [Get started](../README.md#get-started).
 
 ## How the modules work together
 
