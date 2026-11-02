@@ -130,6 +130,7 @@ These changes are in the `next` branch and come with the next release.
 - Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
 - The `scroller-mask` token is gone, because the modules fade scrolling rows themselves.
+- The theme leaves out 83 variables that nothing reads anymore or that only repeat what Home Assistant sets itself, such as the Paper Buttons Row colors and old names for fills and tints. Its comments are short, and every card looks the same.
 
 #### Dashboard
 
@@ -212,6 +213,7 @@ Every module changed, and some options were renamed or work differently. The [mo
 22. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
 23. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
 24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens.
+25. Cards from 2.0 that read `--card-padding`, `--control-padding-x` or `--font-size-headline` need `12px`, `16px` and `28px` in their place, because the theme no longer has these variables.
 
 ## 2.0 · The Unfolding
 

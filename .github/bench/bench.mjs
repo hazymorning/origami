@@ -56,9 +56,13 @@ const defaults = {
   'state-climate-heat-color': 'var(--deep-orange-color)', 'state-climate-cool-color': 'var(--blue-color)',
   'state-fan-active-color': 'var(--cyan-color)', 'state-media_player-active-color': 'var(--light-blue-color)',
   'state-inactive-color': 'var(--grey-color)', 'ha-font-size-2xl': '24px', 'ha-font-size-3xl': '28px',
-  'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%'
+  'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%', 'state-light-active-color': 'var(--amber-color)',
+  'mdc-theme-primary': 'var(--primary-color)', 'mdc-theme-text-primary-on-background': 'var(--primary-text-color)'
 };
 const vars = (o) => Object.entries(o).map(([k, v]) => `--${k}: ${v};`).join('\n');
+// Home Assistant adds rgb-<name> as r, g, b for each hex color of a theme that has no rgb-<name> of its own
+const rgb = (o) => Object.fromEntries(Object.entries(o).filter(([k, v]) => /^#[0-9a-f]{6}$/i.test(String(v)) && !(('rgb-' + k) in o))
+  .map(([k, v]) => ['rgb-' + k, [1, 3, 5].map((i) => parseInt(String(v).slice(i, i + 2), 16)).join(', ')]));
 
 // Stand-ins for the Home Assistant elements that Bubble Card uses
 const standIns = `
@@ -159,6 +163,7 @@ const page = (mode) => `<!doctype html>
 ${vars(defaults)}
 ${vars(theme)}
 ${vars(themeModes[mode])}
+${vars(rgb({ ...theme, ...themeModes[mode] }))}
 }
 html, body { margin: 0; background: var(--dashboard-background); color: var(--primary-text-color); font-family: var(--ha-font-family-body); }
 .shot { box-sizing: border-box; padding: 16px; background: var(--dashboard-background); }

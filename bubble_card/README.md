@@ -1044,7 +1044,7 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
   show_name: true
   origami_button:
     color: var(--media-color)
-    background: var(--media-tint)
+    background: var(--tint)
 ```
 
 With `content_layout: icon-top` or `icon-bottom`, a button stacks its icon and name and is twice as tall, unless the card has `background: false`.
