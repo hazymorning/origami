@@ -29,12 +29,12 @@ This rule comes first. Origami is for every home, and every home has other entit
 - Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
 - Every feature stands on its own, so people take only what they use. A feature is a card or a pop-up and the few parts it needs. Nothing bundles several features into one install, and nothing puts parts into a home that it does not use.
 - Entities appear only in a feature's card YAML, where people replace them with their own. Scripts take entities as fields from the card, so they work without edits. Logic that a card can compute in its `${ }` templates stays in the card instead of a template sensor.
-- A feature's helpers, scripts and automations go into one small package file next to its card, and only when the feature cannot work without them. Each one stays short and easy to read, change and debug. A script full of one home's edge cases does not belong there.
+- A feature's folder holds plain files, and each one goes into one place in Home Assistant's UI: the card or pop-up YAML into the dashboard, a script into the script editor and an automation into the automation editor. Helpers are created under Settings, Helpers, and the README part says the type, name and options of each one, so its entity ID matches the card. Nothing comes as a package, because a package hides what it creates and can't know a home's entities. Each script stays short and easy to read, change and debug, and a script full of one home's edge cases does not belong there.
 
 ## Repository layout from 3.0
 
 - The theme, the font and the modules are the core that every user installs.
-- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, its package file.
+- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, one file for each script or automation.
 - There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
 
 ## README from 3.0

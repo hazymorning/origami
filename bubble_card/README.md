@@ -459,7 +459,7 @@ sub_button:
 rows: 1.375
 ```
 
-The plus and minus buttons need actions of your own, such as `script.thermostat_step` from the [package](../packages/origami.yaml).
+The plus and minus buttons need actions of your own, such as a script that moves the target by half a degree.
 
 </details>
 
