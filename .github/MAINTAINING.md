@@ -26,6 +26,7 @@ Origami builds on what Home Assistant already offers and does things the Home As
 This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and tent pop-ups, and they stay out.
 
 - Separate what makes a feature work from one home's details. The repository has the general part, with plain defaults where the user's setup has personal details, such as English greetings instead of the user's own words.
+- The real setup is the starting point, not the spec. Each part is checked for what can be simpler, sturdier or more general, and the better version goes into the repository and is offered back to the real setup.
 - Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
 - Every feature stands on its own, so people take only what they use. A feature is a card or a pop-up and the few parts it needs. Nothing bundles several features into one install, and nothing puts parts into a home that it does not use.
 - Entities appear only in a feature's card YAML, where people replace them with their own. Scripts take entities as fields from the card, so they work without edits. Logic that a card can compute in its `${ }` templates stays in the card instead of a template sensor.
@@ -135,7 +136,7 @@ All text is written for people: short, plain English in a calm, neutral tone. Th
 
 ## README cards
 
-The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, its folder has only one, because more copies add nothing but noise.
+The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, its folder has only one, because more copies add nothing but noise. A part that comes in variants, such as the room pop-ups, gets two examples at most, which differ in what they show.
 
 The READMEs hold no copies of a part's YAML. A part's README links to the files in its folder, so each file exists once.
 
