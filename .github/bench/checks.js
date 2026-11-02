@@ -130,7 +130,7 @@ window.__check = async () => {
     report('icon only', fails, `${count} buttons with only an icon are square`);
   }
 
-  // Rows: in a Button grid, a group is one row as tall as a button, whose icon starts where the icons of the buttons above it start, and whose last key's icon ends as far from the row's end. A tap on a key with step sends the number's next value.
+  // Rows: in a Button grid, a group is one row as tall as a button, whose icon starts where the icons of the buttons above it start, and whose last key's icon ends as far from the row's end
   {
     const fails = [];
     let count = 0;
@@ -151,30 +151,9 @@ window.__check = async () => {
           if (!near(b.height, g.height) || b.width < g.height - 0.5) fails.push(`card ${card.i} ${label(k)}: a key of ${r1(b.width)}x${r1(b.height)} px in a row of ${r1(g.height)} px`);
         }
       }
-      // A tap on a key with step: the tap that reaches Home Assistant sets the number's next value. The bench's states never change, so quick taps add up from the value the last tap asked for.
-      const row = [...card.root.querySelectorAll('.bubble-sub-button-group')].find((x) => x.children.length > 1);
-      let asked = null;
-      (card.cfg.sub_button.bottom.find((x) => x.group)?.group ?? []).forEach((item, i) => {
-        const step = Number(item.origami_button?.step);
-        if (!step) return;
-        const st = (card.haCard?._org?.hass ?? card.el._hass)?.states?.[item.entity] ?? null;
-        const el = row?.children[i];
-        if (!el || !st) return fails.push(`card ${card.i}: no key or state for ${item.icon}`);
-        let sent = null;
-        const catcher = (e) => { sent = e.detail; e.stopPropagation(); };
-        window.addEventListener('hass-action', catcher, { once: true });
-        const tap = new Event('hass-action', { bubbles: true, composed: true });
-        tap.detail = { config: { entity: item.entity, tap_action: { action: 'more-info' } }, action: 'tap' };
-        el.dispatchEvent(tap);
-        window.removeEventListener('hass-action', catcher);
-        const want = (asked ?? Number(st.state)) + step;
-        asked = want;
-        const a = sent?.config?.tap_action;
-        if (a?.perform_action !== item.entity.split('.')[0] + '.set_value' || a?.target?.entity_id !== item.entity || a?.data?.value !== want) fails.push(`card ${card.i} ${item.icon}: the tap sent ${JSON.stringify(a)}, expected ${item.entity.split('.')[0]}.set_value with ${want}`);
-      });
     }
     if (!count) fails.push('no Button grid with a row found on the sheet');
-    report('rows', fails, `${count} rows in a Button grid are as tall as a button, line up with it and end like they start, and their minus and plus send the next value`);
+    report('rows', fails, `${count} rows in a Button grid are as tall as a button, line up with it and end like they start`);
   }
 
   // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content

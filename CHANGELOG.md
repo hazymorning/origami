@@ -12,7 +12,7 @@ These changes are in the `next` branch and come with the next release.
 - The modules follow Home Assistant's rules for when an entity counts as on and which color it gets.
 - Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
 - A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
-- Sub-buttons have five new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, `dot` marks a control that is on with a small dot, `hidden` hides a sub-button from a template that can read any entity, and `step` lets a minus or a plus key move a number entity, such as a subwoofer's level, without a script.
+- Sub-buttons have four new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, `dot` marks a control that is on with a small dot, and `hidden` hides a sub-button from a template that can read any entity.
 - Templates in values have `num()`, `format()`, `word()`, `ago()` and `name()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.

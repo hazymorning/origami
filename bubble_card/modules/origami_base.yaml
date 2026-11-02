@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.8.0"
+  version: "13.8.1"
   is_global: true
   supported:
     - button
@@ -573,8 +573,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), and 13.5 added step().
-        version: 13.5,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, and 13.4 added pending().
+        version: 13.4,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -677,41 +677,6 @@ origami_base:
               setTimeout(() => { if (st.pend.get(n) === p) { st.pend.delete(n); mark(el, null); } }, 10000);
             });
           }
-        },
-        // step() keeps the sub-buttons whose tap moves a number by a step, under a key per module and sub-button, and returns the value that the next tap sets, or null where the number can't move further. Home Assistant's actions have no step, so a tap on such a sub-button sets that value with the entity's set_value action, which Base writes into the tap that Bubble Card sends. The value stays within the entity's min and max and on the grid of its own step, as with Home Assistant's own number buttons. A tap that follows while the state is still on its way to the value the last tap asked for steps on from that value, so quick taps add up. Any other state, such as a change from elsewhere, counts as it is.
-        step: (k, s) => {
-          const st = card._orgSteps ?? (card._orgSteps = { by: new Map(), asked: new Map() });
-          const next = (s) => {
-            const obj = card._org.hass.states[s.id];
-            const f = (v) => v === undefined || v === null || v === "" ? NaN : Number(v);
-            const a = obj?.attributes ?? {};
-            const now = f(obj?.state);
-            if (!Number.isFinite(now)) return null;
-            const was = st.asked.get(s.id);
-            const on = was && Date.now() < was.until && (was.value > was.base ? now >= was.base && now < was.value : now <= was.base && now > was.value);
-            const from = on ? was.value : now;
-            const lo = Number.isFinite(f(a.min)) ? f(a.min) : -Infinity;
-            const hi = Number.isFinite(f(a.max)) ? f(a.max) : Infinity;
-            const grid = f(a.step) > 0 ? f(a.step) : 0;
-            const zero = Number.isFinite(lo) ? lo : 0;
-            const v = Number(Math.min(Math.max(grid ? zero + Math.round((from + s.step - zero) / grid) * grid : from + s.step, lo), hi).toPrecision(12));
-            return v === from ? null : { v, base: on ? was.base : now };
-          };
-          if (!s) return st.by.delete(k);
-          st.by.set(k, s);
-          if (!st.listen) {
-            st.listen = true;
-            card.addEventListener("hass-action", (e) => {
-              const el = e.composedPath().find((x) => x.classList?.contains("bubble-sub-button"));
-              const n = Number(el?.className.match(/bubble-sub-button-(\d+)/)?.[1]);
-              const one = el && el.getRootNode() === card.getRootNode() && e.detail?.action === "tap" && e.detail.config ? [...st.by.values()].find((x) => x.n === n) : null;
-              if (!one) return;
-              const to = next(one);
-              if (to) st.asked.set(one.id, { value: to.v, base: to.base, until: Date.now() + 3000 });
-              e.detail.config = { ...e.detail.config, tap_action: !to ? { action: "none" } : { action: "perform-action", perform_action: one.id.split(".")[0] + ".set_value", target: { entity_id: one.id }, data: { value: to.v } } };
-            });
-          }
-          return next(s)?.v ?? null;
         },
         // readouts() writes a text into each sub-button with css_class readout, or another class, made by text() from that sub-button's own entity
         readouts: (hass, cfg, entity, text, cls = "readout") => items(cfg).forEach((item, i) => {
@@ -832,11 +797,7 @@ origami_base:
         values: (env, cfg, key, scope, size, list) => {
           const org = card._org;
           const rules = [];
-          (list ?? org.subs(env, cfg, key)).forEach(({ n, item, entity, opt }) => {
-            // A value with step moves the number of its entity by that step on a tap, and it takes the disabled color where the number can't move further
-            const id = opt?.step !== undefined ? String(entity ?? item.entity ?? cfg.entity ?? "") : "";
-            const step = /^(input_)?number\./.test(id) ? Number(opt.step) || 0 : 0;
-            const stuck = step ? org.step(key + n, { n, id, step }) === null : (card._orgSteps?.by.size && org.step(key + n, null), false);
+          (list ?? org.subs(env, cfg, key)).forEach(({ n, item, opt }) => {
             if (!opt) return;
             const sel = scope + " .bubble-sub-button.bubble-sub-button-" + n;
             // On a slider that is always visible, the name stands before the value that Bubble Card writes, such as Gruppe · 20 % for the name Gruppe ·
@@ -848,7 +809,7 @@ origami_base:
             // A value with dot is on without a fill. It takes the text color and shows a small dot under its icon.
             if (yes(opt.dot)) rules.push(sel + " { color: var(--primary-text-color) !important; }", sel + "::after { content: \"\"; position: absolute; top: calc(50% + var(--icon-size-s) / 2 + var(--ha-space-1)); inset-inline-start: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background-color: currentColor; }");
             // A disabled value takes the disabled color and ignores taps
-            if (yes(opt.disabled) || stuck) rules.push(sel + ", " + sel + " .bubble-sub-button-icon:not(.hidden) { color: var(--disabled-color) !important; pointer-events: none !important; }");
+            if (yes(opt.disabled)) rules.push(sel + ", " + sel + " .bubble-sub-button-icon:not(.hidden) { color: var(--disabled-color) !important; pointer-events: none !important; }");
             // A hidden value takes no space, as with Bubble Card's visibility conditions, but its template can read any entity at once. The :not() with an ID gives the rule more weight than the rules that show a value with a name of its own.
             if (yes(opt.hidden)) rules.push(sel + ":not(#org-none) { display: none !important; }");
             if (has(opt.icon)) org.icon(card.querySelector(scope + " .bubble-sub-button-" + n + " .bubble-sub-button-icon"), opt.icon);

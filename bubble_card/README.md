@@ -163,7 +163,6 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
 | `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
 | `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line. Both end at the same edge, and the sub-button has no fill, as for the values on the server card. |
-| `step` | A tap moves the number of the sub-button's entity by this step, such as `-1` on a minus key, within the number's range and on the grid of its own step, as Home Assistant's own number buttons do. Quick taps add up before the entity reports its new value, and where the number can't move further, the sub-button takes the disabled color. It works with `number` and `input_number` entities, without a script. |
 
 All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
@@ -1072,7 +1071,7 @@ origami_button:
   icon_size: var(--icon-size-s)
 ```
 
-With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A number between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. With Base's `step` key, minus and plus change the number without a script, as for this subwoofer in a list of shortcuts:
+With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need actions of your own, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
 
 ```yaml
 type: custom:bubble-card
@@ -1107,7 +1106,7 @@ sub_button:
         - entity: number.living_room_subwoofer_level
           icon: mdi:minus
           origami_button:
-            step: -1
+            disabled: ${Number(state) <= Number(attr.min)}
         - entity: number.living_room_subwoofer_level
           show_icon: false
           state_content: state
@@ -1116,7 +1115,7 @@ sub_button:
         - entity: number.living_room_subwoofer_level
           icon: mdi:plus
           origami_button:
-            step: 1
+            disabled: ${Number(state) >= Number(attr.max)}
 ```
 
 With `segmented: true`, each group under `sub_button: bottom` is one bar. Buttons outside a group form one bar each when the card also has groups, and a shared bar when it has none.

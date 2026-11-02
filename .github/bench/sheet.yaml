@@ -287,7 +287,7 @@ sections:
           bottom:
             - {entity: light.kitchen, name: Kitchen, tap_action: {action: toggle}}
             - {entity: switch.printer, name: Printer, tap_action: {action: toggle}}
-      # A list of buttons with a row that holds keys: the subwoofer's switch, then minus, its level and plus, which step the level
+      # A list of buttons with a row that holds keys: the subwoofer's switch, then minus, its level and plus, which rest at the ends of the range
       - type: custom:bubble-card
         card_type: sub-buttons
         modules: [origami_button]
@@ -299,9 +299,9 @@ sections:
             - name: Subwoofer
               group:
                 - {entity: switch.living_room_subwoofer, name: Subwoofer, icon: mdi:speaker, show_name: true, tap_action: {action: toggle}}
-                - {entity: number.living_room_subwoofer_level, icon: mdi:minus, origami_button: {step: -1}}
+                - {entity: number.living_room_subwoofer_level, icon: mdi:minus, origami_button: {disabled: '${Number(state) <= Number(attr.min)}'}}
                 - {entity: number.living_room_subwoofer_level, show_icon: false, state_content: state, tap_action: {action: none}}
-                - {entity: number.living_room_subwoofer_level, icon: mdi:plus, origami_button: {step: 1}}
+                - {entity: number.living_room_subwoofer_level, icon: mdi:plus, origami_button: {disabled: '${Number(state) >= Number(attr.max)}'}}
       # A master slider for a whole group, one step taller with its name at the start of the track
       - type: custom:bubble-card
         card_type: button
