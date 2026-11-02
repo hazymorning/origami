@@ -291,7 +291,7 @@ sections:
       - type: custom:bubble-card
         card_type: sub-buttons
         modules: [origami_button]
-        origami_button: {columns: 1, active_style: toggle, icon_size: var(--icon-size-xs)}
+        origami_button: {columns: 1, group_rows: true, active_style: toggle, icon_size: var(--icon-size-xs)}
         sub_button:
           main: []
           bottom:
@@ -302,6 +302,20 @@ sections:
                 - {entity: number.living_room_subwoofer_level, icon: mdi:minus, origami_button: {disabled: '${Number(state) <= Number(attr.min)}'}}
                 - {entity: number.living_room_subwoofer_level, show_icon: false, state_content: state, tap_action: {action: none}}
                 - {entity: number.living_room_subwoofer_level, icon: mdi:plus, origami_button: {disabled: '${Number(state) >= Number(attr.max)}'}}
+      # A grid whose named group stays cells without group_rows, as a vacuum's room buttons do
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_button]
+        origami_button: {columns: 2, active_style: toggle, icon_size: var(--icon-size-s)}
+        sub_button:
+          main: []
+          bottom:
+            - name: Rooms
+              group:
+                - {name: Living, icon: mdi:sofa-outline, show_name: true, tap_action: {action: none}}
+                - {name: Kitchen, icon: mdi:silverware-fork-knife, show_name: true, tap_action: {action: none}}
+                - {name: Bedroom, icon: mdi:bed-outline, show_name: true, tap_action: {action: none}}
+                - {name: Bath, icon: mdi:shower, show_name: true, tap_action: {action: none}}
       # A master slider for a whole group, one step taller with its name at the start of the track
       - type: custom:bubble-card
         card_type: button

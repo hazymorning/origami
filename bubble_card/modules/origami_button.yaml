@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.10.0"
+  version: "3.11.0"
   supported:
     - sub-buttons
     - button
@@ -33,6 +33,11 @@ origami_button:
           step: 1
           mode: box
       default: 0
+    - name: group_rows
+      label: "In a grid, each group is one row with keys at its end"
+      selector:
+        boolean: {}
+      default: false
     - name: muted
       label: "Dimmed text and icons"
       selector:
@@ -218,8 +223,8 @@ origami_button:
       const seq = bottom.flatMap((x) => x.n);
       const first = pick(cfg.start);
       const s = seq.findIndex((n) => hit(subs.find((x) => x.n === n)?.item ?? {}, first));
-      // With columns, each group is one row of the grid with one fill, as one button, so a row can hold keys such as minus and plus with a value between them. The row is filled while its first button is.
-      const rows = cols && !below ? bottom.filter((x) => x.group && x.n.length && !inBar.includes(x.n[0])) : [];
+      // With columns and group_rows, each group is one row of the grid with one fill, as one button, so a row can hold keys such as minus and plus with a value between them. The row is filled while its first button is. Without group_rows, a group's buttons stay cells of the grid, as before.
+      const rows = cols && !below && org.yes(cfg.group_rows) ? bottom.filter((x) => x.group && x.n.length && !inBar.includes(x.n[0])) : [];
       const row = (n, end = "") => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> .bubble-sub-button-" + n + end + "):not(.hidden)";
       const lit = [...active.filter((n) => !inBar.includes(n)).map((n) => ".bubble-sub-button-" + n + (waiting.length ? ":not(.org-pending-off)" : "")), ...(waiting.length ? [".org-pending-on"] : [])].join(", ");
       // A number between a row's keys, such as a level, is as wide as the longest value it can take, in Home Assistant's words, so the keys keep their places while it changes. The fonts and the widths are known only after layout, so the values are measured in the next frame, as Tiles measures its names.

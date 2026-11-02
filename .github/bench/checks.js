@@ -134,7 +134,7 @@ window.__check = async () => {
   {
     const fails = [];
     let count = 0;
-    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns && c.cfg.origami_button?.group_rows && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
       const single = [...card.root.querySelectorAll('.bubble-sub-button-group > .bubble-sub-button:only-child')].find(visible);
       for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
         if (group.children.length < 2 || !visible(group)) continue;
@@ -154,6 +154,26 @@ window.__check = async () => {
     }
     if (!count) fails.push('no Button grid with a row found on the sheet');
     report('rows', fails, `${count} rows in a Button grid are as tall as a button, line up with it and end like they start`);
+  }
+
+  // Grid cells: without group_rows, the buttons of a group in a Button grid stay cells of the grid, each as wide as a column, as they were before rows existed
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns > 1 && !c.cfg.origami_button?.group_rows && !c.cfg.origami_button?.segmented && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
+      const cols = Number(card.cfg.origami_button.columns);
+      const box = card.root.querySelector('.bubble-sub-button-bottom-container')?.getBoundingClientRect();
+      for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
+        const keys = [...group.children].filter(visible);
+        if (keys.length <= cols || !box) continue;
+        count++;
+        const tops = new Set(keys.map((k) => Math.round(k.getBoundingClientRect().top)));
+        if (tops.size < Math.ceil(keys.length / cols)) fails.push(`card ${card.i}: a group of ${keys.length} buttons in ${cols} columns takes ${tops.size} row${tops.size === 1 ? '' : 's'}`);
+        for (const k of keys) if (k.getBoundingClientRect().width < box.width / cols * 0.8) fails.push(`card ${card.i} ${label(k)}: ${r1(k.getBoundingClientRect().width)} px wide in a grid of ${cols} columns that is ${r1(box.width)} px wide`);
+      }
+    }
+    if (!count) fails.push('no Button grid with a group of cells found on the sheet');
+    report('grid cells', fails, `${count} group in a Button grid without group_rows keeps its buttons as cells`);
   }
 
   // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content

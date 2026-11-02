@@ -931,7 +931,8 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | Option | Default | Description |
 | --- | --- | --- |
 | `background` | `true` | The buttons have a fill. With `false`, they are plain text. |
-| `columns` | `0` | `0` sizes the buttons to their text, and `1` to `6` make an even grid, in which each group is one row. |
+| `columns` | `0` | `0` sizes the buttons to their text, and `1` to `6` make an even grid. |
+| `group_rows` | `false` | In a grid, each group is one row with keys at its end, described below. Without it, a group's buttons are cells of the grid. |
 | `align` | `start` | Places the buttons at the `start`, `center` or `end` of the row. |
 | `active` | | Highlights the buttons whose name, `css_class` or tap target matches. Takes text, a map from the card entity's state, Jinja or JavaScript in `${ }`, with commas between several values. |
 | `active_style` | `lamp` | `lamp` tints the active button in the lamp color, and `toggle` fills it. |
@@ -1060,7 +1061,7 @@ origami_button:
   icon_size: var(--icon-size-s)
 ```
 
-With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need their own actions, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
+With `columns` and `group_rows: true`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need their own actions, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
 
 ```yaml
 type: custom:bubble-card
@@ -1070,6 +1071,7 @@ modules:
   - origami_button
 origami_button:
   columns: 1
+  group_rows: true
   active_style: toggle
 sub_button:
   main: []

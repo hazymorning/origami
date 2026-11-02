@@ -101,7 +101,7 @@ These changes are in the `next` branch and come with the next release.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
-- In a grid, each group is one row with one fill, whose first button takes the free width and whose other buttons are keys at its end, such as minus, a level and plus. The keys stay in place while the level changes.
+- In a grid with `group_rows: true`, each group is one row with one fill, whose first button takes the free width and whose other buttons are keys at its end, such as minus, a level and plus. The keys stay in place while the level changes. Without the option, a group's buttons stay cells of the grid.
 
 #### Slider
 
