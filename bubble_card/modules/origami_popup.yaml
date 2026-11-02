@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.11.1"
+  version: "4.12.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -41,6 +41,8 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance" && !this.config.hide_backdrop,
+        // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 4 px
+        dimBlur: ((b) => b === undefined ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(4px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
         // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
         art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
         mix: cfg.cover_mix ?? 16,
@@ -71,7 +73,7 @@ origami_popup:
         const host = () => card.querySelector(".bubble-pop-up-container") ?? card;
         const shown = (el) => el.matches(":popover-open");
         const cards = () => (card.querySelector(".bubble-cards-container") ?? card).getBoundingClientRect();
-        // A mini pop-up is a list of cards, or a map with its cards under cards, its width and its max_height, such as 240px. A number counts in pixels.
+        // A mini pop-up is a list of cards, or a map with its cards under cards, its width and its max_height, such as 240px, and frameless. A number counts in pixels.
         const prop = (o, key) => ((v) => typeof v === "number" ? v + "px" : v === undefined || v === null || Array.isArray(o.src) ? "" : String(v).trim())(o.src?.[key]);
         // size() makes a mini pop-up as wide as its own width, at most as wide as the pop-up's cards, or else as wide as the cards
         const size = (o, col) => { o.el.style.width = prop(o, "width") ? "min(" + prop(o, "width") + ", " + col.width + "px)" : col.width + "px"; };
@@ -134,6 +136,7 @@ origami_popup:
             const el = layer("org-mini");
             el.tabIndex = -1;
             el.setAttribute("role", "dialog");
+            if (!Array.isArray(src) && String(src?.frameless) === "true") el.classList.add("frameless");
             // The cards sit in a box that scrolls inside the mini pop-up's corners
             const box = el.appendChild(document.createElement("div"));
             box.className = "org-mini-box";
@@ -427,14 +430,29 @@ origami_popup:
       -webkit-mask-image: linear-gradient(transparent, #000 var(--ha-space-4), #000 calc(100% - var(--ha-space-4)), transparent);
       mask-image: linear-gradient(transparent, #000 var(--ha-space-4), #000 calc(100% - var(--ha-space-4)), transparent);
     }
-    /* The dim starts where the dashboard starts, so beside Home Assistant's sidebar it covers what Bubble Card's backdrop covers */
+    /* A frameless mini pop-up has no panel, so its cards stand on the dim like the buttons of a sheet, 8 px apart. Their subtle fills take the card background there, so they stay solid. */
+    .org-mini.frameless {
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+      --fill-subtle: var(--ha-card-background);
+    }
+    .org-mini.frameless .org-mini-box {
+      gap: var(--ha-space-2);
+      padding: 0;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    /* The dim has the color and the blur of Bubble Card's backdrop, so the pop-up behind a mini pop-up looks like the page behind the pop-up, up to the phone's status bar. It starts where the dashboard starts, so beside Home Assistant's sidebar it covers what the backdrop covers. */
     .org-mini-dim {
       inset: 0;
       inset-inline-start: var(--bubble-pop-up-content-inline-start, 0px);
       width: auto;
       height: auto;
       padding: 0;
-      background: var(--mdc-dialog-scrim-color);
+      background: var(--bubble-backdrop-background-color, var(--bubble-default-backdrop-background-color, var(--mdc-dialog-scrim-color)));
+      -webkit-backdrop-filter: var(--bubble-backdrop-filter, ${card._orgP.dimBlur});
+      backdrop-filter: var(--bubble-backdrop-filter, ${card._orgP.dimBlur});
       touch-action: none;
     }
     .org-mini.open, .org-mini-dim.open {
@@ -495,6 +513,6 @@ origami_popup:
       selector:
         text: {}
     - name: mini_popups
-      label: "Mini pop-ups (each with a name and its cards, or a map with cards, width and max_height, opened by a key with fire-dom-event and mini_popup)"
+      label: "Mini pop-ups (each with a name and its cards, or a map with cards, width, max_height and frameless, opened by a key with fire-dom-event and mini_popup)"
       selector:
         object: {}

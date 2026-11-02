@@ -287,7 +287,7 @@ sections:
         tap_action: {action: none}
         modules: [origami_base, origami_slider]
         origami_slider: {master: true}
-      # A pop-up whose keys open mini pop-ups: one with a title and a volume row of its own, and a narrow one whose list scrolls
+      # A pop-up whose keys open mini pop-ups: one with a title and a volume row of its own, and a narrow frameless one whose list scrolls
       - type: custom:bubble-card
         card_type: pop-up
         hash: '#sheet'
@@ -313,6 +313,7 @@ sections:
             inputs:
               width: 200px
               max_height: 160px
+              frameless: true
               cards:
                 - type: custom:bubble-card
                   card_type: sub-buttons

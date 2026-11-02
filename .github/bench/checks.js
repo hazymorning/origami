@@ -426,6 +426,10 @@ window.__check = async () => {
           if (b.height > 160.5) fails.push(`the narrow one is ${r1(b.height)} px tall, more than its max_height of 160px`);
           if (!box || box.scrollHeight <= box.clientHeight + 1) fails.push('the narrow one does not scroll, though its cards are taller than its max_height');
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`the narrow one covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          // Frameless, it has no panel, and its cards start at its edge
+          const ns = getComputedStyle(n);
+          if (!/rgba\(0, 0, 0, 0\)|transparent/.test(ns.backgroundColor) || ns.boxShadow !== 'none') fails.push(`the frameless one has a panel: ${ns.backgroundColor}, shadow ${ns.boxShadow}`);
+          if (box && parseFloat(getComputedStyle(box).paddingTop) !== 0) fails.push(`the frameless one keeps ${getComputedStyle(box).paddingTop} of padding`);
           window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
           if (!(await until(() => !mini(), 3000))) fails.push('Esc left the narrow one open');
         }
@@ -433,7 +437,7 @@ window.__check = async () => {
       go('');
       await until(() => !host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened'), 2000);
     }
-    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards or its own width at its key, with a card\'s corners and 16 px of padding, a list taller than its max_height scrolls, and a tap beside it or Esc closes only the mini pop-up');
+    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards or its own width at its key, with a card\'s corners and 16 px of padding or frameless without them, a list taller than its max_height scrolls, and a tap beside it or Esc closes only the mini pop-up');
   }
   return results;
 };

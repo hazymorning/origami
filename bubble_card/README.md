@@ -1428,7 +1428,7 @@ sub_button:
 
 With `sign: check`, each row of a list has a circle at its end that shows a check while the row is chosen, as in a list of rooms to clean or of speakers to group. A row is chosen while its entity is on, or while its own `on` key is true. A row with a check never shows its entity's state, and its `state` key can show a quiet hint instead, such as why a speaker is busy.
 
-With `background: false`, a list has no panel of its own, and its rows stand on the card or the mini pop-up around them.
+With `background: false`, a list has no panel of its own, and its rows stand on the card or the mini pop-up around them. A slim list then keeps its first and last names as far from the edge as the text around it, and only a pressed row's fill reaches into that space.
 
 ```yaml
 type: custom:bubble-card
@@ -1607,7 +1607,7 @@ cards:
             mini_popup: volume
 ```
 
-In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
+In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
 
 ```yaml
 origami_popup:
