@@ -29,7 +29,7 @@
     vacuum: { _: { default: 'mdi:robot-vacuum' } }
   };
   const hass = {
-    states, entities: {}, devices: {}, areas: {},
+    states, entities: sc.entities || {}, devices: {}, areas: {},
     user: { id: 'u', name: 'Test', is_admin: false, is_owner: false },
     language: lang, selectedLanguage: lang,
     locale: { language: lang, number_format: 'language', time_format: 'language', date_format: 'language', first_weekday: 'language', time_zone: 'local' },

@@ -1,5 +1,5 @@
 alias: Playback
-description: Plays, pauses, skips, shuffles or repeats on the selected speaker. In a group, the group's leader gets the command.
+description: Plays, pauses, skips or shuffles on the selected speaker, or saves its song as a favorite in Music Assistant. In a group, the group's leader gets the command.
 mode: queued
 fields:
   speaker:
@@ -11,7 +11,7 @@ fields:
           - input_select
           - media_player
   command:
-    description: What to do. Shuffle turns shuffle on or off, and repeat goes from off to all to one.
+    description: What to do. Shuffle turns shuffle on or off, and favorite saves the song in Music Assistant.
     example: play_pause
     selector:
       select:
@@ -20,7 +20,7 @@ fields:
           - previous_track
           - next_track
           - shuffle
-          - repeat
+          - favorite
 sequence:
   - variables:
       selected: "{{ states(speaker) if speaker.startswith('input_select.') else speaker }}"
@@ -34,14 +34,20 @@ sequence:
               entity_id: "{{ leader }}"
             data:
               shuffle: "{{ not state_attr(leader, 'shuffle') }}"
-      - alias: Repeat
-        conditions: "{{ command == 'repeat' }}"
+      # Music Assistant has one button for each player, which saves the song that plays as a favorite
+      - alias: Favorite
+        conditions: "{{ command == 'favorite' }}"
         sequence:
-          - action: media_player.repeat_set
+          - variables:
+              device: "{{ device_id(selected) }}"
+              button: >-
+                {{ (integration_entities('music_assistant') | select('match', 'button\\.')
+                | select('in', device_entities(device) if device else []) | list + [''])[0] }}
+          - condition: template
+            value_template: "{{ button != '' }}"
+          - action: button.press
             target:
-              entity_id: "{{ leader }}"
-            data:
-              repeat: "{{ {'off': 'all', 'all': 'one'}.get(state_attr(leader, 'repeat'), 'off') }}"
+              entity_id: "{{ button }}"
     default:
       # media_player.media_play_pause, media_player.media_previous_track or media_player.media_next_track
       - action: "media_player.media_{{ command }}"

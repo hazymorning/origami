@@ -465,7 +465,7 @@ cards:
                 action: fire-dom-event
                 mini_popup: more
           bottom:
-            # The keys rest while nothing plays or is paused, and shuffle and repeat also while the speaker has neither
+            # The keys rest while nothing plays or is paused, and shuffle also while the speaker has no shuffle
             - name: Playback
               group:
                 - icon: mdi:shuffle-variant
@@ -515,22 +515,31 @@ cards:
                     data:
                       speaker: input_select.selected_speaker
                       command: next_track
-                - icon: mdi:repeat
+                # Saves the song as a favorite in Music Assistant, through the favorite button of the speaker's Music Assistant player.
+                # The heart fills once the song is saved, and the key rests on speakers without that button.
+                - icon: mdi:heart-outline
                   sub_button_type: default
                   origami_base:
-                    icon: "${hass.states[states('input_select.selected_speaker')]?.attributes?.repeat === 'one' ? 'mdi:repeat-once' : ''}"
-                    dot: >-
-                      ${(p => ['playing', 'paused'].includes(p?.state) && ['all',
-                      'one'].includes(p.attributes.repeat))(hass.states[states('input_select.selected_speaker')])}
+                    icon: >-
+                      ${(p => { const d = hass.entities?.[p?.entity_id]?.device_id; const b = d &&
+                      Object.values(hass.entities).find((e) => e.platform === 'music_assistant' &&
+                      e.translation_key === 'favorite_now_playing' && e.device_id === d); const a =
+                      p?.attributes ?? {}; const start = Number.isFinite(a.media_position) &&
+                      a.media_position_updated_at ? new Date(a.media_position_updated_at) -
+                      a.media_position * 1000 : new Date(p?.last_changed); return b && new
+                      Date(hass.states[b.entity_id]?.state) > start ? 'mdi:heart' : '';
+                      })(hass.states[states('input_select.selected_speaker')])}
                     disabled: >-
-                      ${(p => !['playing', 'paused'].includes(p?.state) || p.attributes.repeat ===
-                      undefined)(hass.states[states('input_select.selected_speaker')])}
+                      ${(p => !['playing', 'paused'].includes(p?.state) ||
+                      !Object.values(hass.entities ?? {}).some((e) => e.platform === 'music_assistant' &&
+                      e.translation_key === 'favorite_now_playing' && e.device_id ===
+                      hass.entities?.[p.entity_id]?.device_id))(hass.states[states('input_select.selected_speaker')])}
                   tap_action:
                     action: perform-action
                     perform_action: script.playback
                     data:
                       speaker: input_select.selected_speaker
-                      command: repeat
+                      command: favorite
         # The two keys beside the title are one size larger, with a smaller link icon. The title keeps a gap to them, and the play row keeps a little space below it.
         styles: |-
           .bubble-sub-button-container .bubble-sub-button {

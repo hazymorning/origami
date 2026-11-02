@@ -50,7 +50,7 @@ The pop-up stays light on purpose, so it opens fast: one music card, with the gr
 | `media_player.living_room`, `media_player.bedroom`, `media_player.office` | The speakers, each with a chip in the title, a row in the group and a slider in the volume. The chip of the first other speaker that plays shows beside the title. The living room speaker also has the shortcuts for Bluetooth and the TV. |
 | `number.group_volume` | The volume slider and the levels **Quiet**, **Medium** and **Loud**. It's the average volume of the speaker and its group. |
 | `script.group_speakers` | Adds a speaker to the group or takes it out, groups all free speakers and ends the group. A free speaker plays nothing and uses no input. |
-| `script.playback` | The keys of the play row. In a group, they control the music of the whole group. |
+| `script.playback` | The keys of the play row. In a group, they control the music of the whole group. The heart saves the song as a favorite in Music Assistant, and it rests on speakers that aren't Music Assistant players. |
 | `script.set_group_volume` | Sets the volume of the group and keeps the balance between its speakers |
 | `light.living_room_display` | Optional: the display of the living room amplifier |
 | `switch.living_room_subwoofer`, `number.living_room_subwoofer_level` | Optional: the subwoofer and its level |
