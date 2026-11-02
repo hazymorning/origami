@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.12.0"
+  version: "4.13.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -96,7 +96,7 @@ origami_popup:
           Object.values(mini.built).forEach((o) => { if (!o.el.classList.contains("open")) size(o, col); });
         };
         mini.down = () => [mini.dim, ...Object.values(mini.built).map((o) => o.el)].forEach((el) => { if (shown(el)) el.hidePopover(); });
-        // place() puts the mini pop-up below its key, or above it where there is more room, lined up with the pop-up's cards. One narrower than the cards lines up with the key instead, at the key's end edge if the key is in the end half of the cards, or else at its start edge. The edge next to the key stays where it is while the mini pop-up is open, so a change of its cards or of the pop-up behind it never moves it, and content taller than its max_height or the screen scrolls.
+        // place() puts the mini pop-up above its key where it fits, or else on the side with more room, lined up with the pop-up's cards. One narrower than the cards lines up with the key instead, at the key's end edge if the key is in the end half of the cards, or else at its start edge. The edge next to the key stays where it is while the mini pop-up is open, so a change of its cards or of the pop-up behind it never moves it, and content taller than its max_height or the screen scrolls.
         mini.place = (o) => {
           const col = cards();
           const gap = parseFloat(getComputedStyle(card).getPropertyValue("--ha-space-2")) || 8;
@@ -107,7 +107,7 @@ origami_popup:
           const left = !k || w >= col.width ? col.left : Math.min(Math.max(k.left + k.width / 2 > col.left + col.width / 2 ? k.right - w : k.left, col.left), col.right - w);
           const below = k ? innerHeight - k.bottom - 2 * gap : innerHeight - 2 * gap;
           const above = k ? k.top - 2 * gap : 0;
-          const down = o.el.offsetHeight <= below || below >= above;
+          const down = !k || (o.el.offsetHeight > above && below >= above);
           const room = Math.max(down ? below : above, 0) + "px";
           Object.assign(o.el.style, {
             left: left + "px",

@@ -15,6 +15,8 @@ states:
     state: heat
     attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 20.5, current_temperature: 19.8, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
   switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+  switch.living_room_subwoofer: {state: 'on', attributes: {friendly_name: Subwoofer}}
+  number.living_room_subwoofer_level: {state: '3.0', attributes: {friendly_name: Subwoofer level, min: -10, max: 10, step: 1, mode: slider, unit_of_measurement: dB}}
   fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 50}}
   sensor.living_room_temperature: {state: '21.5', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Temperature}}
   sensor.living_room_humidity: {state: '48', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Humidity}}
@@ -275,6 +277,31 @@ sections:
           bottom:
             - {entity: light.kitchen, name: Kitchen, icon: mdi:lightbulb, tap_action: {action: toggle}}
             - {entity: switch.printer, name: Printer, icon: mdi:printer-outline, tap_action: {action: toggle}}
+      # A list to add to: the lamp is on and shows a check in its icon's place, the printer is off and shows a plus
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_tiles]
+        origami_tiles: {layout: list, slim: true, dividers: true, sign: add, pending: true, background: false}
+        sub_button:
+          main: []
+          bottom:
+            - {entity: light.kitchen, name: Kitchen, tap_action: {action: toggle}}
+            - {entity: switch.printer, name: Printer, tap_action: {action: toggle}}
+      # A list of buttons with a row that holds keys: the subwoofer's switch, then minus, its level and plus, which step the level
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_button]
+        origami_button: {columns: 1, active_style: toggle, icon_size: var(--icon-size-xs)}
+        sub_button:
+          main: []
+          bottom:
+            - {name: Bluetooth, icon: mdi:bluetooth, show_name: true, tap_action: {action: perform-action, perform_action: media_player.select_source, target: {entity_id: media_player.living_room}, data: {source: Bluetooth}}}
+            - name: Subwoofer
+              group:
+                - {entity: switch.living_room_subwoofer, name: Subwoofer, icon: mdi:speaker, show_name: true, tap_action: {action: toggle}}
+                - {entity: number.living_room_subwoofer_level, icon: mdi:minus, origami_button: {step: -1}}
+                - {entity: number.living_room_subwoofer_level, show_icon: false, state_content: state, tap_action: {action: none}}
+                - {entity: number.living_room_subwoofer_level, icon: mdi:plus, origami_button: {step: 1}}
       # A master slider for a whole group, one step taller with its name at the start of the track
       - type: custom:bubble-card
         card_type: button

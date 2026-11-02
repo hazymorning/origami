@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.6"
+  version: "3.10.0"
   supported:
     - sub-buttons
     - button
@@ -218,6 +218,34 @@ origami_button:
       const seq = bottom.flatMap((x) => x.n);
       const first = pick(cfg.start);
       const s = seq.findIndex((n) => hit(subs.find((x) => x.n === n)?.item ?? {}, first));
+      // With columns, each group is one row of the grid with one fill, as one button, so a row can hold keys such as minus and plus with a value between them. The row is filled while its first button is.
+      const rows = cols && !below ? bottom.filter((x) => x.group && x.n.length && !inBar.includes(x.n[0])) : [];
+      const row = (n, end = "") => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> .bubble-sub-button-" + n + end + "):not(.hidden)";
+      const lit = [...active.filter((n) => !inBar.includes(n)).map((n) => ".bubble-sub-button-" + n + (waiting.length ? ":not(.org-pending-off)" : "")), ...(waiting.length ? [".org-pending-on"] : [])].join(", ");
+      // A number between a row's keys, such as a level, is as wide as the longest value it can take, in Home Assistant's words, so the keys keep their places while it changes. The fonts and the widths are known only after layout, so the values are measured in the next frame, as Tiles measures its names.
+      // Home Assistant's words for a state change only with the state, so they are kept per state for the whole page
+      const said = globalThis.__origamiKeyTexts ?? (globalThis.__origamiKeyTexts = new WeakMap());
+      const wide = rows.flatMap((g) => g.n.slice(1).map((n) => subs.find((x) => x.n === n)).filter((x) => x && org.shows(x.item) && /^(input_)?number\./.test(String(x.item.entity ?? ""))).map(({ n, item }) => {
+        const st = hass.states[item.entity];
+        if (st && said.has(st)) return [n, said.get(st)];
+        const texts = [st?.attributes?.min, st?.attributes?.max, st?.state].filter(org.has).map((v) => String(org.word(hass, st, undefined, String(v))).replace(/\d/g, "0"));
+        if (st) said.set(st, texts);
+        return [n, texts];
+      }));
+      const sig = wide.map(([n, texts]) => n + ":" + texts.join("|")).join(";");
+      // The values are measured again only when their texts change or Bubble Card builds their elements anew
+      if (wide.length && (card._orgKeys !== sig || !card._orgKeysAt?.isConnected)) org.later("keys", () => {
+        card._orgKeys = sig;
+        wide.forEach(([n, texts]) => {
+          const el = card.querySelector(".bubble-sub-button-bottom-container .bubble-sub-button-" + n);
+          const name = el?.querySelector(".bubble-sub-button-name-container");
+          if (!name) return;
+          card._orgKeysAt = el;
+          const pen = org.pen(name, null);
+          const w = Math.ceil(Math.max(0, ...texts.map(pen.width))) + "px";
+          if (el.style.getPropertyValue("--org-key-w") !== w) el.style.setProperty("--org-key-w", w);
+        });
+      });
       // A button card leaves its own row, its main sub-buttons and their fill to Base
       if (!own && card.dataset.orgFill !== "bottom") card.dataset.orgFill = "bottom";
       card._orgB = {
@@ -226,6 +254,10 @@ origami_button:
         below,
         rings,
         order: s < 0 ? "" : seq.map((n, i) => at(n) + " { order: " + ((i - s + seq.length) % seq.length) + "; }").join("\n    "),
+        rows: rows.map((g) => row(g.n[0])),
+        // The same rows with the weight of a single button's rules, so the rules for an active, a disabled or a waiting button still win over the row's color
+        flat: rows.map((g) => "ha-card .bubble-sub-button-bottom-container :where(.bubble-sub-button-group:has(> .bubble-sub-button-" + g.n[0] + "))"),
+        lit: lit ? rows.filter((g) => active.includes(g.n[0]) || waiting.includes(g.n[0])).map((g) => row(g.n[0], ":is(" + lit + ")")) : [],
         bg: cfg.background ?? true,
         muted: !!cfg.muted,
         // The active segment is filled like the Toggle style
@@ -487,3 +519,48 @@ origami_button:
       opacity: 1 !important;
       ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }
+    ${card._orgB.rows.length ? `/* In a grid, a group is one row with one fill, as one button. Its first button takes the free width and starts like any button, so the icons of all rows line up. The buttons after it are keys at the row's end without gaps, as tall as the row and at least as wide, and the last key's icon ends as far from the row's end as the first icon starts from its start. The row is filled while its first button is, and a press on that button presses the whole row. */
+    ${card._org.each(card._orgB.rows, "")} {
+      display: flex !important;
+      grid-column: 1 / -1;
+      align-items: center;
+      min-width: 0;
+      box-sizing: border-box;
+      gap: 0 !important;
+      height: var(--org-btn-height);
+      padding-inline-end: max(0px, calc(var(--org-btn-height) * 0.4 - (var(--org-btn-height) - var(--org-btn-icon-size)) / 2));
+      border-radius: var(--org-btn-radius);
+      background: var(--org-btn-bg);
+      color: var(--secondary-text-color);
+      transition: var(--transition-interactive);
+    }
+    ${card._org.each(card._orgB.flat, " > .bubble-sub-button")} {
+      color: inherit !important;
+    }
+    ${card._org.each(card._orgB.rows, " > .bubble-sub-button")} {
+      height: 100% !important;
+      min-height: 0 !important;
+      background: none !important;
+    }
+    ${card._org.each(card._orgB.rows, " > .bubble-sub-button:first-child")} {
+      flex: 1 1 auto !important;
+      padding-inline-end: var(--ha-space-2) !important;
+      transform: none !important;
+    }
+    ${card._org.each(card._orgB.rows, " > .bubble-sub-button:not(:first-child)")} {
+      flex: 0 0 auto !important;
+      min-width: max(var(--org-btn-height), calc(var(--org-key-w, 0px) + 2 * var(--ha-space-1))) !important;
+      padding: 0 var(--ha-space-1) !important;
+      justify-content: center !important;
+      font-variant-numeric: tabular-nums;
+    }
+    ${card._org.each(card._orgB.rows, " > .bubble-sub-button:not(:first-child) .bubble-sub-button-icon:not(.hidden)")} {
+      margin: 0 !important;
+    }
+    ${card._orgB.press ? card._org.each(card._orgB.rows, ":has(> .bubble-sub-button.bubble-action-enabled:first-child:active)") + ` {
+      transform: scale(var(--press-scale));
+    }` : ""}
+    ${card._orgB.lit.length ? card._org.each(card._orgB.lit, "") + ` {
+      background: ${card._orgB.toggle ? "var(--fill-active)" : card._orgB.bg ? "color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background))" : "transparent"};
+      color: ${card._orgB.toggle ? "var(--text-color-active)" : "var(--primary-text-color)"};
+    }` : ""}` : ""}

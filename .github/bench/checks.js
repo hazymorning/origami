@@ -130,6 +130,53 @@ window.__check = async () => {
     report('icon only', fails, `${count} buttons with only an icon are square`);
   }
 
+  // Rows: in a Button grid, a group is one row as tall as a button, whose icon starts where the icons of the buttons above it start, and whose last key's icon ends as far from the row's end. A tap on a key with step sends the number's next value.
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
+      const single = [...card.root.querySelectorAll('.bubble-sub-button-group > .bubble-sub-button:only-child')].find(visible);
+      for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
+        if (group.children.length < 2 || !visible(group)) continue;
+        count++;
+        const g = group.getBoundingClientRect();
+        const keys = [...group.children];
+        const icon = (el) => el.querySelector('.bubble-sub-button-icon:not(.hidden)')?.getBoundingClientRect();
+        const first = icon(keys[0]), last = icon(keys.at(-1));
+        if (single && !near(g.height, single.getBoundingClientRect().height)) fails.push(`card ${card.i}: a row is ${r1(g.height)} px tall, a button ${r1(single.getBoundingClientRect().height)} px`);
+        if (single && first && !near(first.left - g.left, icon(single).left - single.getBoundingClientRect().left)) fails.push(`card ${card.i}: a row's icon starts ${r1(first.left - g.left)} px into it, a button's ${r1(icon(single).left - single.getBoundingClientRect().left)} px`);
+        if (first && last && !near(g.right - last.right, first.left - g.left)) fails.push(`card ${card.i}: the last key's icon ends ${r1(g.right - last.right)} px from the row's end, expected ${r1(first.left - g.left)} px as at its start`);
+        for (const k of keys.slice(1)) {
+          const b = k.getBoundingClientRect();
+          if (!near(b.height, g.height) || b.width < g.height - 0.5) fails.push(`card ${card.i} ${label(k)}: a key of ${r1(b.width)}x${r1(b.height)} px in a row of ${r1(g.height)} px`);
+        }
+      }
+      // A tap on a key with step: the tap that reaches Home Assistant sets the number's next value. The bench's states never change, so quick taps add up from the value the last tap asked for.
+      const row = [...card.root.querySelectorAll('.bubble-sub-button-group')].find((x) => x.children.length > 1);
+      let asked = null;
+      (card.cfg.sub_button.bottom.find((x) => x.group)?.group ?? []).forEach((item, i) => {
+        const step = Number(item.origami_button?.step);
+        if (!step) return;
+        const st = (card.haCard?._org?.hass ?? card.el._hass)?.states?.[item.entity] ?? null;
+        const el = row?.children[i];
+        if (!el || !st) return fails.push(`card ${card.i}: no key or state for ${item.icon}`);
+        let sent = null;
+        const catcher = (e) => { sent = e.detail; e.stopPropagation(); };
+        window.addEventListener('hass-action', catcher, { once: true });
+        const tap = new Event('hass-action', { bubbles: true, composed: true });
+        tap.detail = { config: { entity: item.entity, tap_action: { action: 'more-info' } }, action: 'tap' };
+        el.dispatchEvent(tap);
+        window.removeEventListener('hass-action', catcher);
+        const want = (asked ?? Number(st.state)) + step;
+        asked = want;
+        const a = sent?.config?.tap_action;
+        if (a?.perform_action !== item.entity.split('.')[0] + '.set_value' || a?.target?.entity_id !== item.entity || a?.data?.value !== want) fails.push(`card ${card.i} ${item.icon}: the tap sent ${JSON.stringify(a)}, expected ${item.entity.split('.')[0]}.set_value with ${want}`);
+      });
+    }
+    if (!count) fails.push('no Button grid with a row found on the sheet');
+    report('rows', fails, `${count} rows in a Button grid are as tall as a button, line up with it and end like they start, and their minus and plus send the next value`);
+  }
+
   // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content
   {
     const fails = [];
@@ -142,14 +189,42 @@ window.__check = async () => {
         if (line.content === 'none' || line.position !== 'absolute') continue;
         count++;
         if (!near(parseFloat(line.height), want, 0.1)) fails.push(`card ${card.i} ${label(el)}: line ${line.height}, expected ${want}px`);
-        // It starts where the row's content starts and ends as far from the row's other end, and nothing clips it, so the row's round corners never bend it
-        const pad = parseFloat(getComputedStyle(el).paddingInlineStart);
+        // It starts where the row's content starts, at the icon or the plus, and ends as far from the row's other end, and nothing clips it, so the row's round corners never bend it
+        const pad = parseFloat(getComputedStyle(el).getPropertyValue('--org-list-pad'));
         if (!near(parseFloat(line.left), pad, 0.5) || !near(parseFloat(line.right), pad, 0.5) || !near(parseFloat(line.top), 0, 0.1)) fails.push(`card ${card.i} ${label(el)}: line at ${line.left} and ${line.right} from the row's ends and ${line.top} from its top, expected ${pad}px and 0px`);
         if (getComputedStyle(el).overflow !== 'visible') fails.push(`card ${card.i} ${label(el)}: the row clips its line with overflow ${getComputedStyle(el).overflow}`);
       }
     }
     if (!count) fails.push('no divider found on the sheet');
     report('lines', fails, `the dividers are as thick as the line width and run straight across their rows' content (${count} checked)`);
+  }
+
+  // Plus: in a list with sign add, a plus or a check stands in the icon's place at the icon's size, so the names start where they start beside an icon, and a chosen row's sign differs from the others'
+  {
+    const fails = [];
+    let count = 0;
+    const lists = origami.filter((c) => c.cfg.origami_tiles?.layout === 'list' && c.cfg.origami_tiles?.slim);
+    // nameAt() measures where a row's name starts, from the start of the row's content
+    const nameAt = (row) => row.querySelector('.bubble-sub-button-name-container').getBoundingClientRect().left - row.getBoundingClientRect().left - parseFloat(getComputedStyle(row).getPropertyValue('--org-list-pad'));
+    const ref = lists.find((c) => c.cfg.origami_tiles.sign !== 'add')?.root.querySelector('.bubble-sub-button .bubble-sub-button-icon:not(.hidden)')?.closest('.bubble-sub-button');
+    for (const card of lists.filter((c) => c.cfg.origami_tiles.sign === 'add')) {
+      const size = length(card, 'var(--icon-size-s)');
+      const masks = new Set();
+      for (const row of card.root.querySelectorAll('.bubble-sub-button')) {
+        if (!visible(row)) continue;
+        count++;
+        const sign = getComputedStyle(row, '::after');
+        const pad = parseFloat(getComputedStyle(row).getPropertyValue('--org-list-pad'));
+        masks.add(sign.maskImage || sign.webkitMaskImage);
+        if (sign.content === 'none' || !near(parseFloat(sign.width), size) || !near(parseFloat(sign.left), pad)) fails.push(`card ${card.i} ${label(row)}: sign ${sign.width} wide at ${sign.left}, expected the icon's ${size}px at ${pad}px`);
+        if (row.querySelector('.bubble-sub-button-icon:not(.hidden)') && visible(row.querySelector('.bubble-sub-button-icon'))) fails.push(`card ${card.i} ${label(row)}: the row shows its icon beside the plus`);
+        if (ref && !near(nameAt(row), nameAt(ref))) fails.push(`card ${card.i} ${label(row)}: the name starts ${r1(nameAt(row))} px into the row, expected ${r1(nameAt(ref))} px as beside an icon`);
+      }
+      if (masks.size < 2) fails.push(`card ${card.i}: a chosen row and the others show the same sign`);
+    }
+    if (!count) fails.push('no list with a plus found on the sheet');
+    if (!ref) fails.push('no slim list with icons to compare the names with');
+    report('plus', fails, `${count} rows show a plus or a check in the icon's place, and their names start where they start beside an icon`);
   }
 
   // Frameless: a frameless card draws no background, shadow or border, and its content reaches its edges
@@ -351,7 +426,7 @@ window.__check = async () => {
     report('hidden cards', fails, 'a hidden card takes no space and no gap in its stack, and stays on the page');
   }
 
-  // Mini pop-ups: a key in a pop-up opens one below or above the key, as wide as the pop-up's cards, with a card's corners, 16 px of padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
+  // Mini pop-ups: a key in a pop-up opens one above the key where it fits, or else below it, as wide as the pop-up's cards, with a card's corners, 16 px of padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
   {
     const fails = [];
     const until = async (f, ms = 5000) => {
@@ -391,6 +466,7 @@ window.__check = async () => {
           return mini();
         };
         const pad = parseFloat(doc.getPropertyValue('--ha-space-4'));
+        const gap = parseFloat(doc.getPropertyValue('--ha-space-2'));
         const k = keyAt(1);
         const m = await open(k);
         if (!m) fails.push('the key did not open the mini pop-up');
@@ -402,6 +478,7 @@ window.__check = async () => {
           const bs = getComputedStyle(m.querySelector('.org-mini-box') ?? m);
           if (!near(b.left, col.left) || !near(b.width, col.width)) fails.push(`it spans ${r1(b.left)} to ${r1(b.right)} px, expected the pop-up's cards from ${r1(col.left)} to ${r1(col.right)} px`);
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`it covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`it opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
           if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
           if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
           if (!near(parseFloat(bs.paddingTop), pad) || !near(parseFloat(bs.paddingLeft), pad)) fails.push(`its padding is ${bs.padding}, expected ${pad}px`);
@@ -426,6 +503,7 @@ window.__check = async () => {
           if (b.height > 160.5) fails.push(`the narrow one is ${r1(b.height)} px tall, more than its max_height of 160px`);
           if (!box || box.scrollHeight <= box.clientHeight + 1) fails.push('the narrow one does not scroll, though its cards are taller than its max_height');
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`the narrow one covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`the narrow one opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
           // Frameless, it has no panel, and its cards start at its edge
           const ns = getComputedStyle(n);
           if (!/rgba\(0, 0, 0, 0\)|transparent/.test(ns.backgroundColor) || ns.boxShadow !== 'none') fails.push(`the frameless one has a panel: ${ns.backgroundColor}, shadow ${ns.boxShadow}`);

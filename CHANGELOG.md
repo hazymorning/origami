@@ -12,7 +12,7 @@ These changes are in the `next` branch and come with the next release.
 - The modules follow Home Assistant's rules for when an entity counts as on and which color it gets.
 - Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
 - A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
-- Sub-buttons have four new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, `dot` marks a control that is on with a small dot, and `hidden` hides a sub-button from a template that can read any entity.
+- Sub-buttons have five new keys: `on` fills a sub-button, `disabled` shows a control that cannot work, `dot` marks a control that is on with a small dot, `hidden` hides a sub-button from a template that can read any entity, and `step` lets a minus or a plus key move a number entity, such as a subwoofer's level, without a script.
 - Templates in values have `num()`, `format()`, `word()`, `ago()` and `name()`. A `${ }` expression that returns `unavailable` or `unknown` counts as empty, and `minutesUntil()` also reads timers and dates.
 - The keys of a map in a value match in any case, so `On` and `on` are the same key.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.
@@ -90,7 +90,7 @@ These changes are in the `next` branch and come with the next release.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
-- `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change. A mini pop-up with its own `width` lines up with its key, and cards taller than its `max_height` scroll inside it and fade out at its edges. With `frameless: true`, its cards stand on the dim like the buttons of a sheet. The dim has the color and the blur of Bubble Card's backdrop, and beside Home Assistant's sidebar it covers what the backdrop covers.
+- `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One opens above its key where it fits, or else on the side with more room. It grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change. A mini pop-up with its own `width` lines up with its key, and cards taller than its `max_height` scroll inside it and fade out at its edges. With `frameless: true`, its cards stand on the dim like the buttons of a sheet. The dim has the color and the blur of Bubble Card's backdrop, and beside Home Assistant's sidebar it covers what the backdrop covers.
 
 #### Button
 
@@ -101,6 +101,7 @@ These changes are in the `next` branch and come with the next release.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
+- In a grid, each group is one row with one fill, whose first button takes the free width and whose other buttons are keys at its end, such as minus, a level and plus. The keys stay in place while the level changes.
 
 #### Slider
 
@@ -116,6 +117,7 @@ These changes are in the `next` branch and come with the next release.
 - `slim` makes one-line rows for facts and settings, as tall as the one-line rows in Home Assistant's own lists, and `dividers` draws a straight line between two rows. Base's `sub_button_height` sets the height of a list's rows.
 - New options: `sign` for every row, and the `state_color` and `image_size` keys for a tile.
 - `sign: check` marks a chosen row with a check, such as a speaker in a group, from its entity or its own `on` key. With `pending`, a tapped row shows the sign it is about to get until its state changes, and `background: false` leaves out the list's panel inside a card or a mini pop-up, and a slim list then keeps its first and last names as far from the edge as the text around it.
+- `sign: add` puts a plus in the icon's place of a row that isn't chosen, and a check once it is, such as for the speakers that can join a group.
 - Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.
 
 #### Table

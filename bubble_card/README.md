@@ -163,6 +163,7 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
 | `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
 | `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line. Both end at the same edge, and the sub-button has no fill, as for the values on the server card. |
+| `step` | A tap moves the number of the sub-button's entity by this step, such as `-1` on a minus key, within the number's range and on the grid of its own step, as Home Assistant's own number buttons do. Quick taps add up before the entity reports its new value, and where the number can't move further, the sub-button takes the disabled color. It works with `number` and `input_number` entities, without a script. |
 
 All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
@@ -942,7 +943,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | Option | Default | Description |
 | --- | --- | --- |
 | `background` | `true` | The buttons have a fill. With `false`, they are plain text. |
-| `columns` | `0` | `0` sizes the buttons to their text, and `1` to `6` make an even grid. |
+| `columns` | `0` | `0` sizes the buttons to their text, and `1` to `6` make an even grid, in which each group is one row. |
 | `align` | `start` | Places the buttons at the `start`, `center` or `end` of the row. |
 | `active` | | Highlights the buttons whose name, `css_class` or tap target matches. Takes text, a map from the card entity's state, Jinja or JavaScript in `${ }`, with commas between several values. |
 | `active_style` | `lamp` | `lamp` tints the active button in the lamp color, and `toggle` fills it. |
@@ -1069,6 +1070,53 @@ origami_button:
   chips: true
   scroll: true
   icon_size: var(--icon-size-s)
+```
+
+With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A number between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. With Base's `step` key, minus and plus change the number without a script, as for this subwoofer in a list of shortcuts:
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_button
+origami_button:
+  columns: 1
+  active_style: toggle
+sub_button:
+  main: []
+  bottom:
+    - name: Bluetooth
+      icon: mdi:bluetooth
+      show_name: true
+      tap_action:
+        action: perform-action
+        perform_action: media_player.select_source
+        target:
+          entity_id: media_player.living_room
+        data:
+          source: Bluetooth
+    - name: Subwoofer
+      group:
+        - entity: switch.living_room_subwoofer
+          name: Subwoofer
+          icon: mdi:speaker
+          show_name: true
+          tap_action:
+            action: toggle
+        - entity: number.living_room_subwoofer_level
+          icon: mdi:minus
+          origami_button:
+            step: -1
+        - entity: number.living_room_subwoofer_level
+          show_icon: false
+          state_content: state
+          tap_action:
+            action: none
+        - entity: number.living_room_subwoofer_level
+          icon: mdi:plus
+          origami_button:
+            step: 1
 ```
 
 With `segmented: true`, each group under `sub_button: bottom` is one bar. Buttons outside a group form one bar each when the card also has groups, and a shared bar when it has none.
@@ -1272,8 +1320,8 @@ On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid h
 | `image_size` | `cover` | The picture's size. `230%` shows only its middle. |
 | `name_color` | | The name's color. |
 | `state_color` | | The state's color. |
-| `sign` | Set by the tap action | In a list, the sign at the row's end: `open`, `run`, `switch`, `check` or `none`. It wins over the card's `sign`. |
-| `on` | The entity's state | In a list, whether the row's switch is on or its check is set, such as a template that reads whether a speaker is in a group. |
+| `sign` | Set by the tap action | In a list, the sign at the row's end: `open`, `run`, `switch`, `check` or `none`, or `add` in the icon's place. It wins over the card's `sign`. |
+| `on` | The entity's state | In a list, whether the row's switch is on or it shows a check, such as a template that reads whether a speaker is in a group. |
 | `pending` | The card's `pending` | In a list, whether the row waits after a tap. |
 
 ```yaml
@@ -1327,7 +1375,7 @@ With `layout: list`, each sub-button is a row of one list, as in a settings app.
 
 A row's `sign` key sets another sign, such as `open` for a script that opens a pop-up. Two rows with opposite visibility conditions can share one place, as the two TV rows below do: one turns the TV on, the other opens the TV pop-up.
 
-With `pending: true`, a row with a switch or a check that you tap shows the sign it is about to get, faded and without taps, until its state changes or 10 seconds pass. A row's own `pending` key decides for that row.
+With `pending: true`, a row with a switch, a check or a plus that you tap shows the sign it is about to get, faded and without taps, until its state changes or 10 seconds pass. A row's own `pending` key decides for that row.
 
 ```yaml
 type: custom:bubble-card
@@ -1427,6 +1475,8 @@ sub_button:
 #### Checklist
 
 With `sign: check`, each row of a list has a circle at its end that shows a check while the row is chosen, as in a list of rooms to clean or of speakers to group. A row is chosen while its entity is on, or while its own `on` key is true. A row with a check never shows its entity's state, and its `state` key can show a quiet hint instead, such as why a speaker is busy.
+
+With `sign: add`, a plus stands in the icon's place of each row that isn't chosen, and a check once it is, as for the speakers that can join a group. The sign has the icon's size, so the rows need no icon of their own. Like a row with a check, the row shows only its own `state`.
 
 With `background: false`, a list has no panel of its own, and its rows stand on the card or the mini pop-up around them. A slim list then keeps its first and last names as far from the edge as the text around it, and only a pressed row's fill reaches into that space.
 
@@ -1569,7 +1619,7 @@ sub_button:
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 
-`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens below the key, or above it where there's more room, as wide as the pop-up's cards or its own `width`, and the pop-up behind it dims. Like Home Assistant's menus, it grows out of the key from 90 % while it fades in, in the time of Home Assistant's dialogs, and it shrinks back the same way when a tap beside it, Esc or closing the pop-up closes it. While it is open, its edge next to the key stays in place, so a change of its cards never moves it, and cards taller than the screen scroll. A card in it with Base's `hidden` takes no space while it is hidden. Once the pop-up has opened, it draws its mini pop-ups ahead and keeps their cards up to date, so a tap only has to show one. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
+`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens above the key where it fits, or else on the side with more room, as wide as the pop-up's cards or its own `width`, and the pop-up behind it dims. Like Home Assistant's menus, it grows out of the key from 90 % while it fades in, in the time of Home Assistant's dialogs, and it shrinks back the same way when a tap beside it, Esc or closing the pop-up closes it. While it is open, its edge next to the key stays in place, so a change of its cards never moves it, and cards taller than the screen scroll. A card in it with Base's `hidden` takes no space while it is hidden. Once the pop-up has opened, it draws its mini pop-ups ahead and keeps their cards up to date, so a tap only has to show one. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
 
 ```yaml
 origami_popup:
