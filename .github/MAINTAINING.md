@@ -39,7 +39,7 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 ## README from 3.0
 
-The README is the main documentation, and it is written for people. Most readers are beginners who scroll through it and pick the parts they like, so it has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
+The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
 
 - It folds. At first glance, each part is its image, its name and one or two sentences. Everything else sits in folded `<details>` blocks, so people open what they want on purpose. Every part uses the same blocks in the same order, and the first part that gets written sets them.
 - Each step, explanation and term lives in one place, and other places link there. Installing the theme, the font and the modules is explained once, in the core setup at the top.
