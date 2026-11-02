@@ -39,12 +39,12 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 ## README from 3.0
 
-The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read the way a person talks. Text that doesn't meet this standard doesn't go in.
+The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read like good product documentation: calm, plain and neutral. Text that doesn't meet this standard doesn't go in.
 
-- It's light. The main README is a gallery: each part is its image, its name and one sentence, with a link to its folder. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
-- Every part's README has the same sections in the same order, and the first one that gets written sets them.
-- Each step, explanation and term lives in one place, and other places link there. Setting up the theme, the font, Bubble Card and a module is explained once, under Get started in the main README.
-- It's said in plain words, the way you'd explain it to a friend who uses Home Assistant. A sentence says what something does for the reader, not how it's built, and a technical term only shows up where the reader has to type or find it.
+- It's light. The main README is a gallery: each part is its image, its name and one sentence that says what it does, and the name links to the part's folder once the folder exists. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
+- Every part's README has the same sections in the same order: its name, its image and what it does, then Requirements, Setup and Entities. Requirements lists the modules, integrations, cards and helpers, Setup has numbered steps, and Entities says what each example entity is used for.
+- Each step, explanation and term lives in one place, and other places link there. Setting up the theme, the font and Bubble Card, adding a module and adding a card or pop-up are explained once, under Get started in the main README.
+- It's said in plain, neutral words. A part's sentence says what the part does, checked against its files, not how it's built. Steps are short commands, such as "Open Settings", and the text never talks to the reader as "you". A technical term only shows up where the reader has to type or find it.
 - No step needs access to the `/config` folder when Home Assistant's UI can do it. A module is added in Bubble Card's editor and the font as a resource, and copying files is only mentioned for people who already work that way.
 - A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again. History and reasons stay out, and how a module works inside belongs in the module reference.
 - It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
@@ -67,7 +67,7 @@ A new custom card is often the easiest path for an agent, but it is rarely the r
 
 Two checks keep the rules that a script can measure. Run them before each commit. CI runs them too and fails when a rule breaks.
 
-- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules, and lists the README's placeholder images. It takes a second.
+- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod, the writing rules and the links in the READMEs, and lists the placeholder images. It takes a second.
 - `node .github/bench/bench.mjs` renders example cards with the modules and the theme in Chromium and measures the design rules, such as corners, row ends, the end column and line widths. It takes a few seconds. Run `npm ci` and `npx playwright install chromium` in `.github/bench` once before.
 - `node .github/bench/bench.mjs shot <scenario.yaml> <folder>` takes screenshots of any cards, such as the user's own, which stay outside the repository.
 - `node .github/bench/compare.mjs [--ref <commit>] <scenario.yaml ...>` renders scenarios with the modules of a commit and with the working tree, and compares every element's style and the pixels. A change that should look the same, such as a cleanup, is done only when every render is the same. `python3 .github/bench/options.py <folder>` writes scenarios with every module option alone and in the pairs that interact, and the user's own cards belong in the comparison too.
@@ -96,7 +96,7 @@ Commit messages, PR titles and the README stay plain.
 
 ## Writing
 
-All text is written for people: short, plain English, the way you'd explain something to a friend next to you. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
+All text is written for people: short, plain English in a calm, neutral tone. The docs that people read say what a part does and give steps as short commands, and they never talk to the reader as "you". This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
 - Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
@@ -111,7 +111,10 @@ All text is written for people: short, plain English, the way you'd explain some
 | Instead of | Write |
 | --- | --- |
 | Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
-| The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or your browser still shows an old version of the page. |
+| The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or the browser still shows an old version of the page. |
+| A menu that slides in from the top of the screen, in place of Home Assistant's header. | Hides Home Assistant's header and adds a menu that slides in from the top. |
+| Your favorite scenes, devices and pop-ups in one list, and each row shows what a tap does. | A pop-up with quick access to favorites, such as other pop-ups and devices. |
+| Most parts are Bubble cards, and those also need Bubble Card. | Most parts are built with Bubble Card, and each one lists the modules it uses. |
 | The room's climate sensor writes `temp_rank`, and the Table module gives every cell in its column this icon. | The warmest and the coldest room get an arrow. |
 
 ## Commits and pull requests

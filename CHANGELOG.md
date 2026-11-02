@@ -24,7 +24,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Base
 
-- Base is the shared core of all modules. Bubble Card runs it on every card with an Origami module, and the module reference lists its helpers for your own modules.
+- Base is the shared core of all modules. Bubble Card runs it on every card with an Origami module, and the module reference lists its helpers for new modules.
 - `vertical` places the name under the icon, as on the room cards.
 - `large` makes the name larger, as on a card at the top of a pop-up.
 - `animate` fades a card in. Button cards, media cards and pop-ups also glide to their new height when their content changes. It replaces Button's option of the same name.
@@ -162,7 +162,7 @@ These changes are in the `next` branch and come with the next release.
 - Climate buttons that set a mode or a preset are filled again while it is set.
 - A tap on a Media card's icon opens the more-info dialog again.
 - The printer tile's name in the dashboard keeps the theme's text color while the printer runs.
-- A header keeps Bubble Card's grid options once you set its rows.
+- A header keeps Bubble Card's grid options once its rows are set.
 - In a Button card, a button with its icon above or below its name centers the icon and fits both lines.
 - A sub-button slider takes its `custom_height`.
 - Numbers with a unit follow Home Assistant's format for the language, such as 33% in English and 48 % in German.

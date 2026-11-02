@@ -1,0 +1,518 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_server'
+name: Server
+show_header: true
+popup_mode: fit-content
+back_open: true
+close_by_clicking_outside: true
+hide_backdrop: false
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 80px
+margin_top_desktop: 0px
+width_desktop: 500px
+bg_opacity: '100'
+bg_blur: '0'
+backdrop_blur: '10'
+shadow_opacity: '12'
+button_type: name
+show_icon: false
+with_bottom_offset: true
+modules:
+  - origami_base
+  - origami_popup
+origami_popup:
+  gap: var(--ha-space-4)
+sub_button:
+  main: []
+  bottom: []
+cards:
+  - type: vertical-stack
+    cards:
+      # The most urgent problem as the name, the uptime below it and the age of the last backup at the end
+      - type: custom:bubble-card
+        card_type: button
+        button_type: state
+        entity: sensor.system_monitor_uptime
+        icon: mdi:server
+        name: >-
+          {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
+          {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
+          {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
+          {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
+          {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
+          {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
+          {%- if s > 90 -%}Disk almost full
+          {%- elif r > 95 -%}Memory low
+          {%- elif c > 95 -%}CPU high
+          {%- elif a > 259200 -%}Backup due
+          {%- elif s > 80 -%}Disk almost full
+          {%- elif r > 85 -%}Memory low
+          {%- elif c > 80 -%}CPU high
+          {%- elif c < 0 and r < 0 and s < 0 -%}No data
+          {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
+          {%- else -%}All good
+          {%- endif -%}
+        state_content: >-
+          {%- set n = as_timestamp(states('sensor.system_monitor_uptime'), default=none) -%}
+          {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
+          {%- if d < 0 -%}Uptime unknown
+          {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
+          {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
+          {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
+          {%- endif -%}
+        scrolling_effect: false
+        modules:
+          - origami_base
+        tap_action:
+          action: navigate
+          navigation_path: /config/hardware
+        button_action:
+          tap_action:
+            action: navigate
+            navigation_path: /config/hardware
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            # How long ago the last backup ran, orange after 3 days and red after 7
+            - entity: sensor.backup_last_successful_automatic_backup
+              show_state: true
+              show_icon: false
+              origami_base:
+                name: >-
+                  ${(h => h < 48 ? num(h, 0, 'hour') : num(h / 24, 0, 'day'))((Date.now() -
+                  new Date(state)) / 3600000)}
+                name_color: >-
+                  ${(d => d >= 7 ? 'var(--error-color)' : d >= 3 ? 'var(--heat-color)' :
+                  '')((Date.now() - new Date(state)) / 86400000)}
+                label: Backup
+              tap_action:
+                action: navigate
+                navigation_path: /config/backup
+          bottom:
+            - name: Actions
+              group:
+                - entity: sensor.backup_backup_manager_state
+                  name: Back up
+                  icon: mdi:archive-arrow-down-outline
+                  show_name: true
+                  origami_base:
+                    name: "${state === 'create_backup' ? 'Backing up' : 'Back up'}"
+                    icon: "${state === 'create_backup' ? 'mdi:timer-sand' : ''}"
+                    'on': true
+                  tap_action:
+                    action: perform-action
+                    perform_action: backup.create_automatic
+                    confirmation:
+                      text: Create a backup now?
+                - icon: mdi:file-check-outline
+                  fill_width: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.check_config
+                - icon: mdi:restart
+                  fill_width: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.restart
+                    confirmation:
+                      text: Restart Home Assistant?
+      # Each tile fills from below as far as its value, as a slider fills its track, and turns red above 80 %
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_base:
+          sub_button_height: var(--control-height-list)
+          sub_button_text_size: var(--ha-font-size-l)
+        origami_button:
+          columns: 3
+          chips: true
+          icon_size: var(--icon-size-l)
+        sub_button:
+          main: []
+          bottom:
+            - entity: sensor.system_monitor_processor_use
+              name: CPU
+              icon: mdi:cpu-64-bit
+              show_name: true
+              content_layout: icon-top
+              origami_button:
+                name: ${num(state, 0, '%')}
+                background: >-
+                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
+                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
+                color: "${state > 80 ? 'var(--error-color)' : ''}"
+              tap_action:
+                action: more-info
+            - entity: sensor.system_monitor_memory_usage
+              name: RAM
+              icon: mdi:memory
+              show_name: true
+              content_layout: icon-top
+              origami_button:
+                name: ${num(state, 0, '%')}
+                background: >-
+                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
+                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
+                color: "${state > 80 ? 'var(--error-color)' : ''}"
+              tap_action:
+                action: more-info
+            - entity: sensor.system_monitor_disk_usage
+              name: Disk
+              icon: mdi:harddisk
+              show_name: true
+              content_layout: icon-top
+              origami_button:
+                name: ${num(state, 0, '%')}
+                background: >-
+                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
+                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
+                color: "${state > 80 ? 'var(--error-color)' : ''}"
+              tap_action:
+                action: more-info
+      # The load of the last 24 hours. It needs Plotly Graph Card.
+      - type: custom:plotly-graph
+        hours_to_show: 24
+        refresh_interval: auto
+        extended_touch_support:
+          pinch_to_zoom: false
+          double_tap_drag_to_zoom: false
+          hold_to_scan: true
+        color_setup: |-
+          $fn ({ vars, css_vars }) => {
+            const ha = document.querySelector("home-assistant") || document.documentElement;
+            const read = (name) =>
+              getComputedStyle(ha).getPropertyValue(name).trim() ||
+              getComputedStyle(document.body).getPropertyValue(name).trim();
+            vars.cCpu = css_vars["accent-color"] || read("--accent-color") || "#8DA399";
+            vars.cRam = read("--water-color") || "#8BC2CF";
+            vars.cErr = css_vars["error-color"] || read("--error-color") || "#E6867A";
+            vars.cBg = read("--popup-background") || css_vars["primary-background-color"];
+          }
+        smooth_filters:
+          - resample: 5m
+          - sliding_window_moving_average:
+              window_size: 3
+              extended: true
+              centered: true
+          - filter: '!isNaN(+x) && isFinite(+y)'
+        max_marker:
+          - fn: |-
+              ({ xs, ys }) => {
+                let bi = -1, bv = -Infinity;
+                for (let i = 0; i < ys.length; i++) {
+                  const v = +ys[i];
+                  if (isFinite(+xs[i]) && isFinite(v) && v > bv) { bv = v; bi = i; }
+                }
+                if (bi < 0) return { xs: [], ys: [] };
+                return { xs: [new Date(Math.min(+xs[bi], Date.now() - 30000))], ys: [bv] };
+              }
+        defaults:
+          entity:
+            mode: lines
+            showlegend: false
+            line:
+              shape: spline
+              smoothing: 1
+              width: 2.5
+          yaxes:
+            fixedrange: true
+            showgrid: false
+            zeroline: false
+            showline: false
+            ticks: ''
+            tickfont:
+              size: 12
+            title:
+              text: ''
+        entities:
+          - entity: sensor.system_monitor_memory_usage
+            name: RAM
+            line:
+              color: $ex vars.cRam
+            fill: tozeroy
+            fillgradient:
+              type: vertical
+              colorscale: $ex [[0, "rgba(0,0,0,0)"], [1, vars.cRam + "52"]]
+            hovertemplate: '%{y:.0f} %<extra>RAM</extra>'
+            filters: '$ex [...get("smooth_filters"), { store_var: "ram" }]'
+          - entity: sensor.system_monitor_processor_use
+            name: CPU
+            line:
+              color: $ex vars.cCpu
+            fill: tozeroy
+            fillgradient:
+              type: vertical
+              colorscale: $ex [[0, "rgba(0,0,0,0)"], [1, vars.cCpu + "52"]]
+            hovertemplate: '%{y:.0f} %<extra>CPU</extra>'
+            filters: '$ex [...get("smooth_filters"), { store_var: "cpu" }]'
+          - entity: sensor.system_monitor_processor_use
+            name: max cpu
+            hoverinfo: skip
+            hovertemplate: null
+            mode: markers+text
+            cliponaxis: false
+            texttemplate: <b>%{y:.0f}%</b>
+            textposition: top center
+            textfont:
+              size: 11
+              color: $ex vars.cCpu
+            marker:
+              size: 6
+              color: $ex vars.cBg
+              line:
+                width: 2
+                color: $ex vars.cCpu
+            filters: $ex [...get("smooth_filters"), ...get("max_marker")]
+          - entity: sensor.system_monitor_memory_usage
+            name: max ram
+            hoverinfo: skip
+            hovertemplate: null
+            mode: markers+text
+            cliponaxis: false
+            texttemplate: <b>%{y:.0f}%</b>
+            textposition: top center
+            textfont:
+              size: 11
+              color: $ex vars.cRam
+            marker:
+              size: 6
+              color: $ex vars.cBg
+              line:
+                width: 2
+                color: $ex vars.cRam
+            filters: $ex [...get("smooth_filters"), ...get("max_marker")]
+        layout:
+          height: 250
+          dragmode: false
+          paper_bgcolor: |-
+            $fn () => {
+              try {
+                const fix = (root) => {
+                  if (!root || !root.querySelectorAll) return;
+                  root.querySelectorAll("plotly-graph").forEach((el) => {
+                    el.style.setProperty("--ha-card-box-shadow", "none");
+                    el.style.setProperty("--ha-card-border-width", "0px");
+                  });
+                  root.querySelectorAll("*").forEach((n) => {
+                    if (n.tagName && n.tagName.includes("-") && n.shadowRoot) fix(n.shadowRoot);
+                  });
+                };
+                fix(document);
+              } catch (e) {}
+              return "rgba(0,0,0,0)";
+            }
+          plot_bgcolor: rgba(0,0,0,0)
+          hovermode: x unified
+          showlegend: false
+          font:
+            family: Montserrat, sans-serif
+            size: 13
+          margin:
+            t: 18
+            b: 30
+            l: 36
+            r: 86
+          hoverlabel:
+            font:
+              family: Montserrat, sans-serif
+              size: 12
+          annotations: |-
+            $fn ({ vars }) => {
+              const last = (s) => {
+                const ys = (s && s.ys) || [];
+                for (let i = ys.length - 1; i >= 0; i--) {
+                  if (ys[i] != null && isFinite(+ys[i])) return +ys[i];
+                }
+                return null;
+              };
+              const cpu = last(vars.cpu), ram = last(vars.ram);
+              if (cpu == null || ram == null) return [];
+              let yc = cpu, yr = ram;
+              if (Math.abs(yc - yr) < 9) {
+                const mid = (yc + yr) / 2;
+                if (yc < yr) { yc = mid - 4.5; yr = mid + 4.5; }
+                else { yc = mid + 4.5; yr = mid - 4.5; }
+              }
+              const chip = (label, val, y, color) => ({
+                xref: "paper", x: 1, xanchor: "left", xshift: 8,
+                yref: "y", y: y, showarrow: false, borderpad: 4,
+                text: "<b>" + label + " " + Math.round(val) + "%</b>",
+                font: { size: 11, color: vars.cBg }, bgcolor: color,
+              });
+              return [chip("CPU", cpu, yc, vars.cCpu), chip("RAM", ram, yr, vars.cRam)];
+            }
+          xaxis:
+            showgrid: false
+            showline: false
+            ticks: ''
+            nticks: 6
+            tickfont:
+              size: 12
+            showspikes: true
+            spikemode: across
+            spikethickness: -2
+            spikedash: solid
+            spikecolor: rgba(128,128,128,0.5)
+            tickformatstops:
+              - dtickrange:
+                  - null
+                  - 86400000
+                value: '%H:%M'
+              - dtickrange:
+                  - 86400000
+                  - null
+                value: '%b %d'
+          yaxis:
+            range:
+              - 0
+              - 102
+            tick0: 0
+            dtick: 25
+            ticksuffix: '%'
+          shapes:
+            - type: line
+              xref: paper
+              x0: 0
+              x1: 1
+              yref: 'y'
+              y0: 90
+              y1: 90
+              layer: below
+              line:
+                width: 1
+                dash: dot
+                color: $ex vars.cErr + "8C"
+        config:
+          displayModeBar: false
+      - type: custom:bubble-card
+        card_type: separator
+        name: System
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+          icon_size: var(--icon-size-s)
+        sub_button:
+          main:
+            - name: Repairs
+              show_name: true
+              icon: mdi:chevron-right
+              content_layout: icon-right
+              show_background: false
+              tap_action:
+                action: navigate
+                navigation_path: /config/repairs
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          slim: true
+          dividers: true
+          sign: none
+        sub_button:
+          main: []
+          bottom:
+            - entity: sensor.system_monitor_uptime
+              name: Last restart
+              icon: mdi:timer-outline
+              origami_tiles:
+                state: >-
+                  ${(t => t.charAt(0).toUpperCase() + t.slice(1))(ago(state))}
+            - entity: update.home_assistant_core_update
+              name: Home Assistant
+              icon: mdi:home-assistant
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+            - entity: update.home_assistant_operating_system_update
+              name: Operating system
+              icon: mdi:harddisk
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+            - entity: update.home_assistant_supervisor_update
+              name: Supervisor
+              icon: mdi:shield-check-outline
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+      - type: custom:bubble-card
+        card_type: separator
+        name: Maintenance
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+          icon_size: var(--icon-size-s)
+        sub_button:
+          main:
+            - name: Logs
+              show_name: true
+              icon: mdi:chevron-right
+              content_layout: icon-right
+              show_background: false
+              tap_action:
+                action: navigate
+                navigation_path: /config/logs
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          slim: true
+          dividers: true
+        sub_button:
+          main: []
+          bottom:
+            - name: Updates
+              icon: mdi:package-up
+              origami_tiles:
+                state: >-
+                  ${(u => u.length === 0 ? 'All up to date' : u.length === 1 ?
+                  String(u[0].attributes.friendly_name ??
+                  u[0].entity_id).replace(' Update', '').replace('Home Assistant ', '') : u.length + '
+                  available')(Object.values(hass.states).filter((s) =>
+                  s.entity_id.startsWith('update.') && s.state === 'on'))}
+                state_color: >-
+                  ${Object.values(hass.states).some((s) =>
+                  s.entity_id.startsWith('update.') && s.state === 'on') ?
+                  'var(--accent-color)' : ''}
+              tap_action:
+                action: navigate
+                navigation_path: /config/updates
+            - entity: sensor.backup_next_scheduled_automatic_backup
+              name: Next backup
+              icon: mdi:cloud-check-outline
+              origami_tiles:
+                state: >-
+                  ${(t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '–')(ago(state))}
+              tap_action:
+                action: navigate
+                navigation_path: /config/backup

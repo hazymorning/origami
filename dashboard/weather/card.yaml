@@ -1,0 +1,135 @@
+type: custom:origami-weather
+weather_entity: weather.home
+sun_enabled: false
+moon_enabled: false
+color_mode: theme
+card_height: 160px
+card_padding: 20px
+card_offset: 16px 0px 12px 0px
+# One color for each condition instead of the sky. Clouds and the other effects are off.
+# Rain, snow, hail and thunderstorms still appear.
+background_mode: color
+background_threshold_entity: weather.home
+background_thresholds:
+  - value: sunny
+    color: '#e7e2d9'
+    color_dark: '#24211d'
+  - value: clear-night
+    color: '#dbdce1'
+    color_dark: '#15181f'
+  - value: partlycloudy
+    color: '#e0deda'
+    color_dark: '#1c2023'
+  - value: cloudy
+    color: '#d3d4d6'
+    color_dark: '#222324'
+  - value: fog
+    color: '#e6e6e5'
+    color_dark: '#272829'
+  - value: windy
+    color: '#dadfdd'
+    color_dark: '#1c201e'
+  - value: windy-variant
+    color: '#d5dad9'
+    color_dark: '#1a1f1e'
+  - value: rainy
+    color: '#cdd2d6'
+    color_dark: '#181e22'
+  - value: pouring
+    color: '#c8cdd2'
+    color_dark: '#14191e'
+  - value: lightning
+    color: '#cfced3'
+    color_dark: '#1c1b21'
+  - value: lightning-rainy
+    color: '#cacacf'
+    color_dark: '#18171e'
+  - value: snowy
+    color: '#e6eaed'
+    color_dark: '#252b2e'
+  - value: snowy-rainy
+    color: '#d8dddf'
+    color_dark: '#1f2527'
+  - value: hail
+    color: '#d2d9da'
+    color_dark: '#1c2324'
+  - value: exceptional
+    color: '#ded8d2'
+    color_dark: '#27221f'
+cloud_effects: false
+night_sky_effects: false
+bird_effects: false
+balloon_effects: false
+plane_effects: false
+grid_options:
+  rows: auto
+  columns: 12
+button_containers:
+  # The house is 20px from the top, right and bottom edges. The drawing
+  # does not fill its picture, so the offsets are negative.
+  - position: custom
+    position_anchor: top-right
+    position_x: -32px
+    position_y: -10px
+    custom_width: 168px
+    image: demo-home-image
+  # Next sunset, or sunrise while the sun is down
+  - position: custom
+    position_anchor: top-left
+    button_gap: 6px
+    buttons:
+      - entity: sun.sun
+        visibility:
+          - condition: state
+            entity: sun.sun
+            state: above_horizon
+        elements:
+          - type: text
+            size: 12px
+            weight: '500'
+            color: var(--secondary-text-color)
+            text: Sunset
+          - type: text
+            size: 12px
+            weight: '500'
+            color: var(--primary-text-color)
+            entity: sun.sun
+            attribute: next_setting
+      - entity: sun.sun
+        visibility:
+          - condition: state
+            entity: sun.sun
+            state: below_horizon
+        elements:
+          - type: text
+            size: 12px
+            weight: '500'
+            color: var(--secondary-text-color)
+            text: Sunrise
+          - type: text
+            size: 12px
+            weight: '500'
+            color: var(--primary-text-color)
+            entity: sun.sun
+            attribute: next_rising
+  # Temperature and condition
+  - position: custom
+    position_anchor: bottom-left
+    gap: 5px
+    buttons:
+      - entity: weather.home
+        width: 100%
+        elements:
+          - type: text
+            size: 48px
+            weight: '700'
+            color: var(--primary-text-color)
+            attribute: temperature
+            precision: 0
+            format: °
+      - entity: weather.home
+        elements:
+          - type: text
+            size: 12px
+            weight: '500'
+            color: var(--primary-text-color)

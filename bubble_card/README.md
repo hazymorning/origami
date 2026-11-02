@@ -9,7 +9,7 @@ This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bub
 
 ## Installation
 
-Set up Bubble Card and add the modules you need as described under [Get started](../README.md#get-started).
+Bubble Card and the modules are set up as described under [Get started](../README.md#get-started).
 
 ## How the modules work together
 
@@ -60,7 +60,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 
 <br>
 
-The modules show Home Assistant's words for states and attributes in your language, and numbers in the format of your profile. Where a word is too long for a card, Base uses a shorter one, such as Heizt for a German thermostat that heats.
+The modules show Home Assistant's words for states and attributes, in the language and the number format of the user's profile. Where a word is too long for a card, Base uses a shorter one, such as Heizt for a German thermostat that heats.
 
 Base's `words` option changes the words that the Origami modules write on one card, such as the state line of Climate, Media and Speaker Select, a tile's state and `format()` in templates. It does not change the line that Bubble Card writes from `state_content`. The keys can be states, such as `idle`, or values such as a source, an app, an action or a speaker's name.
 
@@ -85,7 +85,7 @@ The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami
 - `states(id)` returns another entity's state. `hass` is also available.
 - `name(id)` returns an entity's name, which the card's `words` option can shorten, as in a dropdown. `${name(states('input_select.speaker'))}` names the speaker that a helper selects.
 - `minutesUntil(id)` returns the minutes until a time. It takes a timer, an `input_datetime`, a sensor whose state is a time, or a time itself. A paused timer gives the minutes it has left, and a time of day that has passed counts for tomorrow. Times without a time zone use Home Assistant's time zone.
-- `num(value)` writes a number in the format of your profile, such as 21,5 in German. `num(value, 1)` always shows one decimal. `num(value, 0, '%')` adds a unit in your language, such as `%`, `minute` or `hour`.
+- `num(value)` writes a number in the format of the user's profile, such as 21,5 in German. `num(value, 1)` always shows one decimal. `num(value, 0, '%')` adds a unit in the user's language, such as `%`, `minute` or `hour`.
 - `word(value)` returns Home Assistant's word for a state of the template's own entity, such as `${word('off')}`.
 - `ago(id)` returns how long ago an entity changed, such as 3 days ago. `ago(id, 'last_triggered')` reads that attribute instead.
 - `format(id)` returns an entity's state in Home Assistant's words, with its unit. `format(id, attribute)` does the same for an attribute.
@@ -448,7 +448,7 @@ sub_button:
 rows: 1.375
 ```
 
-The plus and minus buttons need actions of your own, such as a script that moves the target by half a degree.
+The plus and minus buttons need their own actions, such as a script that moves the target by half a degree.
 
 </details>
 
@@ -753,7 +753,7 @@ origami_speaker:
     - placeholder
 ```
 
-Groups work as in Media, and Base's `words` option can shorten a leader's name, such as `Living room: Living`. A tap does not select the speaker, so give each row a tap action that sets your selection. A readout without its own tap action passes the tap to the row. Rows need no `hide` option.
+Groups work as in Media, and Base's `words` option can shorten a leader's name, such as `Living room: Living`. A tap does not select the speaker, so give each row a tap action that sets the selection. A readout without its own tap action passes the tap to the row. Rows need no `hide` option.
 
 To make the whole row a volume slider, use a button card with `button_type: slider` and an icon. A stray touch can then make a speaker loud.
 
@@ -919,7 +919,7 @@ sub_button:
 
 ### Button
 
-The Button module creates rows and grids of buttons on a sub-buttons card, and styles the bottom sub-buttons of a button card the same way. Put every button under `sub_button: bottom`, with `show_name: true` where the name should show. Buttons can also form segmented bars or a row that scrolls sideways, as in the [TV pop-up](../README.md#tv).
+The Button module creates rows and grids of buttons on a sub-buttons card, and styles the bottom sub-buttons of a button card the same way. Put every button under `sub_button: bottom`, with `show_name: true` where the name should show. Buttons can also form segmented bars or a row that scrolls sideways, as in the [TV pop-up](../dashboard/tv/README.md).
 
 <img width="800" alt="Scenes with the active scene highlighted, two toggles and a plain text button" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-button.webp">
 
@@ -1060,7 +1060,7 @@ origami_button:
   icon_size: var(--icon-size-s)
 ```
 
-With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need actions of your own, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
+With `columns`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need their own actions, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
 
 ```yaml
 type: custom:bubble-card
@@ -1351,7 +1351,7 @@ sub_button:
           before: '20:59:59'
 ```
 
-A tile whose entity is unavailable is dimmed. More tile examples are in the Favorites section of [`dashboard.yaml`](../dashboard/dashboard.yaml).
+A tile whose entity is unavailable is dimmed. More tile examples are in the [favorites](../dashboard/favorites/tiles.yaml).
 
 #### List
 
@@ -1363,7 +1363,7 @@ With `layout: list`, each sub-button is a row of one list, as in a settings app.
 
 A row's `sign` key sets another sign, such as `open` for a script that opens a pop-up. Two rows with opposite visibility conditions can share one place, as the two TV rows below do: one turns the TV on, the other opens the TV pop-up.
 
-With `pending: true`, a row with a switch, a check or a plus that you tap shows the sign it is about to get, faded and without taps, until its state changes or 10 seconds pass. A row's own `pending` key decides for that row.
+With `pending: true`, a tapped row with a switch, a check or a plus shows the sign it is about to get, faded and without taps, until its state changes or 10 seconds pass. A row's own `pending` key decides for that row.
 
 ```yaml
 type: custom:bubble-card
@@ -1709,7 +1709,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 </details>
 
-## Your own modules
+## Writing a module
 
 A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, Tiles, which turns a sub-buttons card into a grid, and Speaker Select, which reads a media player with `media()`.
 

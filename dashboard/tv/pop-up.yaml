@@ -1,0 +1,390 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_tv'
+name: TV
+button_type: name
+show_icon: false
+margin_top_mobile: 72px
+margin_top_desktop: 300px
+bg_opacity: 100
+shadow_opacity: '12'
+popup_mode: adaptive-dialog
+with_bottom_offset: true
+performance_mode: performance
+modules:
+  - origami_base
+  - origami_popup
+# A blurred picture of the current program appears behind the pop-up
+styles: |-
+  ${(() => {
+    const cast = hass.states["media_player.living_room_tv_cast"];
+    const art = cast?.attributes?.entity_picture_local ?? cast?.attributes?.entity_picture;
+    const on = ["playing", "paused", "buffering"].includes(cast?.state);
+    const url = on && typeof art === "string" && art ? 'url("' + art.replace(/"/g, "%22") + '")' : null;
+    return `.bubble-pop-up-background::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      border-radius: inherit;
+      background-image: ${url ?? "none"};
+      background-size: cover;
+      background-position: center;
+      filter: blur(50px) saturate(170%);
+      opacity: ${url ? "0.16" : "0"};
+      pointer-events: none;
+      clip-path: inset(0 round var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0);
+      transition: opacity var(--duration-normal, 0.3s) ease;
+    }
+    .bubble-pop-up-container > * {
+      position: relative;
+      z-index: 1;
+    }`;
+  })()}
+cards:
+  - type: vertical-stack
+    cards:
+      # The TV card shows the app or the cast program, a power button and the speaker's volume
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.living_room_tv
+        name: TV
+        icon: mdi:television
+        modules:
+          - origami_base
+          - origami_media
+          - '!default'
+        origami_media:
+          layout: tv
+          players:
+            - media_player.living_room_tv_cast
+        scrolling_effect: false
+        slider_live_update: false
+        cover_background: false
+        hide:
+          power_button: true
+          previous_button: true
+          next_button: true
+          volume_button: true
+          play_pause_button: true
+        tap_action:
+          action: more-info
+        button_action:
+          tap_action:
+            action: more-info
+        sub_button:
+          main:
+            - icon: mdi:power
+              show_background: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.toggle
+                target:
+                  entity_id: media_player.living_room_tv
+          bottom:
+            - entity: media_player.living_room
+              sub_button_type: slider
+              always_visible: true
+        rows: '2.2'
+
+      # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          segmented: true
+          icon_size: var(--icon-size-m)
+          padding: var(--ha-space-2) 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Sources
+              group:
+                - name: Input
+                  icon: mdi:import
+                  tap_action:
+                    action: perform-action
+                    perform_action: remote.send_command
+                    target:
+                      entity_id: remote.living_room_tv
+                    data:
+                      command: TV_INPUT
+                # The button is filled while the speaker uses this source, because its tap selects it
+                - name: TV
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.select_source
+                    target:
+                      entity_id: media_player.living_room
+                    data:
+                      source: Optical In
+            # A tap changes the volume by 1%, a double tap by 5% and holding by 10%
+            - name: Volume
+              group:
+                - name: Quieter
+                  icon: mdi:minus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: -0.1
+                # The middle button shows the volume in percent, a dash while the speaker is off, or a muted icon. A tap mutes or unmutes the speaker.
+                - name: >-
+                    {% set s = 'media_player.living_room' %}{{ '–' if states(s) in ['unavailable', 'unknown', 'off']
+                    else '' if state_attr(s, 'is_volume_muted')
+                    else ((state_attr(s, 'volume_level') | float(0)) * 100) | round(0) | int }}
+                  icon: >-
+                    {% set s = 'media_player.living_room' %}{{ 'mdi:volume-off' if states(s) not in ['unavailable', 'unknown', 'off']
+                    and state_attr(s, 'is_volume_muted') else '' }}
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      mute: true
+                  hold_action:
+                    action: more-info
+                    entity: media_player.living_room
+                - name: Louder
+                  icon: mdi:plus
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.01
+                  double_tap_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.05
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.volume
+                    data:
+                      speaker: media_player.living_room
+                      step: 0.1
+
+      # The app buttons scroll sideways. A button is filled while the TV runs its app, because the TV reports the running app as its source.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          scroll: true
+          active_style: toggle
+        sub_button:
+          main: []
+          bottom:
+            - name: Netflix
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Netflix
+            - name: YouTube
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: YouTube
+            - name: Prime Video
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Prime Video
+            - name: Disney+
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Disney+
+            - name: Spotify
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Spotify
+            - name: Plex
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.living_room_tv
+                data:
+                  source: Plex
+
+      # The remote has back and home buttons and a round pad with an OK button
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          icon_size: var(--icon-size-l)
+          padding: var(--ha-space-2) 0 0
+        # The styles place the buttons by their css_class, draw the round pad and set the button sizes. They exist only on this card.
+        styles: |-
+          ha-card .bubble-sub-button-bottom-container {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) repeat(3, var(--control-height-lg)) minmax(0, 1fr);
+            grid-template-rows: repeat(3, var(--control-height-lg));
+            grid-template-areas: "back . up . home" ". left ok right ." ". . down . .";
+            place-items: center;
+          }
+          ha-card .bubble-sub-button-bottom-container::before {
+            content: "";
+            grid-area: 1 / 2 / 4 / 5;
+            place-self: stretch;
+            border-radius: var(--radius-circle);
+            background-color: var(--fill-subtle);
+            box-shadow: var(--card-ring);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+            width: var(--control-height) !important;
+            height: var(--control-height) !important;
+            padding: 0 !important;
+            color: var(--primary-text-color) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+            opacity: var(--opacity-strong) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.back, .home) {
+            width: var(--control-height-sm) !important;
+            height: var(--control-height-sm) !important;
+            border-radius: var(--ha-card-border-radius) !important;
+            background-color: var(--fill-subtle) !important;
+            box-shadow: var(--card-ring) !important;
+            --org-btn-icon-size: var(--icon-size-m);
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok {
+            width: var(--control-height-lg) !important;
+            height: var(--control-height-lg) !important;
+            border-radius: var(--radius-circle) !important;
+            background-color: var(--ha-card-background) !important;
+            box-shadow: var(--ha-card-box-shadow) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.ok .bubble-sub-button-name-container {
+            font-size: var(--ha-font-size-m) !important;
+            font-weight: var(--ha-font-weight-bold) !important;
+            opacity: var(--opacity-muted) !important;
+          }
+          .back { grid-area: back; justify-self: start; }
+          .home { grid-area: home; justify-self: end; }
+          .up { grid-area: up; }
+          .left { grid-area: left; }
+          .ok { grid-area: ok; }
+          .right { grid-area: right; }
+          .down { grid-area: down; }
+        sub_button:
+          main: []
+          bottom:
+            - name: Back
+              css_class: back
+              icon: mdi:arrow-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: BACK
+            - name: Home
+              css_class: home
+              icon: mdi:home
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: HOME
+            - name: Up
+              css_class: up
+              icon: mdi:chevron-up
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_UP
+            - name: Left
+              css_class: left
+              icon: mdi:chevron-left
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_LEFT
+            - name: OK
+              css_class: ok
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_CENTER
+            - name: Right
+              css_class: right
+              icon: mdi:chevron-right
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_RIGHT
+            - name: Down
+              css_class: down
+              icon: mdi:chevron-down
+              tap_action:
+                action: perform-action
+                perform_action: remote.send_command
+                target:
+                  entity_id: remote.living_room_tv
+                data:
+                  command: DPAD_DOWN

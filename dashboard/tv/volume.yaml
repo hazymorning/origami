@@ -1,0 +1,33 @@
+alias: Volume
+description: Turns a speaker up or down in small steps, or mutes it.
+mode: queued
+fields:
+  speaker:
+    description: The media player
+    example: media_player.living_room
+    selector:
+      entity:
+        domain: media_player
+  step:
+    description: How much to change the volume, from -1 to 1
+    example: 0.05
+  mute:
+    description: Mutes or unmutes instead
+    example: true
+sequence:
+  - if:
+      - condition: template
+        value_template: "{{ mute | default(false) | bool }}"
+    then:
+      - action: media_player.volume_mute
+        target:
+          entity_id: "{{ speaker }}"
+        data:
+          is_volume_muted: "{{ not state_attr(speaker, 'is_volume_muted') }}"
+    else:
+      - action: media_player.volume_set
+        target:
+          entity_id: "{{ speaker }}"
+        data:
+          volume_level: >
+            {{ [[state_attr(speaker, 'volume_level') | float(0) + step | float(0), 0] | max, 1] | min | round(2) }}

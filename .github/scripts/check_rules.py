@@ -13,6 +13,7 @@ made on that branch are checked too. With --release, a placeholder fails the
 check. The script needs PyYAML.
 """
 
+import functools
 import re
 import subprocess
 import sys
@@ -124,15 +125,24 @@ WRITING = {
 }
 
 
-def check_writing(where, text, first_line=1):
+# The docs that people read describe what a part does and give steps as plain commands. They never talk to the reader as "you".
+SECOND_PERSON = r"(?i)\b(you|your|yours|yourself|you're|you've|you'll|you'd)\b"
+NAMES = ["Share your Modules"]
+
+
+def check_writing(where, text, first_line=1, reader=True):
     for n, line in enumerate(prose(text).splitlines(), first_line):
-        for name, pattern in WRITING.items():
-            if found := [m.group(0).strip() for m in re.finditer(pattern, line)]:
+        rules = {**WRITING, "the second person": SECOND_PERSON} if reader else WRITING
+        for name, pattern in rules.items():
+            if found := [m.group(0).strip() for m in re.finditer(pattern, functools.reduce(lambda s, x: s.replace(x, ""), NAMES, line))]:
                 fail(f"{where}:{n}", f"has {name} ({', '.join(found)}): {line.strip()[:80]}")
 
 
-for name in ["README.md", "AGENTS.md", ".github/MAINTAINING.md", "bubble_card/README.md"]:
+READMES = ["README.md", "bubble_card/README.md", *sorted(str(p.relative_to(ROOT)) for p in (ROOT / "dashboard").glob("*/README.md"))]
+for name in READMES:
     check_writing(name, (ROOT / name).read_text(encoding="utf-8"))
+for name in ["AGENTS.md", ".github/MAINTAINING.md"]:
+    check_writing(name, (ROOT / name).read_text(encoding="utf-8"), reader=False)
 changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 start = changelog.find("## Next release")
 if start >= 0:
@@ -143,10 +153,35 @@ for path in modules:
     check_writing(f"{path.relative_to(ROOT)} description", str(next(iter(doc.values())).get("description", "")))
 
 
-# Screenshots: an image in the README or the module reference whose file doesn't exist yet is a placeholder.
+# Links: every relative link in the READMEs points to a file that exists, and an anchor to a heading or a named anchor in it
+def anchors(path):
+    text = re.sub(r"^```.*?^```", "", path.read_text(encoding="utf-8"), flags=re.M | re.S)
+    slugs = set(re.findall(r'<a name="([^"]+)"', text))
+    for heading in re.findall(r"^#{1,6} (.+)$", text, flags=re.M):
+        text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", re.sub(r"<[^>]+>|`", "", heading))
+        slug = re.sub(r"[^\w\- ]", "", text.strip().lower()).replace(" ", "-")
+        slugs.add(slug)
+    return slugs
+
+
+for name in READMES:
+    text = re.sub(r"^[ \t]*```.*?^[ \t]*```", "", (ROOT / name).read_text(encoding="utf-8"), flags=re.M | re.S)
+    for target in re.findall(r"\]\(([^)\s]+)\)|href=\"([^\"]+)\"", text):
+        target = next(x for x in target if x)
+        if re.match(r"[a-z]+:", target):
+            continue
+        file, _, anchor = target.partition("#")
+        path = (ROOT / name).parent / file if file else ROOT / name
+        if not path.resolve().exists():
+            fail(name, f"links to {target}, which doesn't exist")
+        elif anchor and path.is_file() and path.suffix == ".md" and anchor not in anchors(path):
+            fail(name, f"links to {target}, but that heading doesn't exist")
+
+
+# Screenshots: an image in a README or the module reference whose file doesn't exist yet is a placeholder.
 # The list is the shot list for the last pass before the release, and with --release, a placeholder fails.
 shots = {}
-for name in ["README.md", "bubble_card/README.md"]:
+for name in READMES:
     for tag in re.findall(r"<img\b[^>]*>", (ROOT / name).read_text(encoding="utf-8")):
         src = re.search(r'src="https://raw\.githubusercontent\.com/hazymorning/origami/main/([^"]+)"', tag)
         if src and not (ROOT / src.group(1)).exists():
