@@ -13,7 +13,7 @@ Controls an Android TV with a remote, its apps and the volume of the speaker tha
 
 ## Setup
 
-1. Open [Scripts](https://my.home-assistant.io/redirect/scripts/) and select **Add script**, then **Create new script**. In the three-dot menu, select **Edit in YAML**, paste [`volume.yaml`](volume.yaml) and save it with the name **Volume**, so its entity ID is `script.volume`.
+1. Open [Scripts](https://my.home-assistant.io/redirect/scripts/) and select **Create script**, then **Create new script**. In the three-dot menu, select **Edit in YAML**, paste [`volume.yaml`](volume.yaml) and save it with the name **Volume**, so its entity ID is `script.volume`.
 2. In [`pop-up.yaml`](pop-up.yaml), change the app buttons to the TV's apps, with the names its `source` uses. Change `Optical In` to the name of the speaker's TV input.
 3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_tv`.

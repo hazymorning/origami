@@ -100,7 +100,7 @@ sub_button:
         name: >-
           ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
           : Number.isNaN(p) ? '' : p < 0 ? 'Error'
-          : num(p, 0, '%'))(Math.round(states('number.robot_cleaning_progress')))}
+          : num(p, 0, '%'))(Math.round(states('sensor.robot_cleaning_progress')))}
         state:
           docked: ${word('off')}
           idle: ${word('off')}

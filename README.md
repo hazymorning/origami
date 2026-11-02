@@ -36,7 +36,7 @@ The theme and the font give every part its look, and most parts are built with B
 
 <br>
 
-1. Open [Resources](https://my.home-assistant.io/redirect/lovelace_resources/) and select **Add resource**. Resources only shows with **Advanced mode** turned on in the [user profile](https://my.home-assistant.io/redirect/profile/).
+1. Open [Resources](https://my.home-assistant.io/redirect/lovelace_resources/) and select **Add resource**.
 2. Paste this URL, choose **Stylesheet** and select **Create**.
 
    ```text
@@ -115,19 +115,19 @@ Shows the temperature and the weather at a glance, in one calm color for each ki
 
 Shows tiles for what matters at the moment. Most of them only appear when needed.
 
-### Rooms
+### [Rooms](dashboard/rooms/)
 
 <img width="800" alt="The rooms header and the room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
 
 Shows each room's climate and lights at a glance, and opens the room's pop-up.
 
-### Climate table
+### [Climate table](dashboard/climate-table/)
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
 Shows the temperature, humidity, windows and heating of every room in one table.
 
-### Navigation bar
+### [Navigation bar](dashboard/navigation-bar/)
 
 <img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
 
@@ -135,19 +135,19 @@ Opens the most used pop-ups and the menu from the bottom of the screen, and show
 
 ## Pop-ups
 
-### Room
+### [Room](dashboard/room/)
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
 Brings the media, lights and climate of one room together.
 
-### Lights
+### [Lights](dashboard/lights/)
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
 Sets scenes, all lamps at once or each lamp on its own.
 
-### Music
+### [Music](dashboard/music/)
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and its group pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
@@ -159,7 +159,7 @@ Plays music, groups speakers and sets their volume.
 
 Controls an Android TV with a remote, its apps and the volume of its speaker.
 
-### Fan
+### [Fan](dashboard/fan/)
 
 <img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
 
@@ -177,7 +177,7 @@ Gives quick access to favorites, such as other pop-ups and devices.
 
 Shows the health, backups and updates of the Home Assistant server.
 
-### Vacuum
+### [Vacuum](dashboard/vacuum/)
 
 <img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
 

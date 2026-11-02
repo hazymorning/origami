@@ -4,7 +4,6 @@ hash: '#popup_server'
 name: Server
 show_header: true
 popup_mode: fit-content
-back_open: true
 close_by_clicking_outside: true
 hide_backdrop: false
 scrolling_effect: false

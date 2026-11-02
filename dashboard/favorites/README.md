@@ -21,7 +21,7 @@ All tiles are examples from one home.
 | Tile | Entities | Shows |
 | --- | --- | --- |
 | Oven | `sensor.oven` | While the oven is on, always first |
-| Vacuum | `vacuum.robot`, `number.robot_cleaning_progress` | Always. While it cleans, it moves to the front and shows its progress. |
+| Vacuum | `vacuum.robot`, `sensor.robot_cleaning_progress` | Always. While it cleans, it moves to the front and shows its progress. |
 | Fan | `fan.bedroom`, `sensor.living_room_temperature`, `sensor.bedroom_temperature` | While the fan runs or a room is above 24° |
 | Dinner | `sensor.dinner` | From 14:00 to 21:00, with the photo from its `recipe.image` attribute, such as from [Tandoor](https://tandoor.dev) |
 | Music | `media_player.bedroom` | From 22:00 to 4:00 |

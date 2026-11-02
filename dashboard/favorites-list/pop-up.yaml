@@ -7,7 +7,6 @@ show_header: true
 show_icon: false
 show_previous_button: false
 popup_mode: adaptive-dialog
-back_open: true
 hide_backdrop: false
 scrolling_effect: false
 with_bottom_offset: true
