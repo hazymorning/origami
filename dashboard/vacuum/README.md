@@ -2,7 +2,7 @@
 
 <img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
 
-Starts the vacuum or sends it to single rooms, and shows its battery and bin. The wrench lists its brushes, filter and sensors with the hours left, and turns red when a part is due.
+Starts the vacuum for the whole home or single rooms, and shows its battery and bin. The wrench lists the brushes, the filter and the sensors with the hours they have left, and turns red when a part is due.
 
 ## Requirements
 

@@ -2,7 +2,7 @@
 
 <img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
 
-Sets a fan's speed, mode, timer and oscillation. The timer turns the fan off after 1, 3 or 5 hours.
+Speed, mode, timer and oscillation in one pop-up. The timer turns the fan off after 1, 3 or 5 hours.
 
 ## Requirements
 

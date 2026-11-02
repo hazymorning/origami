@@ -2,7 +2,7 @@
 
 <img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
 
-Controls an Android TV with a remote, its apps and the volume of the speaker that plays its sound. A blurred picture of the current program shows behind it.
+A remote for an Android TV, with its apps and the volume of the speaker that plays its sound. A blurred picture of what's on shows behind it.
 
 ## Requirements
 

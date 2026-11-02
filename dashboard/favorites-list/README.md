@@ -2,7 +2,7 @@
 
 <img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-pop-up.webp">
 
-Gives quick access to favorites, such as other pop-ups and devices, in one list. The sign at the end of each row shows what a tap does.
+A list of favorites, like other pop-ups, devices or anything else worth a shortcut. The sign at the end of each row shows what a tap does.
 
 ## Requirements
 

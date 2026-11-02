@@ -2,7 +2,7 @@
 
 <img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
 
-Shows the temperature and the weather at a glance, in one calm color for each kind of weather, with today's lowest and highest temperature. Clouds, rain and snow move over the card. A tap opens the forecast.
+The temperature, the weather and today's low and high, with a calm color for each kind of weather. Clouds, rain and snow drift across the card, and a tap opens the forecast.
 
 ## Requirements
 

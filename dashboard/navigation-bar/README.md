@@ -2,7 +2,7 @@
 
 <img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
 
-Opens the most used pop-ups and the menu from the bottom of the screen, and shows what's playing. Holding the music button plays or pauses the music, and holding the lights button opens a list that turns the lights off or on and sets a scene.
+A bar at the bottom of the screen with buttons for the most used pop-ups and the menu, and a card for what's playing. Holding the music button plays or pauses, and holding the lights button opens a list to turn the lights off or on and pick a scene.
 
 ## Requirements
 
@@ -30,4 +30,4 @@ The buttons open the music pop-up at `#popup_music`, the [TV pop-up](../tv/READM
 | `light.living_room` | **Turn on** in the lights list |
 | `scene.living_room_evening`, `scene.living_room_dinner`, `scene.living_room_movie`, `scene.living_room_late`, `scene.living_room_night` | The scenes in the lights list. While `light.living_room` is on, the scene turned on last is highlighted. |
 
-The lights button counts every light that is on, without light groups, and **Turn off** turns off every light. For administrators, the menu button shows a dot while an update waits.
+The lights button counts every light that is on, without light groups, and **Turn off** turns off every light. For administrators, the menu button shows a dot while an update is waiting.

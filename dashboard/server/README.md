@@ -2,7 +2,7 @@
 
 <img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
 
-Shows the health, backups and updates of the Home Assistant server, with buttons to back up, check the configuration and restart. The top line names the most urgent problem, such as a full disk or a backup that is due.
+How the Home Assistant server is doing, with its backups and updates, and buttons to back up, check the configuration and restart. The top line names the most urgent problem, like a full disk or a backup that's due.
 
 ## Requirements
 

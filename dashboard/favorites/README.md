@@ -2,7 +2,7 @@
 
 <img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
-Shows tiles for what matters at the moment, such as a running vacuum or tonight's dinner. Most tiles only appear when needed, and a hidden tile leaves no gap.
+Tiles for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed, and a hidden tile leaves no gap.
 
 ## Requirements
 

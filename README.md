@@ -3,20 +3,22 @@
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=6A8778&labelColor=181715"></a>
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-6A8778?labelColor=181715"></a>
 
-Origami is a theme and a phone dashboard for Home Assistant, shaped by years of daily use. Every part works on its own, so any of them can go into an existing dashboard.
+Origami is a Home Assistant dashboard designed around balance and usability. It's rather quiet and never shows too much at once, because most of what's on it only appears when it's needed. Anyone at home should be able to use it without thinking twice, and it should look nice without trying too hard.
+
+It's a bit of an old-school approach to building a dashboard. Origami works with what Home Assistant already has wherever it can, before adding anything on top, so it isn't exactly beginner-friendly.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
 ## Get started
 
-The theme and the font give every part its look, and most parts are built with Bubble Card. Each part lists the modules and anything else it needs.
+The theme, the font and Bubble Card come first. After that, any part below can go into a dashboard, and each one says what else it needs.
 
 <details>
 <summary><b>1. Theme</b></summary>
 
 <br>
 
-1. Add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, add only the `themes` line under it.
+1. Add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, only the `themes` line goes under it.
 
    ```yaml
    frontend:
@@ -27,7 +29,7 @@ The theme and the font give every part its look, and most parts are built with B
 
    [![Open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme)
 
-3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and select **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
+3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
 </details>
 
@@ -45,7 +47,7 @@ The theme and the font give every part its look, and most parts are built with B
 
 3. Reload the page.
 
-To load the font from Home Assistant instead of from Google, copy [`www/fonts`](www/fonts) to `/config/www/fonts` and use `/local/fonts/montserrat.css` as the URL.
+To load the font from Home Assistant instead of Google, copy [`www/fonts`](www/fonts) to `/config/www/fonts` and use `/local/fonts/montserrat.css` as the URL.
 
 </details>
 
@@ -54,7 +56,7 @@ To load the font from Home Assistant instead of from Google, copy [`www/fonts`](
 
 <br>
 
-1. Download [Bubble Card](https://github.com/Clooos/Bubble-Card) 3.4 or later and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) in HACS. Bubble Card needs Bubble Card Tools to add modules.
+1. Download [Bubble Card](https://github.com/Clooos/Bubble-Card) 3.4 or later and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) in HACS. Bubble Card needs the Tools to add modules.
 
    [Open Bubble Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
 
@@ -67,7 +69,7 @@ To load the font from Home Assistant instead of from Google, copy [`www/fonts`](
 
 <br>
 
-Each part lists the Origami modules it uses. Every module needs Base, so add Base first.
+Every module needs Base, so Base goes in first.
 
 1. Open the module in [`bubble_card/modules`](bubble_card/modules) and select **Copy raw file**.
 2. In the editor of any Bubble card, open **Modules**, then **My Modules**, and select **Import from YAML**.
@@ -83,9 +85,9 @@ To add all modules at once, copy the [`bubble_card/modules`](bubble_card/modules
 <br>
 
 1. Edit the dashboard and select **Add card**.
-2. Choose **Manual**, paste the contents of the file and select **Save**.
+2. Choose **Manual**, paste the file's contents and select **Save**.
 
-A pop-up stays hidden until a button opens it with the tap action **Navigate** to the pop-up's hash, such as `#popup_server`. The pop-up and the button have to be in the same view.
+A pop-up stays hidden until a button opens it. The button's tap action is **Navigate** to the pop-up's hash, such as `#popup_server`, and both have to be in the same view.
 
 </details>
 
@@ -95,43 +97,43 @@ A pop-up stays hidden until a button opens it with the tap action **Navigate** t
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Hides Home Assistant's header and adds a menu that slides in from the top, with shortcuts and a card for the server.
+Hides Home Assistant's header and adds a menu that slides down from the top.
 
 ### [Greeting and notifications](dashboard/greeting/)
 
 <img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/greeting.webp">
 
-Shows a greeting for the time of day and the next event, with notifications, repairs and updates beside it.
+A greeting, the next event, and notifications that only show up when they matter.
 
 ### [Weather](dashboard/weather/)
 
 <img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
 
-Shows the temperature and the weather at a glance, in one calm color for each kind of weather.
+The temperature and the weather, with a calm color for each kind of weather.
 
 ### [Favorites](dashboard/favorites/)
 
 <img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
-Shows tiles for what matters at the moment. Most of them only appear when needed.
+Tiles that come and go with what's happening at home.
 
 ### [Rooms](dashboard/rooms/)
 
 <img width="800" alt="The rooms header and the room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
 
-Shows each room's climate and lights at a glance, and opens the room's pop-up.
+Each room's climate and lights at a glance.
 
 ### [Climate table](dashboard/climate-table/)
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
-Shows the temperature, humidity, windows and heating of every room in one table.
+Temperature, humidity, windows and heating for every room in one table.
 
 ### [Navigation bar](dashboard/navigation-bar/)
 
 <img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
 
-Opens the most used pop-ups and the menu from the bottom of the screen, and shows what's playing.
+The most used pop-ups, the menu and what's playing, at the bottom of the screen.
 
 ## Pop-ups
 
@@ -139,49 +141,49 @@ Opens the most used pop-ups and the menu from the bottom of the screen, and show
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Brings the media, lights and climate of one room together.
+Everything for one room in one place: media, lights and climate.
 
 ### [Lights](dashboard/lights/)
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-Sets scenes, all lamps at once or each lamp on its own.
+All the lights in one pop-up, from scenes to each single lamp.
 
 ### [Music](dashboard/music/)
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and its group pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
-Plays music, groups speakers and sets their volume.
+Music, speaker groups and volume, with a few shortcuts.
 
 ### [TV](dashboard/tv/)
 
 <img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
 
-Controls an Android TV with a remote, its apps and the volume of its speaker.
+Remote, apps and volume for an Android TV.
 
 ### [Fan](dashboard/fan/)
 
 <img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
 
-Sets a fan's speed, mode, timer and oscillation.
+A fan's speed, mode and oscillation, with a timer that turns it off later.
 
 ### [Favorites list](dashboard/favorites-list/)
 
 <img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-pop-up.webp">
 
-Gives quick access to favorites, such as other pop-ups and devices.
+Quick access to favorites: other pop-ups, devices, anything really.
 
 ### [Server](dashboard/server/)
 
 <img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
 
-Shows the health, backups and updates of the Home Assistant server.
+Health, backups and updates of the Home Assistant server.
 
 ### [Vacuum](dashboard/vacuum/)
 
 <img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
 
-Starts the vacuum or sends it to single rooms, and shows its battery and bin.
+The vacuum, for the whole home or room by room.
 
 ## More
 
@@ -191,10 +193,10 @@ Starts the vacuum or sends it to single rooms, and shows its battery and bin.
 <br>
 
 1. Copy [`themes/origami.yaml`](themes/origami.yaml) to `/config/themes` under a new name, such as `my-origami.yaml`.
-2. In the copy, change `Origami:` at the top to a new name, then change the colors. Comments in the file say what each group of settings does.
+2. In the copy, change `Origami:` at the top to a new name, then change the colors. The comments in the file say what each group of settings does.
 3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and select the new theme in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
-Leave the original file as it is, because an update replaces it.
+Leave the original file alone, since an update replaces it.
 
 </details>
 
@@ -218,12 +220,12 @@ Leave the original file as it is, because an update replaces it.
 
 <br>
 
-Origami grew from years of daily use, so an assistant that guesses instead of reading the files gets the details wrong.
+Assistants like to guess, and with Origami, guesses get the details wrong. A few things help:
 
 - Give it the files of the part, not a link or a screenshot.
 - Ask it to read the part's README and the [module reference](bubble_card/README.md) before it writes anything.
-- Ask it to use Bubble Card's own options first, then a module, then a template or a script, and a new card only when nothing else works. Never card-mod.
-- Give it the real entity IDs. It can't see the Home Assistant instance, so it makes up any ID it doesn't get.
+- Ask it to stick to Bubble Card's options and the modules, then templates and scripts, and to build a new card only when nothing else works. Never card-mod.
+- Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get.
 - Keep a copy of the configuration before pasting anything.
 
 </details>

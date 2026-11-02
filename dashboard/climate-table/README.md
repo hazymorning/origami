@@ -2,7 +2,7 @@
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
-Shows the temperature, humidity, windows and heating of every room in one table. The warmest and the coldest room get an arrow, and so do the most humid and the driest.
+Every room in one table, with its temperature, humidity, windows and heating. Arrows point out the warmest and the coldest room, and the most humid and the driest one.
 
 ## Requirements
 
@@ -18,7 +18,7 @@ Shows the temperature, humidity, windows and heating of every room in one table.
 4. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started), such as right below the rooms header.
 5. Optional: to close the table after 3 minutes, open [Automations](https://my.home-assistant.io/redirect/automations/) under **Settings**, **Automations & scenes** and select **Create automation**, then **Create new automation**. In the three-dot menu, select **Edit in YAML**, paste [`close-table.yaml`](close-table.yaml) and save it.
 
-The table shows while **Climate table** is on, and the chevron in the [rooms header](../rooms/README.md) turns it on and off. To show the table all the time, skip steps 1 and 5 and delete the `visibility` lines in [`card.yaml`](card.yaml).
+The table only shows while **Climate table** is on, and the chevron in the [rooms header](../rooms/README.md) turns it on and off. To keep it on screen all the time, skip steps 1 and 5 and delete the `visibility` lines in [`card.yaml`](card.yaml).
 
 ## Entities
 

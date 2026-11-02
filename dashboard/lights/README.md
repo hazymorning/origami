@@ -2,7 +2,7 @@
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-Sets scenes, all lamps at once or each lamp on its own. The row of scenes starts with the one for the time of day, and the scene turned on last is highlighted while a lamp is on.
+Scenes, all lamps at once, or each lamp on its own. The scenes start with the one for the time of day, and the last one turned on stays highlighted while a lamp is on.
 
 ## Requirements
 

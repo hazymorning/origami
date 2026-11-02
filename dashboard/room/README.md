@@ -2,7 +2,7 @@
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Brings the media, lights and climate of one room together. The arrow on **All** opens a slider for each lamp and the scenes, and **Everything off** turns off the room's lamps and devices.
+Media, lights and climate of one room together. The arrow on **All** opens a slider for each lamp and the scenes, and **Everything off** turns off the room's lamps and devices.
 
 ## Requirements
 
@@ -43,4 +43,4 @@ A tap on the speaker, the TV, the fan or the count of lamps opens another pop-up
 | `climate.living_room`, `climate.bathroom` | The thermostat |
 | `script.thermostat_step` | Minus and plus, which move the thermostat's target by half a degree, within its range |
 
-**Everything off** turns off the entities in its list and leaves the thermostat as it is. Speakers stay out of the list, because some of them can't be turned off, such as Sonos, and one of those makes the button fail.
+**Everything off** turns off the entities in its list and leaves the thermostat as it is. Speakers stay out of the list, because some can't be turned off, like Sonos, and a single one of those makes the button fail.

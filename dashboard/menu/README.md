@@ -2,7 +2,7 @@
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Hides Home Assistant's header and adds a menu that slides in from the top, with shortcuts and a card for the server. Unlike other ways to hide the header, it never shows for a moment while the page loads.
+Home Assistant's header is hidden, and a menu slides down from the top instead, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
 
 ## Requirements
 
