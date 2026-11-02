@@ -1,0 +1,60 @@
+# The rooms header, with the average temperature and the open windows.
+# A tap on either of them, or on the chevron, opens the climate table.
+type: custom:bubble-card
+card_type: separator
+name: Rooms
+modules:
+  - origami_base
+  - origami_header
+origami_header:
+  weight: medium
+  value_style: chip
+  icon_size: var(--icon-size-l)
+grid_options:
+  columns: full
+  rows: auto
+sub_button:
+  main:
+    # The average of the rooms' temperature sensors
+    - name: Temperature
+      icon: mdi:thermometer
+      origami_header:
+        name: >-
+          ${(t => t.length ? num(t.reduce((a, b) => a + b, 0) / t.length, 0) + '°' : '–')(
+          ['sensor.living_room_temperature', 'sensor.bedroom_temperature', 'sensor.office_temperature']
+          .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+      tap_action:
+        action: perform-action
+        perform_action: input_boolean.toggle
+        target:
+          entity_id: input_boolean.climate_table
+    # The number of open windows. Each of the four templates lists the same window contacts.
+    - name: Windows
+      icon: mdi:window-closed-variant
+      origami_header:
+        name: >-
+          ${['binary_sensor.living_room_window', 'binary_sensor.bedroom_window']
+          .filter((id) => states(id) === 'on').length}
+        icon: >-
+          ${['binary_sensor.living_room_window', 'binary_sensor.bedroom_window']
+          .some((id) => states(id) === 'on') ? 'mdi:window-open-variant' : ''}
+        color: >-
+          ${['binary_sensor.living_room_window', 'binary_sensor.bedroom_window']
+          .some((id) => states(id) === 'on') ? 'var(--state-binary_sensor-window-on-color)' : 'var(--secondary-text-color)'}
+        background: >-
+          ${['binary_sensor.living_room_window', 'binary_sensor.bedroom_window']
+          .some((id) => states(id) === 'on') ? 'var(--tint)' : ''}
+      tap_action:
+        action: perform-action
+        perform_action: input_boolean.toggle
+        target:
+          entity_id: input_boolean.climate_table
+    - name: Climate table
+      entity: input_boolean.climate_table
+      icon: mdi:chevron-down
+      show_background: false
+      origami_header:
+        icon:
+          'on': mdi:chevron-up
+      tap_action:
+        action: toggle

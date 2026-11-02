@@ -7,8 +7,6 @@ modules:
 grid_options:
   columns: full
   rows: auto
-origami_base:
-  padding: 0 0 var(--ha-space-2) 0
 sub_button:
   bottom:
     # Music, from 22:00 to 4:00
