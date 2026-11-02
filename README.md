@@ -97,7 +97,7 @@ A pop-up stays hidden until a button opens it with the tap action **Navigate** t
 
 Hides Home Assistant's header and adds a menu that slides in from the top, with shortcuts and a card for the server.
 
-### Greeting and notifications
+### [Greeting and notifications](dashboard/greeting/)
 
 <img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/greeting.webp">
 
@@ -165,7 +165,7 @@ Controls an Android TV with a remote, its apps and the volume of its speaker.
 
 Sets a fan's speed, mode, timer and oscillation.
 
-### Favorites list
+### [Favorites list](dashboard/favorites-list/)
 
 <img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-pop-up.webp">
 

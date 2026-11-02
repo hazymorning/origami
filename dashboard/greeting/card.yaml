@@ -1,0 +1,93 @@
+# The greeting with the next event above it, and the notifications beside it
+type: grid
+square: false
+columns: 2
+cards:
+  # The greeting changes with the time of day. Change the words in the template.
+  - type: custom:bubble-card
+    card_type: separator
+    name: "${(h => h < 5 ? 'Still awake?' : h < 22 ? 'Hello there' : 'Good night')(new Date().getHours())}"
+    modules:
+      - origami_base
+      - origami_header
+    origami_header:
+      value_position: above
+      value_size: var(--ha-font-size-s)
+      value_max_width: 100px
+    sub_button:
+      main:
+        # The current or next event of the calendar, above the greeting
+        - entity: calendar.household
+          show_icon: false
+          origami_header:
+            name: ${attr.message}
+          tap_action:
+            action: none
+  # Notifications, repairs and updates, and each entity below while it matters
+  - type: custom:origami-notifications
+    weather: weather.home
+    hide_when_empty: false
+    rotate: 3
+    entities:
+      - sensor.weather_warning_level
+      - entity: calendar.household
+        before: "24:00:00"
+      - timer.bath
+      - entity: sensor.oven_ready_in
+        type: countdown
+        name: Oven
+      - vacuum.robot
+      - entity: sensor.dinner
+        actions:
+          - label: Open recipe
+            tap_action:
+              action: url
+              url_path: https://tandoor.dev
+    css: |
+      :host {
+        --origami-pad: var(--ha-space-4);
+        --origami-gap: var(--ha-space-4);
+        --origami-tile: var(--ha-space-10);
+        --origami-row-tile: var(--ha-space-12);
+        --origami-icon: var(--icon-size-m);
+        --origami-radius: var(--radius-inner);
+        --origami-card-bg: var(--fill-subtle);
+        --origami-row-bg: var(--fill-subtle);
+        --accent-color: var(--fill-active);
+        --ha-tile-icon-border-radius: var(--radius-inner);
+        --ha-tile-info-primary-font-size: var(--ha-font-size-m);
+        --ha-tile-info-primary-font-weight: var(--ha-font-weight-bold);
+        --ha-tile-info-secondary-font-size: var(--ha-font-size-s);
+        --ha-tile-info-secondary-font-weight: var(--ha-font-weight-medium);
+        --ha-tile-info-secondary-color: var(--secondary-text-color);
+      }
+      ha-card { box-shadow: none; }
+      .texts { min-height: calc(var(--origami-tile) + 2 * var(--origami-pad)); }
+      .slide { gap: var(--ha-space-1); }
+      .icon {
+        background: color-mix(in srgb, var(--tile-color) var(--tint-strength), var(--ha-card-background, var(--card-background-color)));
+        box-shadow: var(--ha-card-box-shadow, none);
+      }
+      .head .icon.idle { color: var(--primary-text-color); }
+      .badge {
+        top: -6px;
+        inset-inline-end: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: var(--ha-font-weight-bold);
+        box-shadow: none;
+      }
+      .list { gap: var(--ha-space-2); }
+      .row { padding: var(--ha-space-3); }
+      .row .title {
+        font-size: var(--ha-font-size-m);
+        font-weight: var(--ha-font-weight-bold);
+      }
+      .row .message { font-size: var(--ha-font-size-s); }
+      .heading {
+        font-weight: var(--ha-font-weight-bold);
+        font-size: var(--ha-font-size-l);
+      }

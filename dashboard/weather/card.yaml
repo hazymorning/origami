@@ -1,135 +1,140 @@
 type: custom:origami-weather
 weather_entity: weather.home
-sun_enabled: false
-moon_enabled: false
 color_mode: theme
-card_height: 160px
-card_padding: 20px
-card_offset: 16px 0px 12px 0px
-# One color for each condition instead of the sky. Clouds and the other effects are off.
-# Rain, snow, hail and thunderstorms still appear.
+card_height: 185px
+card_padding: 16px
+card_offset: 12px 0px 12px 0px
+card_tap_action:
+  action: more-info
+sun_moon_size: 40
+sun_moon_x: 32
+sun_moon_y: 46
+# One calm color for each kind of weather, and a plain one for anything else
 background_mode: color
+background_color: '#e6e3de'
+background_color_dark: '#1c1b19'
 background_threshold_entity: weather.home
 background_thresholds:
   - value: sunny
-    color: '#e7e2d9'
-    color_dark: '#24211d'
+    color: '#eee5d7'
+    color_dark: '#261d13'
   - value: clear-night
-    color: '#dbdce1'
-    color_dark: '#15181f'
+    color: '#e0e3ed'
+    color_dark: '#161924'
   - value: partlycloudy
-    color: '#e0deda'
-    color_dark: '#1c2023'
+    color: '#dee9ef'
+    color_dark: '#182227'
   - value: cloudy
-    color: '#d3d4d6'
-    color_dark: '#222324'
+    color: '#e2e5e7'
+    color_dark: '#1b1e20'
   - value: fog
-    color: '#e6e6e5'
-    color_dark: '#272829'
+    color: '#e8e7e5'
+    color_dark: '#222120'
   - value: windy
-    color: '#dadfdd'
-    color_dark: '#1c201e'
+    color: '#dce6e3'
+    color_dark: '#182220'
   - value: windy-variant
-    color: '#d5dad9'
-    color_dark: '#1a1f1e'
+    color: '#dae1de'
+    color_dark: '#171d1b'
   - value: rainy
-    color: '#cdd2d6'
-    color_dark: '#181e22'
+    color: '#d9e1ea'
+    color_dark: '#171e26'
   - value: pouring
-    color: '#c8cdd2'
-    color_dark: '#14191e'
+    color: '#d7dde4'
+    color_dark: '#151b21'
   - value: lightning
-    color: '#cfced3'
-    color_dark: '#1c1b21'
+    color: '#e5dfe8'
+    color_dark: '#221d25'
   - value: lightning-rainy
-    color: '#cacacf'
-    color_dark: '#18171e'
-  - value: snowy
-    color: '#e6eaed'
-    color_dark: '#252b2e'
-  - value: snowy-rainy
-    color: '#d8dddf'
-    color_dark: '#1f2527'
+    color: '#dfdbe2'
+    color_dark: '#1d1920'
   - value: hail
-    color: '#d2d9da'
-    color_dark: '#1c2324'
+    color: '#d3dfdf'
+    color_dark: '#121c1c'
+  - value: snowy
+    color: '#e5eaec'
+    color_dark: '#1c2426'
+  - value: snowy-rainy
+    color: '#dde2e5'
+    color_dark: '#1e2124'
   - value: exceptional
-    color: '#ded8d2'
-    color_dark: '#27221f'
-cloud_effects: false
-night_sky_effects: false
-bird_effects: false
-balloon_effects: false
-plane_effects: false
+    color: '#eadad3'
+    color_dark: '#271a15'
 grid_options:
+  columns: full
   rows: auto
-  columns: 12
+css: |
+  /* Today's lowest and highest temperature sit on one chip with the card's inner corners */
+  .buttons-group.grouped.with-bg > .buttons-row .button.with-bg {
+    border-radius: var(--radius-inner) !important;
+    box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
+  }
+  /* The color changes softly when the weather changes */
+  @media (prefers-reduced-motion: no-preference) {
+    #card-root.bg-custom-color.bg-custom-color { transition: background-color 1.2s var(--ease-standard, ease), transform .4s cubic-bezier(.2, 0, .2, 1); }
+  }
+  /* On a wide screen, the heading above the card sets the space */
+  @media (min-width: 768px) { :host { margin: 0 !important; } }
 button_containers:
-  # The house is 20px from the top, right and bottom edges. The drawing
-  # does not fill its picture, so the offsets are negative.
-  - position: custom
-    position_anchor: top-right
-    position_x: -32px
-    position_y: -10px
-    custom_width: 168px
-    image: demo-home-image
-  # Next sunset, or sunrise while the sun is down
-  - position: custom
-    position_anchor: top-left
-    button_gap: 6px
-    buttons:
-      - entity: sun.sun
-        visibility:
-          - condition: state
-            entity: sun.sun
-            state: above_horizon
-        elements:
-          - type: text
-            size: 12px
-            weight: '500'
-            color: var(--secondary-text-color)
-            text: Sunset
-          - type: text
-            size: 12px
-            weight: '500'
-            color: var(--primary-text-color)
-            entity: sun.sun
-            attribute: next_setting
-      - entity: sun.sun
-        visibility:
-          - condition: state
-            entity: sun.sun
-            state: below_horizon
-        elements:
-          - type: text
-            size: 12px
-            weight: '500'
-            color: var(--secondary-text-color)
-            text: Sunrise
-          - type: text
-            size: 12px
-            weight: '500'
-            color: var(--primary-text-color)
-            entity: sun.sun
-            attribute: next_rising
-  # Temperature and condition
-  - position: custom
-    position_anchor: bottom-left
-    gap: 5px
+  # The weather and the temperature
+  - padding: 4px
     buttons:
       - entity: weather.home
-        width: 100%
+        style: vertical
+        align: start
+        inner_gap: 6px
+        padding: '0'
         elements:
           - type: text
-            size: 48px
-            weight: '700'
+            size: 13px
+            weight: '500'
             color: var(--primary-text-color)
+          - type: text
             attribute: temperature
             precision: 0
             format: °
+            size: 40px
+            weight: '700'
+            color: var(--primary-text-color)
+  # Today's lowest and highest temperature
+  - position: custom
+    position_anchor: bottom-left
+    position_x: 0px
+    position_y: 0px
+    grouped: true
+    background: true
+    separator: true
+    gap: 0px
+    button_gap: 4px
+    button_icon_size: 13px
+    button_text_size: 13px
+    button_padding: 8px 12px
+    button_shadow: false
+    buttons:
       - entity: weather.home
+        forecast: daily
+        shadow: false
+        background: false
         elements:
           - type: text
-            size: 12px
+            text: 'Today:'
+            margin: 0 2px 0 0
             weight: '500'
+          - type: text
+            attribute: templow
+            format: ' '
+            weight: '700'
             color: var(--primary-text-color)
+          - type: text
+            text: '-'
+          - type: text
+            attribute: temperature
+            format: °
+            weight: '700'
+  # The house, the card's demo house
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    image: demo-home-image

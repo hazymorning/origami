@@ -55,10 +55,19 @@ cards:
           - origami_base
           - origami_media
           - '!default'
+        # The program's cover fills the icon and tints the card. Long app names get short words.
         origami_media:
           layout: tv
+          cover: icon background
+          cover_mix: 20
+          cover_blur: true
           players:
             - media_player.living_room_tv_cast
+        origami_base:
+          words:
+            Prime Video: Prime
+            Google Cast: Cast
+            Android TV Launcher: Launcher
         scrolling_effect: false
         slider_live_update: false
         cover_background: false

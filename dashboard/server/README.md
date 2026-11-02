@@ -23,7 +23,7 @@ Shows the health, backups and updates of the Home Assistant server, with buttons
 
 | Entity | Used for |
 | --- | --- |
-| `sensor.system_monitor_processor_use`, `sensor.system_monitor_memory_usage`, `sensor.system_monitor_disk_usage` | The tiles and the top line, and processor and memory also in the graph. A tile turns red above 80%. |
+| `sensor.system_monitor_processor_use`, `sensor.system_monitor_memory_usage`, `sensor.system_monitor_disk_usage` | The top line, and processor and memory also in the graph |
 | `sensor.system_monitor_uptime` | The uptime and the last restart |
 | `sensor.backup_last_successful_automatic_backup` | The age of the last backup, orange after 3 days and red after 7 |
 | `sensor.backup_next_scheduled_automatic_backup` | The next backup |

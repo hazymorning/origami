@@ -119,61 +119,134 @@ cards:
                     perform_action: homeassistant.restart
                     confirmation:
                       text: Restart Home Assistant?
-      # Each tile fills from below as far as its value, as a slider fills its track, and turns red above 80 %
+      - type: custom:bubble-card
+        card_type: separator
+        name: System
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+          icon_size: var(--icon-size-s)
+        sub_button:
+          main:
+            - name: Repairs
+              show_name: true
+              icon: mdi:chevron-right
+              content_layout: icon-right
+              show_background: false
+              tap_action:
+                action: navigate
+                navigation_path: /config/repairs
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
           - origami_base
-          - origami_button
-        origami_base:
-          sub_button_height: var(--control-height-list)
-          sub_button_text_size: var(--ha-font-size-l)
-        origami_button:
-          columns: 3
-          chips: true
-          icon_size: var(--icon-size-l)
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          slim: true
+          dividers: true
+          sign: none
         sub_button:
           main: []
           bottom:
-            - entity: sensor.system_monitor_processor_use
-              name: CPU
-              icon: mdi:cpu-64-bit
-              show_name: true
-              content_layout: icon-top
-              origami_button:
-                name: ${num(state, 0, '%')}
-                background: >-
-                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
-                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
-                color: "${state > 80 ? 'var(--error-color)' : ''}"
-              tap_action:
-                action: more-info
-            - entity: sensor.system_monitor_memory_usage
-              name: RAM
-              icon: mdi:memory
-              show_name: true
-              content_layout: icon-top
-              origami_button:
-                name: ${num(state, 0, '%')}
-                background: >-
-                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
-                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
-                color: "${state > 80 ? 'var(--error-color)' : ''}"
-              tap_action:
-                action: more-info
-            - entity: sensor.system_monitor_disk_usage
-              name: Disk
+            - entity: sensor.system_monitor_uptime
+              name: Last restart
+              icon: mdi:timer-outline
+              origami_tiles:
+                state: >-
+                  ${(t => t.charAt(0).toUpperCase() + t.slice(1))(ago(state))}
+            - entity: update.home_assistant_core_update
+              name: Home Assistant
+              icon: mdi:home-assistant
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+            - entity: update.home_assistant_operating_system_update
+              name: Operating system
               icon: mdi:harddisk
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+            - entity: update.home_assistant_supervisor_update
+              name: Supervisor
+              icon: mdi:shield-check-outline
+              origami_tiles:
+                state: >-
+                  ${state === 'on' && attr.latest_version ? '→ ' +
+                  attr.latest_version : attr.installed_version}
+                state_color:
+                  'on': var(--accent-color)
+                sign:
+                  'on': open
+      - type: custom:bubble-card
+        card_type: separator
+        name: Maintenance
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+          icon_size: var(--icon-size-s)
+        sub_button:
+          main:
+            - name: Logs
               show_name: true
-              content_layout: icon-top
-              origami_button:
-                name: ${num(state, 0, '%')}
-                background: >-
-                  linear-gradient(to top, ${state > 80 ? 'var(--error-fill)' :
-                  'var(--fill-loud)'} ${state}%, var(--fill-subtle) 0)
-                color: "${state > 80 ? 'var(--error-color)' : ''}"
+              icon: mdi:chevron-right
+              content_layout: icon-right
+              show_background: false
               tap_action:
-                action: more-info
+                action: navigate
+                navigation_path: /config/logs
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          slim: true
+          dividers: true
+        sub_button:
+          main: []
+          bottom:
+            - name: Updates
+              icon: mdi:package-up
+              origami_tiles:
+                state: >-
+                  ${(u => u.length === 0 ? 'All up to date' : u.length === 1 ?
+                  String(u[0].attributes.friendly_name ??
+                  u[0].entity_id).replace(' Update', '').replace('Home Assistant ', '') : u.length + '
+                  available')(Object.values(hass.states).filter((s) =>
+                  s.entity_id.startsWith('update.') && s.state === 'on'))}
+                state_color: >-
+                  ${Object.values(hass.states).some((s) =>
+                  s.entity_id.startsWith('update.') && s.state === 'on') ?
+                  'var(--accent-color)' : ''}
+              tap_action:
+                action: navigate
+                navigation_path: /config/updates
+            - entity: sensor.backup_next_scheduled_automatic_backup
+              name: Next backup
+              icon: mdi:cloud-check-outline
+              origami_tiles:
+                state: >-
+                  ${(t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '–')(ago(state))}
+              tap_action:
+                action: navigate
+                navigation_path: /config/backup
+
       # The load of the last 24 hours. It needs Plotly Graph Card.
       - type: custom:plotly-graph
         hours_to_show: 24
@@ -389,130 +462,3 @@ cards:
                 color: $ex vars.cErr + "8C"
         config:
           displayModeBar: false
-      - type: custom:bubble-card
-        card_type: separator
-        name: System
-        modules:
-          - origami_base
-          - origami_header
-        origami_header:
-          weight: medium
-          icon_size: var(--icon-size-s)
-        sub_button:
-          main:
-            - name: Repairs
-              show_name: true
-              icon: mdi:chevron-right
-              content_layout: icon-right
-              show_background: false
-              tap_action:
-                action: navigate
-                navigation_path: /config/repairs
-      - type: custom:bubble-card
-        card_type: sub-buttons
-        modules:
-          - origami_base
-          - origami_tiles
-        origami_tiles:
-          layout: list
-          slim: true
-          dividers: true
-          sign: none
-        sub_button:
-          main: []
-          bottom:
-            - entity: sensor.system_monitor_uptime
-              name: Last restart
-              icon: mdi:timer-outline
-              origami_tiles:
-                state: >-
-                  ${(t => t.charAt(0).toUpperCase() + t.slice(1))(ago(state))}
-            - entity: update.home_assistant_core_update
-              name: Home Assistant
-              icon: mdi:home-assistant
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-            - entity: update.home_assistant_operating_system_update
-              name: Operating system
-              icon: mdi:harddisk
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-            - entity: update.home_assistant_supervisor_update
-              name: Supervisor
-              icon: mdi:shield-check-outline
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-      - type: custom:bubble-card
-        card_type: separator
-        name: Maintenance
-        modules:
-          - origami_base
-          - origami_header
-        origami_header:
-          weight: medium
-          icon_size: var(--icon-size-s)
-        sub_button:
-          main:
-            - name: Logs
-              show_name: true
-              icon: mdi:chevron-right
-              content_layout: icon-right
-              show_background: false
-              tap_action:
-                action: navigate
-                navigation_path: /config/logs
-      - type: custom:bubble-card
-        card_type: sub-buttons
-        modules:
-          - origami_base
-          - origami_tiles
-        origami_tiles:
-          layout: list
-          slim: true
-          dividers: true
-        sub_button:
-          main: []
-          bottom:
-            - name: Updates
-              icon: mdi:package-up
-              origami_tiles:
-                state: >-
-                  ${(u => u.length === 0 ? 'All up to date' : u.length === 1 ?
-                  String(u[0].attributes.friendly_name ??
-                  u[0].entity_id).replace(' Update', '').replace('Home Assistant ', '') : u.length + '
-                  available')(Object.values(hass.states).filter((s) =>
-                  s.entity_id.startsWith('update.') && s.state === 'on'))}
-                state_color: >-
-                  ${Object.values(hass.states).some((s) =>
-                  s.entity_id.startsWith('update.') && s.state === 'on') ?
-                  'var(--accent-color)' : ''}
-              tap_action:
-                action: navigate
-                navigation_path: /config/updates
-            - entity: sensor.backup_next_scheduled_automatic_backup
-              name: Next backup
-              icon: mdi:cloud-check-outline
-              origami_tiles:
-                state: >-
-                  ${(t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '–')(ago(state))}
-              tap_action:
-                action: navigate
-                navigation_path: /config/backup
