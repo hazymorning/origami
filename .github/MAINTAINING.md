@@ -58,13 +58,13 @@ A new custom card is often the easiest path for an agent, but it is rarely the r
 - Shared code lives in Base, and no module repeats what Base or another module already does. Less code keeps the dashboard fast.
 - Grouping speakers always uses the link icon, `mdi:link-variant`, as the badge of a group member does. Speaker icons stand for choosing a speaker, so a control that groups never uses one.
 - Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
-- Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
+- Before changing a part, read its README section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
 
 ## Checks
 
 Two checks keep the rules that a script can measure. Run them before each commit. CI runs them too and fails when a rule breaks.
 
-- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules. It takes a second.
+- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules, and lists the README's placeholder images. It takes a second.
 - `node .github/bench/bench.mjs` renders example cards with the modules and the theme in Chromium and measures the design rules, such as corners, row ends, the end column and line widths. It takes a few seconds. Run `npm ci` and `npx playwright install chromium` in `.github/bench` once before.
 - `node .github/bench/bench.mjs shot <scenario.yaml> <folder>` takes screenshots of any cards, such as the user's own, which stay outside the repository.
 - `node .github/bench/compare.mjs [--ref <commit>] <scenario.yaml ...>` renders scenarios with the modules of a commit and with the working tree, and compares every element's style and the pixels. A change that should look the same, such as a cleanup, is done only when every render is the same. `python3 .github/bench/options.py <folder>` writes scenarios with every module option alone and in the pairs that interact, and the user's own cards belong in the comparison too.
@@ -125,6 +125,7 @@ All text is written for people: short, plain English, the way you'd explain some
 - Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
 - Phone mockups use the 3D phone with the camera at eye level. The phones stand upright, and the screens are never tilted away.
 - README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones.
+- Until the last pass, each image in the README already has its final file name under `images/v3/` and an `alt` text that says what it will show. An image whose file doesn't exist yet is a placeholder. `check_rules.py` lists every placeholder, so the list is the shot list, and `check_rules.py --release` fails while one is left.
 
 ## README cards
 
@@ -140,7 +141,7 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them, following "README from 3.0". Until then, only `fold_cards.py` and the comments above its copies change the README.
+- The README for the release is written on `next` while the dashboard is still fine-tuned, one part after another in the order of the dashboard. Each part gets its feature folder from the user's setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`, and its README part is written around that folder, following "README from 3.0". A later change to a documented part updates its folder and its README part in the same round. The screenshots come last, in one pass, once nothing changes.
 - Every change is tested in the user's own Home Assistant before the release.
 - A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
 - For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.

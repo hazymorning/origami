@@ -3,12 +3,14 @@
 The checks look for AI attribution in the files and commit messages, check
 each module's basics, keep entity IDs out of the modules, keep card-mod out of
 the dashboard and check the writing rules in the docs that follow them. They
-run in about a second.
+also list the screenshots that are still placeholders. They run in about a
+second.
 
-    python3 .github/scripts/check_rules.py [git range]
+    python3 .github/scripts/check_rules.py [--release] [git range]
 
 With a git range, such as the commits of a push, the messages of the commits
-made on that branch are checked too. The script needs PyYAML.
+made on that branch are checked too. With --release, a placeholder fails the
+check. The script needs PyYAML.
 """
 
 import re
@@ -20,6 +22,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 problems = []
+RELEASE = "--release" in sys.argv[1:]
+ARGS = [a for a in sys.argv[1:] if a != "--release"]
 
 
 def fail(where, what):
@@ -43,9 +47,9 @@ for path in tracked():
         if ATTRIBUTION.search(line) or NAMES.search(line):
             fail(f"{path.relative_to(ROOT)}:{n}", "names an assistant or adds attribution")
 
-if len(sys.argv) > 1:
+if ARGS:
     # Only the commits made on the branch, not the ones that a merge brings in
-    log = subprocess.run(["git", "log", "--first-parent", "--format=%h%n%B%n--end--", sys.argv[1]], cwd=ROOT, capture_output=True, text=True).stdout
+    log = subprocess.run(["git", "log", "--first-parent", "--format=%h%n%B%n--end--", ARGS[0]], cwd=ROOT, capture_output=True, text=True).stdout
     for entry in log.split("--end--"):
         lines = entry.strip().splitlines()
         if lines and (ATTRIBUTION.search("\n".join(lines[1:])) or NAMES.search("\n".join(lines[1:]))):
@@ -91,7 +95,7 @@ for path in [ROOT / "README.md", *sorted((ROOT / "dashboard").glob("**/*.yaml"))
             fail(f"{path.relative_to(ROOT)}:{n}", "uses card-mod")
 
 
-# Writing rules, in the docs that follow them. The README joins after its rewrite for 3.0.
+# Writing rules, in the docs that follow them
 def prose(text):
     text = re.sub(r"^```.*?^```", "", text, flags=re.M | re.S)
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
@@ -127,7 +131,7 @@ def check_writing(where, text, first_line=1):
                 fail(f"{where}:{n}", f"has {name} ({', '.join(found)}): {line.strip()[:80]}")
 
 
-for name in ["AGENTS.md", ".github/MAINTAINING.md", "bubble_card/README.md"]:
+for name in ["README.md", "AGENTS.md", ".github/MAINTAINING.md", "bubble_card/README.md"]:
     check_writing(name, (ROOT / name).read_text(encoding="utf-8"))
 changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 start = changelog.find("## Next release")
@@ -137,6 +141,22 @@ if start >= 0:
 for path in modules:
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     check_writing(f"{path.relative_to(ROOT)} description", str(next(iter(doc.values())).get("description", "")))
+
+
+# Screenshots: an image in the README or the module reference whose file doesn't exist yet is a placeholder.
+# The list is the shot list for the last pass before the release, and with --release, a placeholder fails.
+shots = {}
+for name in ["README.md", "bubble_card/README.md"]:
+    for tag in re.findall(r"<img\b[^>]*>", (ROOT / name).read_text(encoding="utf-8")):
+        src = re.search(r'src="https://raw\.githubusercontent\.com/hazymorning/origami/main/([^"]+)"', tag)
+        if src and not (ROOT / src.group(1)).exists():
+            alt = re.search(r'alt="([^"]*)"', tag)
+            shots.setdefault(src.group(1), alt.group(1) if alt else "")
+if shots:
+    print(f"{len(shots)} screenshots are still placeholders:")
+    print("\n".join(f"  {path}: {alt}" for path, alt in shots.items()))
+    if RELEASE:
+        fail("README.md", f"{len(shots)} screenshots are still placeholders")
 
 
 if problems:

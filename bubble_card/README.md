@@ -1,11 +1,11 @@
 # Origami modules for Bubble Card
 
-This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#setup) for its tokens. The main README explains [how Origami is built](../README.md#how-origami-is-built) and why the modules exist.
+This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#core-setup) for its tokens. The main README explains [how Origami is built](../README.md#how-origami-is-built) and why the modules exist.
 
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, especially for card heights, so details may still change. The modules work as shown in the dashboard.
 
-<img width="800" alt="A pop-up built from the modules, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-popup.webp">
+<img width="800" alt="A pop-up built from the modules, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-popup.webp">
 
 ## Installation
 
@@ -122,7 +122,7 @@ sub_button:
 
 The Base module is the frame for button and media player cards. It sets the height and the styles of the icon and the text, and it keeps the sub-buttons neutral.
 
-<img width="800" alt="A regular card, a tile and two compact rows with the pill switch" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-base.webp">
+<img width="800" alt="A regular card, a tile and two compact rows with the pill switch" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-base.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -249,7 +249,7 @@ The controls at the end of a row line up from card to card. Each one ends at the
 
 With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.
 
-<img width="800" alt="The rooms header and four room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/rooms.webp">
+<img width="800" alt="The rooms header and four room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
 
 A tap anywhere on the card runs the button action, and a hold runs the hold action. With `button_type: name` and no `tap_action`, this includes the icon. A sub-button without its own tap, hold or double tap action passes the tap to the card. Dropdowns and sliders keep working.
 
@@ -315,7 +315,7 @@ origami_base:
 
 The Light module fills the sliders of a light card with amber, the state color for lights. In dark mode, the fill stays gray so its light text stays readable, and only the mark at its end is amber. On a sub-buttons card with the Slider module, Light colors the rows of lamps the same way, as in the lamp example under [Slider](#slider).
 
-<img width="800" alt="A light group card with filled buttons and two compact lamps" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-light.webp">
+<img width="800" alt="A light group card with filled buttons and two compact lamps" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-light.webp">
 
 <details>
 <summary>Example</summary>
@@ -362,7 +362,7 @@ For a lamp as a compact row, use one of Base's compact examples with a light ent
 
 The Fan module spins a fan card's icon at the fan's speed. The icon spins backwards while the fan runs in reverse. It stands still when the device asks for reduced motion. Base fills the power button while the fan runs and the button for the current speed. With `state_content: percentage`, the state line shows the speed, or Home Assistant's word for off while the fan is off and reports a speed of 0.
 
-<img width="800" alt="Two fan cards, one at speed two and one that is off" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-fan.webp">
+<img width="800" alt="Two fan cards, one at speed two and one that is off" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-fan.webp">
 
 <details>
 <summary>Example</summary>
@@ -415,7 +415,7 @@ rows: 1.375
 
 The Climate module shows what a thermostat is doing. While it heats, cools, dries or runs its fan, the state line names that action, and the card takes the color of the matching mode. At other times, the state line shows the action, such as Idle, or the mode. The icon is muted while the thermostat is off. Thermostats without `hvac_action` count as on in every mode except off.
 
-<img width="800" alt="Three thermostats that are heating, idle and off" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-climate.webp">
+<img width="800" alt="Three thermostats that are heating, idle and off" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-climate.webp">
 
 <details>
 <summary>Example</summary>
@@ -467,7 +467,7 @@ The plus and minus buttons need actions of your own, such as `script.thermostat_
 
 The Media module styles media player cards. With the speaker layout, the card shows the title and the artist while music plays, the source while the speaker uses an input, and the cover in the icon. With the TV layout, the state line shows what plays, the running app or the TV's state.
 
-<img width="800" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-media.webp">
+<img width="800" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-media.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -721,7 +721,7 @@ living_room_repeat:
 
 The Speaker Select module creates the speaker rows of a music pop-up, and it works with Base. A row shows the speaker's name, what it plays and its cover. A crown marks a group's leader and a link its members, whose rows show the leader's name. The selected row has a stronger fill.
 
-<img width="800" alt="Four speaker rows for a playing group leader, a group member, a paused speaker and an offline speaker" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-speaker.webp">
+<img width="800" alt="Four speaker rows for a playing group leader, a group member, a paused speaker and an offline speaker" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-speaker.webp">
 
 <details>
 <summary>Example</summary>
@@ -795,7 +795,7 @@ rows: 1
 
 The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
 
-<img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-slider.webp">
+<img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-slider.webp">
 
 <details>
 <summary>Example</summary>
@@ -932,7 +932,7 @@ sub_button:
 
 The Button module creates rows and grids of buttons on a sub-buttons card, and styles the bottom sub-buttons of a button card the same way. Put every button under `sub_button: bottom`, with `show_name: true` where the name should show. Buttons can also form segmented bars or a row that scrolls sideways, as in the [TV pop-up](../README.md#tv).
 
-<img width="800" alt="Scenes with the active scene highlighted, two toggles and a plain text button" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-button.webp">
+<img width="800" alt="Scenes with the active scene highlighted, two toggles and a plain text button" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-button.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1177,7 +1177,7 @@ sub_button:
 
 The Header module turns a separator card into a section header, with the card's name as the title and its sub-buttons as values beside or above it. It is not related to the Origami Header card from the dashboard setup.
 
-<img width="800" alt="Headers with text, a colored dot and chips" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/module-header.webp">
+<img width="800" alt="Headers with text, a colored dot and chips" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-header.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1300,7 +1300,7 @@ The header sets its own height, so it needs no `grid_options`, and Popup's `gap`
 
 The Tiles module turns a sub-buttons card into a grid of tiles or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
 
-<img width="800" alt="Six tiles with the oven and the vacuum sorted to the front" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/favorites.webp">
+<img width="800" alt="Six tiles with the oven and the vacuum sorted to the front" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1511,7 +1511,7 @@ sub_button:
 
 The Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and all rows share the columns. A cell hidden by its visibility conditions leaves its column empty, and a row with all cells hidden takes no space.
 
-<img width="800" alt="The rooms header with the climate table open" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/climate.webp">
+<img width="800" alt="The rooms header with the climate table open" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
 <details>
 <summary>Options and example</summary>
