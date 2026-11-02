@@ -1,0 +1,49 @@
+alias: Playback
+description: Plays, pauses, skips, shuffles or repeats on the selected speaker. In a group, the group's leader gets the command.
+mode: queued
+fields:
+  speaker:
+    description: The dropdown helper that selects the speaker, or a speaker
+    example: input_select.selected_speaker
+    selector:
+      entity:
+        domain:
+          - input_select
+          - media_player
+  command:
+    description: What to do. Shuffle turns shuffle on or off, and repeat goes from off to all to one.
+    example: play_pause
+    selector:
+      select:
+        options:
+          - play_pause
+          - previous_track
+          - next_track
+          - shuffle
+          - repeat
+sequence:
+  - variables:
+      selected: "{{ states(speaker) if speaker.startswith('input_select.') else speaker }}"
+      leader: "{{ (state_attr(selected, 'group_members') or [selected])[0] }}"
+  - choose:
+      - alias: Shuffle
+        conditions: "{{ command == 'shuffle' }}"
+        sequence:
+          - action: media_player.shuffle_set
+            target:
+              entity_id: "{{ leader }}"
+            data:
+              shuffle: "{{ not state_attr(leader, 'shuffle') }}"
+      - alias: Repeat
+        conditions: "{{ command == 'repeat' }}"
+        sequence:
+          - action: media_player.repeat_set
+            target:
+              entity_id: "{{ leader }}"
+            data:
+              repeat: "{{ {'off': 'all', 'all': 'one'}.get(state_attr(leader, 'repeat'), 'off') }}"
+    default:
+      # media_player.media_play_pause, media_player.media_previous_track or media_player.media_next_track
+      - action: "media_player.media_{{ command }}"
+        target:
+          entity_id: "{{ leader }}"

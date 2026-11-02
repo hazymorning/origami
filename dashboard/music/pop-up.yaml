@@ -1,0 +1,605 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_music'
+# The title stays empty, so the speaker dropdown takes its place
+name: ''
+button_type: name
+show_header: true
+show_icon: false
+scrolling_effect: false
+bg_opacity: '100'
+bg_blur: '0'
+shadow_opacity: '12'
+hide_backdrop: false
+margin: 7px
+margin_top_mobile: 0px
+margin_top_desktop: 20%
+popup_mode: fit-content
+with_bottom_offset: true
+modules:
+  - origami_base
+  - origami_popup
+origami_base:
+  animate: true
+origami_popup:
+  gap: var(--ha-space-4)
+  # A blurred cover of the selected speaker's music shows behind the pop-up
+  art: ${states('input_select.selected_speaker')}
+  value_style: chip
+  value_position: beside
+  mini_popups:
+    # The group opens from the link key. A tap on a speaker adds it to the group or takes it out.
+    group:
+      width: 256px
+      cards:
+        - type: custom:bubble-card
+          card_type: separator
+          name: ${name(states('input_select.selected_speaker'))}
+          modules:
+            - origami_header
+          origami_header:
+            weight: medium
+            value_size: var(--ha-font-size-s)
+          sub_button:
+            main:
+              # Ends the group. It shows while the speaker plays in a group.
+              - name: Ungroup
+                icon: mdi:link-variant-off
+                show_name: true
+                origami_header:
+                  icon: "${states('script.group_speakers') === 'on' ? 'mdi:timer-sand' : ''}"
+                  disabled: ${states('script.group_speakers') === 'on'}
+                  hidden: >-
+                    ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members?.length
+                    ?? 0) < 2}
+                tap_action:
+                  action: perform-action
+                  perform_action: script.group_speakers
+                  data:
+                    speaker: input_select.selected_speaker
+                    ungroup: true
+        # Adds every free speaker: one that plays nothing and uses no input, such as the TV. It shows while there is one.
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_button
+          origami_base:
+            hidden: >-
+              ${(group => (hass.states['input_select.selected_speaker']?.attributes?.options ?? []).every((s) =>
+              group.includes(s) || ['playing', 'buffering', 'unavailable', 'unknown'].includes(states(s))
+              || /bluetooth|optical|coax|hdmi|line|aux/i.test(hass.states[s]?.attributes?.source ??
+              '')))(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members ?? [states('input_select.selected_speaker')])}
+          origami_button:
+            columns: 1
+            align: center
+            icon_size: var(--icon-size-xs)
+          sub_button:
+            main: []
+            bottom:
+              - name: Group all
+                icon: mdi:link-variant
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: script.group_speakers
+                  data:
+                    speaker: input_select.selected_speaker
+                    all: true
+        # One row for each speaker except the selected one, with a check while it plays in the group and a plus while it can join
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_tiles
+          origami_base:
+            sub_button_height: 44px
+          origami_tiles:
+            layout: list
+            slim: true
+            dividers: true
+            sign: add
+            background: false
+            pending: true
+          sub_button:
+            main: []
+            bottom:
+              - entity: media_player.living_room
+                show_icon: false
+                origami_tiles:
+                  'on': ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members ?? []).includes(entity)}
+                visibility:
+                  - condition: state
+                    entity: input_select.selected_speaker
+                    state_not: media_player.living_room
+                tap_action:
+                  action: perform-action
+                  perform_action: script.group_speakers
+                  data:
+                    speaker: input_select.selected_speaker
+                    member: media_player.living_room
+              - entity: media_player.bedroom
+                show_icon: false
+                origami_tiles:
+                  'on': ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members ?? []).includes(entity)}
+                visibility:
+                  - condition: state
+                    entity: input_select.selected_speaker
+                    state_not: media_player.bedroom
+                tap_action:
+                  action: perform-action
+                  perform_action: script.group_speakers
+                  data:
+                    speaker: input_select.selected_speaker
+                    member: media_player.bedroom
+              - entity: media_player.office
+                show_icon: false
+                origami_tiles:
+                  'on': ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members ?? []).includes(entity)}
+                visibility:
+                  - condition: state
+                    entity: input_select.selected_speaker
+                    state_not: media_player.office
+                tap_action:
+                  action: perform-action
+                  perform_action: script.group_speakers
+                  data:
+                    speaker: input_select.selected_speaker
+                    member: media_player.office
+    # The volume opens from the key after the slider while the speaker plays in a group
+    volume:
+      - type: custom:bubble-card
+        card_type: separator
+        name: Volume
+        modules:
+          - origami_header
+        origami_header:
+          value_style: switch
+          weight: medium
+          value_size: var(--ha-font-size-s)
+        sub_button:
+          main:
+            # Each level sets the average of the group and keeps the balance between the speakers. The level that the group has stands out.
+            - name: Quiet
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: number.set_value
+                target:
+                  entity_id: number.group_volume
+                data:
+                  value: 10
+            - name: Medium
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: number.set_value
+                target:
+                  entity_id: number.group_volume
+                data:
+                  value: 15
+            - name: Loud
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: number.set_value
+                target:
+                  entity_id: number.group_volume
+                data:
+                  value: 20
+      # One slider for each speaker, shown while it plays in the group of the selected speaker
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_slider
+        origami_slider:
+          label_width: 112px
+        sub_button:
+          main: []
+          bottom:
+            - entity: media_player.living_room
+              sub_button_type: slider
+              always_visible: true
+              slider_live_update: false
+              visibility:
+                - condition: template
+                  value_template: >-
+                    {% set s = states('input_select.selected_speaker') %}
+                    {{ 'media_player.living_room' in (state_attr(s, 'group_members') or [s]) }}
+            - entity: media_player.bedroom
+              sub_button_type: slider
+              always_visible: true
+              slider_live_update: false
+              visibility:
+                - condition: template
+                  value_template: >-
+                    {% set s = states('input_select.selected_speaker') %}
+                    {{ 'media_player.bedroom' in (state_attr(s, 'group_members') or [s]) }}
+            - entity: media_player.office
+              sub_button_type: slider
+              always_visible: true
+              slider_live_update: false
+              visibility:
+                - condition: template
+                  value_template: >-
+                    {% set s = states('input_select.selected_speaker') %}
+                    {{ 'media_player.office' in (state_attr(s, 'group_members') or [s]) }}
+    # The shortcuts open from the dots key. Each row is optional, so delete the ones that don't fit.
+    more:
+      width: 272px
+      max_height: 320px
+      frameless: true
+      cards:
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_button
+          origami_button:
+            columns: 1
+            group_rows: true
+            icon_size: var(--icon-size-xs)
+            active_style: toggle
+          sub_button:
+            main: []
+            bottom:
+              # The inputs of the living room speaker show while it is the selected speaker. They rest while it plays in another speaker's group.
+              - name: Bluetooth
+                icon: mdi:bluetooth
+                show_name: true
+                origami_button:
+                  hidden: ${states('input_select.selected_speaker') !== 'media_player.living_room'}
+                  disabled: >-
+                    ${(hass.states['media_player.living_room']?.attributes?.group_members?.[0] ??
+                    'media_player.living_room') !== 'media_player.living_room'}
+                tap_action:
+                  action: perform-action
+                  perform_action: media_player.select_source
+                  target:
+                    entity_id: media_player.living_room
+                  data:
+                    source: Bluetooth
+              - name: TV
+                icon: mdi:television-classic
+                show_name: true
+                origami_button:
+                  hidden: ${states('input_select.selected_speaker') !== 'media_player.living_room'}
+                  disabled: >-
+                    ${(hass.states['media_player.living_room']?.attributes?.group_members?.[0] ??
+                    'media_player.living_room') !== 'media_player.living_room'}
+                tap_action:
+                  action: perform-action
+                  perform_action: media_player.select_source
+                  target:
+                    entity_id: media_player.living_room
+                  data:
+                    source: Optical In
+              # The display of the living room amplifier
+              - entity: light.living_room_display
+                name: Display
+                icon: mdi:monitor
+                show_name: true
+                tap_action:
+                  action: toggle
+              # A tap turns the subwoofer on and off. Minus and plus move its level by one step and rest at the ends of its range.
+              - name: Subwoofer
+                group:
+                  - entity: switch.living_room_subwoofer
+                    name: Subwoofer
+                    icon: mdi:surround-sound
+                    show_name: true
+                    tap_action:
+                      action: toggle
+                  - entity: number.living_room_subwoofer_level
+                    icon: mdi:minus
+                    origami_button:
+                      disabled: ${Number(state) <= Number(attr.min)}
+                    tap_action:
+                      action: perform-action
+                      perform_action: script.number_step
+                      data:
+                        entity: number.living_room_subwoofer_level
+                        steps: -1
+                  - entity: number.living_room_subwoofer_level
+                    show_icon: false
+                    state_content: state
+                    tap_action:
+                      action: none
+                  - entity: number.living_room_subwoofer_level
+                    icon: mdi:plus
+                    origami_button:
+                      disabled: ${Number(state) >= Number(attr.max)}
+                    tap_action:
+                      action: perform-action
+                      perform_action: script.number_step
+                      data:
+                        entity: number.living_room_subwoofer_level
+                        steps: 1
+sub_button:
+  main:
+    # The speaker that the pop-up shows
+    - entity: input_select.selected_speaker
+      sub_button_type: select
+      show_icon: false
+    # A chip for another speaker that plays on its own, so a tap shows it in the pop-up. Each speaker has one, and at most one shows.
+    - entity: media_player.living_room
+      icon: mdi:circle
+      show_name: false
+      show_background: true
+      origami_popup:
+        name: "${((attr.group_members?.length ?? 0) > 1 ? 'Group · ' : '') + name(entity)}"
+        color: var(--media-color)
+        hidden: >-
+          ${(() => { const sel = states('input_select.selected_speaker');
+          const lead = (hass.states[sel]?.attributes?.group_members ?? [sel])[0];
+          return (hass.states['input_select.selected_speaker']?.attributes?.options ?? []).find((s) => s !== lead
+          && (hass.states[s]?.attributes?.group_members ?? [s])[0] === s && states(s) === 'playing'); })() !== entity}
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.selected_speaker
+        data:
+          option: media_player.living_room
+    - entity: media_player.bedroom
+      icon: mdi:circle
+      show_name: false
+      show_background: true
+      origami_popup:
+        name: "${((attr.group_members?.length ?? 0) > 1 ? 'Group · ' : '') + name(entity)}"
+        color: var(--media-color)
+        hidden: >-
+          ${(() => { const sel = states('input_select.selected_speaker');
+          const lead = (hass.states[sel]?.attributes?.group_members ?? [sel])[0];
+          return (hass.states['input_select.selected_speaker']?.attributes?.options ?? []).find((s) => s !== lead
+          && (hass.states[s]?.attributes?.group_members ?? [s])[0] === s && states(s) === 'playing'); })() !== entity}
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.selected_speaker
+        data:
+          option: media_player.bedroom
+    - entity: media_player.office
+      icon: mdi:circle
+      show_name: false
+      show_background: true
+      origami_popup:
+        name: "${((attr.group_members?.length ?? 0) > 1 ? 'Group · ' : '') + name(entity)}"
+        color: var(--media-color)
+        hidden: >-
+          ${(() => { const sel = states('input_select.selected_speaker');
+          const lead = (hass.states[sel]?.attributes?.group_members ?? [sel])[0];
+          return (hass.states['input_select.selected_speaker']?.attributes?.options ?? []).find((s) => s !== lead
+          && (hass.states[s]?.attributes?.group_members ?? [s])[0] === s && states(s) === 'playing'); })() !== entity}
+      tap_action:
+        action: perform-action
+        perform_action: input_select.select_option
+        target:
+          entity_id: input_select.selected_speaker
+        data:
+          option: media_player.office
+  bottom: []
+cards:
+  - type: vertical-stack
+    cards:
+      # The music card stands for the speaker that the helper selects, so it has the helper as its entity.
+      # It shows the music of that speaker's group, with the cover above the title and the play row below.
+      # Its keys say sub_button_type: default, so they stay keys instead of becoming dropdowns for the helper.
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: input_select.selected_speaker
+        icon: mdi:music-note
+        # While no music plays, the name says what the speaker does
+        name: >-
+          ${(p => (src => !p || ['unavailable', 'unknown'].includes(p.state) ? 'Unavailable'
+          : /bluetooth|optical|coax|hdmi|line|aux|\btv\b/i.test(src) ? format(p.entity_id, 'source')
+          : 'Nothing playing')(String(p?.attributes?.source ?? '')))(hass.states[(s =>
+          hass.states[s]?.attributes?.group_members?.[0] ?? s)(states('input_select.selected_speaker'))])}
+        modules:
+          - origami_base
+          - origami_media
+          - '!default'
+        show_icon: false
+        scrolling_effect: true
+        cover_background: false
+        tap_action:
+          action: none
+        button_action:
+          tap_action:
+            action: none
+        hide:
+          power_button: true
+          previous_button: true
+          next_button: true
+          volume_button: true
+          play_pause_button: true
+        origami_base:
+          frameless: true
+          # Renames an input, such as the TV's
+          words:
+            Optical In: TV
+        origami_media:
+          cover: above
+          # The leader of the selected speaker's group, whose music the card shows
+          leader: ${(s => hass.states[s]?.attributes?.group_members?.[0] ?? s)(states('input_select.selected_speaker'))}
+          # Bluetooth gets a hint, and an input such as the TV shows only its name
+          state: >-
+            ${(p => (src => !p || ['unavailable', 'unknown'].includes(p.state) ? 'Unavailable'
+            : /bluetooth/i.test(src) ? 'Played from a phone'
+            : /optical|coax|hdmi|line|aux|\btv\b/i.test(src) ? format(p.entity_id, 'source')
+            : '')(String(p?.attributes?.source ?? '')))(hass.states[(s =>
+            hass.states[s]?.attributes?.group_members?.[0] ?? s)(states('input_select.selected_speaker'))])}
+          icons:
+            bluetooth: mdi:bluetooth
+            tv: mdi:television
+            line: mdi:audio-input-rca
+            idle: mdi:music-note-off
+            'on': mdi:music-note-off
+            'off': mdi:music-note-off
+            unavailable: mdi:speaker-off
+          icon_color:
+            bluetooth: var(--media-color)
+            tv: var(--primary-text-color)
+            line: var(--primary-text-color)
+            idle: var(--disabled-color)
+            'on': var(--disabled-color)
+            'off': var(--disabled-color)
+            unavailable: var(--disabled-color)
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            # Opens the group, and is filled while the speaker plays in a group
+            - icon: mdi:link-variant
+              sub_button_type: default
+              show_background: true
+              origami_base:
+                'on': ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members?.length ?? 0) > 1}
+              tap_action:
+                action: fire-dom-event
+                mini_popup: group
+            # Opens the shortcuts
+            - icon: mdi:dots-horizontal
+              sub_button_type: default
+              show_background: true
+              tap_action:
+                action: fire-dom-event
+                mini_popup: more
+          bottom:
+            # The keys rest while nothing plays or is paused, and shuffle and repeat also while the speaker has neither
+            - name: Playback
+              group:
+                - icon: mdi:shuffle-variant
+                  sub_button_type: default
+                  origami_base:
+                    dot: >-
+                      ${(p => ['playing', 'paused'].includes(p?.state) && p.attributes.shuffle ===
+                      true)(hass.states[states('input_select.selected_speaker')])}
+                    disabled: >-
+                      ${(p => !['playing', 'paused'].includes(p?.state) || p.attributes.shuffle ===
+                      undefined)(hass.states[states('input_select.selected_speaker')])}
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.playback
+                    data:
+                      speaker: input_select.selected_speaker
+                      command: shuffle
+                - icon: mdi:skip-previous
+                  sub_button_type: default
+                  origami_base:
+                    disabled: ${!['playing', 'paused'].includes(states(states('input_select.selected_speaker')))}
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.playback
+                    data:
+                      speaker: input_select.selected_speaker
+                      command: previous_track
+                - icon: mdi:play
+                  sub_button_type: default
+                  css_class: play
+                  origami_base:
+                    icon: "${states(states('input_select.selected_speaker')) === 'playing' ? 'mdi:pause' : ''}"
+                    disabled: ${!['playing', 'paused'].includes(states(states('input_select.selected_speaker')))}
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.playback
+                    data:
+                      speaker: input_select.selected_speaker
+                      command: play_pause
+                - icon: mdi:skip-next
+                  sub_button_type: default
+                  origami_base:
+                    disabled: ${!['playing', 'paused'].includes(states(states('input_select.selected_speaker')))}
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.playback
+                    data:
+                      speaker: input_select.selected_speaker
+                      command: next_track
+                - icon: mdi:repeat
+                  sub_button_type: default
+                  origami_base:
+                    icon: "${hass.states[states('input_select.selected_speaker')]?.attributes?.repeat === 'one' ? 'mdi:repeat-once' : ''}"
+                    dot: >-
+                      ${(p => ['playing', 'paused'].includes(p?.state) && ['all',
+                      'one'].includes(p.attributes.repeat))(hass.states[states('input_select.selected_speaker')])}
+                    disabled: >-
+                      ${(p => !['playing', 'paused'].includes(p?.state) || p.attributes.repeat ===
+                      undefined)(hass.states[states('input_select.selected_speaker')])}
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.playback
+                    data:
+                      speaker: input_select.selected_speaker
+                      command: repeat
+        # The two keys beside the title are one size larger, with a smaller link icon. The title keeps a gap to them, and the play row keeps a little space below it.
+        styles: |-
+          .bubble-sub-button-container .bubble-sub-button {
+            --bubble-sub-button-height: var(--control-height-sm);
+          }
+          .bubble-sub-button-1 .bubble-sub-button-icon {
+            --mdc-icon-size: var(--icon-size-s) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container {
+            margin-bottom: var(--ha-space-2) !important;
+          }
+          ha-card .bubble-name-container {
+            margin-inline-end: var(--org-gap) !important;
+          }
+
+      # The volume of the speaker and its group. The key after it opens each speaker's volume while the speaker plays in a group.
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: number.group_volume
+        name: "${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members?.length ?? 0) > 1 ? 'Group ·' : ''}"
+        show_name: true
+        show_icon: false
+        show_state: false
+        scrolling_effect: false
+        slider_value_position: right
+        slider_live_update: false
+        tap_action:
+          action: none
+        button_action:
+          tap_action:
+            action: none
+        modules:
+          - origami_base
+          - origami_slider
+        sub_button:
+          main:
+            - icon: mdi:chevron-down
+              show_background: true
+              origami_base:
+                hidden: ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members?.length ?? 0) < 2}
+              tap_action:
+                action: fire-dom-event
+                mini_popup: volume
+
+      # Ends the group. It shows while the speaker plays in a group.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_button
+        origami_base:
+          hidden: ${(hass.states[states('input_select.selected_speaker')]?.attributes?.group_members?.length ?? 0) < 2}
+        origami_button:
+          background: false
+          align: center
+          icon_size: var(--icon-size-s)
+          padding: var(--ha-space-3) 0 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Ungroup
+              icon: mdi:link-variant-off
+              show_name: true
+              origami_button:
+                icon: "${states('script.group_speakers') === 'on' ? 'mdi:timer-sand' : ''}"
+                disabled: ${states('script.group_speakers') === 'on'}
+              tap_action:
+                action: perform-action
+                perform_action: script.group_speakers
+                data:
+                  speaker: input_select.selected_speaker
+                  ungroup: true

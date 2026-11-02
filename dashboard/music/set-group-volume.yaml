@@ -1,0 +1,39 @@
+alias: Set group volume
+description: Sets the volume of the selected speaker and the speakers in its group. Their average takes the new volume, and the balance between them stays.
+mode: queued
+fields:
+  speaker:
+    description: The dropdown helper that selects the speaker, or a speaker
+    example: input_select.selected_speaker
+    selector:
+      entity:
+        domain:
+          - input_select
+          - media_player
+  volume:
+    description: The new volume in percent
+    example: 20
+    selector:
+      number:
+        min: 0
+        max: 100
+        unit_of_measurement: "%"
+sequence:
+  - variables:
+      selected: "{{ states(speaker) if speaker.startswith('input_select.') else speaker }}"
+      members: "{{ state_attr(selected, 'group_members') or [selected] }}"
+      levels: "{{ members | map('state_attr', 'volume_level') | select('number') | list }}"
+      before: "{{ levels | sum / levels | count if levels else 0 }}"
+      after: "{{ volume | float(0) / 100 }}"
+  - repeat:
+      for_each: "{{ members }}"
+      sequence:
+        # Each speaker keeps its share of the group's volume, and a speaker that isn't silent stays at 1% or more
+        - action: media_player.volume_set
+          target:
+            entity_id: "{{ repeat.item }}"
+          data:
+            volume_level: >-
+              {% set level = state_attr(repeat.item, 'volume_level') | float(0) %}
+              {% set wanted = level * after / before if before > 0 else after %}
+              {{ 0 if after == 0 else ([[wanted, 0.01 if level > 0 else 0] | max, 1] | min) | round(2) }}

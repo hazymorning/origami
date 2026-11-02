@@ -1,0 +1,271 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_fan'
+name: Fan
+show_header: false
+popup_mode: fit-content
+hide_backdrop: false
+margin: 7px
+bg_opacity: '100'
+bg_blur: '10'
+shadow_opacity: '20'
+with_bottom_offset: true
+modules:
+  - origami_base
+  - origami_popup
+origami_popup:
+  # The timer key in the header opens this mini pop-up
+  mini_popups:
+    timer:
+      # The time left, or Off
+      - type: custom:bubble-card
+        card_type: separator
+        name: Timer
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+        sub_button:
+          main:
+            - entity: timer.bedroom_fan
+              show_name: true
+              show_icon: false
+              show_background: false
+              origami_header:
+                name: >-
+                  ${state === 'idle' ? 'Off' : (m => (m >= 60 ? Math.floor(m / 60) + ':' +
+                  String(m % 60).padStart(2, '0') : num(m, 0, 'minute')) + ' left')(minutesUntil(entity))}
+              tap_action:
+                action: none
+      # Each button starts the timer for that long, and Off cancels it. When the timer finishes, the automation turns the fan off.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          segmented: true
+          label_size: normal
+          padding: var(--ha-space-2) 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Timer
+              group:
+                - entity: timer.bedroom_fan
+                  name: 'Off'
+                  show_name: true
+                  show_icon: false
+                  origami_button:
+                    'on': ${state === 'idle'}
+                  tap_action:
+                    action: perform-action
+                    perform_action: timer.cancel
+                    target:
+                      entity_id: timer.bedroom_fan
+                - entity: timer.bedroom_fan
+                  name: 1 h
+                  show_name: true
+                  show_icon: false
+                  origami_button:
+                    'on': ${state === 'active' && attr.duration === '1:00:00'}
+                  tap_action:
+                    action: perform-action
+                    perform_action: timer.start
+                    target:
+                      entity_id: timer.bedroom_fan
+                    data:
+                      duration: '01:00:00'
+                - entity: timer.bedroom_fan
+                  name: 3 h
+                  show_name: true
+                  show_icon: false
+                  origami_button:
+                    'on': ${state === 'active' && attr.duration === '3:00:00'}
+                  tap_action:
+                    action: perform-action
+                    perform_action: timer.start
+                    target:
+                      entity_id: timer.bedroom_fan
+                    data:
+                      duration: '03:00:00'
+                - entity: timer.bedroom_fan
+                  name: 5 h
+                  show_name: true
+                  show_icon: false
+                  origami_button:
+                    'on': ${state === 'active' && attr.duration === '5:00:00'}
+                  tap_action:
+                    action: perform-action
+                    perform_action: timer.start
+                    target:
+                      entity_id: timer.bedroom_fan
+                    data:
+                      duration: '05:00:00'
+cards:
+  - type: vertical-stack
+    cards:
+      # The title, with keys for the power, the timer and closing. Power stands out while the fan runs, and the timer while it counts down.
+      - type: custom:bubble-card
+        card_type: separator
+        name: Fan
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          size: large
+          value_style: chip
+          icon_size: var(--icon-size-l)
+        sub_button:
+          main:
+            - entity: fan.bedroom
+              icon: mdi:power
+              origami_header:
+                'on': ${state === 'on'}
+              tap_action:
+                action: toggle
+            - entity: timer.bedroom_fan
+              icon: mdi:timer-outline
+              origami_header:
+                'on': ${state === 'active'}
+              tap_action:
+                action: fire-dom-event
+                mini_popup: timer
+            - icon: mdi:close
+              show_background: false
+              tap_action:
+                action: navigate
+                navigation_path: '#'
+      # The speed as the name and its level below. The icon spins at the fan's speed, and a tap on it turns the fan on or off.
+      - type: custom:bubble-card
+        card_type: button
+        button_type: state
+        entity: fan.bedroom
+        name: "{{ state_attr(entity, 'percentage') | int(0) if is_state(entity, 'on') else 0 }}%"
+        icon: mdi:fan
+        state_content: >-
+          {%- set p = state_attr(entity, 'percentage') | float(0) -%}
+          {{ state_translated(entity) if not is_state(entity, 'on') else 'Low' if p <= 34 else 'Medium' if p <= 67 else 'High' }}
+        scrolling_effect: false
+        modules:
+          - origami_base
+          - origami_fan
+        origami_base:
+          large: true
+          group: true
+        tap_action:
+          action: toggle
+        button_action:
+          tap_action:
+            action: none
+        sub_button:
+          main:
+            # The arrows set the direction, which turns the head of a Xiaomi fan a step to the side
+            - icon: mdi:chevron-left
+              tap_action:
+                action: perform-action
+                perform_action: fan.set_direction
+                target:
+                  entity_id: fan.bedroom
+                data:
+                  direction: reverse
+            # Oscillation has a key that turns it on and one that turns it off, and only one of them shows
+            - icon: mdi:arrow-left-right
+              origami_base:
+                hidden: ${attr.oscillating === true}
+              tap_action:
+                action: perform-action
+                perform_action: fan.oscillate
+                target:
+                  entity_id: fan.bedroom
+                data:
+                  oscillating: true
+            - icon: mdi:arrow-left-right
+              origami_base:
+                hidden: ${attr.oscillating !== true}
+                'on': ${state === 'on'}
+              tap_action:
+                action: perform-action
+                perform_action: fan.oscillate
+                target:
+                  entity_id: fan.bedroom
+                data:
+                  oscillating: false
+            - icon: mdi:chevron-right
+              tap_action:
+                action: perform-action
+                perform_action: fan.set_direction
+                target:
+                  entity_id: fan.bedroom
+                data:
+                  direction: forward
+          bottom:
+            - entity: fan.bedroom
+              sub_button_type: slider
+              always_visible: true
+              slider_value_position: hidden
+        rows: '2.2'
+      # Two presets and three speeds. A button is filled while the fan has its preset or its speed.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          segmented: true
+          icon_size: var(--icon-size-m)
+          padding: var(--ha-space-2) 0
+        sub_button:
+          main: []
+          bottom:
+            # The presets need the names that the fan's preset_modes attribute lists
+            - name: Mode
+              group:
+                - name: Breeze
+                  icon: mdi:leaf
+                  tap_action:
+                    action: perform-action
+                    perform_action: fan.set_preset_mode
+                    target:
+                      entity_id: fan.bedroom
+                    data:
+                      preset_mode: Nature
+                - name: Normal
+                  icon: mdi:weather-windy
+                  tap_action:
+                    action: perform-action
+                    perform_action: fan.set_preset_mode
+                    target:
+                      entity_id: fan.bedroom
+                    data:
+                      preset_mode: Normal
+            - name: Speed
+              group:
+                - name: '1'
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: fan.set_percentage
+                    target:
+                      entity_id: fan.bedroom
+                    data:
+                      percentage: 33
+                - name: '2'
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: fan.set_percentage
+                    target:
+                      entity_id: fan.bedroom
+                    data:
+                      percentage: 66
+                - name: '3'
+                  show_name: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: fan.set_percentage
+                    target:
+                      entity_id: fan.bedroom
+                    data:
+                      percentage: 100

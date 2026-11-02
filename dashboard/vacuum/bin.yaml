@@ -1,0 +1,15 @@
+alias: Vacuum bin
+description: Counts the runs since the vacuum's bin was emptied, for the bin in the vacuum pop-up.
+triggers:
+  - trigger: state
+    entity_id: vacuum.robot
+    from:
+      - cleaning
+      - returning
+    to: docked
+conditions: []
+actions:
+  - action: counter.increment
+    target:
+      entity_id: counter.vacuum_bin
+mode: single

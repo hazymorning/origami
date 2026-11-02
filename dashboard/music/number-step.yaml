@@ -1,0 +1,25 @@
+alias: Number step
+description: Moves a number up or down by its own step, within its range.
+mode: queued
+fields:
+  entity:
+    description: The number
+    example: number.living_room_subwoofer_level
+    selector:
+      entity:
+        domain: number
+  steps:
+    description: How many steps to move, such as 1 or -1
+    example: 1
+    selector:
+      number:
+        min: -10
+        max: 10
+sequence:
+  - action: number.set_value
+    target:
+      entity_id: "{{ entity }}"
+    data:
+      value: >-
+        {% set level = states(entity) | float(0) + steps | float(0) * state_attr(entity, 'step') | float(1) %}
+        {{ [[level, state_attr(entity, 'min') | float(level)] | max, state_attr(entity, 'max') | float(level)] | min }}

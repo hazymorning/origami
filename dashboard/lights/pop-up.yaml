@@ -1,0 +1,257 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_lights'
+name: Lights
+show_header: true
+popup_mode: adaptive-dialog
+close_by_clicking_outside: true
+hide_backdrop: false
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 80px
+margin_top_desktop: 0px
+width_desktop: 500px
+bg_opacity: '100'
+bg_blur: '0'
+backdrop_blur: '10'
+shadow_opacity: '12'
+button_type: name
+show_icon: false
+with_bottom_offset: true
+performance_mode: performance
+modules:
+  - origami_base
+  - origami_popup
+origami_popup:
+  gap: var(--ha-space-4)
+sub_button:
+  main: []
+  bottom: []
+cards:
+  - type: vertical-stack
+    cards:
+      # The room, how many lamps are on and their brightness, a power button and the scenes
+      - type: custom:bubble-card
+        card_type: button
+        button_type: state
+        entity: light.living_room
+        name: Living room
+        show_icon: false
+        state_content: >-
+          {%- set n = expand(entity) | selectattr('state', 'eq', 'on') | list | count -%}
+          {%- set b = state_attr(entity, 'brightness') -%}
+          {{ 'All lamps off' if n == 0 else n ~ (' lamp on' if n == 1 else ' lamps on')
+          ~ (' · ' ~ (b / 2.55) | round | int ~ '%' if b else '') }}
+        modules:
+          - origami_base
+          - origami_button
+        origami_base:
+          large: true
+        origami_button:
+          scroll: true
+          icon_size: 0px
+          # While a lamp is on, the scene turned on last is highlighted. A scene's state is the time it was last turned on.
+          # The list has the same scenes as the buttons below.
+          active: >-
+            ${state !== 'on' ? '' : ['scene.living_room_night', 'scene.living_room_morning',
+            'scene.living_room_dinner', 'scene.living_room_evening', 'scene.living_room_movie',
+            'scene.living_room_late'].reduce((last, id) => (Date.parse(states(id)) || 0) >
+            (Date.parse(states(last)) || 0) ? id : last, '')}
+          # The row starts with the scene for the time of day, named by its css_class
+          start: >-
+            ${(h => h < 5 || h >= 23 ? 'night' : h < 17 ? 'morning' : h < 19 ? 'dinner' : h < 21 ?
+            'evening' : 'late')(new Date().getHours())}
+        button_action:
+          tap_action:
+            action: none
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main:
+            - icon: mdi:power
+              show_background: true
+              tap_action:
+                action: toggle
+          bottom:
+            - name: Scenes
+              group:
+                - name: Night
+                  icon: mdi:weather-night
+                  css_class: night
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_night
+                - name: Morning
+                  icon: mdi:weather-sunset-up
+                  css_class: morning
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_morning
+                - name: Dinner
+                  icon: mdi:silverware-fork-knife
+                  css_class: dinner
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_dinner
+                - name: Evening
+                  icon: mdi:weather-sunset-down
+                  css_class: evening
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_evening
+                - name: Movie
+                  icon: mdi:movie-open-outline
+                  css_class: movie
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_movie
+                - name: Late
+                  icon: mdi:weather-night-partly-cloudy
+                  css_class: late
+                  show_name: true
+                  content_layout: icon-top
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_late
+        # Each scene button shows a circle in the colors of its css_class below, or in gray for a css_class without colors
+        styles: |-
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
+            width: 92px !important;
+            border-radius: var(--ha-card-border-radius) !important;
+          }
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+            display: flex !important;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--scene, var(--fill-loud));
+          }
+          .night {
+            --scene: linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55);
+          }
+          .morning {
+            --scene: linear-gradient(135deg, #f3e6cc, #e6c68a 50%, #a9c0cc);
+          }
+          .dinner {
+            --scene: linear-gradient(135deg, #e6c68a, #c48f55 50%, #ae6e55);
+          }
+          .evening {
+            --scene: linear-gradient(135deg, #e6c68a, #c08470 50%, #8c7185);
+          }
+          .movie {
+            --scene: linear-gradient(135deg, #3a3448, #766481 50%, #a75050);
+          }
+          .late {
+            --scene: linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67);
+          }
+  - type: vertical-stack
+    cards:
+      # A tap on the header shows or hides a row for each lamp
+      - type: custom:bubble-card
+        card_type: separator
+        name: Lamps
+        modules:
+          - origami_base
+          - origami_header
+        origami_header:
+          weight: medium
+          icon_size: var(--icon-size-s)
+          title_action: true
+        sub_button:
+          main:
+            - entity: input_boolean.living_room_lamps
+              icon: mdi:chevron-right
+              content_layout: icon-right
+              show_name: true
+              show_background: false
+              origami_header:
+                # Counts the lamps of the light group that are on
+                name: >-
+                  ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
+                  states(id) === 'on').length))(hass.states['light.living_room']?.attributes?.entity_id ?? [])}
+              tap_action:
+                action: toggle
+        # The chevron turns down while the lamps show
+        styles: |-
+          ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon {
+            transition: rotate var(--duration-normal) ease;
+            rotate: ${hass.states['input_boolean.living_room_lamps']?.state === 'on' ? 90 : 0}deg;
+          }
+      # Sets all lamps of the light group at once
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.living_room
+        name: All lamps
+        show_name: true
+        show_state: false
+        show_icon: false
+        slider_value_position: right
+        tap_action:
+          action: none
+        modules:
+          - origami_base
+          - origami_slider
+        origami_slider:
+          master: true
+        rows: 1
+      # A row for each lamp. Moving a slider to the start turns the lamp off.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_slider
+        origami_base:
+          hidden: ${states('input_boolean.living_room_lamps') !== 'on'}
+        origami_slider:
+          label_width: 104px
+        sub_button:
+          main: []
+          bottom:
+            - entity: light.living_room_floor_lamp
+              name: Floor lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_string_lights
+              name: String lights
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_tv
+              name: TV light
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_table_lamp
+              name: Table lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_ceiling
+              name: Ceiling
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true

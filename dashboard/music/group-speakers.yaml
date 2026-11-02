@@ -1,0 +1,76 @@
+alias: Group speakers
+description: Adds a speaker to the group of the selected speaker or takes it out, adds every free speaker, or ends the group.
+mode: queued
+fields:
+  speaker:
+    description: The dropdown helper that selects the speaker, or a speaker
+    example: input_select.selected_speaker
+    selector:
+      entity:
+        domain:
+          - input_select
+          - media_player
+  member:
+    description: The speaker to add to the group or to take out. For the group's leader, the selected speaker leaves the group instead.
+    example: media_player.bedroom
+    selector:
+      entity:
+        domain: media_player
+  all:
+    description: Adds every speaker of the helper that plays nothing and uses no input, such as the TV
+    example: true
+    selector:
+      boolean: {}
+  ungroup:
+    description: Ends the group, so each speaker plays on its own
+    example: true
+    selector:
+      boolean: {}
+sequence:
+  - variables:
+      selected: "{{ states(speaker) if speaker.startswith('input_select.') else speaker }}"
+      leader: "{{ (state_attr(selected, 'group_members') or [selected])[0] }}"
+      members: "{{ state_attr(leader, 'group_members') or [leader] }}"
+  - choose:
+      - alias: End the group
+        conditions: "{{ ungroup | default(false) and members | count > 1 }}"
+        sequence:
+          - action: media_player.unjoin
+            target:
+              entity_id: "{{ members[1:] }}"
+      - alias: Add every free speaker
+        conditions: "{{ all | default(false) }}"
+        sequence:
+          - variables:
+              free: >-
+                {% set ns = namespace(free=[]) %}
+                {% for s in state_attr(speaker, 'options') or [] %}
+                  {% if s not in members
+                     and states(s) not in ['playing', 'buffering', 'unavailable', 'unknown']
+                     and (state_attr(s, 'source') or '') is not search('bluetooth|optical|coax|hdmi|line|aux', ignorecase=true) %}
+                    {% set ns.free = ns.free + [s] %}
+                  {% endif %}
+                {% endfor %}
+                {{ ns.free }}
+          - if: "{{ free | count > 0 }}"
+            then:
+              - action: media_player.join
+                target:
+                  entity_id: "{{ leader }}"
+                data:
+                  group_members: "{{ free }}"
+      - alias: Take the speaker out
+        conditions: "{{ member is defined and member in members }}"
+        sequence:
+          - action: media_player.unjoin
+            target:
+              entity_id: "{{ selected if member == leader else member }}"
+      - alias: Add the speaker
+        conditions: "{{ member is defined }}"
+        sequence:
+          - action: media_player.join
+            target:
+              entity_id: "{{ leader }}"
+            data:
+              group_members:
+                - "{{ member }}"

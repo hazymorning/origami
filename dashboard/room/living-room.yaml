@@ -1,0 +1,474 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_living_room'
+name: Living room
+button_type: name
+show_icon: false
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 22px
+margin_top_desktop: 30%
+bg_opacity: '100'
+shadow_opacity: '12'
+modules:
+  - origami_base
+  - origami_popup
+origami_popup:
+  # The arrow on All opens a slider for each lamp and the scenes over the pop-up
+  mini_popups:
+    lamps:
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: light.living_room_floor_lamp
+        name: Floor lamp
+        icon: mdi:floor-lamp
+        modules:
+          - origami_base
+        origami_base:
+          compact: true
+          tile: true
+        sub_button:
+          main:
+            - sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+        rows: 1
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: light.living_room_string_lights
+        name: String lights
+        icon: mdi:string-lights
+        modules:
+          - origami_base
+        origami_base:
+          compact: true
+          tile: true
+        sub_button:
+          main:
+            - sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+        rows: 1
+      # The scene that was turned on last is highlighted until the lamps are turned off
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          columns: 2
+          active: >-
+            ${(() => {
+              const lamps = hass.states['light.living_room'];
+              const since = lamps?.state === 'on' ? Date.parse(lamps.last_changed) - 10000 : Infinity;
+              return ['scene.living_room_evening', 'scene.living_room_late', 'scene.living_room_night', 'scene.living_room_dinner']
+                .filter((id) => Date.parse(states(id)) >= since)
+                .sort((a, b) => Date.parse(states(b)) - Date.parse(states(a)))[0] ?? '';
+            })()}
+        sub_button:
+          main: []
+          bottom:
+            - name: Evening
+              icon: mdi:weather-sunset-down
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_evening
+            - name: Late
+              icon: mdi:weather-night-partly-cloudy
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_late
+            - name: Night
+              icon: mdi:weather-night
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_night
+            - name: Dinner
+              icon: mdi:silverware-fork-knife
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_dinner
+cards:
+  - type: vertical-stack
+    cards:
+      # Media: the TV card shows while the speaker plays the TV's sound, and the speaker card at other times
+      - type: vertical-stack
+        cards:
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: media_player.living_room
+                attribute: source
+                state: Optical In
+            card:
+              type: custom:bubble-card
+              card_type: media-player
+              button_type: state
+              entity: media_player.living_room_tv
+              name: TV
+              icon: mdi:television
+              modules:
+                - origami_base
+                - origami_media
+              origami_media:
+                layout: tv
+                players:
+                  - media_player.living_room_tv_cast
+              hide:
+                power_button: true
+                previous_button: true
+                next_button: true
+                volume_button: true
+                play_pause_button: true
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_tv'
+              button_action:
+                tap_action:
+                  action: navigate
+                  navigation_path: '#popup_tv'
+              sub_button:
+                main:
+                  - icon: mdi:power
+                    show_background: true
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.toggle
+                      target:
+                        entity_id: media_player.living_room_tv
+                # The volume of the speaker that plays the TV's sound
+                bottom:
+                  - entity: media_player.living_room
+                    sub_button_type: slider
+                    always_visible: true
+              rows: '2.2'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: media_player.living_room
+                attribute: source
+                state_not: Optical In
+            card:
+              type: custom:bubble-card
+              card_type: media-player
+              button_type: state
+              entity: media_player.living_room
+              name: Speaker
+              icon: mdi:speaker
+              modules:
+                - origami_base
+                - origami_media
+              origami_base:
+                group: true
+              # The cover shows in the icon and tints the card
+              origami_media:
+                cover:
+                  - background
+                  - icon
+                cover_mix: 10
+              hide:
+                power_button: true
+                previous_button: true
+                next_button: true
+                volume_button: true
+                play_pause_button: true
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_music'
+              button_action:
+                tap_action:
+                  action: navigate
+                  navigation_path: '#popup_music'
+              sub_button:
+                main:
+                  - icon: mdi:play
+                    show_background: true
+                    origami_base:
+                      icon: "${state === 'playing' ? 'mdi:pause' : ''}"
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.living_room
+                  - icon: mdi:skip-next
+                    show_background: false
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_next_track
+                      target:
+                        entity_id: media_player.living_room
+                  # Filled while the speaker uses Bluetooth, because the tap selects it
+                  - icon: mdi:bluetooth
+                    show_background: false
+                    origami_base:
+                      icon: "${attr.source === 'Bluetooth' ? 'mdi:bluetooth-connect' : ''}"
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.select_source
+                      target:
+                        entity_id: media_player.living_room
+                      data:
+                        source: Bluetooth
+                bottom:
+                  - entity: media_player.living_room
+                    sub_button_type: slider
+                    always_visible: true
+              rows: '2.2'
+          # A plug as a compact row with a switch
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.living_room_console
+            name: Console
+            icon: mdi:controller
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              toggle: true
+              tile: true
+            sub_button:
+              main:
+                - icon: mdi:circle
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            rows: 1
+
+      # Lights: the header counts the lamps of the group that are on, and All switches them together
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Lights
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-s)
+            sub_button:
+              main:
+                - entity: light.living_room
+                  icon: mdi:chevron-right
+                  show_name: true
+                  content_layout: icon-right
+                  show_background: false
+                  origami_header:
+                    name: >-
+                      ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
+                      states(id) === 'on').length))(attr.entity_id ?? [])}
+                  tap_action:
+                    action: navigate
+                    navigation_path: '#popup_lights'
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.living_room
+            name: All
+            icon: mdi:lightbulb-multiple
+            modules:
+              - origami_base
+            origami_base:
+              tile: true
+            button_action:
+              tap_action:
+                action: more-info
+            sub_button:
+              main:
+                - icon: mdi:chevron-down
+                  show_background: true
+                  tap_action:
+                    action: fire-dom-event
+                    mini_popup: lamps
+                - icon: mdi:power
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            state_content:
+              - state
+              - brightness
+            rows: 1.375
+
+      # Climate: the header shows the temperature and the humidity, with a dot in a color for the temperature
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Climate
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-2xs)
+            sub_button:
+              main:
+                # Without the humidity, the value shows the temperature in Home Assistant's words
+                - entity: sensor.living_room_temperature
+                  icon: mdi:circle
+                  show_state: true
+                  show_background: false
+                  origami_header:
+                    name: ${num(state, 1)}° / ${num(states('sensor.living_room_humidity'), 0, '%')}
+                    # Blue up to 17°, green up to 22°, then yellow and orange, and red above 30°
+                    color: >-
+                      ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+                      [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
+                      [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
+                      [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
+                      .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+          # The fan card hides while the fan is unavailable, such as when it is unplugged
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: fan.living_room
+                state_not:
+                  - unavailable
+                  - unknown
+            card:
+              type: custom:bubble-card
+              card_type: button
+              button_type: switch
+              entity: fan.living_room
+              name: Fan
+              icon: mdi:fan
+              modules:
+                - origami_base
+                - origami_fan
+              origami_base:
+                group: true
+                tile: true
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_fan'
+              button_action:
+                tap_action:
+                  action: navigate
+                  navigation_path: '#popup_fan'
+              sub_button:
+                main:
+                  - icon: mdi:power
+                    show_background: true
+                    tap_action:
+                      action: toggle
+                  - name: '1'
+                    show_icon: false
+                    show_name: true
+                    show_background: false
+                    tap_action:
+                      action: perform-action
+                      perform_action: fan.set_percentage
+                      target:
+                        entity_id: fan.living_room
+                      data:
+                        percentage: 33
+                  - name: '2'
+                    show_icon: false
+                    show_name: true
+                    show_background: false
+                    tap_action:
+                      action: perform-action
+                      perform_action: fan.set_percentage
+                      target:
+                        entity_id: fan.living_room
+                      data:
+                        percentage: 66
+                  - name: '3'
+                    show_icon: false
+                    show_name: true
+                    show_background: false
+                    tap_action:
+                      action: perform-action
+                      perform_action: fan.set_percentage
+                      target:
+                        entity_id: fan.living_room
+                      data:
+                        percentage: 100
+              state_content:
+                - state
+                - percentage
+              rows: 1.375
+          # Minus and plus move the target by half a degree, and a tap on the card opens the thermostat
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: climate.living_room
+            name: Heating
+            icon: mdi:thermostat
+            modules:
+              - origami_base
+              - origami_climate
+            origami_base:
+              group: true
+              tile: true
+            button_action:
+              tap_action:
+                action: more-info
+            sub_button:
+              main:
+                - icon: mdi:minus
+                  show_background: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.thermostat_step
+                    data:
+                      thermostat: climate.living_room
+                      step: -0.5
+                - entity: climate.living_room
+                  css_class: readout
+                  show_icon: false
+                  show_name: false
+                  show_background: false
+                  state_content: temperature
+                - icon: mdi:plus
+                  show_background: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.thermostat_step
+                    data:
+                      thermostat: climate.living_room
+                      step: 0.5
+            rows: 1.375
+
+      # Everything off turns off the lamps, the TV, the console and the fan. The thermostat keeps its setting.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          muted: true
+          icon_size: var(--icon-size-xs)
+          padding: var(--ha-space-6) 0 100px 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Everything off
+              icon: mdi:power
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: homeassistant.turn_off
+                target:
+                  entity_id:
+                    - light.living_room
+                    - media_player.living_room_tv
+                    - switch.living_room_console
+                    - fan.living_room
