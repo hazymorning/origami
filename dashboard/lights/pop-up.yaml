@@ -24,6 +24,44 @@ modules:
   - origami_popup
 origami_popup:
   gap: var(--ha-space-4)
+  mini_popups:
+    lamps:
+      # A row for each lamp. Moving a slider to the start turns the lamp off.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_slider
+        origami_slider:
+          label_width: 104px
+        sub_button:
+          main: []
+          bottom:
+            - entity: light.living_room_floor_lamp
+              name: Floor lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_string_lights
+              name: String lights
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_tv
+              name: TV light
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_table_lamp
+              name: Table lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_ceiling
+              name: Ceiling
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
 sub_button:
   main: []
   bottom: []
@@ -168,7 +206,7 @@ cards:
           }
   - type: vertical-stack
     cards:
-      # A tap on the header shows or hides a row for each lamp
+      # A tap on the header opens a row for each lamp over the pop-up
       - type: custom:bubble-card
         card_type: separator
         name: Lamps
@@ -181,8 +219,7 @@ cards:
           title_action: true
         sub_button:
           main:
-            - entity: input_boolean.living_room_lamps
-              icon: mdi:chevron-right
+            - icon: mdi:chevron-right
               content_layout: icon-right
               show_name: true
               show_background: false
@@ -192,13 +229,8 @@ cards:
                   ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
                   states(id) === 'on').length))(hass.states['light.living_room']?.attributes?.entity_id ?? [])}
               tap_action:
-                action: toggle
-        # The chevron turns down while the lamps show
-        styles: |-
-          ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon {
-            transition: rotate var(--duration-normal) ease;
-            rotate: ${hass.states['input_boolean.living_room_lamps']?.state === 'on' ? 90 : 0}deg;
-          }
+                action: fire-dom-event
+                mini_popup: lamps
       # Sets all lamps of the light group at once
       - type: custom:bubble-card
         card_type: button
@@ -217,41 +249,3 @@ cards:
         origami_slider:
           master: true
         rows: 1
-      # A row for each lamp. Moving a slider to the start turns the lamp off.
-      - type: custom:bubble-card
-        card_type: sub-buttons
-        modules:
-          - origami_base
-          - origami_slider
-        origami_base:
-          hidden: ${states('input_boolean.living_room_lamps') !== 'on'}
-        origami_slider:
-          label_width: 104px
-        sub_button:
-          main: []
-          bottom:
-            - entity: light.living_room_floor_lamp
-              name: Floor lamp
-              sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-            - entity: light.living_room_string_lights
-              name: String lights
-              sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-            - entity: light.living_room_tv
-              name: TV light
-              sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-            - entity: light.living_room_table_lamp
-              name: Table lamp
-              sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-            - entity: light.living_room_ceiling
-              name: Ceiling
-              sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
