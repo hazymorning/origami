@@ -158,10 +158,11 @@ Origami:
   state-person-not_home-color: 'var(--secondary-text-color)'
   state-alarm_control_panel-disarmed-color: 'var(--accent-color)'
 
-  # Status colors, and the tint behind a colored icon, which mixes the icon's color into the card background
+  # Status colors, a fill in the error color for a bar that runs too high, and the tint behind a colored icon, which mixes the icon's color into the card background
   success-color: 'var(--green-color)'
   warning-color: 'var(--orange-color)'
   error-color: 'var(--red-color)'
+  error-fill: 'color-mix(in srgb, var(--error-color) var(--fill-strength), var(--ha-card-background))'
   tint: 'color-mix(in srgb, currentColor var(--tint-strength), var(--ha-card-background))'
 
   # Short names for state colors, which some cards use
