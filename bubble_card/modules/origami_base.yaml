@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.7.1"
+  version: "13.7.2"
   is_global: true
   supported:
     - button
@@ -140,8 +140,22 @@ origami_base:
       };
       // power() tells whether a device is switched on. It is null while the device has no answer, and false while it is off or in standby.
       const power = (st) => !st || silent(st.state) ? null : !["off", "standby"].includes(st.state);
+      // memoOf() keeps what Base reads from a sub_button object for the whole page, such as its list of sub-buttons. It holds while the object's main and bottom lists stay the same, because Bubble Card's editor can put a new list on the same object.
+      const itemsMemo = globalThis.__origamiItems ?? (globalThis.__origamiItems = new WeakMap());
+      const memoOf = (sb) => {
+        if (!sb || typeof sb !== "object") return null;
+        let memo = itemsMemo.get(sb);
+        if (!memo || memo.main !== sb.main || memo.bottom !== sb.bottom || memo.n !== sb.length) itemsMemo.set(sb, memo = { main: sb.main, bottom: sb.bottom, n: sb.length });
+        return memo;
+      };
       // items() lists the sub-buttons in Bubble Card's numbering. Groups come first, and a sub-buttons card has no main sub-buttons.
       const items = (cfg) => {
+        const memo = memoOf(cfg.sub_button);
+        if (!memo) return [];
+        const kind = cfg.card_type === "sub-buttons" ? "s" : "o";
+        return memo[kind] ?? (memo[kind] = items0(cfg));
+      };
+      const items0 = (cfg) => {
         const sb = cfg.sub_button;
         const flat = (list) => [
           ...list.filter((i) => Array.isArray(i?.group)).flatMap((i) => i.group.filter(Boolean)),
@@ -193,7 +207,8 @@ origami_base:
       const fill = (strings, ...values) => values.some((v) => v === null || v === undefined || v === false || v === "" || v === "unavailable" || v === "unknown" || Number.isNaN(v))
         ? ""
         : strings.reduce((out, s, i) => out + s + (i < values.length ? values[i] : ""), "");
-      const fns = card._orgFns ?? (card._orgFns = new Map());
+      // A template is compiled once for the whole page, because Bubble Card builds the cards of a pop-up again each time it opens
+      const fns = globalThis.__origamiFns ?? (globalThis.__origamiFns = new Map());
       // num() writes a number the way the user's profile in Home Assistant asks for. Without digits, it keeps the number's own decimals.
       const formats = { comma_decimal: "en-US", decimal_comma: "de", quote_decimal: "de-CH", space_comma: "fr", none: "en-US" };
       // Home Assistant puts a space before a percent sign only in these languages (blank_before_percent.ts)
@@ -232,6 +247,7 @@ origami_base:
           } catch (e) {
             fn = () => "";
           }
+          if (fns.size > 4000) fns.clear();
           fns.set(v, fn);
         }
         const states = (id) => env.hass.states[id]?.state ?? "unknown";
@@ -275,7 +291,18 @@ origami_base:
         return v === undefined && off && silent(String(key).toLowerCase()) ? find("off") : v;
       };
       // slug() turns a text into a class name, the way Bubble Card turns a sub-button's name or css_class into one
-      const slug = (v) => ["string", "number"].includes(typeof v) ? String(v).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : "";
+      // slug() and str() remember their results for the whole page, because the same names and texts come back on every pass
+      const slugs = globalThis.__origamiSlugs ?? (globalThis.__origamiSlugs = new Map());
+      const slug = (v) => {
+        if (!["string", "number"].includes(typeof v)) return "";
+        const k = String(v);
+        let out = slugs.get(k);
+        if (out === undefined) {
+          if (slugs.size > 2000) slugs.clear();
+          slugs.set(k, out = k.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""));
+        }
+        return out;
+      };
       const value = (env, option, ctx) => {
         if (option === undefined || option === null) return "";
         if (typeof option === "object" && !Array.isArray(option)) {
@@ -286,7 +313,16 @@ origami_base:
       };
       const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
       // Bubble Card cleans the CSS text, so every character that it could change is escaped
-      const str = (v) => '"' + String(v).trim().replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"';
+      const strs = globalThis.__origamiStrs ?? (globalThis.__origamiStrs = new Map());
+      const str = (v) => {
+        const k = String(v);
+        let out = strs.get(k);
+        if (out === undefined) {
+          if (strs.size > 2000) strs.clear();
+          strs.set(k, out = '"' + k.trim().replace(/[^\p{L}\p{N}%°.:|+-]/gu, (c) => "\\" + c.codePointAt(0).toString(16).padStart(6, "0")) + '"');
+        }
+        return out;
+      };
       // Home Assistant's own words come first. Where they are too long for a card, the core keeps a shorter word for that language, and the card's words option wins over both.
       const short = {
         de: {
@@ -348,22 +384,40 @@ origami_base:
         const a = act(item);
         return list(a.target?.entity_id ?? (a.data ?? a.service_data)?.entity_id);
       };
-      const matches = (hass, item, entity) => {
+      // plan() reads once for each sub-button what its tap sets, and matches() keeps each answer with the state it read, because Home Assistant gives a state that changes a new object
+      const plans = globalThis.__origamiPlans ?? (globalThis.__origamiPlans = new WeakMap());
+      const answers = globalThis.__origamiAnswers ?? (globalThis.__origamiAnswers = new WeakMap());
+      const plan = (item) => {
+        if (plans.has(item)) return plans.get(item);
         const a = act(item);
-        if (!["perform-action", "call-service"].includes(a.action)) return null;
-        const data = a.data ?? a.service_data ?? {};
-        const fixed = (v) => ["string", "number", "boolean"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v));
-        // An app button plays the app's ID, which an Android TV reports as app_id
-        const app = service(item) === "media_player.play_media" && String(data.media_content_type ?? "").toLowerCase() === "app" && fixed(data.media_content_id);
-        const used = app ? [] : Object.keys(keys).filter((k) => fixed(data[k]));
-        if (!app && !used.length) return null;
-        const target = a.target ?? {};
-        const ids = targets(item);
-        // A tap that targets an area, a device, a floor or a label has no single entity to compare with
-        if (!ids.length && ["area_id", "device_id", "floor_id", "label_id"].some((k) => target[k] ?? data[k])) return null;
+        let out = null;
+        if (["perform-action", "call-service"].includes(a.action)) {
+          const data = a.data ?? a.service_data ?? {};
+          const fixed = (v) => ["string", "number", "boolean"].includes(typeof v) && !/\{(\{|%)|\$\{/.test(String(v));
+          const app = service(item) === "media_player.play_media" && String(data.media_content_type ?? "").toLowerCase() === "app" && fixed(data.media_content_id);
+          const used = app ? [] : Object.keys(keys).filter((k) => fixed(data[k]));
+          const target = a.target ?? {};
+          const ids = targets(item);
+          if ((app || used.length) && !(!ids.length && ["area_id", "device_id", "floor_id", "label_id"].some((k) => target[k] ?? data[k]))) out = { data, app, used, ids };
+        }
+        plans.set(item, out);
+        return out;
+      };
+      const matches = (hass, item, entity) => {
+        const p = plan(item);
+        if (!p) return null;
+        const { data, app, used, ids } = p;
         const id = ids[0] ?? entity;
         const st = hass.states[id === "entity" ? entity : id];
         if (!st || silent(st.state)) return false;
+        const seen = answers.get(st) ?? new WeakMap();
+        if (seen.has(item)) return seen.get(item);
+        answers.set(st, seen);
+        const r = matches0(st, app, used, data);
+        seen.set(item, r);
+        return r;
+      };
+      const matches0 = (st, app, used, data) => {
         const at = st.attributes ?? {};
         if (app) return String(at.app_id ?? "").toLowerCase() === String(data.media_content_id).trim().toLowerCase();
         return used.every((k) => {
@@ -604,10 +658,13 @@ origami_base:
           st.pend.forEach((p, n) => {
             if (on.includes(n) !== p.was || Date.now() > p.until || !wait.includes(n)) st.pend.delete(n);
           });
-          card.querySelectorAll(".bubble-sub-button-bottom-container :is(.org-pending-on, .org-pending-off)").forEach((el) => mark(el, null));
-          st.pend.forEach((p, n) => mark(at(n), p));
+          if (st.pend.size || st.marked) {
+            card.querySelectorAll(".bubble-sub-button-bottom-container :is(.org-pending-on, .org-pending-off)").forEach((el) => mark(el, null));
+            st.pend.forEach((p, n) => mark(at(n), p));
+            st.marked = st.pend.size > 0;
+          }
           // Bubble Card runs a tap through a hass-action event, so a tap on a sub-button marks it there
-          if (!st.listen) {
+          if (!st.listen && wait.length) {
             st.listen = true;
             card.addEventListener("hass-action", (e) => {
               const el = e.composedPath().find((x) => x.classList?.contains("bubble-sub-button"));
@@ -615,6 +672,7 @@ origami_base:
               if (e.detail?.action !== "tap" || !st.wait.includes(n)) return;
               const p = { was: st.on.includes(n), until: Date.now() + 10000 };
               st.pend.set(n, p);
+              st.marked = true;
               mark(el, p);
               setTimeout(() => { if (st.pend.get(n) === p) { st.pend.delete(n); mark(el, null); } }, 10000);
             });
@@ -626,17 +684,29 @@ origami_base:
         }),
         // layout() gives the number of main sub-buttons, which Bubble Card numbers first, and the bottom row's entries in the YAML's order: each group with its name and its sub-buttons' numbers, and each single sub-button with its number. Bubble Card numbers the grouped sub-buttons before the single ones.
         layout: (cfg) => {
+          const memo = memoOf(cfg.sub_button);
+          const kind = "l" + (cfg.card_type === "sub-buttons" ? "s" : "o");
+          if (memo?.[kind]) return memo[kind];
           const sb = cfg.sub_button;
           const bottom = (Array.isArray(sb) ? [] : sb?.bottom ?? []).filter(Boolean).map((x) => Array.isArray(x.group) ? { name: x.name, group: x.group.filter(Boolean) } : { item: x });
           let g = items(cfg).length - bottom.reduce((a, x) => a + (x.group ? x.group.length : 1), 0);
           let l = g + bottom.reduce((a, x) => a + (x.group?.length ?? 0), 0);
           const mains = g;
-          return { mains, bottom: bottom.map((x) => x.group ? { name: x.name, group: true, n: x.group.map(() => ++g) } : { group: false, n: [++l] }) };
+          const out = { mains, bottom: bottom.map((x) => x.group ? { name: x.name, group: true, n: x.group.map(() => ++g) } : { group: false, n: [++l] }) };
+          if (memo) memo[kind] = out;
+          return out;
         },
         // classed() returns the sub-buttons with this css_class by their numbers, because Bubble Card also turns a name such as Play into a class
-        classed: (cfg, cls) => items(cfg).map((item, i) => slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean),
+        classed: (cfg, cls) => {
+          const memo = memoOf(cfg.sub_button);
+          const kind = "c" + (cfg.card_type === "sub-buttons" ? "s" : "o") + cls;
+          if (memo?.[kind]) return memo[kind];
+          const out = items(cfg).map((item, i) => slug(item.css_class) === cls ? ".bubble-sub-button-" + (i + 1) : null).filter(Boolean);
+          if (memo) memo[kind] = out;
+          return out;
+        },
         // dropdown() tells whether a sub-button is a dropdown: it has sub_button_type: select, or it has no type and its entity is a select or an input_select, or it has a select_attribute
-        dropdown: ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (["input_select", "select"].includes(String(id ?? "").split(".")[0]) || !!item.select_attribute)),
+        dropdown: ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (/^(input_)?select\./.test(String(id ?? "")) || !!item.select_attribute)),
         // menu() returns the rules that show the menus of the dropdowns in scope as the rows of a list. Bubble Card gives the menu 8 px of padding, and a row's corners follow the menu's corners less that padding. A row is as tall as a button, and an icon in it sits in the middle of a square as tall as the row, so its space to the row's start is the same as above and below it. The name follows 12 px after the icon, as in a slim list, and ends 12 px before the row's end. The menu is as wide as its longest row, so it has no empty space after the names. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
         menu: (scope) => [scope + " { --bubble-select-list-item-accent-color: var(--fill-active); --bubble-select-list-width: 0px; }",
           scope + " :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
@@ -969,7 +1039,7 @@ origami_base:
         transform: translateY(10px);
       }
     }` : ""}
-    ha-card {
+    ${this.config.card_type === "pop-up" ? "" : `ha-card {
       /* A slider in a row with a name before it, as in Slider's rows and a list of compact cards, is a little lower than a key, so the name keeps its weight and two rows' sliders stand 12 px apart */
       --org-row-slider-h: var(--ha-space-7, 28px);
       --org-toggle-w: calc(var(--tile-size) + var(--ha-space-2));
@@ -980,7 +1050,7 @@ origami_base:
       /* Every line that divides, such as between the rows of a list or the segments of a bar, has this width and color */
       --org-line-width: 2px;
       --org-line-color: var(--fill-strong);
-    }
+    }`}
     ${card._org.fills === null ? "" : `
     ha-card {
       --bubble-sub-slider-height: var(--org-sub-h, var(--control-height-mini));
@@ -1146,7 +1216,7 @@ origami_base:
       color: var(--primary-text-color) !important;
     }
     ${card._org.opts.frame ? `
-    .org-group-badge {
+    ${[].concat(this.config.modules ?? []).some((m) => ["origami_media", "origami_speaker"].includes(m)) ? `.org-group-badge {
       position: absolute;
       top: -3px;
       inset-inline-end: -3px;
@@ -1168,7 +1238,7 @@ origami_base:
       align-items: center;
       justify-content: center;
       line-height: 0;
-    }
+    }` : ""}
     .card-content {
       display: flex;
       align-items: center;
@@ -1609,12 +1679,19 @@ origami_base:
       const auto = 'ha-card:not([data-org-fill="own"])';
       // The pill switches are filled while their entity is on. Otherwise, why() decides for each sub-button, and under the icon only accent fills.
       const sel = org.opts.toggle ? [...org.pills] : [];
+      // On a button card, Button styles the bottom sub-buttons, so only the main ones get Base's fill
+      const mine = this.config.card_type !== "sub-buttons" && [].concat(this.config.modules ?? []).includes("origami_button") ? org.layout(this.config).mains : Infinity;
+      // The sub-buttons that fill for the same reason share one selector, so the rule stays short for Bubble Card to clean
+      const by = { set: [], accent: [], on: [] };
       if (!org.opts.toggle) card._orgSubs.forEach(({ n, item, opt }) => {
+        if (n > mine) return;
         const r = (!org.opts.vertical || org.slug(item.css_class) === "accent") && org.why(hass, item, item.entity ?? entity, opt);
-        if (!r) return;
-        const one = " .bubble-sub-button.bubble-sub-button-" + n + keep;
-        sel.push(r === "set" ? "ha-card" + one : r === "accent" ? "ha-card" + one + ".accent:is(.background-on, .background-off)" : auto + one + ":is(.background-on, .background-off)");
+        if (r) by[r].push(".bubble-sub-button-" + n);
       });
+      const one = (list) => " .bubble-sub-button:is(" + list.join(", ") + ")" + keep;
+      if (by.set.length) sel.push("ha-card" + one(by.set));
+      if (by.accent.length) sel.push("ha-card" + one(by.accent) + ".accent:is(.background-on, .background-off)");
+      if (by.on.length) sel.push(auto + one(by.on) + ":is(.background-on, .background-off)");
       return org.fill(sel);
     })()}
     `}

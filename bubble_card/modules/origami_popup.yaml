@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.11.0"
+  version: "4.11.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -278,9 +278,6 @@ origami_popup:
       min-width: var(--control-height-icon) !important;
       min-height: var(--control-height-icon) !important;
       margin-inline-end: 0px !important;
-    }
-    .bubble-close-icon {
-      --mdc-icon-size: 32px;
     }
     .bubble-header-action-icon svg {
       width: 32px !important;

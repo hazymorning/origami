@@ -20,7 +20,7 @@ These changes are in the `next` branch and come with the next release.
 - Options that moved or were renamed in this release still work: `compact`, `animate`, `solid_controls`, `art_entity`, `app_entity` and `subtitle_style`.
 - Base and Media read `state_content` before the older `show_state` and `show_attribute` keys, as Bubble Card 3.4 does, so a card keeps its look after Bubble Card's editor rewrites those keys, and `state_content: []` hides Media's line.
 - The card editor shows Tiles' list options only for a list, and Popup's cover mix and blur only with `art`.
-- The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
+- The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. Base compiles each template once for the whole page and remembers what it reads from a card's sub-buttons and from each state, so a pop-up that opens again does a third of the work, and Tiles and Button write only the rules that a card's rows and buttons use. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
 
 #### Base
 

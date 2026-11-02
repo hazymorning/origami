@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.14.0"
+  version: "1.14.1"
   supported:
     - button
     - sub-buttons
@@ -47,16 +47,17 @@ origami_slider:
         };
         // A name wider than its column scrolls like Bubble Card's scrolling text, at the same speed. The fonts and the column width are known only after layout, so the rows are measured in the next frame.
         org.later("slider", () => {
-          rows.forEach((r) => {
-            const el = card.querySelector(r.sel.replace(/^ha-card /, ""));
-            if (!el) return;
-            const pen = org.pen(el);
-            const room = parseFloat(pen.cs.width);
+          const found = rows.map((r) => [r, card.querySelector(r.sel.replace(/^ha-card /, ""))]).filter(([, el]) => el);
+          if (!found.length) return;
+          const pen = org.pen(found[0][1]);
+          const room = parseFloat(pen.cs.width);
+          found.forEach(([r, el]) => {
             const wide = pen.width(r.text);
             if (!(room > 0) || wide <= room + 0.5) return el.removeAttribute("data-org-scroll");
             const shift = wide + pen.width(gap);
-            el.style.setProperty("--org-name-shift", (-shift).toFixed(1) + "px");
-            el.style.setProperty("--org-name-time", Math.max(1, shift / 8).toFixed(2) + "s");
+            const set = (k, v) => { if (el.style.getPropertyValue(k) !== v) el.style.setProperty(k, v); };
+            set("--org-name-shift", (-shift).toFixed(1) + "px");
+            set("--org-name-time", Math.max(1, shift / 8).toFixed(2) + "s");
             if (!el.hasAttribute("data-org-scroll")) el.setAttribute("data-org-scroll", "");
           });
         });
@@ -237,9 +238,6 @@ origami_slider:
       --org-one-r: calc(var(--org-one-h) * var(--radius-ratio, 0.35));
       --org-row-height: var(--org-one-h);
       --bubble-border: none;
-    }
-    .large .bubble-container {
-        border: none !important;
     }
     .bubble-button-card-container,
     .bubble-container {

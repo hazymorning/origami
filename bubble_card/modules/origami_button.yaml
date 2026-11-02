@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.9.5"
+  version: "3.9.6"
   supported:
     - sub-buttons
     - button
@@ -180,7 +180,8 @@ origami_button:
         return named || r === "set" || (r !== null && !!item.entity && item.show_background !== false) ? n : 0;
       }).filter(Boolean);
       // pending shows a tapped button with the look it is about to get, at reduced opacity and without taps, until its state changes or 10 seconds pass
-      org.pending(active, subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n));
+      const waiting = subs.filter(({ n, item, opt }) => pendingOn(opt, item, n)).map(({ n }) => n);
+      org.pending(active, waiting);
       const lamp = String(org.value(env, cfg.color, ctx) ?? "").trim();
       const base = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button";
       const at = (n) => base + ".bubble-sub-button-" + n;
@@ -188,7 +189,7 @@ origami_button:
       const opts = org.opts ?? {};
       // A button without a name or a state of its own shows only its icon, and it is a square
       const bare = subs.filter(({ n, item, opt }) => !org.shows(item) && !org.has(opt?.name) && org.slug(item.css_class) !== "divider" && !inBar.includes(n)).map(({ n }) => at(n));
-      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => at(n) + ":not(.org-pending-off)"), base + ".org-pending-on"];
+      const sel = [...active.filter((n) => !inBar.includes(n)).map((n) => at(n) + (waiting.length ? ":not(.org-pending-off)" : "")), ...(waiting.length ? [base + ".org-pending-on"] : [])];
       const chips = !!cfg.chips;
       const scroll = !!cfg.scroll && !seg;
       // With labels below, each button is a large icon field with its name under it, as for scenes
@@ -221,6 +222,7 @@ origami_button:
       if (!own && card.dataset.orgFill !== "bottom") card.dataset.orgFill = "bottom";
       card._orgB = {
         own,
+        waits: waiting.length > 0,
         below,
         rings,
         order: s < 0 ? "" : seq.map((n, i) => at(n) + " { order: " + ((i - s + seq.length) % seq.length) + "; }").join("\n    "),
@@ -440,10 +442,10 @@ origami_button:
     ` + card._org.each(card._orgB.dividers, " > *") + ` {
       display: none !important;
     }` : ""}
-    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
+    ${card._orgB.waits ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
       opacity: var(--opacity-muted) !important;
       pointer-events: none !important;
-    }
+    }` : ""}
     ${card._orgB.scroll && card._orgB.own ? `/* The row reaches past the card by its padding, so the buttons scroll to the screen's edge and their shadows show. The card reaches as far and lies over the cards around it, so only the buttons take taps, and a tap beside them reaches the card below, such as a slider. A swipe on a button still scrolls the row. */
     ha-card {
       pointer-events: none;

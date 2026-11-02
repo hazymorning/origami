@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.6.0"
+  version: "3.6.1"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
@@ -178,9 +178,7 @@ origami_tiles:
       const at = (keys, end = "", start = "") => keys.split(" ").flatMap((k) => signs[k]).map((c) => start + ".bubble-sub-button" + c + end).join(", ") || ".org-none";
       // The signs are icons from Material Design Icons, drawn as masks in the text color. Only the list builds them.
       const mask = (d) => "url(" + org.str("data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='" + d + "'/></svg>")) + ")";
-      t.sign = list && {
-        at,
-        all: "open run running stop switch on check checked",
+      const masks = globalThis.__origamiSigns ?? (globalThis.__origamiSigns = {
         circle: mask("M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"),
         tick: mask("M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"),
         chevron: mask("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"),
@@ -188,6 +186,12 @@ origami_tiles:
         stop: mask("M18,18H6V6H18V18Z"),
         off: mask("M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"),
         on: mask("M17,7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7M17,15A3,3 0 0,1 14,12A3,3 0 0,1 17,9A3,3 0 0,1 20,12A3,3 0 0,1 17,15Z")
+      });
+      // rule() returns a rule for the rows with these signs, or nothing when no row shows one of them
+      const rule = (keys, end, start, body) => keys.split(" ").some((k) => signs[k].length) ? at(keys, end, start) + " { " + body + " }" : "";
+      t.sign = list && {
+        at, rule, ...masks,
+        all: "open run running stop switch on check checked",
       };
       return "";
     })()}
@@ -314,63 +318,28 @@ origami_tiles:
       pointer-events: none;
       transition: background-color var(--duration-normal) ease, opacity var(--duration-normal) ease;
     }
-    ${card._orgTi.sign.at("open", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.chevron};
-    }
-    ${card._orgTi.sign.at("open", "::after", "ha-card:dir(rtl) ")} {
-      scale: -1 1;
-    }
-    ${card._orgTi.sign.at("run running", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.play};
-    }
-    ${card._orgTi.sign.at("stop", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.stop};
-    }
-    ${card._orgTi.sign.at("switch", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.off};
-    }
-    ${card._orgTi.sign.at("on", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.on};
-    }
-    ${card._orgTi.sign.at("check", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.circle};
-    }
-    ${card._orgTi.sign.at("checked", "::after")} {
-      --org-sign-icon: ${card._orgTi.sign.tick};
-    }
-    ${card._orgTi.sign.at("running stop on checked", "::after")} {
-      background-color: var(--primary-text-color);
-      opacity: 1;
-    }
+    ${card._orgTi.sign.rule("open", "::after", "", `--org-sign-icon: ${card._orgTi.sign.chevron};`)}
+    ${card._orgTi.sign.rule("open", "::after", "ha-card:dir(rtl) ", `scale: -1 1;`)}
+    ${card._orgTi.sign.rule("run running", "::after", "", `--org-sign-icon: ${card._orgTi.sign.play};`)}
+    ${card._orgTi.sign.rule("stop", "::after", "", `--org-sign-icon: ${card._orgTi.sign.stop};`)}
+    ${card._orgTi.sign.rule("switch", "::after", "", `--org-sign-icon: ${card._orgTi.sign.off};`)}
+    ${card._orgTi.sign.rule("on", "::after", "", `--org-sign-icon: ${card._orgTi.sign.on};`)}
+    ${card._orgTi.sign.rule("check", "::after", "", `--org-sign-icon: ${card._orgTi.sign.circle};`)}
+    ${card._orgTi.sign.rule("checked", "::after", "", `--org-sign-icon: ${card._orgTi.sign.tick};`)}
+    ${card._orgTi.sign.rule("running stop on checked", "::after", "", `background-color: var(--primary-text-color); opacity: 1;`)}
     /* A row with a check is a choice, and its state is a quiet hint next to the check */
-    ${card._orgTi.sign.at("check checked", " .bubble-sub-button-name-container::after")} {
-      font-weight: var(--ha-font-weight-normal);
-    }
+    ${card._orgTi.sign.rule("check checked", " .bubble-sub-button-name-container::after", "", `font-weight: var(--ha-font-weight-normal);`)}
     /* A row that waits after a tap shows the sign it is about to get, faded and without taps */
     .bubble-sub-button:is(.org-pending-on, .org-pending-off) {
       opacity: var(--opacity-muted) !important;
       pointer-events: none !important;
     }
-    ${card._orgTi.sign.at("check", ".org-pending-on::after")} {
-      --org-sign-icon: ${card._orgTi.sign.tick};
-    }
-    ${card._orgTi.sign.at("checked", ".org-pending-off::after")} {
-      --org-sign-icon: ${card._orgTi.sign.circle};
-    }
-    ${card._orgTi.sign.at("switch", ".org-pending-on::after")} {
-      --org-sign-icon: ${card._orgTi.sign.on};
-    }
-    ${card._orgTi.sign.at("on", ".org-pending-off::after")} {
-      --org-sign-icon: ${card._orgTi.sign.off};
-    }
-    ${card._orgTi.sign.at("check switch", ".org-pending-on::after")} {
-      background-color: var(--primary-text-color);
-      opacity: 1;
-    }
-    ${card._orgTi.sign.at("checked on", ".org-pending-off::after")} {
-      background-color: var(--secondary-text-color);
-      opacity: var(--opacity-muted);
-    }
+    ${card._orgTi.sign.rule("check", ".org-pending-on::after", "", `--org-sign-icon: ${card._orgTi.sign.tick};`)}
+    ${card._orgTi.sign.rule("checked", ".org-pending-off::after", "", `--org-sign-icon: ${card._orgTi.sign.circle};`)}
+    ${card._orgTi.sign.rule("switch", ".org-pending-on::after", "", `--org-sign-icon: ${card._orgTi.sign.on};`)}
+    ${card._orgTi.sign.rule("on", ".org-pending-off::after", "", `--org-sign-icon: ${card._orgTi.sign.off};`)}
+    ${card._orgTi.sign.rule("check switch", ".org-pending-on::after", "", `background-color: var(--primary-text-color); opacity: 1;`)}
+    ${card._orgTi.sign.rule("checked on", ".org-pending-off::after", "", `background-color: var(--secondary-text-color); opacity: var(--opacity-muted);`)}
     ${card._orgTi.lines ? `
     /* With dividers, each shown row after another shown row draws the line above it. The line is straight and spans the row's content, from the icon's edge to the sign's, so the row's round corners never bend it, and the content keeps the same space to the line above as to the line below. */
     .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) {
