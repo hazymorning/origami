@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.7.0"
+  version: "13.7.1"
   is_global: true
   supported:
     - button
@@ -867,9 +867,10 @@ origami_base:
         pad: length(cfgB.padding),
         sub: length(cfgB.sub_button_height),
         text: length(cfgB.sub_button_text_size),
-        // A card has a state line under its name as Bubble Card decides, unless the card is a slim row or has its name under the icon. A media card writes its state line, and Media takes it back when it hides the line.
-        lines: !compact && !cfgB.vertical && (type === "media-player" ? this.config.show_state !== false
-          : ["show_state", "show_attribute"].some((k) => this.config[k] ?? this.config.button_type === "state") || !!this.config.show_last_changed || !!this.config.show_last_updated),
+        // A card has a state line under its name as Bubble Card decides, unless the card is a slim row or has its name under the icon. Bubble Card reads state_content before the old keys, and its editor writes them as state_content, where an empty list is no line. A media card writes its state line, and Media takes it back when it hides the line.
+        lines: !compact && !cfgB.vertical && ((sc) => sc !== undefined && sc !== null ? [].concat(sc).some(has)
+          : type === "media-player" ? this.config.show_state !== false
+          : ["show_state", "show_attribute"].some((k) => this.config[k] ?? this.config.button_type === "state") || !!this.config.show_last_changed || !!this.config.show_last_updated)(this.config.state_content),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
         bare: ["separator", "sub-buttons", "pop-up"].includes(type),
         dark: !!hass.themes?.darkMode
@@ -1499,7 +1500,6 @@ origami_base:
       --org-group-gap: max(var(--ha-space-1), var(--org-group-pad));
     }
     ha-card .bubble-sub-button-container {
-      --bubble-sub-button-outline: none;
       height: var(--org-tile-size) !important;
       align-items: center;
       padding: 0 var(--org-group-pad) !important;

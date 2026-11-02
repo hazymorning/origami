@@ -1,6 +1,6 @@
 origami_media:
   name: "Origami • Media"
-  version: "5.11.0"
+  version: "5.11.1"
   supported:
     - media-player
   description: "Media styles media player cards. The speaker layout shows the music, the input and the cover in the icon, above the name, alone, behind the card or behind it and in the icon. The TV layout shows what plays or the running app. A play key shows the track's progress."
@@ -142,8 +142,8 @@ origami_media:
         blur: org.yes(cfg.cover_blur),
         // Origami 2 kept Filled play and power buttons under origami_base, and that place still works
         solid: !!(cfg.solid_controls ?? this.config.origami_base?.solid_controls),
-        // Base hides the state line on compact rows and under the icon, and show_state: false hides it too
-        state: this.config.show_state === false || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
+        // Base hides the state line on compact rows and under the icon. An empty state_content hides it too, and so does show_state: false without a state_content, as Bubble Card reads them.
+        state: ((sc) => sc !== undefined && sc !== null ? ![].concat(sc).some(org.has) : this.config.show_state === false)(this.config.state_content) || card._org.opts.compact || card._org.opts.vertical ? "none" : "block"
       };
       const c = card._orgM;
       // A cover that goes fades out, so the card keeps the last cover until another one comes

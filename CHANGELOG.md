@@ -18,6 +18,8 @@ These changes are in the `next` branch and come with the next release.
 - The state line under a card's name and the state on a tile use the medium weight instead of bold.
 - A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
 - Options that moved or were renamed in this release still work: `compact`, `animate`, `solid_controls`, `art_entity`, `app_entity` and `subtitle_style`.
+- Base and Media read `state_content` before the older `show_state` and `show_attribute` keys, as Bubble Card 3.4 does, so a card keeps its look after Bubble Card's editor rewrites those keys, and `state_content: []` hides Media's line.
+- The card editor shows Tiles' list options only for a list, and Popup's cover mix and blur only with `art`.
 - The modules do less work each time Bubble Card styles a card, which happens about seven times while a pop-up opens. They measure long names once per frame, write a dropdown's items only when their entity changes, and give the slider rules only to cards with a slider. The cards look and work as before. The modules need Base 13.1 and Bubble Card 3.4 or later.
 
 #### Base
@@ -84,10 +86,11 @@ These changes are in the `next` branch and come with the next release.
 - `gap` sets the space between the cards of a vertical stack.
 - Popup writes the title itself, so a title with a `${ }` template shows at once, such as the view that a helper chooses.
 - `value_position: beside` puts the values beside the title.
+- The backdrop is blurred through Bubble Card's own `backdrop_blur` variable, which older Safari also reads, and as with `backdrop_blur`, the pop-up's surface then has no blur of its own, so the phone draws one blur instead of two.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
-- `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change.
+- `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change. A mini pop-up with its own `width` lines up with its key, and cards taller than its `max_height` scroll inside it and fade out at its edges. Beside Home Assistant's sidebar, the dim covers what Bubble Card's backdrop covers.
 
 #### Button
 
@@ -110,7 +113,7 @@ These changes are in the `next` branch and come with the next release.
 #### Tiles
 
 - The `list` layout shows rows with an icon, a state line and a sign at the end. A chevron opens something, a switch toggles the entity, and a play sign runs a script or a scene.
-- `slim` makes one-line rows for facts and settings, as tall as the one-line rows in Home Assistant's own lists, and `dividers` draws lines between rows.
+- `slim` makes one-line rows for facts and settings, as tall as the one-line rows in Home Assistant's own lists, and `dividers` draws a straight line between two rows. Base's `sub_button_height` sets the height of a list's rows.
 - New options: `sign` for every row, and the `state_color` and `image_size` keys for a tile.
 - `sign: check` marks a chosen row with a check, such as a speaker in a group, from its entity or its own `on` key. With `pending`, a tapped row shows the sign it is about to get until its state changes, and `background: false` leaves out the list's panel inside a card or a mini pop-up.
 - Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.

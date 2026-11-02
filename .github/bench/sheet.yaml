@@ -287,7 +287,7 @@ sections:
         tap_action: {action: none}
         modules: [origami_base, origami_slider]
         origami_slider: {master: true}
-      # A pop-up whose key opens a mini pop-up with a title and a volume row of its own
+      # A pop-up whose keys open mini pop-ups: one with a title and a volume row of its own, and a narrow one whose list scrolls
       - type: custom:bubble-card
         card_type: pop-up
         hash: '#sheet'
@@ -310,6 +310,21 @@ sections:
                   main: []
                   bottom:
                     - {entity: media_player.living_room, name: Living room, sub_button_type: slider, always_visible: true}
+            inputs:
+              width: 200px
+              max_height: 160px
+              cards:
+                - type: custom:bubble-card
+                  card_type: sub-buttons
+                  modules: [origami_button]
+                  origami_button: {columns: 1}
+                  sub_button:
+                    main: []
+                    bottom:
+                      - {name: Network, icon: mdi:wifi, show_name: true, tap_action: {action: perform-action, perform_action: media_player.select_source, target: {entity_id: media_player.living_room}, data: {source: Network}}}
+                      - {name: Bluetooth, icon: mdi:bluetooth, show_name: true, tap_action: {action: perform-action, perform_action: media_player.select_source, target: {entity_id: media_player.living_room}, data: {source: Bluetooth}}}
+                      - {name: Line In, icon: mdi:audio-input-rca, show_name: true, tap_action: {action: perform-action, perform_action: media_player.select_source, target: {entity_id: media_player.living_room}, data: {source: Line In}}}
+                      - {name: Optical In, icon: mdi:television, show_name: true, tap_action: {action: perform-action, perform_action: media_player.select_source, target: {entity_id: media_player.living_room}, data: {source: Optical In}}}
         cards:
           - type: custom:bubble-card
             card_type: button
@@ -320,6 +335,7 @@ sections:
             sub_button:
               main:
                 - {icon: mdi:chevron-down, show_background: true, tap_action: {action: fire-dom-event, mini_popup: volume}}
+                - {icon: mdi:dots-horizontal, show_background: true, tap_action: {action: fire-dom-event, mini_popup: inputs}}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button

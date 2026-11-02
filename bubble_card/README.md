@@ -143,7 +143,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `hidden` | | While true, the card takes no space, as a conditional card's, such as a list of lamps while its header is closed. It takes a template that can read any entity, and the card changes at the same moment as the cards around it. |
 | `words` | | Maps a state or a value to the word that the modules write on the card. See Language above. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. It also sets the row's height, except on a compact card. |
-| `sub_button_height` | | The height of sub-buttons, sliders and the Button module's buttons, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px, or 28 px in a row with a name before them, and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |
+| `sub_button_height` | | The height of sub-buttons, sliders, the Button module's buttons and the rows of a Tiles list, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px, or 28 px in a row with a name before them, and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |
 | `sub_button_text_size` | `var(--ha-font-size-s)` | The text size on sub-buttons, sliders and the labels in a Button row, such as `var(--ha-font-size-m)`. |
 
 `css_class: plain` keeps a sub-button neutral. `css_class: accent` fills it while its entity is on, even if it navigates. Dropdowns, sliders and readouts always stay neutral.
@@ -166,7 +166,9 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 
 All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
-Bubble Card writes the state line from `state_content`. Without it, a card has no state line unless it has `button_type: state`. Climate, Media and Speaker Select write their own state line, and Media also the name, so `state_content` has no effect there.
+For a fixed name or icon, or one in Jinja, the sub-button's own `name` and `icon` are enough, because Bubble Card renders those itself. These keys are for `${ }` templates, which read the states at once, and for maps.
+
+Bubble Card writes the state line from `state_content`. Without it, a card has no state line unless it has `button_type: state`. Climate, Media and Speaker Select write their own state line, and Media also the name, so `state_content` has no effect there, except that an empty list, `state_content: []`, hides Media's line. Bubble Card's editor writes the older `show_state` and `show_attribute` keys as `state_content`, and Base and Media read both.
 
 ```yaml
 # Regular card
@@ -1263,7 +1265,7 @@ On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid h
 | Key | Default | Description |
 | --- | --- | --- |
 | `name` | The sub-button's name, or the entity's name | The tile's name. |
-| `state` | The state in Home Assistant's words | The state line. Without it, the tile shows the sub-button's `state_content`, else its `attribute`, else the entity's state. Times read as relative times. As in Bubble Card, a speed, brightness or position of 0 is left out, and so is the speed or brightness of an off fan or light. |
+| `state` | The state in Home Assistant's words | The state line. Without it, the tile shows the sub-button's `state_content`, else the entity's state. Write an attribute as `state_content: brightness`, because Bubble Card's editor drops an `attribute` key on its own. Times read as relative times. As in Bubble Card, a speed, brightness or position of 0 is left out, and so is the speed or brightness of an off fan or light. |
 | `color` | The state color while the entity is on | The icon's color. A map applies only in the states it lists, such as `'on': var(--blue-color)`. |
 | `order` | | The tile's position, such as `-1` for the front. |
 | `image` | | A picture instead of the icon. |
@@ -1389,9 +1391,9 @@ A row without an entity can get a state line, such as a short description, from 
 
 #### Slim list
 
-With `slim: true`, a list has one-line rows for facts and settings, such as a server's load, with a small icon and the state at the row's end. The rows are as tall as the one-line rows in Home Assistant's own lists. The name keeps at least 40 % of the row, or less if it is shorter, and long text ends with an ellipsis.
+With `slim: true`, a list has one-line rows for facts and settings, such as a server's load, with a small icon and the state at the row's end. The rows are as tall as the one-line rows in Home Assistant's own lists, and Base's `sub_button_height` sets another height, such as `44px` for a list in a mini pop-up. The name keeps at least 40 % of the row, or less if it is shorter, and long text ends with an ellipsis.
 
-`dividers: true` draws lines between the rows of a list. The rows then keep their YAML order, and `order` has no effect.
+`dividers: true` draws a straight line between two rows of a list, across the rows' content. The rows then keep their YAML order, and `order` has no effect.
 
 The card's `sign` option sets the sign of every row without its own `sign` key, such as `none` for facts whose tap only opens their details.
 
@@ -1567,7 +1569,7 @@ sub_button:
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 
-`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens below the key, or above it where there's more room, as wide as the pop-up's cards, and the pop-up behind it dims. Like Home Assistant's menus, it grows out of the key from 90 % while it fades in, in the time of Home Assistant's dialogs, and it shrinks back the same way when a tap beside it, Esc or closing the pop-up closes it. While it is open, its edge next to the key stays in place, so a change of its cards never moves it, and cards taller than the screen scroll. A card in it with Base's `hidden` takes no space while it is hidden. Once the pop-up has opened, it draws its mini pop-ups ahead and keeps their cards up to date, so a tap only has to show one. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
+`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens below the key, or above it where there's more room, as wide as the pop-up's cards or its own `width`, and the pop-up behind it dims. Like Home Assistant's menus, it grows out of the key from 90 % while it fades in, in the time of Home Assistant's dialogs, and it shrinks back the same way when a tap beside it, Esc or closing the pop-up closes it. While it is open, its edge next to the key stays in place, so a change of its cards never moves it, and cards taller than the screen scroll. A card in it with Base's `hidden` takes no space while it is hidden. Once the pop-up has opened, it draws its mini pop-ups ahead and keeps their cards up to date, so a tap only has to show one. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
 
 ```yaml
 origami_popup:
@@ -1605,7 +1607,39 @@ cards:
             mini_popup: volume
 ```
 
-The backdrop is blurred, unless the pop-up sets its own `backdrop_blur` or uses Bubble Card's performance mode.
+In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
+
+```yaml
+origami_popup:
+  mini_popups:
+    inputs:
+      width: 224px
+      max_height: 320px
+      cards:
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_button
+          origami_button:
+            columns: 1
+            active_style: toggle
+          sub_button:
+            main: []
+            bottom:
+              - name: Bluetooth
+                icon: mdi:bluetooth
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: media_player.select_source
+                  target:
+                    entity_id: media_player.living_room
+                  data:
+                    source: Bluetooth
+              # Network, Line In and the other inputs work the same way
+```
+
+The backdrop is blurred as with Bubble Card's `backdrop_blur: 4`, unless the pop-up sets its own `backdrop_blur`, hides its backdrop or uses Bubble Card's performance mode. As with `backdrop_blur`, the pop-up's surface then has no blur of its own.
 
 ```yaml
 type: custom:bubble-card

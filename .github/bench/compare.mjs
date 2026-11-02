@@ -13,7 +13,7 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-const BUBBLE_CARD = '3.4.2';
+const BUBBLE_CARD = '3.4.3';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '../..');
 const require = createRequire(import.meta.url);

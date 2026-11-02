@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.5.0"
+  version: "3.6.0"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
@@ -25,16 +25,28 @@ origami_tiles:
           step: 1
           mode: box
       default: 2
+      visible:
+        - field: layout
+          operator: not_eq
+          value: list
     - name: slim
       label: "Slim rows (list): small icons without a background, the state at the row's end"
       selector:
         boolean: {}
       default: false
+      visible:
+        - field: layout
+          operator: eq
+          value: list
     - name: dividers
       label: "Lines between the rows (list)"
       selector:
         boolean: {}
       default: false
+      visible:
+        - field: layout
+          operator: eq
+          value: list
     - name: sign
       label: "Sign for every row (list)"
       selector:
@@ -54,16 +66,28 @@ origami_tiles:
             - label: None
               value: none
       default: auto
+      visible:
+        - field: layout
+          operator: eq
+          value: list
     - name: pending
       label: "After a tap, a row with a check or a switch shows its next look, faded, until its state changes (list)"
       selector:
         boolean: {}
       default: false
+      visible:
+        - field: layout
+          operator: eq
+          value: list
     - name: background
       label: "A panel behind the rows (list). Without it, the rows stand on the card or the mini pop-up around them"
       selector:
         boolean: {}
       default: true
+      visible:
+        - field: layout
+          operator: eq
+          value: list
   code: |
     ${(() => {
       const org = card._org;
@@ -72,7 +96,8 @@ origami_tiles:
       const cfg = this.config.origami_tiles ?? {};
       const list = cfg.layout === "list";
       // A slim list has low rows with plain icons and the state at the row's end, and dividers draw a line between the rows of any list
-      const t = card._orgTi = { list, cols: list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers), panel: !list || cfg.background === undefined || org.yes(cfg.background) };
+      // Base's sub_button_height sets the height of a list's rows
+      const t = card._orgTi = { list, cols: list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers), panel: !list || cfg.background === undefined || org.yes(cfg.background), row: list ? org.opts?.sub ?? "" : "" };
       const signKeys = ["open", "run", "switch", "check", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [], check: [], checked: [] };
@@ -169,7 +194,7 @@ origami_tiles:
     ${card._org.unframe()}
     /* In a list, a row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. A slim row is as tall as a one-line row in Home Assistant's own lists, and its icon and its sign are small. */
     .bubble-sub-button-group${card._orgTi.group} {
-      --org-row-min: ${card._orgTi.slim ? "var(--control-height-list)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))"};
+      --org-row-min: ${card._orgTi.row || (card._orgTi.slim ? "var(--control-height-list)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))")};
       display: grid !important;
       grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
       gap: ${card._orgTi.list ? "0" : "var(--ha-space-3)"} !important;
@@ -347,13 +372,18 @@ origami_tiles:
       opacity: var(--opacity-muted);
     }
     ${card._orgTi.lines ? `
-    /* With dividers, each shown row after another shown row draws the line above it. The line spans the row's content, and the content keeps the same space to the line above as to the line below. */
+    /* With dividers, each shown row after another shown row draws the line above it. The line is straight and spans the row's content, from the icon's edge to the sign's, so the row's round corners never bend it, and the content keeps the same space to the line above as to the line below. */
     .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) {
       min-height: calc(var(--org-row-min) + var(--org-line-width)) !important;
       padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
-      background-image: linear-gradient(var(--org-line-color), var(--org-line-color)) !important;
-      background-size: calc(100% - 2 * var(--org-list-pad)) var(--org-line-width) !important;
-      background-position: center top !important;
-      background-repeat: no-repeat !important;
       ${card._orgTi.panel ? "" : "border-radius: calc((var(--org-row-min) + var(--org-line-width)) * var(--radius-ratio, 0.35)) !important;"}
+    }
+    .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"])::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      inset-inline: var(--org-list-pad);
+      height: var(--org-line-width);
+      background-color: var(--org-line-color);
+      pointer-events: none;
     }` : ""}` : ""}

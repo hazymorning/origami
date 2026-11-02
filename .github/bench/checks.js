@@ -130,23 +130,26 @@ window.__check = async () => {
     report('icon only', fails, `${count} buttons with only an icon are square`);
   }
 
-  // Lines: a list's dividers are as thick as --org-line-width
+  // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content
   {
     const fails = [];
     let count = 0;
     for (const card of origami.filter((c) => c.cfg.origami_tiles?.dividers)) {
       const want = length(card, 'var(--org-line-width)');
       for (const el of card.root.querySelectorAll('.bubble-sub-button')) {
-        const cs = getComputedStyle(el);
-        // A divider is a gradient whose height is the last part of the background size
-        const height = cs.backgroundSize.trim().split(/\s+/).pop();
-        if (!cs.backgroundImage.includes('gradient') || !height.endsWith('px')) continue;
+        // A divider is the row's ::before, a line at its top
+        const line = getComputedStyle(el, '::before');
+        if (line.content === 'none' || line.position !== 'absolute') continue;
         count++;
-        if (!near(parseFloat(height), want, 0.1)) fails.push(`card ${card.i} ${label(el)}: line ${height}, expected ${want}px`);
+        if (!near(parseFloat(line.height), want, 0.1)) fails.push(`card ${card.i} ${label(el)}: line ${line.height}, expected ${want}px`);
+        // It starts where the row's content starts and ends as far from the row's other end, and nothing clips it, so the row's round corners never bend it
+        const pad = parseFloat(getComputedStyle(el).paddingInlineStart);
+        if (!near(parseFloat(line.left), pad, 0.5) || !near(parseFloat(line.right), pad, 0.5) || !near(parseFloat(line.top), 0, 0.1)) fails.push(`card ${card.i} ${label(el)}: line at ${line.left} and ${line.right} from the row's ends and ${line.top} from its top, expected ${pad}px and 0px`);
+        if (getComputedStyle(el).overflow !== 'visible') fails.push(`card ${card.i} ${label(el)}: the row clips its line with overflow ${getComputedStyle(el).overflow}`);
       }
     }
     if (!count) fails.push('no divider found on the sheet');
-    report('lines', fails, `the dividers are as thick as the line width (${count} checked)`);
+    report('lines', fails, `the dividers are as thick as the line width and run straight across their rows' content (${count} checked)`);
   }
 
   // Frameless: a frameless card draws no background, shadow or border, and its content reaches its edges
@@ -373,30 +376,35 @@ window.__check = async () => {
     else {
       go(host.cfg.hash);
       const shell = () => host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened:not(.is-opening)');
-      const key = () => shell() && deep(shell(), 'bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button-1');
-      if (!(await until(() => key()))) fails.push('the pop-up did not open with its key');
+      const keyAt = (n) => shell() && deep(shell(), 'bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button-' + n);
+      if (!(await until(() => keyAt(1)))) fails.push('the pop-up did not open with its key');
       else {
         await new Promise((r) => setTimeout(r, 400));
-        const k = key();
-        // The tap as Bubble Card sends it
-        const tap = new Event('hass-action', { bubbles: true, composed: true });
-        tap.detail = { config: { tap_action: k.closest ? JSON.parse(k.dataset.tapAction) : {} }, action: 'tap' };
-        k.dispatchEvent(tap);
         const mini = () => shell()?.querySelector('.org-mini.open');
-        if (!(await until(() => mini(), 2000))) fails.push('the key did not open the mini pop-up');
-        else {
-          // It is measured once it has grown to its size
+        // open() taps a key as Bubble Card sends the tap, and returns the mini pop-up once it has grown to its size
+        const open = async (k) => {
+          const tap = new Event('hass-action', { bubbles: true, composed: true });
+          tap.detail = { config: { tap_action: JSON.parse(k.dataset.tapAction) }, action: 'tap' };
+          k.dispatchEvent(tap);
+          if (!(await until(() => mini(), 2000))) return null;
           await until(() => mini() && mini().getAnimations().length === 0, 3000);
-          const m = mini();
+          return mini();
+        };
+        const pad = parseFloat(doc.getPropertyValue('--ha-space-4'));
+        const k = keyAt(1);
+        const m = await open(k);
+        if (!m) fails.push('the key did not open the mini pop-up');
+        else {
           const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
           const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();
           const cs = getComputedStyle(m);
-          const pad = parseFloat(doc.getPropertyValue('--ha-space-4'));
+          // Its cards sit in a box with its padding
+          const bs = getComputedStyle(m.querySelector('.org-mini-box') ?? m);
           if (!near(b.left, col.left) || !near(b.width, col.width)) fails.push(`it spans ${r1(b.left)} to ${r1(b.right)} px, expected the pop-up's cards from ${r1(col.left)} to ${r1(col.right)} px`);
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`it covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
           if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
           if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
-          if (!near(parseFloat(cs.paddingTop), pad) || !near(parseFloat(cs.paddingLeft), pad)) fails.push(`its padding is ${cs.padding}, expected ${pad}px`);
+          if (!near(parseFloat(bs.paddingTop), pad) || !near(parseFloat(bs.paddingLeft), pad)) fails.push(`its padding is ${bs.padding}, expected ${pad}px`);
           const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
           if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
           // A tap beside it lands on the dim
@@ -406,11 +414,26 @@ window.__check = async () => {
           if (!(await until(() => !mini(), 3000))) fails.push('a tap beside it left it open');
           if (!shell()) fails.push('a tap beside it closed the pop-up too');
         }
+        // A mini pop-up with a width of its own lines up with its key, and one with a max_height scrolls inside it
+        const k2 = keyAt(2);
+        const n = k2 && await open(k2);
+        if (!n) fails.push('the second key did not open its narrow mini pop-up');
+        else {
+          const b = n.getBoundingClientRect(), kb = k2.getBoundingClientRect();
+          const box = n.querySelector('.org-mini-box');
+          if (!near(b.width, 200)) fails.push(`the narrow one is ${r1(b.width)} px wide, expected its width of 200px`);
+          if (!near(b.right, kb.right)) fails.push(`the narrow one ends at ${r1(b.right)} px, expected the end of its key at ${r1(kb.right)} px`);
+          if (b.height > 160.5) fails.push(`the narrow one is ${r1(b.height)} px tall, more than its max_height of 160px`);
+          if (!box || box.scrollHeight <= box.clientHeight + 1) fails.push('the narrow one does not scroll, though its cards are taller than its max_height');
+          if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`the narrow one covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+          if (!(await until(() => !mini(), 3000))) fails.push('Esc left the narrow one open');
+        }
       }
       go('');
       await until(() => !host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened'), 2000);
     }
-    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards, with a card\'s corners and 16 px of padding, and a tap beside it closes only the mini pop-up');
+    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards or its own width at its key, with a card\'s corners and 16 px of padding, a list taller than its max_height scrolls, and a tap beside it or Esc closes only the mini pop-up');
   }
   return results;
 };
