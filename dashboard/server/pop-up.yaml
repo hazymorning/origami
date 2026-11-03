@@ -120,77 +120,6 @@ cards:
                       text: Restart Home Assistant?
       - type: custom:bubble-card
         card_type: separator
-        name: System
-        modules:
-          - origami_base
-          - origami_header
-        origami_header:
-          weight: medium
-          icon_size: var(--icon-size-s)
-        sub_button:
-          main:
-            - name: Repairs
-              show_name: true
-              icon: mdi:chevron-right
-              content_layout: icon-right
-              show_background: false
-              tap_action:
-                action: navigate
-                navigation_path: /config/repairs
-      - type: custom:bubble-card
-        card_type: sub-buttons
-        modules:
-          - origami_base
-          - origami_tiles
-        origami_tiles:
-          layout: list
-          slim: true
-          dividers: true
-          sign: none
-        sub_button:
-          main: []
-          bottom:
-            - entity: sensor.system_monitor_uptime
-              name: Last restart
-              icon: mdi:timer-outline
-              origami_tiles:
-                state: >-
-                  ${(t => t.charAt(0).toUpperCase() + t.slice(1))(ago(state))}
-            - entity: update.home_assistant_core_update
-              name: Home Assistant
-              icon: mdi:home-assistant
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-            - entity: update.home_assistant_operating_system_update
-              name: Operating system
-              icon: mdi:harddisk
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-            - entity: update.home_assistant_supervisor_update
-              name: Supervisor
-              icon: mdi:shield-check-outline
-              origami_tiles:
-                state: >-
-                  ${state === 'on' && attr.latest_version ? '→ ' +
-                  attr.latest_version : attr.installed_version}
-                state_color:
-                  'on': var(--accent-color)
-                sign:
-                  'on': open
-      - type: custom:bubble-card
-        card_type: separator
         name: Maintenance
         modules:
           - origami_base
@@ -245,6 +174,11 @@ cards:
               tap_action:
                 action: navigate
                 navigation_path: /config/backup
+            - name: Repairs
+              icon: mdi:hammer-wrench
+              tap_action:
+                action: navigate
+                navigation_path: /config/repairs
 
       # The load of the last 24 hours. It needs Plotly Graph Card.
       - type: custom:plotly-graph

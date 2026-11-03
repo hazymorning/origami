@@ -33,11 +33,11 @@ sub_button:
           [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
           [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
           .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+    # The window shows only while it is open
     - entity: binary_sensor.living_room_window
-      icon: mdi:window-closed-variant
+      icon: mdi:window-open-variant
       origami_base:
-        icon:
-          'on': mdi:window-open-variant
+        hidden: ${state !== 'on'}
     - entity: sensor.living_room_temperature
       show_icon: false
       origami_base:

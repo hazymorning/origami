@@ -14,94 +14,105 @@ modules:
   - origami_base
   - origami_popup
 origami_popup:
-  # The arrow on All opens a slider for each lamp and the scenes over the pop-up
   mini_popups:
+    # The arrow on All opens a slider for each lamp, which turns the lamp off at its start
     lamps:
-      - type: custom:bubble-card
-        card_type: button
-        button_type: switch
-        entity: light.living_room_floor_lamp
-        name: Floor lamp
-        icon: mdi:floor-lamp
-        modules:
-          - origami_base
-        origami_base:
-          compact: true
-          tile: true
-        sub_button:
-          main:
-            - sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-        rows: 1
-      - type: custom:bubble-card
-        card_type: button
-        button_type: switch
-        entity: light.living_room_string_lights
-        name: String lights
-        icon: mdi:string-lights
-        modules:
-          - origami_base
-        origami_base:
-          compact: true
-          tile: true
-        sub_button:
-          main:
-            - sub_button_type: slider
-              always_visible: true
-              allow_light_slider_to_0: true
-        rows: 1
-      # The scene that was turned on last is highlighted until the lamps are turned off
-      - type: custom:bubble-card
-        card_type: sub-buttons
-        modules:
-          - origami_base
-          - origami_button
-        origami_button:
-          columns: 2
-          active: >-
-            ${(() => {
-              const lamps = hass.states['light.living_room'];
-              const since = lamps?.state === 'on' ? Date.parse(lamps.last_changed) - 10000 : Infinity;
-              return ['scene.living_room_evening', 'scene.living_room_late', 'scene.living_room_night', 'scene.living_room_dinner']
-                .filter((id) => Date.parse(states(id)) >= since)
-                .sort((a, b) => Date.parse(states(b)) - Date.parse(states(a)))[0] ?? '';
-            })()}
-        sub_button:
-          main: []
-          bottom:
-            - name: Evening
-              icon: mdi:weather-sunset-down
-              show_name: true
-              tap_action:
-                action: perform-action
-                perform_action: scene.turn_on
-                target:
-                  entity_id: scene.living_room_evening
-            - name: Late
-              icon: mdi:weather-night-partly-cloudy
-              show_name: true
-              tap_action:
-                action: perform-action
-                perform_action: scene.turn_on
-                target:
-                  entity_id: scene.living_room_late
-            - name: Night
-              icon: mdi:weather-night
-              show_name: true
-              tap_action:
-                action: perform-action
-                perform_action: scene.turn_on
-                target:
-                  entity_id: scene.living_room_night
-            - name: Dinner
-              icon: mdi:silverware-fork-knife
-              show_name: true
-              tap_action:
-                action: perform-action
-                perform_action: scene.turn_on
-                target:
-                  entity_id: scene.living_room_dinner
+      frameless: true
+      cards:
+        - type: custom:bubble-card
+          card_type: button
+          button_type: slider
+          entity: light.living_room_floor_lamp
+          name: Floor lamp
+          show_name: true
+          show_icon: false
+          show_state: false
+          slider_value_position: right
+          allow_light_slider_to_0: true
+          tap_action:
+            action: none
+          modules:
+            - origami_base
+            - origami_slider
+            - origami_light
+          origami_slider:
+            master: true
+          rows: 1
+        - type: custom:bubble-card
+          card_type: button
+          button_type: slider
+          entity: light.living_room_string_lights
+          name: String lights
+          show_name: true
+          show_icon: false
+          show_state: false
+          slider_value_position: right
+          allow_light_slider_to_0: true
+          tap_action:
+            action: none
+          modules:
+            - origami_base
+            - origami_slider
+            - origami_light
+          origami_slider:
+            master: true
+          rows: 1
+    # The palette on All opens the scenes. The one turned on last is highlighted until the lamps are turned off.
+    scenes:
+      width: 272px
+      frameless: true
+      cards:
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_base
+            - origami_button
+          origami_button:
+            columns: 1
+            icon_size: var(--icon-size-xs)
+            active: >-
+              ${(() => {
+                const lamps = hass.states['light.living_room'];
+                const since = lamps?.state === 'on' ? Date.parse(lamps.last_changed) - 10000 : Infinity;
+                return ['scene.living_room_evening', 'scene.living_room_late', 'scene.living_room_night', 'scene.living_room_dinner']
+                  .filter((id) => Date.parse(states(id)) >= since)
+                  .sort((a, b) => Date.parse(states(b)) - Date.parse(states(a)))[0] ?? '';
+              })()}
+          sub_button:
+            main: []
+            bottom:
+              - name: Evening
+                icon: mdi:weather-sunset-down
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.living_room_evening
+              - name: Late
+                icon: mdi:weather-night-partly-cloudy
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.living_room_late
+              - name: Night
+                icon: mdi:weather-night
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.living_room_night
+              - name: Dinner
+                icon: mdi:silverware-fork-knife
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.living_room_dinner
 cards:
   - type: vertical-stack
     cards:
@@ -275,6 +286,7 @@ cards:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_lights'
+          # All has the layout of the speaker card, with keys for the scenes and the lamps and a slider for the brightness
           - type: custom:bubble-card
             card_type: button
             button_type: switch
@@ -283,15 +295,19 @@ cards:
             icon: mdi:lightbulb-multiple
             modules:
               - origami_base
+              - origami_light
             origami_base:
-              tile: true
+              group: true
             button_action:
               tap_action:
                 action: more-info
             sub_button:
               main:
+                - icon: mdi:palette-outline
+                  tap_action:
+                    action: fire-dom-event
+                    mini_popup: scenes
                 - icon: mdi:chevron-down
-                  show_background: true
                   tap_action:
                     action: fire-dom-event
                     mini_popup: lamps
@@ -299,10 +315,11 @@ cards:
                   show_background: true
                   tap_action:
                     action: toggle
-            state_content:
-              - state
-              - brightness
-            rows: 1.375
+              bottom:
+                - sub_button_type: slider
+                  always_visible: true
+            state_content: state
+            rows: '2.2'
 
       # Climate: the header shows the temperature and the humidity, with a dot in a color for the temperature
       - type: vertical-stack

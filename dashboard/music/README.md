@@ -10,7 +10,7 @@ Music on the speaker picked in the title, with speaker groups, their volume and 
 - Speakers that Home Assistant can group, such as [Sonos](https://www.home-assistant.io/integrations/sonos/), [LinkPlay](https://www.home-assistant.io/integrations/linkplay/) or the players of [Music Assistant](https://www.home-assistant.io/integrations/music_assistant/)
 - A **Dropdown** helper named **Selected speaker**, which chooses the speaker
 - A **Template** helper of the type **Number** named **Group volume**, for the volume slider
-- Optional: a speaker whose display and subwoofer Home Assistant can control, such as a WiiM amplifier, for those two shortcuts
+- Optional: a speaker whose display Home Assistant can control, such as a WiiM amplifier, for that shortcut
 
 ## Setup
 
@@ -36,9 +36,8 @@ Music on the speaker picked in the title, with speaker groups, their volume and 
 
 6. In [`pop-up.yaml`](pop-up.yaml), replace the example speakers with the home's speakers. Each speaker has a chip under `sub_button`, a row under `group:` and a row under `volume:`. Copy these for more speakers, or delete them for fewer.
 7. Under `more:` in [`pop-up.yaml`](pop-up.yaml), keep the shortcuts that fit and delete the others. Bluetooth and the TV switch the input of the living room speaker and show while it's the selected speaker. Change `Optical In` to the name of its TV input, also under `words`.
-8. For the subwoofer's minus and plus, add [`number-step.yaml`](number-step.yaml) as a script with the name **Number step**.
-9. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
-10. Open the pop-up from a button whose tap action is **Navigate** to `#popup_music`.
+8. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+9. Open the pop-up from a button whose tap action is **Navigate** to `#popup_music`.
 
 It's kept light on purpose, so it opens fast. There's just one music card, and the group, the volume and the shortcuts open in small pop-ups on top of it. The shortcuts have room for more, like playlists or radio stations.
 
@@ -53,5 +52,3 @@ It's kept light on purpose, so it opens fast. There's just one music card, and t
 | `script.playback` | The keys of the play row. In a group, they control the music of the whole group. The heart saves the song as a favorite in Music Assistant, and it's grayed out on speakers that aren't Music Assistant players. |
 | `script.set_group_volume` | Sets the volume of the group and keeps the balance between its speakers |
 | `light.living_room_display` | Optional: the display of the living room amplifier |
-| `switch.living_room_subwoofer`, `number.living_room_subwoofer_level` | Optional: the subwoofer and its level |
-| `script.number_step` | Optional: minus and plus for the subwoofer's level, which rest at the ends of its range |

@@ -30,7 +30,7 @@ The chevron and a tap on the temperature or the windows open the [climate table]
 | Entity | Used for |
 | --- | --- |
 | `sensor.living_room_temperature`, `sensor.bedroom_temperature`, `sensor.office_temperature` | The average in the header. On a room card, the temperature and the dot, from blue when it's cold over green to red when it's hot. |
-| `binary_sensor.living_room_window`, `binary_sensor.bedroom_window` | The open windows in the header, and the window on a room card |
+| `binary_sensor.living_room_window`, `binary_sensor.bedroom_window` | The open windows in the header, and the window on a room card while it's open |
 | `sensor.living_room_humidity` | The humidity on the room card |
 | `light.living_room` | The room's lights. The icon lights up while one of them is on, and a hold on the card opens them. |
 | `input_boolean.all_rooms` | Shows the rooms that stay hidden until a tap on **All rooms** |

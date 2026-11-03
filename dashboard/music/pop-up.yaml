@@ -73,6 +73,7 @@ origami_popup:
             columns: 1
             align: center
             icon_size: var(--icon-size-xs)
+            padding: 0 0 var(--ha-space-2)
           sub_button:
             main: []
             bottom:
@@ -234,7 +235,6 @@ origami_popup:
             - origami_button
           origami_button:
             columns: 1
-            group_rows: true
             icon_size: var(--icon-size-xs)
             active_style: toggle
           sub_button:
@@ -278,40 +278,6 @@ origami_popup:
                 show_name: true
                 tap_action:
                   action: toggle
-              # A tap turns the subwoofer on and off. Minus and plus move its level by one step and rest at the ends of its range.
-              - name: Subwoofer
-                group:
-                  - entity: switch.living_room_subwoofer
-                    name: Subwoofer
-                    icon: mdi:surround-sound
-                    show_name: true
-                    tap_action:
-                      action: toggle
-                  - entity: number.living_room_subwoofer_level
-                    icon: mdi:minus
-                    origami_button:
-                      disabled: ${Number(state) <= Number(attr.min)}
-                    tap_action:
-                      action: perform-action
-                      perform_action: script.number_step
-                      data:
-                        entity: number.living_room_subwoofer_level
-                        steps: -1
-                  - entity: number.living_room_subwoofer_level
-                    show_icon: false
-                    state_content: state
-                    tap_action:
-                      action: none
-                  - entity: number.living_room_subwoofer_level
-                    icon: mdi:plus
-                    origami_button:
-                      disabled: ${Number(state) >= Number(attr.max)}
-                    tap_action:
-                      action: perform-action
-                      perform_action: script.number_step
-                      data:
-                        entity: number.living_room_subwoofer_level
-                        steps: 1
 sub_button:
   main:
     # The speaker that the pop-up shows

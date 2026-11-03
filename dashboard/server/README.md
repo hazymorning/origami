@@ -24,8 +24,7 @@ How the Home Assistant server is doing, with its backups and updates, and button
 | Entity | Used for |
 | --- | --- |
 | `sensor.system_monitor_processor_use`, `sensor.system_monitor_memory_usage`, `sensor.system_monitor_disk_usage` | The top line, and processor and memory also in the graph |
-| `sensor.system_monitor_uptime` | The uptime and the last restart |
+| `sensor.system_monitor_uptime` | The uptime |
 | `sensor.backup_last_successful_automatic_backup` | The age of the last backup, orange after 3 days and red after 7 |
 | `sensor.backup_next_scheduled_automatic_backup` | The next backup |
 | `sensor.backup_backup_manager_state` | **Back up** turns into **Backing up** while a backup runs |
-| `update.home_assistant_core_update`, `update.home_assistant_operating_system_update`, `update.home_assistant_supervisor_update` | The versions. While an update waits, its row shows the new version, and a tap opens the update. Only Home Assistant OS has the last two, so delete their rows on other installations. |

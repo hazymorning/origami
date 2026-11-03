@@ -2,11 +2,11 @@
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Media, lights and climate of one room together. The arrow on **All** opens a slider for each lamp and the scenes, and **Everything off** turns off the room's lamps and devices.
+Media, lights and climate of one room together. On **All**, the palette opens the scenes and the arrow a slider for each lamp. **Everything off** turns off the room's lamps and devices.
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Popup, Media, Header, Button and Climate, and Fan for the living room
+- [Get started](../../README.md#get-started), with the modules Base, Popup, Media, Header, Button and Climate, and Fan, Light and Slider for the living room
 - Two helpers, created in [Setup](#setup): a light group for the living room and a toggle for the bathroom's bath time
 - Optional: [Google Cast](https://www.home-assistant.io/integrations/cast/), for the program and its picture on the TV card
 
@@ -32,8 +32,8 @@ A tap on the speaker, the TV, the fan or the count of lamps opens another pop-up
 | `media_player.living_room_tv` | The TV, which takes the speaker's place while the speaker uses its TV input, `Optical In` |
 | `media_player.living_room_tv_cast` | The program and its picture on the TV card, from Google Cast |
 | `switch.living_room_console` | A plug as a row with a switch |
-| `light.living_room` | **All**, and the count of lamps that are on |
-| `light.living_room_floor_lamp`, `light.living_room_string_lights` | The lamps under the arrow on **All**. Copy a lamp's card for each further lamp. |
+| `light.living_room` | **All** and its brightness, and the count of lamps that are on |
+| `light.living_room_floor_lamp`, `light.living_room_string_lights` | The lamps under the arrow on **All**. Copy a lamp's slider for each further lamp. |
 | `scene.living_room_evening`, `scene.living_room_late`, `scene.living_room_night`, `scene.living_room_dinner` | The scenes. The one turned on last is highlighted until the lamps go off. |
 | `light.bathroom_mirror`, `light.bathroom_night_light` | The bathroom's lamps, and the count of lamps that are on |
 | `input_boolean.bath_time` | **Bath time**, for an automation that reacts to it, such as one that dims the lamps |
