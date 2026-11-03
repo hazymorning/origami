@@ -43,8 +43,8 @@ This rule comes first. Origami is for every home, and every home has other entit
 The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read smoothly: honest and reduced to what's needed, never like marketing or a manual. Text that doesn't meet this standard doesn't go in.
 
 - It's light. The main README is a gallery: each part is its name, its image and one short line about it, which ends with a **Setup** link to the part's folder. The name itself is plain text. A part that needs a custom card, such as Origami Weather or Navbar Card, says so in its line. The line isn't a copy of the first sentence in the part's README. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
-- Origami's idea is said once, in the intro of the main README, which may sound personal: it tells where Origami comes from. The parts, the other sections and the module reference don't repeat it.
-- Badges are black and white, so they never compete with the images.
+- Origami's idea is said once, in the intro of the main README, which may sound personal: it tells where Origami comes from. The parts, the other sections and the module reference don't repeat it. The intro is the maintainer's own text and changes only when the maintainer asks.
+- Badges have a white label and a black value, so they never compete with the images.
 - A step never assumes a fresh install. Many people already have HACS, Bubble Card or a themes folder, so a step says what to check or update instead, and Bubble Card and the community cards get credit where they come up.
 - Every part's README has the same sections in the same order: its name, its image and what it does, then Requirements, Setup and Entities. Requirements lists the modules, integrations, cards and helpers, Setup has numbered steps, and Entities says what each example entity is used for.
 - Each step, explanation and term lives in one place, and other places link there. Setting up the theme, the font and Bubble Card, adding a module and adding a card or pop-up are explained once, under Get started in the main README.
@@ -109,7 +109,8 @@ All text is written for people: short, plain English that sounds like a person w
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
 - Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
-- A rough draft from the maintainer gives the direction, not the wording. Write the text fresh, and shorter.
+- Write the way someone tells a friend about their own project: plainly, and a little modest, such as "Now it finally feels somewhat finished". Name real things, such as one music card for multiple speakers, instead of praise, and say a goal as a goal, not as a claim that it's reached. No lines crafted for effect, such as "until one day it did" or "written down for other homes".
+- A text that the maintainer drafts keeps its wording. Fix the spelling and the grammar, leave out what the rules forbid, such as `basically`, and correct any claim that doesn't match the files, but change nothing else. Notes that only give context, such as the history behind the intro, explain the background and never turn into text.
 - Say a message once. The same point in several places, such as Origami's idea or that a part works on its own, makes text sound generated.
 - Vary how sentences start. Descriptions that all begin with the same verb, such as Shows or Sets, read like a machine wrote them, and a short phrase often says more, such as "Scenes, all lamps at once, or each lamp on its own." Use "such as" sparingly, and "like" where it sounds more natural.
 - No text about the text, such as `this section explains` or `the first three are`. Headings already say what follows.
@@ -122,7 +123,7 @@ All text is written for people: short, plain English that sounds like a person w
 
 | Instead of | Write |
 | --- | --- |
-| Origami is a Home Assistant dashboard designed around balance and usability. It's rather quiet and never shows too much at once, because most of what's on it only appears when it's needed. | Origami is a quiet dashboard for Home Assistant. It shows what matters when it matters. |
+| Origami is a Home Assistant dashboard that took years to get right. It changed with daily use more often than anyone would care to count and never quite felt done, until one day it did. | Origami is a dashboard for Home Assistant. It has been worked on for many years and changed over and over based on daily use. Now it finally feels somewhat finished. |
 | Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
 | The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or the browser still shows an old version of the page. |
 | A menu that slides in from the top of the screen, in place of Home Assistant's header. | Replaces Home Assistant's header with a menu that slides down from the top. |
