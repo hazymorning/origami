@@ -3,9 +3,9 @@
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=black&labelColor=white"></a>
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-black?labelColor=white"></a>
 
-Origami is a dashboard for Home Assistant. It has been worked on for many years and changed over and over based on daily use. Now it finally feels somewhat finished, so it's written down here for anyone who wants to use it. There are quite a few things in it, like one music card that controls multiple speakers, tables made with Bubble Card or slider buttons, which are the end result of countless hours of trying different things.
+Origami is a dashboard for Home Assistant. It has changed with daily use for many years and now finally feels somewhat finished. Many of its parts, like one music card for multiple speakers or tables made with Bubble Card, took countless hours of trial and error.
 
-The goal is to only show what's important, keep it easy to use for everyone at home, and make it look good without trying too hard. It's not the easiest dashboard for beginners, but it's a flexible foundation to build on and covers many things.
+The goal is to show only what's important, be easy to use for everyone at home and look good without trying too hard. It's not the easiest dashboard for beginners, but a flexible foundation to build on.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
