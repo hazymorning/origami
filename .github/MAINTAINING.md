@@ -40,7 +40,7 @@ This rule comes first. Origami is for every home, and every home has other entit
 
 ## README from 3.0
 
-The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and sound like the person who uses the dashboard every day explaining it to a friend: relaxed, honest and plain, never like marketing or a manual. Text that doesn't meet this standard doesn't go in.
+The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read effortlessly: smooth, honest and reduced to what's needed, never like marketing or a manual. Text that doesn't meet this standard doesn't go in.
 
 - It's light. The main README is a gallery: each part is its image, its name and one short line about it, and the name links to the part's folder once the folder exists. The line isn't a copy of the first sentence in the part's README. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
 - Origami's idea is said once, in the intro of the main README. The parts, the other sections and the module reference don't repeat it.
@@ -98,10 +98,11 @@ Commit messages, PR titles and the README stay plain.
 
 ## Writing
 
-All text is written for people: short, plain English that sounds like a person wrote it. The docs that people read are relaxed and honest, give steps as short commands and never talk to the reader as "you". This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
+All text is written for people: short, plain English that sounds like a person wrote it. The docs that people read are smooth and honest, say only what's needed, give steps as short commands and never talk to the reader as "you". This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
 - Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
+- A rough draft from the maintainer gives the direction, not the wording. Write the text fresh, and shorter.
 - Say a message once. The same point in several places, such as Origami's idea or that a part works on its own, makes text sound generated.
 - Vary how sentences start. Descriptions that all begin with the same verb, such as Shows or Sets, read like a machine wrote them, and a short phrase often says more, such as "Scenes, all lamps at once, or each lamp on its own." Use "such as" sparingly, and "like" where it sounds more natural.
 - No text about the text, such as `this section explains` or `the first three are`. Headings already say what follows.
@@ -114,10 +115,11 @@ All text is written for people: short, plain English that sounds like a person w
 
 | Instead of | Write |
 | --- | --- |
-| Origami is a theme and a phone dashboard for Home Assistant, shaped by years of daily use. Every part works on its own, so any of them can go into an existing dashboard. | Origami is a Home Assistant dashboard designed around balance and usability. It's rather quiet and never shows too much at once. |
+| Origami is a Home Assistant dashboard designed around balance and usability. It's rather quiet and never shows too much at once, because most of what's on it only appears when it's needed. | Origami is a quiet dashboard for Home Assistant. It shows what matters when it matters. |
 | Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
 | The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or the browser still shows an old version of the page. |
-| A menu that slides in from the top of the screen, in place of Home Assistant's header. | Hides Home Assistant's header and adds a menu that slides down from the top. |
+| A menu that slides in from the top of the screen, in place of Home Assistant's header. | Replaces Home Assistant's header with a menu that slides down from the top. |
+| Temperature, humidity, windows and heating for every room in one table. | Every room's climate in one table. |
 | Your favorite scenes, devices and pop-ups in one list, and each row shows what a tap does. | Quick access to favorites: other pop-ups, devices, anything really. |
 | Shows the temperature, humidity, windows and heating of every room in one table. | Every room in one table, with its temperature, humidity, windows and heating. |
 | The heart rests on speakers that aren't Music Assistant players. | The heart is grayed out on speakers that aren't Music Assistant players. |

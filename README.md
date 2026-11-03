@@ -3,15 +3,15 @@
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=6A8778&labelColor=181715"></a>
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-6A8778?labelColor=181715"></a>
 
-Origami is a Home Assistant dashboard designed around balance and usability. It's rather quiet and never shows too much at once, because most of what's on it only appears when it's needed. Anyone at home should be able to use it without thinking twice, and it should look nice without trying too hard.
+Origami is a quiet dashboard for Home Assistant. It shows what matters when it matters, it's simple enough for anyone at home, and it looks good without trying too hard.
 
-It's a bit of an old-school approach to building a dashboard. Origami works with what Home Assistant already has wherever it can, before adding anything on top, so it isn't exactly beginner-friendly.
+It's built the old-school way, from what Home Assistant already has. That makes it easy to live with, but not the easiest to set up.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
 ## Get started
 
-The theme, the font and Bubble Card come first. After that, any part below can go into a dashboard, and each one says what else it needs.
+Start with the theme, the font and Bubble Card. Each part below lists what else it needs.
 
 <details>
 <summary><b>1. Theme</b></summary>
@@ -69,7 +69,7 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](www/f
 
 <br>
 
-Every module needs Base, so Base goes in first.
+Every module needs Base, so start with that one.
 
 1. Open the module in [`bubble_card/modules`](bubble_card/modules) and select **Copy raw file**.
 2. In the editor of any Bubble card, open **Modules**, then **My Modules**, and select **Import from YAML**.
@@ -87,7 +87,7 @@ To add all modules at once, copy the [`bubble_card/modules`](bubble_card/modules
 1. Edit the dashboard and select **Add card**.
 2. Choose **Manual**, paste the file's contents and select **Save**.
 
-A pop-up stays hidden until a button opens it. The button's tap action is **Navigate** to the pop-up's hash, such as `#popup_server`, and both have to be in the same view.
+A pop-up stays hidden until a button opens it with **Navigate** to its hash, such as `#popup_server`. Both need to be in the same view.
 
 </details>
 
@@ -97,19 +97,19 @@ A pop-up stays hidden until a button opens it. The button's tap action is **Navi
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Hides Home Assistant's header and adds a menu that slides down from the top.
+Replaces Home Assistant's header with a menu that slides down from the top.
 
 ### [Greeting and notifications](dashboard/greeting/)
 
 <img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/greeting.webp">
 
-A greeting, the next event, and notifications that only show up when they matter.
+A greeting with the next event, and notifications right beside it.
 
 ### [Weather](dashboard/weather/)
 
 <img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
 
-The temperature and the weather, with a calm color for each kind of weather.
+Today's weather, in a color that matches it.
 
 ### [Favorites](dashboard/favorites/)
 
@@ -127,13 +127,13 @@ Each room's climate and lights at a glance.
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
-Temperature, humidity, windows and heating for every room in one table.
+Every room's climate in one table.
 
 ### [Navigation bar](dashboard/navigation-bar/)
 
 <img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
 
-The most used pop-ups, the menu and what's playing, at the bottom of the screen.
+The most used pop-ups and what's playing, within thumb's reach.
 
 ## Pop-ups
 
@@ -141,19 +141,19 @@ The most used pop-ups, the menu and what's playing, at the bottom of the screen.
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Everything for one room in one place: media, lights and climate.
+Everything for one room in one place.
 
 ### [Lights](dashboard/lights/)
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-All the lights in one pop-up, from scenes to each single lamp.
+All the lights, from scenes down to each lamp.
 
 ### [Music](dashboard/music/)
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and its group pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
-Music, speaker groups and volume, with a few shortcuts.
+Music, speaker groups and volume.
 
 ### [TV](dashboard/tv/)
 
@@ -165,7 +165,7 @@ Remote, apps and volume for an Android TV.
 
 <img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
 
-A fan's speed, mode and oscillation, with a timer that turns it off later.
+A fan's speed, mode and timer.
 
 ### [Favorites list](dashboard/favorites-list/)
 
@@ -177,7 +177,7 @@ Quick access to favorites: other pop-ups, devices, anything really.
 
 <img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
 
-Health, backups and updates of the Home Assistant server.
+The server's health, backups and updates.
 
 ### [Vacuum](dashboard/vacuum/)
 
@@ -220,7 +220,7 @@ Leave the original file alone, since an update replaces it.
 
 <br>
 
-Assistants like to guess, and with Origami, guesses get the details wrong. A few things help:
+An assistant that guesses gets the details wrong. This helps:
 
 - Give it the files of the part, not a link or a screenshot.
 - Ask it to read the part's README and the [module reference](bubble_card/README.md) before it writes anything.

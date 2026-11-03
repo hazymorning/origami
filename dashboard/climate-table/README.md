@@ -2,7 +2,7 @@
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
-Every room in one table, with its temperature, humidity, windows and heating. Arrows point out the warmest and the coldest room, and the most humid and the driest one.
+Every room in one table, with its temperature, humidity, windows and heating. Arrows mark the warmest, the coldest, the most humid and the driest room.
 
 ## Requirements
 
