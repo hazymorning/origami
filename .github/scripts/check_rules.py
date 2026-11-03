@@ -178,6 +178,28 @@ for name in READMES:
             fail(name, f"links to {target}, but that heading doesn't exist")
 
 
+# Parts: each part's README has its sections in order, keeps everything optional out of Requirements and Setup,
+# and lists exactly the modules that its files use, with Base whenever there is one
+SECTIONS = ["Requirements", "Setup", "Optional", "Entities"]
+MODULE_NAMES = r"\b(Base|Fan|Climate|Media|Slider|Button|Header|Tiles|Table|Popup)\b"
+for readme in sorted((ROOT / "dashboard").glob("*/README.md")):
+    where = str(readme.relative_to(ROOT))
+    parts = re.split(r"^## (.+)$", re.sub(r"^[ \t]*```.*?^[ \t]*```", "", readme.read_text(encoding="utf-8"), flags=re.M | re.S), flags=re.M)
+    heads, body = parts[1::2], dict(zip(parts[1::2], parts[2::2]))
+    if heads not in (SECTIONS, SECTIONS[:2] + SECTIONS[3:]):
+        fail(where, f"has the sections {', '.join(heads)}, not Requirements, Setup, Optional if needed, and Entities")
+    for head in ["Requirements", "Setup"]:
+        for n, line in enumerate(prose(body.get(head, "")).splitlines()):
+            if not line.lstrip().startswith(">") and (word := re.search(r"(?i)\b(optional|without|skip)\b", line)):
+                fail(where, f"has '{word.group(0)}' under {head}, which hold only what the part needs. Optional pieces go under Optional: {line.strip()[:70]}")
+    used = {m for f in readme.parent.glob("*.yaml") for m in re.findall(r"^\s*- origami_(\w+)\s*$", f.read_text(encoding="utf-8"), flags=re.M)}
+    used |= {"base"} if used else set()
+    first = next((line for line in body.get("Requirements", "").splitlines() if "Get started" in line), "")
+    listed = {m.lower() for m in re.findall(MODULE_NAMES, first)}
+    if listed != used:
+        fail(where, f"lists the modules {', '.join(sorted(listed)) or 'none'}, but its files use {', '.join(sorted(used)) or 'none'}")
+
+
 # Screenshots: an image in a README or the module reference whose file doesn't exist yet is a placeholder.
 # The list is the shot list for the last pass before the release, and with --release, a placeholder fails.
 shots = {}

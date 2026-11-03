@@ -2,13 +2,12 @@
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Hides Home Assistant's header and puts a menu in its place that slides down from the top, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
+A menu in place of Home Assistant's header, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
 
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the Base module
 - [Origami Header](https://github.com/hazymorning/origami_header) from HACS, which needs Home Assistant 2026.9 or later
-- Optional: [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/) with four sensors turned on, as described for the [server pop-up](../server/README.md#setup), and automatic backups, for the server card
 
 ## Setup
 
@@ -21,9 +20,9 @@ Hides Home Assistant's header and puts a menu in its place that slides down from
        - /hacsfiles/origami_header/origami-header.js
    ```
 
-3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** opens the File editor app. Without the server card, delete `cards:` and the card below it.
+3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** opens the File editor app.
 4. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started). The header is gone from then on. To edit the dashboard, select **Edit** in the menu or add `?edit=1` to the address.
-5. Open the menu from a button with this tap action:
+5. Open the menu from a button with this tap action, such as the menu button in the [navigation bar](../navigation-bar/README.md):
 
    ```yaml
    tap_action:
@@ -31,9 +30,13 @@ Hides Home Assistant's header and puts a menu in its place that slides down from
      origami_header: toggle
    ```
 
-A tap on the server card opens the [server pop-up](../server/README.md), and a tap on CPU or RAM opens its history.
+## Optional
+
+- **Server card.** It needs [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/) with four sensors turned on, as described for the [server pop-up](../server/README.md#setup), and automatic backups. A tap opens the server pop-up, and a tap on CPU or RAM opens its history. Without the server card, delete `cards:` and the card below it.
 
 ## Entities
+
+All entities are for the server card.
 
 | Entity | Used for |
 | --- | --- |

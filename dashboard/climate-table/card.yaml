@@ -72,11 +72,6 @@ styles: |-
   ha-card {
     margin-bottom: var(--ha-space-5);
   }
-# Shows the table while Climate table is on. The chevron in the rooms header turns it on and off.
-visibility:
-  - condition: state
-    entity: input_boolean.climate_table
-    state: 'on'
 sub_button:
   bottom_layout: rows
   main: []

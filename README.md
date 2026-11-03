@@ -145,7 +145,7 @@ The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Car
 
 ### Room
 
-<img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
+<img width="800" alt="The living room pop-up with the TV, the lights and the climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up-living-room.webp">
 
 Everything for one room in one place. [Setup](dashboard/room/)
 

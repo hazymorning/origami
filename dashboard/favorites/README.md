@@ -2,7 +2,7 @@
 
 <img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
-Tiles for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed, and a hidden tile leaves no gap.
+Tiles for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed.
 
 ## Requirements
 
@@ -11,8 +11,11 @@ Tiles for whatever matters right now, like a running vacuum or tonight's dinner.
 ## Setup
 
 1. In [`tiles.yaml`](tiles.yaml), keep the tiles that fit, delete the others and change their entities. A comment above each tile says when it shows. To add a tile, copy one and change its entity and its visibility conditions.
-2. Some tiles and **All** in the header open pop-ups, such as `#popup_vacuum`. Point them to existing pop-ups or change their tap action.
-3. Add [`header.yaml`](header.yaml) and then [`tiles.yaml`](tiles.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+2. Add [`header.yaml`](header.yaml) and then [`tiles.yaml`](tiles.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+
+## Optional
+
+- **Other pop-ups.** **All** in the header opens the [favorites list](../favorites-list/README.md), and a tap on the music, the fan, the oven or the vacuum opens its pop-up. Without one of them, change that tap action.
 
 ## Entities
 

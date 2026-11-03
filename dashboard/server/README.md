@@ -6,18 +6,20 @@ How the Home Assistant server is doing, with its backups and updates, and button
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Popup, Button, Header and Tiles
+- [Get started](../../README.md#get-started), with the modules Base, Popup, Header and Tiles
 - [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/), an integration that comes with Home Assistant
 - Automatic backups, set up under **Settings**, **System**, **Backups**
-- Optional: [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from HACS, for the graph
 
 ## Setup
 
-1. [Add System Monitor](https://my.home-assistant.io/redirect/config_flow_start/?domain=systemmonitor) as an integration.
+1. Unless System Monitor is set up already, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=systemmonitor) as an integration.
 2. Turn on four of its sensors, which are off at first: **Processor use**, **Memory usage**, **Disk usage /** and **Uptime**. Open each one under the integration, select the gear icon, turn on **Enabled** and select **Update**.
-3. Without Plotly Graph Card, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
-4. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
-5. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
+3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
+
+## Optional
+
+- **Load graph.** It needs [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from HACS. Without it, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
 
 ## Entities
 
