@@ -2,19 +2,22 @@
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-Scenes, all lamps at once, or each lamp on its own. The scenes start with the one for the time of day, and the last one turned on stays highlighted while a lamp is on.
+All lamps of a room at once or each one on its own, and the room's scenes.
 
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the modules Base, Popup, Button, Header and Slider
-- A [scene](https://www.home-assistant.io/docs/scene/) for each scene button
 
 ## Setup
 
 1. Unless the room has a light group already, open [Helpers](https://my.home-assistant.io/redirect/helpers/) and select **Create helper**, then **Group** and **Light group**. Name it **Living room**, so its entity ID is `light.living_room`, choose the room's lamps as **Members** and select **Submit**.
-2. In [`pop-up.yaml`](pop-up.yaml), change the light group, the lamps and the scenes to the room's own, and list the same scenes under `active`.
+2. In [`pop-up.yaml`](pop-up.yaml), change the light group and the lamps under `mini_popups` to the room's own.
 3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_lights`.
+
+## Optional
+
+- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a button for each, starting with the one for the time of day, and the scene turned on last stays highlighted while a lamp is on. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete that group, `active` and `start`.
 
 > [!TIP]
 > Each scene's `css_class`, such as `evening`, picks the colors of its circle under `styles`, and `start` names a class for each time of day, so the row begins with the scene that fits. A class without colors gets a gray circle.

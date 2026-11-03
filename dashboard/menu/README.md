@@ -20,7 +20,7 @@ A menu in place of Home Assistant's header, with shortcuts and a small card for 
        - /hacsfiles/origami_header/origami-header.js
    ```
 
-3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** opens the File editor app.
+3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** only works with the File editor app.
 4. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started). The header is gone from then on. To edit the dashboard, select **Edit** in the menu or add `?edit=1` to the address.
 5. Open the menu from a button with this tap action, such as the menu button in the [navigation bar](../navigation-bar/README.md):
 

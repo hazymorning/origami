@@ -2,27 +2,24 @@
 
 <img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
 
-Starts the vacuum for the whole home or single rooms, and shows its battery and bin. The wrench lists the brushes, the filter and the sensors with the hours they have left, and turns red when a part is due.
+Starts the vacuum for the whole home or single rooms, and shows its battery, its bin and the parts that need care.
 
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Button and Tiles
-- A vacuum that supports area cleaning, such as one from [Roborock](https://www.home-assistant.io/integrations/roborock/), for the room buttons. Area cleaning needs Home Assistant 2026.3 or later.
 
 ## Setup
 
-1. Open [Entities](https://my.home-assistant.io/redirect/entities/) and select the vacuum, then the gear icon. Select **Map vacuum segments to areas**, choose the area of each room and select **Save**.
-2. In [`pop-up.yaml`](pop-up.yaml), change the entities to the vacuum's own, as listed under [Entities](#entities), and the room buttons to the home's rooms. Each button's `cleaning_area_id` is the **Area ID** from the area's settings under [Areas](https://my.home-assistant.io/redirect/areas/).
-3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
-4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_vacuum`, such as the vacuum tile in the [favorites](../favorites/README.md).
+1. In [`pop-up.yaml`](pop-up.yaml), change `vacuum.robot` and `sensor.robot_battery` to the vacuum's own.
+2. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+3. Open the pop-up from a button whose tap action is **Navigate** to `#popup_vacuum`, such as the vacuum tile in the [favorites](../favorites/README.md).
 
 ## Optional
 
-- **Bin.** It counts the runs since the bin was emptied, and a tap after emptying it sets it back to 0 %. Create a **Counter** helper named **Vacuum bin** under [Helpers](https://my.home-assistant.io/redirect/helpers/), so its entity ID is `counter.vacuum_bin`, and set **Maximum value** to the number of runs that fill the bin, such as 3. Then open [Automations](https://my.home-assistant.io/redirect/automations/), select **Create automation**, then **Create new automation**, and in the three-dot menu **Edit in YAML**. Paste [`bin.yaml`](bin.yaml), change `vacuum.robot` to the vacuum and save it. For a vacuum whose dock empties its bin, delete the sub-button under `# The bin` instead.
-- **The room it cleans.** With a sensor for the room the vacuum is in, such as Roborock's current room, that room's button lights up while it cleans. The button's name or `css_class` has to be the room's name in the vacuum's app.
-
-> [!TIP]
-> Without area cleaning, a room button can use the integration's own action for a room, if it has one, such as `xiaomi_miio.vacuum_clean_segment`.
+- **Rooms.** For a vacuum that supports area cleaning, such as one from [Roborock](https://www.home-assistant.io/integrations/roborock/), with Home Assistant 2026.3 or later. Open [Entities](https://my.home-assistant.io/redirect/entities/) and select the vacuum, then the gear icon. Select **Map vacuum segments to areas**, choose the area of each room and select **Save**. Then change the room buttons to the home's rooms: each button's `cleaning_area_id` is the **Area ID** from the area's settings under [Areas](https://my.home-assistant.io/redirect/areas/). Without area cleaning, a room button can use the integration's own action for a room, if it has one, such as `xiaomi_miio.vacuum_clean_segment`, or the room buttons go.
+- **The room it cleans.** For a vacuum with a sensor for the room it's in, such as Roborock's current room: that room's button lights up while it cleans. The button's name or `css_class` has to be the room's name in the vacuum's app.
+- **Bin.** For a vacuum that doesn't empty its bin in the dock. It counts the runs since the bin was emptied, and a tap after emptying it sets it back to 0 %. Create a **Counter** helper named **Vacuum bin** under [Helpers](https://my.home-assistant.io/redirect/helpers/), so its entity ID is `counter.vacuum_bin`, and set **Maximum value** to the number of runs that fill the bin, such as 3. Then open [Automations](https://my.home-assistant.io/redirect/automations/), select **Create automation**, then **Create new automation**, and in the three-dot menu **Edit in YAML**. Paste [`bin.yaml`](bin.yaml), change `vacuum.robot` to the vacuum and save it. Without the bin, delete the sub-button under `# The bin`.
+- **Maintenance.** For a vacuum with sensors for the hours its parts have left, such as Roborock's. The wrench above the rooms lists them, and a part says **Due** in red once its time is up. Change the sensors under `mini_popups` and in the wrench's color to the vacuum's own, or delete `mini_popups` and the wrench.
 
 ## Entities
 
@@ -32,6 +29,6 @@ The sensors are examples from Roborock. A vacuum's device page lists its own sen
 | --- | --- |
 | `vacuum.robot` | The state as the name, the buttons and the rooms |
 | `sensor.robot_battery` | The battery, which says **Charging** while the vacuum charges in its dock |
-| `sensor.robot_main_brush_time_left`, `sensor.robot_side_brush_time_left`, `sensor.robot_filter_time_left`, `sensor.robot_sensor_time_left` | The hours left for each part. Once a part is due, it says **Due** in red and the wrench turns red. |
-| `counter.vacuum_bin` | Optional: the bin, which fills with each run and turns red when full |
-| `sensor.robot_current_room` | Optional: the room it cleans |
+| `sensor.robot_current_room` | The room it cleans |
+| `counter.vacuum_bin` | The bin, which fills with each run and turns red when full |
+| `sensor.robot_main_brush_time_left`, `sensor.robot_side_brush_time_left`, `sensor.robot_filter_time_left`, `sensor.robot_sensor_time_left` | Maintenance: the hours left for each part |
