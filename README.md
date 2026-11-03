@@ -1,11 +1,11 @@
 <img alt="Origami on two phones in light and dark mode, with the greeting, the weather, favorites and rooms" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero.webp">
 
-<a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=6A8778&labelColor=181715"></a>
-<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-6A8778?labelColor=181715"></a>
+<a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=white&labelColor=black"></a>
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-white?labelColor=black"></a>
 
-Origami is a quiet dashboard for Home Assistant. It shows what matters when it matters, it's simple enough for anyone at home, and it looks good without trying too hard.
+Origami is a Home Assistant dashboard that took years to get right. It changed with daily use more often than anyone would care to count and never quite felt done, until one day it did. So here it is, written down for other homes.
 
-It's built the old-school way, from what Home Assistant already has. That makes it easy to live with, but not the easiest to set up.
+It shows what matters without feeling busy, it's simple enough for anyone at home, and it looks good without trying too hard. Wherever it can, it uses what Home Assistant already has, because fewer parts leave less to break. The rest comes from the wonderful Bubble Card and a few other great community cards, which makes Origami very flexible, though not the easiest place to start.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
@@ -18,7 +18,9 @@ Start with the theme, the font and Bubble Card. Each part below lists what else 
 
 <br>
 
-1. Add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, only the `themes` line goes under it.
+The theme holds Origami's colors, sizes and shadows, for light and dark mode.
+
+1. Unless themes already load from the `themes` folder, add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, only the `themes` line goes under it.
 
    ```yaml
    frontend:
@@ -38,6 +40,8 @@ Start with the theme, the font and Bubble Card. Each part below lists what else 
 
 <br>
 
+Origami is set in Montserrat.
+
 1. Open [Resources](https://my.home-assistant.io/redirect/lovelace_resources/) and select **Add resource**.
 2. Paste this URL, choose **Stylesheet** and select **Create**.
 
@@ -56,11 +60,13 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](www/f
 
 <br>
 
-1. Download [Bubble Card](https://github.com/Clooos/Bubble-Card) 3.4 or later and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) in HACS. Bubble Card needs the Tools to add modules.
+Most of Origami is built with the wonderful [Bubble Card](https://github.com/Clooos/Bubble-Card) by Clooos. Origami needs version 3.4 or later, and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) to add its modules.
+
+1. Download Bubble Card and Bubble Card Tools in HACS, or update them if they're already there.
 
    [Open Bubble Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
 
-2. Restart Home Assistant, then [add Bubble Card Tools](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration.
+2. Restart Home Assistant. Unless Bubble Card Tools is set up already, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration.
 
 </details>
 
