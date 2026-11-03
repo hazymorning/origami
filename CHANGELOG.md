@@ -56,7 +56,7 @@ These changes are in the `next` branch and come with the next release.
 - The ring skips a player that has lost track of the music, such as a Music Assistant player whose position stands still, and follows the speaker itself.
 - A disabled play key rests in a quiet fill, so the play row can stay in place while nothing plays.
 - The play key is the largest control after the cover. Beside a large cover above the name, it has a 64 px fill with a 40 px icon inside its ring at 80 px, and beside a smaller cover it is one step smaller. Its ring has the tints of a slider: the track of `fill-strong` and the arc of `fill-loud`.
-- `cover` shows the cover in the icon, above the name as a large square, alone as that square with nothing else on the card, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
+- `cover` shows the cover in the icon, above the name as a large square, or as the card's background. A list combines `background` with `icon` or `above`, and a map or a template can change the place with the state. `cover_mix` and `cover_blur` set how strongly the background cover shows and blur it.
 
 #### Speaker Select
 
@@ -76,7 +76,7 @@ These changes are in the `next` branch and come with the next release.
 #### Header
 
 - Header and Popup share their value keys: `name`, `icon`, `color`, `name_color` and `background`.
-- New options: `size: large`, `title_action`, `value_size`, `icon_gap`, `scroll` and `value_position: above`, which puts the values in a small line above the title.
+- New options: `size: large`, `title_action`, `value_size`, `scroll` and `value_position: above`, which puts the values in a small line above the title.
 - The `switch` value style joins the values into one small switch.
 - A chosen value on a switch or a chip has the active fill, as every active control. On a switch, it also casts the chip shadow.
 - Header writes the title itself, so a title with a `${ }` template shows at once.
@@ -89,6 +89,7 @@ These changes are in the `next` branch and come with the next release.
 - `value_position: beside` puts the values beside the title.
 - The backdrop is blurred through Bubble Card's own `backdrop_blur` variable, which older Safari also reads, and as with `backdrop_blur`, the pop-up's surface then has no blur of its own, so the phone draws one blur instead of two. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
+- A mini pop-up has the card background, as a menu does, so it stands out from the dimmed pop-up behind it.
 - A pop-up casts the theme's `shadow-elevated`, as a mini pop-up does, whatever `shadow_opacity` says, unless it is `0`. The buttons of a frameless mini pop-up lie on the dim as on a gray fill, so they cast the chip shadow, and it shows whole.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.

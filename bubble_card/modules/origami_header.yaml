@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.7.1"
+  version: "3.8.0"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -64,11 +64,6 @@ origami_header:
       selector:
         text: {}
       default: "var(--ha-font-size-m)"
-    - name: icon_gap
-      label: "Space between a value's icon and its name"
-      selector:
-        text: {}
-      default: "var(--ha-space-1)"
     - name: scroll
       label: "The values scroll sideways next to the title"
       selector:
@@ -106,7 +101,6 @@ origami_header:
       const size = String(cfg.icon_size ?? "").trim();
       const max = String(cfg.value_max_width ?? "").trim();
       const text = String(cfg.value_size ?? "").trim() || "var(--ha-font-size-m)";
-      const gap = String(cfg.icon_gap ?? "").trim();
       card._orgH = {
         weight: cfg.weight === "regular" ? "var(--ha-font-weight-normal)" : cfg.weight === "medium" ? "var(--ha-font-weight-medium)" : "var(--ha-font-weight-bold)",
         color: String(raw ?? "").trim() || "currentcolor",
@@ -117,7 +111,6 @@ origami_header:
         // With title_action, the whole header runs the first value's tap action, such as a title that opens a menu
         titled: !!cfg.title_action,
         text,
-        gap: gap || "var(--ha-space-1)",
         chip: cfg.value_style === "chip",
         // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
         switch: cfg.value_style === "switch",
@@ -149,8 +142,8 @@ origami_header:
       if (!card._orgH.chip) list.forEach(({ n, opt }) => {
         if (!org.has(opt?.name)) return;
         const sel = at(n);
-        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--org-header-icon-gap) !important; }");
-        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--org-header-icon-gap) 0 !important; }");
+        rules.push(sel + ":not(.content-icon-right) .bubble-sub-button-icon.icon-without-state:not(.hidden) { margin-inline-end: var(--ha-space-1) !important; }");
+        rules.push(sel + ".content-icon-right .bubble-sub-button-icon:not(.hidden) { margin-inline: var(--ha-space-1) 0 !important; }");
       });
       card._orgH.css = rules.join("\n");
       return "";
@@ -159,7 +152,6 @@ origami_header:
       --org-header-weight: ${card._orgH.weight};
       --org-header-icon-color: ${card._orgH.color};
       --org-header-icon-size: ${card._orgH.size};
-      --org-header-icon-gap: ${card._orgH.gap};
     }
     ha-card .bubble-container {
       display: flex !important;
@@ -216,7 +208,7 @@ origami_header:
       font-weight: var(--ha-font-weight-normal) !important;
       --mdc-icon-size: var(--org-header-icon-size) !important;
       margin: 0 !important;
-      margin-inline-end: var(--org-header-icon-gap) !important;
+      margin-inline-end: var(--ha-space-1) !important;
       color: var(--org-header-icon-color) !important;
       opacity: 1 !important;
     }

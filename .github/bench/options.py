@@ -36,7 +36,7 @@ values = [
   {'name': 'Color', 'icon': 'mdi:palette-outline', 'tap_action': sel('Color'), 'origami_header': {'name': 'Colour'}},
 ]
 opts = [{}, {'weight': 'regular'}, {'weight': 'medium'}, {'icon_color': 'var(--orange-color)'}, {'icon_size': 'var(--icon-size-l)'},
-        {'value_size': 'var(--ha-font-size-s)'}, {'icon_gap': 'var(--ha-space-3)'}, {'value_max_width': '120px'}, {'size': 'large'},
+        {'value_size': 'var(--ha-font-size-s)'}, {'value_max_width': '120px'}, {'size': 'large'},
         {'title_action': True}, {'scroll': True}, {'value_position': 'above'}]
 styles = [None, 'chip', 'switch']
 cards = []
@@ -63,7 +63,7 @@ grouped = [{'name': 'View', 'group': copy.deepcopy(row[:3])}, {'name': 'More', '
 bopts = [{}, {'background': False}, {'align': 'center'}, {'align': 'end'}, {'columns': 3}, {'muted': True}, {'icon_size': 'var(--icon-size-s)'},
          {'padding': 'var(--ha-space-2)'}, {'active': 'Color'}, {'color': 'var(--orange-color)'}, {'active_style': 'toggle'}, {'segmented': True},
          {'segmented': ['View']}, {'chips': True}, {'labels': 'below'}, {'labels': 'below', 'field_size': '64px'}, {'outline': 'Scenes'},
-         {'start': 'Color'}, {'pending': True}, {'label_size': 'normal', 'segmented': True}, {'scroll': True}, {'press': False}]
+         {'start': 'Color'}, {'pending': True}, {'label_size': 'normal', 'segmented': True}, {'scroll': True}]
 pairs = [{'chips': True, 'scroll': True}, {'chips': True, 'labels': 'below'}, {'labels': 'below', 'columns': 3}, {'labels': 'below', 'scroll': True},
          {'segmented': True, 'scroll': True}, {'segmented': ['View'], 'scroll': True}, {'active_style': 'toggle', 'chips': True}, {'background': False, 'chips': True},
          {'columns': 3, 'align': 'center'}, {'background': False, 'labels': 'below'}, {'muted': True, 'segmented': True}, {'chips': True, 'columns': 2},

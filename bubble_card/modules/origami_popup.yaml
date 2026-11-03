@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.15.1"
+  version: "4.16.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -413,7 +413,8 @@ origami_popup:
       padding: 0;
       overflow: hidden;
       border-radius: var(--ha-card-border-radius);
-      background: var(--popup-background);
+      /* It lies above the dimmed pop-up as a menu does, so it has the card background and the shadow of what lies above */
+      background: var(--ha-card-background);
       box-shadow: var(--shadow-elevated);
       color: var(--primary-text-color);
       outline: none;

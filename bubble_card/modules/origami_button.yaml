@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.13.1"
+  version: "3.14.0"
   supported:
     - sub-buttons
     - button
@@ -121,11 +121,6 @@ origami_button:
       selector:
         boolean: {}
       default: false
-    - name: press
-      label: "Press feedback"
-      selector:
-        boolean: {}
-      default: true
   code: |
     ${(() => {
       const org = card._org;
@@ -236,7 +231,6 @@ origami_button:
         bars: barCss,
         barOn,
         dividers,
-        press: cfg.press ?? true,
         large: cfg.label_size !== "normal",
         // The Lamp style tints active buttons in the lamp color, or in the state color of a button's own entity
         lamp: lamp || "var(--lamp-color)",
@@ -317,7 +311,7 @@ origami_button:
       justify-content: center !important;
       gap: var(--ha-space-2) !important;
     }
-    ${!card._orgB.press ? "" : card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
+    ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       --org-btn-bg: var(--fill-strong);
       --org-value-chip: var(--fill-strong);
     }` : `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {

@@ -452,7 +452,7 @@ The Media options go under `origami_media:`.
 | `state` | | Replaces the module's state line while it has a value. Accepts a template, such as one that reads a title from a template sensor. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
 | `badge` | `false` | Marks the group leader with a crown and its members with a link on the icon. |
 | `icon_color` | | Maps the same keys as `icons` to an icon color, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
-| `cover` | `icon` | Where the cover shows: `icon` in the icon, `above` as a large square above the name, `only` as that square with nothing else on the card, or `background` filling the card. `background` combines with `icon` or `above` in a list, such as `[background, icon]`. Also accepts a map from the state or a template, as shown below. |
+| `cover` | `icon` | Where the cover shows: `icon` in the icon, `above` as a large square above the name, or `background` filling the card. `background` combines with `icon` or `above` in a list, such as `[background, icon]`. Also accepts a map from the state or a template, as shown below. |
 | `cover_mix` | `25` | How strongly the cover shows while it fills the card, in percent. The card's color makes up the rest. |
 | `cover_blur` | `false` | Blurs the cover while it fills the card, so only its colors remain. |
 
@@ -547,13 +547,6 @@ origami_media:
   cover:
     playing: above
     paused: above
-```
-
-With `cover: only`, the card is just the square, with the card's padding around it. Its name, its keys and its rows below are left out. A template can switch between `above` and `only`, so a pop-up keeps its cover in every view while another view replaces the controls below it:
-
-```yaml
-origami_media:
-  cover: "${states('input_select.music_view') === 'Music' ? 'above' : 'only'}"
 ```
 
 #### Cover as background
@@ -832,7 +825,6 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `muted` | `false` | Dims the text and icons. |
 | `icon_size` | `var(--icon-size-2xs)` | The icon size. |
 | `padding` | `0` | The space around the buttons. |
-| `press` | `true` | Buttons shrink a little while pressed, and segments get a stronger fill. |
 | `segmented` | `false` | `true` joins the buttons of each group into a bar, all in one row with equal widths, and fills the active segment. Segments are taller, with bold labels, and ignore `background`, `align`, `columns`, `active_style` and `scroll`. Group names instead of `true` make only those groups small switches, which can stand in any row and fill their active segment the same way. |
 | `chips` | `false` | The buttons are chips, with the label in the text color and the icon in the secondary color. Active chips have a bold label. |
 | `pending` | `false` | After a tap, a button shows its next look, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, never segments or buttons that only open something. A button's own `pending` key decides for that button. |
@@ -1028,7 +1020,6 @@ The Header module turns a separator card into a section header, with the card's 
 | `size` | `normal` | `large` makes the title as large as a pop-up's, with less space above and none below. |
 | `title_action` | `false` | A tap anywhere on the header runs the first value's tap action. |
 | `value_size` | `var(--ha-font-size-m)` | The text size of the values. |
-| `icon_gap` | `var(--ha-space-1)` | The space between icon and name of plain values. |
 | `value_max_width` | | The values' maximum width, such as `50%`, with an ellipsis for longer ones. Set `scrolling_effect: false` on these sub-buttons, or Bubble Card scrolls them. |
 | `scroll` | `false` | The values scroll sideways, up to the edge of a pop-up. |
 | `value_position` | `beside` | `above` puts the values in a small line above the title. |
@@ -1453,7 +1444,7 @@ sub_button:
 
 `gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
 
-`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens above the key where it fits, or else on the side with more room, as wide as the pop-up's cards or its own `width`, and the pop-up behind it dims. Like Home Assistant's menus, it grows out of the key from 90 % while it fades in, in the time of Home Assistant's dialogs, and it shrinks back the same way when a tap beside it, Esc or closing the pop-up closes it. While it is open, its edge next to the key stays in place, so a change of its cards never moves it, and cards taller than the screen scroll. A card in it with Base's `hidden` takes no space while it is hidden. Once the pop-up has opened, it draws its mini pop-ups ahead and keeps their cards up to date, so a tap only has to show one. A Header at the top of a mini pop-up has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
+`mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens next to the key, above it where it fits, as wide as the pop-up's cards or its own `width`. Like a menu, it has the card background and grows out of its key over the dimmed pop-up, and a tap beside it or Esc closes it. A card with Base's `hidden` takes no space while it's hidden, and a Header at the top has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
 
 ```yaml
 origami_popup:

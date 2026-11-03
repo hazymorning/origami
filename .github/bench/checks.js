@@ -400,24 +400,6 @@ window.__check = async () => {
     report('play key', fails, `${keys.length} play keys are as large as their cover's place asks`);
   }
 
-  // Cover only: the card is its cover with the card's padding on every side, and its name, keys and rows are hidden
-  {
-    const fails = [];
-    const only = origami.filter((c) => c.cfg.origami_media?.cover === 'only');
-    for (const card of only) {
-      const box = card.root.querySelector('.bubble-container').getBoundingClientRect();
-      const cover = card.root.querySelector('.bubble-main-icon-container').getBoundingClientRect();
-      const pad = length(card, 'var(--org-pad)');
-      const sides = [cover.top - box.top, box.right - cover.right, box.bottom - cover.bottom, cover.left - box.left];
-      if (sides.some((s) => !near(s, pad, 1))) fails.push(`card ${card.i}: the cover is ${sides.map(r1).join(' / ')} px from the card's edges, expected ${r1(pad)} on every side`);
-      if (!near(cover.width, cover.height, 1)) fails.push(`card ${card.i}: the cover is ${r1(cover.width)}x${r1(cover.height)}, expected a square`);
-      const shown = [...card.root.querySelectorAll('.bubble-name-container, .bubble-sub-button')].filter(visible);
-      if (shown.length) fails.push(`card ${card.i}: ${shown.map(label).join(', ')} still show`);
-    }
-    if (!only.length) fails.push('the sheet has no card that shows only its cover');
-    report('cover only', fails, `${only.length} card shows only its cover, with the card's padding around it`);
-  }
-
   // Dropdown ring: an open dropdown shows its menu without Bubble Card's ring in the accent color, also a key with an icon and no name. Bubble Card shows the ring through the element's own style while the menu is open, so the check does the same.
   {
     const fails = [];
@@ -552,6 +534,11 @@ window.__check = async () => {
           if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`it opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
           if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
           if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
+          // It lies above the pop-up as a menu does, with the card background, so it stands out from the dimmed pop-up behind it
+          const paper = getComputedStyle(document.querySelector('.shot')).getPropertyValue('--ha-card-background').trim();
+          const probe = document.body.appendChild(Object.assign(document.createElement('div'), { style: 'display:none;background-color:' + paper }));
+          if (cs.backgroundColor !== getComputedStyle(probe).backgroundColor) fails.push(`its panel is ${cs.backgroundColor}, expected the card background ${getComputedStyle(probe).backgroundColor}`);
+          probe.remove();
           if (!near(parseFloat(bs.paddingTop), pad) || !near(parseFloat(bs.paddingLeft), pad)) fails.push(`its padding is ${bs.padding}, expected ${pad}px`);
           const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
           if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
