@@ -30,7 +30,8 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
 
-Give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a slider at the bottom `rows: '2.2'`, also in pop-ups. Cards with Base's `vertical` option need no `rows`. A card with `bottom_layout: rows` and `rows: auto` grows with its rows.
+> [!TIP]
+> In a sections view, give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a slider at the bottom `rows: '2.2'`, also in pop-ups. Cards with Base's `vertical` option need no `rows`, and a card with `bottom_layout: rows` and `rows: auto` grows with its rows.
 
 <details>
 <summary>Color</summary>
@@ -47,7 +48,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. A menu is as wide as its longest option and has the spacing of a mini pop-up: 16 px around its rows and 8 px to its dropdown. Each icon has the same space to its row's start as above and below it. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name and the helper's icon, which `show_icon: false` hides. Its menu lists each entity's name and icon, and Base's `words` option renames them, with the entity ID or the name as the key.
 
 </details>
 
@@ -56,16 +57,17 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 
 <br>
 
-The card background casts a shadow, as paper does, and a gray fill never casts one.
+<img width="800" alt="A card with a tray, a tile and a switch with their shadows, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-depth.webp">
 
-- A card casts the card shadow on the page. A pop-up, a mini pop-up and a menu cast the stronger shadow of what lies above the page, and so does each button of a frameless mini pop-up, which has no panel.
-- On a card, on the page and in a pop-up, a control is a flat gray fill, such as the area behind an icon, a key, a switch or a slider's track.
-- A gray fill that holds controls gives each of them the card background and a small shadow, which the theme calls the chip shadow. In a tray on a card, these are the keys with a background. On a tile, they are the icon, the keys, the switch, the slider and a tray, whose keys are flat fills again.
-- A control that turns on changes only its color, to `fill-active`, and keeps the shadow of its place. The chosen value in a switch or a segmented bar has the chip shadow, and a chosen chip on the page has none.
-- A lit icon tints its fill or its card background. On the page, it takes the theme's `tint`, which mixes its color into the card background, so it looks lit.
-- In dark mode, a control on a gray fill is one step lighter than that fill.
+The card background casts a shadow, as paper does, and a gray fill never does. So a control always stands out from what it lies on:
 
-The theme's `tile-chip-background` and `tile-chip-shadow` set the controls on a gray fill. In a copy of the theme, `var(--fill-subtle)` as `tile-chip-background` in both modes and `none` as `tile-chip-shadow` make them flat.
+- On a card and on the page, it's a flat gray fill.
+- On a gray fill, such as a tile, a tray or a switch's track, it has the card background and the small chip shadow. In the tray on a tile, the keys are flat again.
+- When it turns on, only its color changes.
+- In dark mode, a control on a gray fill is one step lighter than the fill.
+
+> [!TIP]
+> For flat controls, a copy of the theme sets `tile-chip-shadow: none`, and `tile-chip-background: var(--fill-subtle)` in both modes. `shadow_opacity: 0` turns off one pop-up's shadow.
 
 </details>
 
@@ -1489,7 +1491,7 @@ cards:
             mini_popup: volume
 ```
 
-In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. With `width: fit-content`, it is as wide as its widest card, so a list of buttons is as wide as its longest button in any language. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid, with the shadow of a mini pop-up. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
+In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. With `width: fit-content`, it is as wide as its widest card, so a list of buttons is as wide as its longest button in any language. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid. They lie on the dim as on a gray fill, with the chip shadow. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
 
 ```yaml
 origami_popup:

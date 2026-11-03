@@ -575,10 +575,28 @@ window.__check = async () => {
           if (!box || box.scrollHeight <= box.clientHeight + 1) fails.push('the narrow one does not scroll, though its cards are taller than its max_height');
           if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`the narrow one covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
           if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`the narrow one opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
-          // Frameless, it has no panel, and its cards start at its edge
+          // Frameless, it has no panel, its cards start at its edge, and no edge cuts the shadow of its first button
           const ns = getComputedStyle(n);
           if (!/rgba\(0, 0, 0, 0\)|transparent/.test(ns.backgroundColor) || ns.boxShadow !== 'none') fails.push(`the frameless one has a panel: ${ns.backgroundColor}, shadow ${ns.boxShadow}`);
-          if (box && parseFloat(getComputedStyle(box).paddingTop) !== 0) fails.push(`the frameless one keeps ${getComputedStyle(box).paddingTop} of padding`);
+          const first = box?.firstElementChild?.getBoundingClientRect();
+          if (first && !(near(first.top, b.top) && near(first.left, b.left))) fails.push(`the frameless one's cards start ${r1(first.left - b.left)} px and ${r1(first.top - b.top)} px from its edge, expected 0`);
+          const button = box?.firstElementChild?.querySelector('bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button');
+          if (box && button) {
+            // reach() tells how far a shadow draws past its shape on each side
+            const reach = { top: 0, right: 0, bottom: 0, left: 0 };
+            for (const part of getComputedStyle(button).boxShadow.split(/,(?![^(]*\))/)) {
+              if (/inset/.test(part)) continue;
+              const [x = 0, y = 0, blur = 0, spread = 0] = (part.replace(/(rgba?|color)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat);
+              reach.top = Math.max(reach.top, blur + spread - y); reach.bottom = Math.max(reach.bottom, blur + spread + y);
+              reach.left = Math.max(reach.left, blur + spread - x); reach.right = Math.max(reach.right, blur + spread + x);
+            }
+            const r = button.getBoundingClientRect();
+            const clip = box.getBoundingClientRect();
+            const room = { top: r.top - Math.max(clip.top, ns.overflow === 'visible' ? -Infinity : b.top), left: r.left - Math.max(clip.left, ns.overflow === 'visible' ? -Infinity : b.left), right: Math.min(clip.right, ns.overflow === 'visible' ? Infinity : b.right) - r.right };
+            const cut = ['top', 'left', 'right'].filter((side) => room[side] < reach[side] - 0.5);
+            if (!reach.bottom) fails.push('the frameless one\'s buttons cast no shadow, though they lie on the dim');
+            else if (cut.length) fails.push(`the frameless one cuts its first button's shadow at the ${cut.join(' and ')}: ${cut.map((s) => r1(room[s]) + ' px of room for ' + r1(reach[s])).join(', ')}`);
+          }
           window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
           if (!(await until(() => !mini(), 3000))) fails.push('Esc left the narrow one open');
         }

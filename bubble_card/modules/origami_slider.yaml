@@ -1,6 +1,6 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.15.0"
+  version: "1.15.1"
   supported:
     - button
     - sub-buttons
@@ -229,7 +229,7 @@ origami_slider:
     /* The track is as tall as a key, or one step taller on a master slider, and its corners follow its height */
     ha-card {
       --org-one-h: ${card._orgOne.master ? "var(--control-height-list)" : "var(--control-height-icon)"};
-      --org-one-r: calc(var(--org-one-h) * var(--radius-ratio, 0.35));
+      --org-one-r: calc(var(--org-one-h) * var(--radius-ratio));
       --org-row-height: var(--org-one-h);
       --bubble-border: none;
     }

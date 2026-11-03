@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.15.0"
+  version: "4.15.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -279,7 +279,7 @@ origami_popup:
       height: var(--control-height-icon) !important;
     }
     .bubble-close-button {
-      border-radius: var(--radius-control, 14px) !important;
+      border-radius: var(--radius-control) !important;
       background-color: transparent !important;
       opacity: var(--opacity-quiet);
       font-weight: var(--ha-font-weight-medium) !important;
@@ -435,17 +435,19 @@ origami_popup:
       -webkit-mask-image: linear-gradient(transparent, #000 var(--ha-space-4), #000 calc(100% - var(--ha-space-4)), transparent);
       mask-image: linear-gradient(transparent, #000 var(--ha-space-4), #000 calc(100% - var(--ha-space-4)), transparent);
     }
-    /* A frameless mini pop-up has no panel, so its cards stand on the dim like the buttons of a sheet, 8 px apart. Their subtle fills take the card background there, so they stay solid. */
+    /* A frameless mini pop-up has no panel, so its cards stand on the dim like the buttons of a sheet, 8 px apart. Their subtle fills take the card background there, so they stay solid, and they lie on the dim as on a gray fill, with the chip shadow. The box reaches 8 px past the cards, as far as that shadow, so it shows whole, also while the list scrolls. */
     .org-mini.frameless {
+      overflow: visible;
       background: none;
       box-shadow: none;
       border-radius: 0;
       --fill-subtle: var(--ha-card-background);
-      --org-key-shadow: var(--shadow-elevated);
+      --org-key-shadow: var(--tile-chip-shadow);
     }
     .org-mini.frameless .org-mini-box {
       gap: var(--ha-space-2);
-      padding: 0;
+      margin: calc(-1 * var(--ha-space-2));
+      padding: var(--ha-space-2);
       -webkit-mask-image: none;
       mask-image: none;
     }
@@ -456,7 +458,7 @@ origami_popup:
       width: auto;
       height: auto;
       padding: 0;
-      background: var(--bubble-backdrop-background-color, var(--bubble-default-backdrop-background-color, var(--mdc-dialog-scrim-color)));
+      background: var(--bubble-backdrop-background-color);
       -webkit-backdrop-filter: var(--bubble-backdrop-filter, ${card._orgP.dimBlur});
       backdrop-filter: var(--bubble-backdrop-filter, ${card._orgP.dimBlur});
       touch-action: none;

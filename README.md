@@ -205,7 +205,7 @@ The vacuum, for the whole home or room by room.
 2. In the copy, change `Origami:` at the top to a new name, then change the colors. The comments in the file say what each group of settings does.
 3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and select the new theme in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
-Leave the original file alone, since an update replaces it.
+Most changes need a few lines: `primary-color` and `accent-color` in each mode for the accent, `radius-ratio` for how round the controls are, and a state color, such as `state-light-active-color: var(--orange-color)`, for one kind of device. Leave the original file alone, since an update replaces it.
 
 </details>
 

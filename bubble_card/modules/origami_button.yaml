@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.13.0"
+  version: "3.13.1"
   supported:
     - sub-buttons
     - button
@@ -233,7 +233,6 @@ origami_button:
         seg,
         scroll,
         chips,
-        active,
         bars: barCss,
         barOn,
         dividers,
@@ -269,7 +268,7 @@ origami_button:
       --org-btn-lamp: ${card._orgB.lamp};
       /* A lit button tints what a key has on its card, and on the page, where a key is gray on gray, the card background, as the theme's tint does */
       --org-btn-lit: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--org-key-bg, var(--ha-card-background)));
-      --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
+      --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio));
     }
     ${card._orgB.lamps}
     ${card._orgB.values}
@@ -346,7 +345,7 @@ origami_button:
       width: 100% !important;
       height: var(--org-btn-field) !important;
       margin: 0 !important;
-      border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
+      border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio)), var(--ha-card-border-radius));
       background: var(--org-value-chip, var(--org-btn-bg));
       ${card._orgB.bg ? "box-shadow: var(--org-key-shadow, none);" : ""}` : "margin-inline: 0 var(--ha-space-2) !important;"}
       color: ${card._orgB.chips ? "var(--secondary-text-color)" : "inherit"} !important;
@@ -392,7 +391,7 @@ origami_button:
       border-radius: calc(var(--org-btn-radius) - var(--org-btn-inset));
       background-color: var(--fill-active);
       /* The bar is a gray fill, so the active segment in it has the chip shadow, as a key in a tray */
-      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow));
+      box-shadow: var(--tile-chip-shadow);
       opacity: 0;
       transition: opacity var(--duration-normal) ease;
     }
@@ -426,7 +425,7 @@ origami_button:
     ${card._orgB.bars}
     ${card._orgB.barOn.length ? card._org.each(card._orgB.barOn, "") + ` {
       background: var(--fill-active) !important;
-      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
+      box-shadow: var(--tile-chip-shadow) !important;
       color: var(--text-color-active) !important;
     }
     ` + card._org.each(card._orgB.barOn, " .bubble-sub-button-name-container") + ` {

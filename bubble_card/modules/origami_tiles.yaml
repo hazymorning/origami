@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.8.0"
+  version: "3.8.1"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
@@ -209,7 +209,7 @@ origami_tiles:
     .bubble-sub-button-group${card._orgTi.group} {
       --org-row-min: ${card._orgTi.row || (card._orgTi.slim ? "var(--control-height-list)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))")};
       /* A tile and a list's panel are gray fills, so an icon on them has the card background and the chip shadow. A list without a panel stands on the card around it, so its icons are flat fills there. */
-      --org-tile-chip-bg: ${card._orgTi.panel ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
+      --org-tile-chip-bg: ${card._orgTi.panel ? "var(--tile-chip-background)" : "var(--fill-subtle)"};
       display: grid !important;
       grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
       gap: ${card._orgTi.list ? "0" : "var(--ha-space-3)"} !important;
@@ -221,7 +221,7 @@ origami_tiles:
       box-sizing: border-box;
       padding: var(--org-list-pad);
       border-radius: var(--ha-card-border-radius);
-      background-color: ${card._orgTi.panel ? "var(--tile-background, var(--fill-subtle))" : "transparent"};` : ""}
+      background-color: ${card._orgTi.panel ? "var(--tile-background)" : "transparent"};` : ""}
     }
     ${card._orgTi.free ? `
     /* A tile without an icon shows its name and state, and its lane stays with it */
@@ -240,8 +240,8 @@ origami_tiles:
       height: auto !important;
       min-height: var(--org-row-min) !important;
       padding: ${card._orgTi.list ? "var(--ha-space-2) var(--org-list-pad)" : "var(--ha-space-4)"} !important;
-      border-radius: ${!card._orgTi.list ? "var(--ha-card-border-radius)" : card._orgTi.panel ? "calc(var(--ha-card-border-radius) - var(--ha-space-2))" : "calc(var(--org-row-min) * var(--radius-ratio, 0.35))"} !important;
-      background-color: ${card._orgTi.list ? "transparent" : "var(--tile-background, var(--fill-subtle))"} !important;
+      border-radius: ${!card._orgTi.list ? "var(--ha-card-border-radius)" : card._orgTi.panel ? "calc(var(--ha-card-border-radius) - var(--ha-space-2))" : "calc(var(--org-row-min) * var(--radius-ratio))"} !important;
+      background-color: ${card._orgTi.list ? "transparent" : "var(--tile-background)"} !important;
       color: var(--primary-text-color) !important;
       transition: var(--transition-interactive) !important;
     }
@@ -259,7 +259,7 @@ origami_tiles:
       margin: 0 !important;
       margin-inline-end: var(--ha-space-3) !important;
       border-radius: ${card._orgTi.slim ? "0" : "var(--radius-inner)"} !important;
-      box-shadow: ${card._orgTi.slim || !card._orgTi.panel ? "none" : "var(--tile-chip-shadow, var(--ha-card-box-shadow))"};
+      box-shadow: ${card._orgTi.slim || !card._orgTi.panel ? "none" : "var(--tile-chip-shadow)"};
       transition: var(--transition-interactive);
     }
     .bubble-sub-button-icon {
@@ -375,7 +375,7 @@ origami_tiles:
     .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) {
       min-height: calc(var(--org-row-min) + var(--org-line-width)) !important;
       padding-top: calc(var(--ha-space-2) + var(--org-line-width)) !important;
-      ${card._orgTi.panel ? "" : "border-radius: calc((var(--org-row-min) + var(--org-line-width)) * var(--radius-ratio, 0.35)) !important;"}
+      ${card._orgTi.panel ? "" : "border-radius: calc((var(--org-row-min) + var(--org-line-width)) * var(--radius-ratio)) !important;"}
     }
     .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"]) ~ .bubble-sub-button${card._orgTi.shown}:not([style*="display: none"])::before {
       content: "";
