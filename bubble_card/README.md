@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
+This folder holds eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, especially for card heights, so details may still change. The modules work as shown in the dashboard.
@@ -20,7 +20,6 @@ Base draws the frame of button and media player cards and holds the helpers that
 | Module | Key | Card type | Purpose |
 | --- | --- | --- | --- |
 | [Base](#base) | `origami_base` | button, media player, cover, climate, select, calendar, separator, sub-buttons, pop-up | The frame, text and color, and the shared options and helpers. On cover, climate, select and calendar cards, it styles only the sub-buttons. |
-| [Light](#light) | `origami_light` | button, sub-buttons | Colors the slider of a light card and rows of lamps. |
 | [Fan](#fan) | `origami_fan` | button | Spins the icon at the fan's speed. |
 | [Climate](#climate) | `origami_climate` | button | Shows what a thermostat does. |
 | [Media](#media) | `origami_media` | media player | Shows speakers and TVs. |
@@ -141,7 +140,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 
 `css_class: plain` keeps a sub-button neutral. `css_class: accent` fills it while its entity is on, even if it navigates. Dropdowns, sliders and readouts always stay neutral.
 
-A slider sub-button shows Home Assistant's word for off instead of 0 % while its entity is off, and a dash while it is unavailable. A slider that only shows a value, such as a sensor or a `read_only_slider`, has no mark at the end of its fill. A color slider, such as `light_slider_type: hue` or `white_temp`, keeps Bubble Card's colored track.
+Sliders are never colored, also not for a light: the fill and the mark at its end are neutral in every mode, and the state color belongs to the icon. A slider sub-button shows Home Assistant's word for off instead of 0 % while its entity is off, and a dash while it is unavailable. A slider that only shows a value, such as a sensor or a `read_only_slider`, has no mark at the end of its fill. A color slider, such as `light_slider_type: hue` or `white_temp`, keeps Bubble Card's colored track.
 
 Each sub-button can have its own `origami_base` key with these entries, which accept maps and templates. Base ignores it on separator, sub-buttons and pop-up cards.
 
@@ -220,7 +219,6 @@ name: Floor lamp
 icon: mdi:floor-lamp
 modules:
   - origami_base
-  - origami_light
 origami_base:
   compact: true
   tile: true
@@ -303,53 +301,6 @@ modules:
 origami_base:
   animate: true
 ```
-
-### Light
-
-The Light module fills the sliders of a light card with amber, the state color for lights. In dark mode, the fill stays gray so its light text stays readable, and only the mark at its end is amber. On a sub-buttons card with the Slider module, Light colors the rows of lamps the same way, as in the lamp example under [Slider](#slider).
-
-<img width="800" alt="A light group card with filled buttons and two compact lamps" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-light.webp">
-
-<details>
-<summary>Example</summary>
-
-<br>
-
-```yaml
-type: custom:bubble-card
-card_type: button
-button_type: switch
-entity: light.living_room
-name: All
-icon: mdi:lightbulb-multiple
-modules:
-  - origami_base
-  - origami_light
-origami_base:
-  tile: true
-button_action:
-  tap_action:
-    action: more-info
-sub_button:
-  main:
-    - entity: input_boolean.living_room_scenes
-      icon: mdi:chevron-down
-      show_background: true
-      tap_action:
-        action: toggle
-    - icon: mdi:power
-      show_background: true
-      tap_action:
-        action: toggle
-state_content:
-  - state
-  - brightness
-rows: 1.375
-```
-
-For a lamp as a compact row, use one of Base's compact examples with a light entity.
-
-</details>
 
 ### Fan
 
@@ -786,7 +737,7 @@ rows: 1
 
 ### Slider
 
-The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
+The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. The name takes the first half of a row and the track the second, so a track is never wider than half the card. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
 
 <img width="800" alt="A subwoofer level slider and a fan speed slider" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-slider.webp">
 
@@ -866,15 +817,13 @@ origami_slider:
   master: true
 ```
 
-On a sub-buttons card, a slider sub-button needs `always_visible: true` to become a row. `label_width` under `origami_slider` sets the width of the name column, which by default fits the longest name, up to 30 % of the card. Longer names scroll. For a sensor without a percentage, Bubble Card's `min_value` and `max_value` set the ends of the track.
+On a sub-buttons card, a slider sub-button needs `always_visible: true` to become a row. A name longer than its half scrolls. For a sensor without a percentage, Bubble Card's `min_value` and `max_value` set the ends of the track.
 
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
   - origami_slider
-origami_slider:
-  label_width: 72px
 sub_button:
   main: []
   bottom:
@@ -888,18 +837,15 @@ sub_button:
       always_visible: true
 ```
 
-A regular sub-button with an entity, such as a switch, is a row whose track fills while the entity is on. Give it `tap_action` with `action: toggle`, so a tap switches it. With the Light module, the rows fill as on a light card. A slider with `light_slider_type: white_temp` or `hue` shows no value.
+A regular sub-button with an entity, such as a switch, is a row whose track fills while the entity is on. Give it `tap_action` with `action: toggle`, so a tap switches it. A slider with `light_slider_type: white_temp` or `hue` shows no value.
 
-In a pop-up with one card per room, give every card the same `label_width`, so the tracks stay in place. This card lists the lamps of a living room:
+The tracks of cards with the same width line up, such as in a pop-up with one card per room. This card lists the lamps of a living room, as a mini pop-up of a room pop-up does:
 
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
   - origami_slider
-  - origami_light
-origami_slider:
-  label_width: 96px
 sub_button:
   main: []
   bottom:

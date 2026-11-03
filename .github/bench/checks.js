@@ -37,6 +37,35 @@ window.__check = async () => {
   // A pop-up has no card of its own to measure while it is closed, and the mini pop-up check below opens and measures it
   const origami = cards.filter((c) => c.origami && c.root && c.cfg.card_type !== 'pop-up');
 
+  // Neutral sliders: no slider is ever colored, also not for a light, because the state color belongs to the icon. Every fill has the theme's fill-loud and every mark the text color.
+  {
+    const fails = [];
+    let count = 0;
+    // resolve() gives the color that a value has next to an element, in the element's own scope
+    const resolve = (el, value) => {
+      const probe = document.createElement('div');
+      probe.style.cssText = 'display:none;color:' + value;
+      el.parentNode.appendChild(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    };
+    for (const el of document.querySelectorAll('.shot bubble-card')) {
+      if (!(el.config?.modules || []).some((m) => String(m).startsWith('origami_'))) continue;
+      for (const fill of el.shadowRoot?.querySelectorAll('.bubble-range-fill') ?? []) {
+        if (fill.closest('.is-color-slider') || !visible(fill)) continue;
+        count++;
+        const name = el.config.entity ?? el.config.card_type;
+        const fillColor = getComputedStyle(fill).backgroundColor, neutral = resolve(fill, 'var(--fill-loud)');
+        if (fillColor !== neutral) fails.push(`${name}: the fill is ${fillColor}, expected the neutral ${neutral}`);
+        const mark = getComputedStyle(fill, '::after'), text = resolve(fill, 'var(--primary-text-color)');
+        if (mark.display !== 'none' && mark.content !== 'none' && mark.backgroundColor !== text) fails.push(`${name}: the mark is ${mark.backgroundColor}, expected the text color ${text}`);
+      }
+    }
+    if (!count) fails.push('no slider found on the sheet');
+    report('neutral sliders', fails, `${count} sliders have a neutral fill and mark, also for lights`);
+  }
+
   // Corners: a shape's radius is its height times the ratio, at most a card's radius. A shape inside another one takes the outer radius less the space between them. Only switches and dots are round.
   {
     const fails = [];

@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.9.0"
+  version: "13.10.0"
   is_global: true
   supported:
     - button
@@ -1071,10 +1071,9 @@ origami_base:
     ha-card {
       --bubble-sub-slider-height: var(--org-sub-h, var(--control-height-mini));
       --bubble-slider-fill-color: var(--org-slider-fill);
-      --org-slider-base: color-mix(in srgb, var(--fill-base) 38%, var(--ha-card-background));
-      /* A slider's fill is the loud step of the tint that its track has, so the two keep their contrast on a card, a tile or a cover behind a pop-up */
-      --org-slider-fill: var(--fill-loud);
-      --org-slider-mark: var(--primary-text-color);
+      /* A slider is never colored, also not for a light, because the state color belongs to the icon. Its fill is the loud step of the tint that its track has, so the two keep their contrast on a card, a tile or a cover behind a pop-up. Both colors are important, so no module can color a slider, such as the Light module of earlier versions that is still installed. */
+      --org-slider-fill: var(--fill-loud) !important;
+      --org-slider-mark: var(--primary-text-color) !important;
     }
     /* A slider's corners follow its height, which Bubble Card's custom_height can set for one slider */
     ha-card [class*="bubble-sub-button-slider-"] {

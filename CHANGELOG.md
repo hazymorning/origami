@@ -41,7 +41,7 @@ These changes are in the `next` branch and come with the next release.
 - `hidden` hides a whole card while its template is true, such as a list of lamps while its header is closed. The card takes no space in a stack, a section or a mini pop-up, as a conditional card's, and it changes at the same moment as the cards around it.
 - Module authors get four new helpers: `shows()`, `unframe()`, `backdrop()` and `pending()`, which Button and Tiles share for a button or a row that waits after a tap.
 - All cards share one number and date formatter, so they render with less work.
-- A slider's fill is the theme's `fill-loud`, a stronger step of its track's tint, so it keeps its contrast on a card, a tile or a cover behind a pop-up. Lamp sliders keep the light's color.
+- Sliders are never colored, also not for a light, because the state color belongs to the icon. A slider's fill is the theme's `fill-loud`, a stronger step of its track's tint, so it keeps its contrast on a card, a tile or a cover behind a pop-up.
 
 #### Media
 
@@ -102,10 +102,14 @@ These changes are in the `next` branch and come with the next release.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
 
+#### Light
+
+- The Light module is gone. Sliders are never colored, and Base colors a light's icon, so Light had nothing left to do.
+
 #### Slider
 
-- Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. `label_width` lines up the tracks of several cards.
-- A switch row fills while the switch is on. With the Light module, lamp rows fill in the light color.
+- Slider sub-buttons on a sub-buttons card are rows with a name, a track and a value. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. The name takes the first half of a row and the track the second, so a track is never wider than half the card and the tracks of several cards line up.
+- A switch row fills while the switch is on.
 - A standalone slider shows its name before the value with `show_name: true`, and its main sub-buttons stand after the track as keys with the track's background.
 - `master: true` makes a standalone slider for a whole group, such as all lamps above a row for each lamp. It is one step taller, with its name at the start of the track, its value at the end and no grip.
 - Every track, on a standalone slider and in the rows, has the subtle fill of a Button row's tiles. The value stands in the track and ends where the track's corner begins, and it uses the medium weight.
@@ -198,7 +202,7 @@ Every module changed, and some options were renamed or work differently. The [mo
 8. Media and Speaker Select keep the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
 9. Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.
 10. Media and Speaker Select take groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` on both kinds of cards to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`. On Speaker Select cards, set `selected` to the helper that selects a speaker, such as `input_select.selected_speaker`.
-11. Light and Fan no longer write the state line. Give light cards `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`.
+11. The Light module is gone. Delete it under **Modules**, then **My Modules**, or delete `origami_light.yaml`, and take `origami_light` out of the cards. Until then, Base keeps its sliders neutral. Give light cards `state_content` with `state` and `brightness`, because nothing writes their state line anymore. Fan no longer writes the state line either, so give fan cards `state_content: percentage`.
 12. Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
 13. Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
 14. In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.

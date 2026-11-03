@@ -191,8 +191,6 @@ origami_popup:
         card_type: sub-buttons
         modules:
           - origami_slider
-        origami_slider:
-          label_width: 112px
         sub_button:
           main: []
           bottom:

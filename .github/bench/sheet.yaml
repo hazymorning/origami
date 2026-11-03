@@ -54,7 +54,7 @@ sections:
         card_type: button
         button_type: switch
         entity: light.kitchen
-        modules: [origami_base, origami_light]
+        modules: [origami_base]
         origami_base: {compact: true, tile: true}
         sub_button:
           main:
@@ -67,7 +67,7 @@ sections:
             card_type: button
             button_type: switch
             entity: light.kitchen
-            modules: [origami_base, origami_light]
+            modules: [origami_base]
             origami_base: {compact: true, tile: true, join: first}
             sub_button:
               main:

@@ -15,48 +15,25 @@ modules:
   - origami_popup
 origami_popup:
   mini_popups:
-    # The arrow on All opens a slider for each lamp, which turns the lamp off at its start
+    # The arrow on All opens a row for each lamp. Moving a slider to the start turns the lamp off.
     lamps:
-      frameless: true
-      cards:
-        - type: custom:bubble-card
-          card_type: button
-          button_type: slider
-          entity: light.living_room_floor_lamp
-          name: Floor lamp
-          show_name: true
-          show_icon: false
-          show_state: false
-          slider_value_position: right
-          allow_light_slider_to_0: true
-          tap_action:
-            action: none
-          modules:
-            - origami_base
-            - origami_slider
-            - origami_light
-          origami_slider:
-            master: true
-          rows: 1
-        - type: custom:bubble-card
-          card_type: button
-          button_type: slider
-          entity: light.living_room_string_lights
-          name: String lights
-          show_name: true
-          show_icon: false
-          show_state: false
-          slider_value_position: right
-          allow_light_slider_to_0: true
-          tap_action:
-            action: none
-          modules:
-            - origami_base
-            - origami_slider
-            - origami_light
-          origami_slider:
-            master: true
-          rows: 1
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_slider
+        sub_button:
+          main: []
+          bottom:
+            - entity: light.living_room_floor_lamp
+              name: Floor lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_string_lights
+              name: String lights
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
     # The palette on All opens the scenes. The one turned on last is highlighted until the lamps are turned off.
     scenes:
       width: fit-content
@@ -295,7 +272,6 @@ cards:
             icon: mdi:lightbulb-multiple
             modules:
               - origami_base
-              - origami_light
             button_action:
               tap_action:
                 action: more-info

@@ -1,15 +1,11 @@
 origami_slider:
   name: "Origami • Slider"
-  version: "1.14.1"
+  version: "1.15.0"
   supported:
     - button
     - sub-buttons
   description: "Slider turns a slider button into a standalone slider, so the card is the track with keys after it, and a master slider is one step taller. On a sub-buttons card, slider sub-buttons become rows with a name, track and value, and a switch a row that fills while on."
   editor:
-    - name: label_width
-      label: "Name width on a sub-buttons card (the longest name, up to 30 %, if empty)"
-      selector:
-        text: {}
     - name: master
       label: "Master slider, such as one for all lamps: one step taller, with its name at the start of the track"
       selector:
@@ -20,10 +16,9 @@ origami_slider:
       const org = card._org;
       if (org?.hass !== hass || !(org.version >= 13.3)) throw new Error("origami_slider needs origami_base 13.3 or later");
       if (this.config.card_type === "sub-buttons") {
-        // Each slider sub-button is a row, and its name stands in a column before the track, as wide as the longest name up to 30 % of the card unless label_width sets it.
+        // Each slider sub-button is a row, with its name in the first half of the card and its track in the second, so a track is never wider than half the card and the tracks of several cards line up.
         // A sub-button with an entity that is not a slider, such as a switch, is a row too. Its track is filled while the entity is on and shows the state in Home Assistant's words.
         const env = org.env;
-        const width = String(this.config.origami_slider?.label_width ?? "").trim();
         const gap = "\u00a0".repeat(6);
         const rows = org.subs(env, this.config, "origami_slider").filter(({ item }) => item.sub_button_type === "slider" || (item.entity && (item.sub_button_type ?? "default") === "default"))
           .map(({ n, item, entity }) => {
@@ -37,7 +32,6 @@ origami_slider:
           });
         const toggles = rows.filter((r) => !r.slider);
         card._orgSl = {
-          width: width || "fit-content(30%)",
           names: rows.map((r) => r.sel + " { --org-name: " + org.str(r.text) + "; --org-name-loop: " + org.str(r.text + gap + r.text) + "; }").join("\n    "),
           toggles: toggles.map((r) => r.sel),
           // The rows that show a name in their first column, which scrolls when it is too wide
@@ -89,7 +83,7 @@ origami_slider:
     }
     ha-card .bubble-sub-button-bottom-container {
       display: grid !important;
-      grid-template-columns: ${card._orgSl.width} minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--ha-space-3) var(--ha-space-4) !important;
     }
     ha-card .bubble-sub-button-bottom-container :is(.bubble-sub-button-alignment-lane, .bubble-sub-button-group:not(.hidden)) {

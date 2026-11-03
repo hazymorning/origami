@@ -32,8 +32,6 @@ origami_popup:
         modules:
           - origami_base
           - origami_slider
-        origami_slider:
-          label_width: 104px
         sub_button:
           main: []
           bottom:

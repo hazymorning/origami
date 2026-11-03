@@ -142,7 +142,7 @@ rows = [{'entity': 'light.kitchen', 'sub_button_type': 'slider', 'always_visible
         {'entity': 'input_boolean.guest', 'name': 'Guest mode', 'tap_action': {'action': 'toggle'}},
         {'entity': 'light.desk', 'sub_button_type': 'slider', 'always_visible': True, 'name': 'A desk lamp with a name too long for its column'}]
 cards = []
-for o in ({}, {'label_width': '30%'}, {'label_width': '90px'}):
+for o in ({},):
     cards.append({'type': 'custom:bubble-card', 'card_type': 'sub-buttons', 'modules': ['origami_slider'], 'origami_slider': o, 'sub_button': {'main': [], 'bottom': copy.deepcopy(rows)}})
     cards.append({'type': 'custom:bubble-card', 'card_type': 'sub-buttons', 'modules': ['origami_slider'], 'origami_slider': o, 'sub_button': {'main': [], 'bottom': [{'group': copy.deepcopy(rows)}]}})
 for name, keys2 in ((None, []), ('Group ·', []), (None, [{'icon': 'mdi:chevron-down'}]), ('Group ·', [{'icon': 'mdi:chevron-down'}, {'icon': 'mdi:cog'}])):
