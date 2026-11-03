@@ -51,7 +51,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
-- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. A menu is as wide as its longest option, and each icon has the same space to its row's start as above and below it. Base's `words` option renames the entities, with the entity ID or the name as the key.
+- A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. A menu is as wide as its longest option and has the spacing of a mini pop-up: 16 px around its rows and 8 px to its dropdown. Each icon has the same space to its row's start as above and below it. Base's `words` option renames the entities, with the entity ID or the name as the key.
 
 </details>
 
@@ -62,15 +62,18 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 
 The modules show Home Assistant's words for states and attributes, in the language and the number format of the user's profile. Where a word is too long for a card, Base uses a shorter one, such as Heizt for a German thermostat that heats.
 
-Base's `words` option changes the words that the Origami modules write on one card, such as the state line of Climate, Media and Speaker Select, a tile's state and `format()` in templates. It does not change the line that Bubble Card writes from `state_content`. The keys can be states, such as `idle`, or values such as a source, an app, an action or a speaker's name.
+Base's `words` option changes words on one card: in the state line, a tile's state, a slider and `format()` in templates. A key can be the word that Home Assistant shows, such as `Ein`, a state, such as `idle`, or a value such as a source, an app or a speaker's name. Home Assistant's word fits best, because it changes only what reads that way, so `Ein: An` leaves an open door's `Offen` alone, while `on: An` would change it too. The state line that Bubble Card writes from `state_content` follows the words, unless it is a template.
 
 ```yaml
 origami_base:
   words:
+    Ein: An
     idle: Auto
     optical in: TV input
     Prime Video: Prime
 ```
+
+For a light, `state_content: brightness` shows the brightness instead of the state, and the word for off while it's off.
 
 </details>
 
@@ -130,7 +133,7 @@ The Base module is the frame for button and media player cards. It sets the heig
 | `animate` | `false` | The card fades in and glides to a new height. See [Fade in and glide](#fade-in-and-glide). |
 | `join` | | `first`, `middle` or `last`. Cards in a vertical stack share one background, as the rows of a list. The list keeps the card's padding at its top and bottom, and the rows' controls are 8 px apart. A compact row's slider is 28 px tall, as its switch and the tracks of Slider's rows are, so two rows' sliders are 12 px apart. Only the outer corners are round, and each card after the first meets the card above it. |
 | `hidden` | | While true, the card takes no space, as a conditional card's, such as a list of lamps while its header is closed. It takes a template that can read any entity, and the card changes at the same moment as the cards around it. |
-| `words` | | Maps a state or a value to the word that the modules write on the card. See Language above. |
+| `words` | | Maps a word, a state or a value to the word that the card shows. See Language above. |
 | `padding` | `16px` | The space between the card's edge and its content, such as `20px` or `var(--ha-space-5)`. It also sets the row's height, except on a compact card. |
 | `sub_button_height` | | The height of sub-buttons, sliders, the Button module's buttons and the rows of a Tiles list, such as `40px`. Without it, keys are as tall as the icon, sliders 32 px, or 28 px in a row with a name before them, and dropdowns 40 px, or as tall as the name and the state line in the card's own row. Bubble Card's `custom_height` on a sub-button wins. |
 | `sub_button_text_size` | `var(--ha-font-size-s)` | The text size on sub-buttons, sliders and the labels in a Button row, such as `var(--ha-font-size-m)`. |
@@ -932,7 +935,6 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | --- | --- | --- |
 | `background` | `true` | The buttons have a fill. With `false`, they are plain text. |
 | `columns` | `0` | `0` sizes the buttons to their text, and `1` to `6` make an even grid. |
-| `group_rows` | `false` | In a grid, each group is one row with keys at its end, described below. Without it, a group's buttons are cells of the grid. |
 | `align` | `start` | Places the buttons at the `start`, `center` or `end` of the row. |
 | `active` | | Highlights the buttons whose name, `css_class` or tap target matches. Takes text, a map from the card entity's state, Jinja or JavaScript in `${ }`, with commas between several values. |
 | `active_style` | `lamp` | `lamp` tints the active button in the lamp color, and `toggle` fills it. |
@@ -1059,54 +1061,6 @@ origami_button:
   chips: true
   scroll: true
   icon_size: var(--icon-size-s)
-```
-
-With `columns` and `group_rows: true`, each group under `sub_button: bottom` is one row of the grid, with the fill of one button around all its buttons. Its first button takes the free width, and the buttons after it are keys at the row's end, such as minus and plus with a value between them. The row is filled while its first button is. A `number` or `input_number` between the keys is as wide as the longest value it can take, so the keys stay in place while it changes. Minus and plus need their own actions, such as a script that moves the level by one step, and Base's `disabled` key rests them at the ends of the range, as for this subwoofer in a list of shortcuts:
-
-```yaml
-type: custom:bubble-card
-card_type: sub-buttons
-modules:
-  - origami_base
-  - origami_button
-origami_button:
-  columns: 1
-  group_rows: true
-  active_style: toggle
-sub_button:
-  main: []
-  bottom:
-    - name: Bluetooth
-      icon: mdi:bluetooth
-      show_name: true
-      tap_action:
-        action: perform-action
-        perform_action: media_player.select_source
-        target:
-          entity_id: media_player.living_room
-        data:
-          source: Bluetooth
-    - name: Subwoofer
-      group:
-        - entity: switch.living_room_subwoofer
-          name: Subwoofer
-          icon: mdi:speaker
-          show_name: true
-          tap_action:
-            action: toggle
-        - entity: number.living_room_subwoofer_level
-          icon: mdi:minus
-          origami_button:
-            disabled: ${Number(state) <= Number(attr.min)}
-        - entity: number.living_room_subwoofer_level
-          show_icon: false
-          state_content: state
-          tap_action:
-            action: none
-        - entity: number.living_room_subwoofer_level
-          icon: mdi:plus
-          origami_button:
-            disabled: ${Number(state) >= Number(attr.max)}
 ```
 
 With `segmented: true`, each group under `sub_button: bottom` is one bar. Buttons outside a group form one bar each when the card also has groups, and a shared bar when it has none.

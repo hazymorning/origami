@@ -8,7 +8,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### All modules
 
-- The modules work for every home and language. They show Home Assistant's own words for states and attributes, as asked in discussion #26. Base keeps shorter words where Home Assistant's are too long for a card, and its new `words` option changes any word.
+- The modules work for every home and language. They show Home Assistant's own words for states and attributes, as asked in discussion #26. Base keeps shorter words where Home Assistant's are too long for a card, and its new `words` option changes any word on a card, such as `Ein: An`, also in the state line that Bubble Card writes.
 - The modules follow Home Assistant's rules for when an entity counts as on and which color it gets.
 - Parts are placed by start and end instead of left and right, so cards are mirrored in languages that read from right to left.
 - A sub-button whose tap sets a value, such as a fan speed, a preset, a source, a brightness or a target temperature, is filled while its entity has that value. A source button also matches a TV's `app_name` or `app_id`.
@@ -33,7 +33,7 @@ These changes are in the `next` branch and come with the next release.
 - A compact card's icon has no background, as in a slim list.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
-- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state, and it is as wide as its longest option. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
+- A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state, it is as wide as its longest option, and it has the spacing of a mini pop-up. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - A sub-button's `label` key puts a small line under its text, such as CPU under 12 %, so a card can show values with labels beside its name.
@@ -101,7 +101,6 @@ These changes are in the `next` branch and come with the next release.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
-- In a grid with `group_rows: true`, each group is one row with one fill, whose first button takes the free width and whose other buttons are keys at its end, such as minus, a level and plus. The keys stay in place while the level changes. Without the option, a group's buttons stay cells of the grid.
 
 #### Slider
 
@@ -130,7 +129,7 @@ These changes are in the `next` branch and come with the next release.
 - Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
 - The `scroller-mask` token is gone, because the modules fade scrolling rows themselves.
-- The theme leaves out 82 variables that nothing reads anymore or that only repeat what Home Assistant sets itself, such as the Paper Buttons Row colors and old names for fills and tints. Its comments are short, and every card looks the same.
+- The theme leaves out 83 variables that nothing reads anymore or that only repeat what Home Assistant sets itself, such as the Paper Buttons Row colors and old names for fills and tints. Its comments are short, and every card looks the same.
 
 #### Dashboard
 
@@ -194,7 +193,7 @@ Every module changed, and some options were renamed or work differently. The [mo
 3. A card with only Base shows a state line only with `state_content`. Add `state_content: state` where a card should show its state.
 4. `animate` moved from `origami_button` to `origami_base`. The old place still works.
 5. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. Such a card with Base alone looks like a plain Bubble card.
-6. The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`. The line that Bubble Card writes from `state_content` always shows Home Assistant's words.
+6. The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`.
 7. On media cards, `art_entity` and `app_entity` still work. New cards use `layout: tv` with both entities in `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` from `origami_base` to `origami_media`. The old places still work.
 8. Media and Speaker Select keep the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
 9. Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.

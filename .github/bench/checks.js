@@ -130,37 +130,11 @@ window.__check = async () => {
     report('icon only', fails, `${count} buttons with only an icon are square`);
   }
 
-  // Rows: in a Button grid, a group is one row as tall as a button, whose icon starts where the icons of the buttons above it start, and whose last key's icon ends as far from the row's end
+  // Grid cells: the buttons of a group in a Button grid are cells of the grid, each as wide as a column
   {
     const fails = [];
     let count = 0;
-    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns && c.cfg.origami_button?.group_rows && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
-      const single = [...card.root.querySelectorAll('.bubble-sub-button-group > .bubble-sub-button:only-child')].find(visible);
-      for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
-        if (group.children.length < 2 || !visible(group)) continue;
-        count++;
-        const g = group.getBoundingClientRect();
-        const keys = [...group.children];
-        const icon = (el) => el.querySelector('.bubble-sub-button-icon:not(.hidden)')?.getBoundingClientRect();
-        const first = icon(keys[0]), last = icon(keys.at(-1));
-        if (single && !near(g.height, single.getBoundingClientRect().height)) fails.push(`card ${card.i}: a row is ${r1(g.height)} px tall, a button ${r1(single.getBoundingClientRect().height)} px`);
-        if (single && first && !near(first.left - g.left, icon(single).left - single.getBoundingClientRect().left)) fails.push(`card ${card.i}: a row's icon starts ${r1(first.left - g.left)} px into it, a button's ${r1(icon(single).left - single.getBoundingClientRect().left)} px`);
-        if (first && last && !near(g.right - last.right, first.left - g.left)) fails.push(`card ${card.i}: the last key's icon ends ${r1(g.right - last.right)} px from the row's end, expected ${r1(first.left - g.left)} px as at its start`);
-        for (const k of keys.slice(1)) {
-          const b = k.getBoundingClientRect();
-          if (!near(b.height, g.height) || b.width < g.height - 0.5) fails.push(`card ${card.i} ${label(k)}: a key of ${r1(b.width)}x${r1(b.height)} px in a row of ${r1(g.height)} px`);
-        }
-      }
-    }
-    if (!count) fails.push('no Button grid with a row found on the sheet');
-    report('rows', fails, `${count} rows in a Button grid are as tall as a button, line up with it and end like they start`);
-  }
-
-  // Grid cells: without group_rows, the buttons of a group in a Button grid stay cells of the grid, each as wide as a column, as they were before rows existed
-  {
-    const fails = [];
-    let count = 0;
-    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns > 1 && !c.cfg.origami_button?.group_rows && !c.cfg.origami_button?.segmented && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns > 1 && !c.cfg.origami_button?.segmented && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
       const cols = Number(card.cfg.origami_button.columns);
       const box = card.root.querySelector('.bubble-sub-button-bottom-container')?.getBoundingClientRect();
       for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
@@ -173,7 +147,7 @@ window.__check = async () => {
       }
     }
     if (!count) fails.push('no Button grid with a group of cells found on the sheet');
-    report('grid cells', fails, `${count} group in a Button grid without group_rows keeps its buttons as cells`);
+    report('grid cells', fails, `${count} group in a Button grid keeps its buttons as cells`);
   }
 
   // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content

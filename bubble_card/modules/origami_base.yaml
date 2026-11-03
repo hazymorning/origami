@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.8.1"
+  version: "13.9.0"
   is_global: true
   supported:
     - button
@@ -343,6 +343,7 @@ origami_base:
         const n = String(st.attributes?.friendly_name ?? id);
         return rename(id) ?? rename(n) ?? n;
       };
+      // word() gives Home Assistant's word for a state or a value. The card's words change it by the value, such as on, or by the word itself, such as Ein, so a key never needs to know the entity.
       const word = (hass, st, attr, val) => {
         const raw = val ?? (attr ? st?.attributes?.[attr] : st ? st.state : "unavailable");
         if (raw === undefined || raw === null || raw === "") return "";
@@ -351,15 +352,14 @@ origami_base:
         if (own !== null) return own;
         const domain = String(st?.entity_id ?? "").split(".")[0];
         const lang = String(hass.locale?.language ?? hass.language ?? "").split("-")[0];
-        const brief = short[lang]?.[domain + "." + (attr ?? "state") + "." + key];
-        if (brief) return brief;
-        try {
-          const out = !st ? hass.localize?.("state.default." + key)
+        let out = short[lang]?.[domain + "." + (attr ?? "state") + "." + key];
+        if (!out) try {
+          out = !st ? hass.localize?.("state.default." + key)
             : attr ? hass.formatEntityAttributeValue?.(st, attr, raw)
             : hass.formatEntityState?.(st, raw);
-          if (has(out)) return String(out);
         } catch (e) {}
-        return String(raw);
+        const text = has(out) ? String(out) : String(raw);
+        return rename(text) ?? text;
       };
       // Links and the more-info dialog never fill a sub-button. Bubble Card gives a sub-button without a tap action the more-info dialog.
       const links = ["navigate", "more-info", "url", "fire-dom-event"];
@@ -707,14 +707,26 @@ origami_base:
         },
         // dropdown() tells whether a sub-button is a dropdown: it has sub_button_type: select, or it has no type and its entity is a select or an input_select, or it has a select_attribute
         dropdown: ({ item, entity: id }) => item.sub_button_type === "select" || (!item.sub_button_type && (/^(input_)?select\./.test(String(id ?? "")) || !!item.select_attribute)),
-        // menu() returns the rules that show the menus of the dropdowns in scope as the rows of a list. Bubble Card gives the menu 8 px of padding, and a row's corners follow the menu's corners less that padding. A row is as tall as a button, and an icon in it sits in the middle of a square as tall as the row, so its space to the row's start is the same as above and below it. The name follows 12 px after the icon, as in a slim list, and ends 12 px before the row's end. The menu is as wide as its longest row, so it has no empty space after the names. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
-        menu: (scope) => [scope + " { --bubble-select-list-item-accent-color: var(--fill-active); --bubble-select-list-width: 0px; }",
-          scope + " :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: calc(var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) - var(--ha-space-2)) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
+        // menu() returns the rules that show the menus of the dropdowns in scope as the rows of a list, with the spacing of a mini pop-up: 16 px around the rows, which Bubble Card's 8 px of padding and the rows' margins add up to, and 8 px between the menu and its dropdown. A row is as tall as a button, with a button's corners, and an icon in it sits in the middle of a square as tall as the row, so its space to the row's start is the same as above and below it. The name follows 12 px after the icon, as in a slim list, and ends 12 px before the row's end. The menu is as wide as its longest row, so it has no empty space after the names. The chosen option has the active color, as a filled sub-button does, and Bubble Card fills it with this variable while it rests, while the pointer is on it and while it has the focus.
+        menu: (scope) => {
+          // Home Assistant's menu opens right at its dropdown, so its distance is set where the menu is drawn
+          card._org.later("menu " + scope, () => {
+            const gap = parseFloat(getComputedStyle(card).getPropertyValue("--ha-space-2")) || 8;
+            card.querySelectorAll(scope + " ha-select").forEach((el) => {
+              const drop = el.shadowRoot?.querySelector("ha-dropdown");
+              if (drop && drop.distance !== gap) drop.distance = gap;
+            });
+          });
+          return [scope + " { --bubble-select-list-item-accent-color: var(--fill-active); --bubble-select-list-width: 0px; }",
+          scope + " :is(ha-dropdown-item, mwc-list-item) { min-height: var(--control-height-icon) !important; height: var(--control-height-icon); margin: 0 var(--ha-space-4) !important; padding-block: 0 !important; padding-inline: var(--ha-space-3) !important; border-radius: var(--radius-control) !important; font-size: var(--ha-font-size-s) !important; font-weight: var(--ha-font-weight-medium) !important; }",
+          scope + " :is(ha-dropdown-item, mwc-list-item):first-of-type { margin-top: var(--ha-space-2) !important; }",
+          scope + " :is(ha-dropdown-item, mwc-list-item):last-of-type { margin-bottom: var(--ha-space-2) !important; }",
           scope + " :is(ha-dropdown-item, mwc-list-item):has(> ha-state-icon) { padding-inline-start: calc((var(--control-height-icon) - var(--icon-size-xs)) / 2) !important; }",
           // Web Awesome sets the space after an item's icon to 0.75em of the icon's font size and marks it important, so the icon's font size sets that space
           scope + " :is(ha-dropdown-item, mwc-list-item) > ha-state-icon { --mdc-icon-size: var(--icon-size-xs); font-size: calc(var(--ha-space-3) / 0.75); }",
           scope + " :is(ha-dropdown-item, mwc-list-item)[selected] { --primary-color: var(--text-color-active); color: var(--text-color-active) !important; font-weight: var(--ha-font-weight-bold) !important; }",
-          scope + " :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }"],
+          scope + " :is(ha-dropdown-item, mwc-list-item)[selected] > ha-state-icon { color: inherit; }"];
+        },
         // picker() shows a dropdown whose options are entity IDs, such as a helper that picks a speaker. Its text is the chosen entity's name in the given size, as the card's words rename it, and each item of its menu shows its entity's name and an icon for the entity's state. A speaker shows a speaker icon for what it does, such as a pause sign while it plays. An option that is not an entity, such as None, stays as it is. It returns the rules for the text, or null for a dropdown with other options.
         picker: (hass, { n, item, entity: id, opt }, sel, size) => {
           const org = card._org;
@@ -946,6 +958,10 @@ origami_base:
         dark: !!hass.themes?.darkMode
       };
       card._org.me = look(hass, entity);
+      // The card's words also reach the state line that Bubble Card writes from state_content, unless a module writes that line itself, as Climate and Media do, or the line is a template
+      const line = opts.lines && Object.keys(words).length ? card.querySelector(".bubble-state") : null;
+      const parts = [].concat(this.config.state_content ?? (["show_attribute", "show_last_changed", "show_last_updated"].some((k) => this.config[k]) ? [] : "state"));
+      if (line && !line.templateDetected && parts.length && parts.every((p) => typeof p === "string" && !/\{(\{|%)|\$\{/.test(p))) card._org.write(line, card._org.state(hass, entity, parts));
       // With hidden, the card hides itself as Home Assistant lets a card do: it sets hidden, says so, and stays on the page while hidden, so it still follows the states. A stack, a section or a mini pop-up then gives it no space and no gap, as for a conditional card.
       if (type !== "pop-up" && (cfgB.hidden !== undefined || this.hidden)) {
         const hide = yes(value(card._org.env, cfgB.hidden, card._org.ctx));
