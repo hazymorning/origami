@@ -91,6 +91,15 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 </details>
 
+> [!TIP]
+> Some of Home Assistant's words are long or sound odd in German, French and other languages. Base's [`words`](bubble_card/README.md#language) option changes them on a card, such as `Nicht verfügbar` to `Offline`:
+>
+> ```yaml
+> origami_base:
+>   words:
+>     Nicht verfügbar: Offline
+> ```
+
 ## Home view
 
 ### [Menu](dashboard/menu/)

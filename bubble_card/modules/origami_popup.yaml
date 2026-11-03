@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.13.0"
+  version: "4.14.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -40,9 +40,9 @@ origami_popup:
         // The icon passes its tap to the card, unless the pop-up has an entity whose icon Bubble Card makes tappable
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
-        blur: this.config.backdrop_blur === undefined && this.config.performance_mode !== "performance" && !this.config.hide_backdrop,
-        // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 4 px
-        dimBlur: ((b) => b === undefined ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(4px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
+        blur: !org.has(this.config.backdrop_blur) && this.config.performance_mode !== "performance" && !this.config.hide_backdrop,
+        // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 4 px. Bubble Card's editor leaves an emptied backdrop_blur as '', which counts as none set.
+        dimBlur: ((b) => !org.has(b) ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(4px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
         // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
         art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
         mix: cfg.cover_mix ?? 16,
@@ -75,8 +75,8 @@ origami_popup:
         const cards = () => (card.querySelector(".bubble-cards-container") ?? card).getBoundingClientRect();
         // A mini pop-up is a list of cards, or a map with its cards under cards, its width and its max_height, such as 240px, and frameless. A number counts in pixels.
         const prop = (o, key) => ((v) => typeof v === "number" ? v + "px" : v === undefined || v === null || Array.isArray(o.src) ? "" : String(v).trim())(o.src?.[key]);
-        // size() makes a mini pop-up as wide as its own width, at most as wide as the pop-up's cards, or else as wide as the cards
-        const size = (o, col) => { o.el.style.width = prop(o, "width") ? "min(" + prop(o, "width") + ", " + col.width + "px)" : col.width + "px"; };
+        // size() makes a mini pop-up as wide as its own width, such as 240px, or fit-content for the width of its widest card, at most as wide as the pop-up's cards, or else as wide as the cards
+        const size = (o, col) => Object.assign(o.el.style, { width: prop(o, "width") || col.width + "px", maxWidth: col.width + "px" });
         // A tap on the dim closes the mini pop-up. The dim is inside the pop-up, so Bubble Card doesn't count it as a tap beside the pop-up.
         mini.dim = layer("org-mini-dim");
         mini.dim.addEventListener("click", () => mini.close());
@@ -258,7 +258,7 @@ origami_popup:
     .bubble-pop-up-background::after {
       z-index: 0;
     }`}
-    ${card._orgP.blur ? `/* Without a backdrop_blur of its own, the backdrop blurs the page as backdrop_blur: 4 would, through Bubble Card's own variable, which older Safari reads too. As with backdrop_blur, the pop-up's surface then has no blur of its own, which would only blur the blurred page again. */
+    ${card._orgP.blur ? `/* Without a backdrop_blur of its own, or with an empty one, the backdrop blurs the page as backdrop_blur: 4 would, through Bubble Card's own variable, which older Safari reads too. As with backdrop_blur, the pop-up's surface then has no blur of its own, which would only blur the blurred page again. */
     .bubble-backdrop {
       --custom-backdrop-filter: blur(4px);
     }

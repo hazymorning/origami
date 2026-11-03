@@ -225,7 +225,7 @@ origami_popup:
                     {{ 'media_player.office' in (state_attr(s, 'group_members') or [s]) }}
     # The shortcuts open from the dots key. Each row is optional, so delete the ones that don't fit.
     more:
-      width: 272px
+      width: fit-content
       max_height: 320px
       frameless: true
       cards:

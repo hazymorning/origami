@@ -55,6 +55,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 
 </details>
 
+<a name="language"></a>
 <details>
 <summary>Language</summary>
 
@@ -1601,13 +1602,13 @@ cards:
             mini_popup: volume
 ```
 
-In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
+In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. With `width: fit-content`, it is as wide as its widest card, so a list of buttons is as wide as its longest button in any language. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
 
 ```yaml
 origami_popup:
   mini_popups:
     inputs:
-      width: 224px
+      width: fit-content
       max_height: 320px
       cards:
         - type: custom:bubble-card
@@ -1633,7 +1634,7 @@ origami_popup:
               # Network, Line In and the other inputs work the same way
 ```
 
-The backdrop is blurred as with Bubble Card's `backdrop_blur: 4`, unless the pop-up sets its own `backdrop_blur`, hides its backdrop or uses Bubble Card's performance mode. As with `backdrop_blur`, the pop-up's surface then has no blur of its own.
+The backdrop is blurred as with Bubble Card's `backdrop_blur: 4`, unless the pop-up sets its own `backdrop_blur`, hides its backdrop or uses Bubble Card's performance mode. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set. As with `backdrop_blur`, the pop-up's surface then has no blur of its own.
 
 ```yaml
 type: custom:bubble-card

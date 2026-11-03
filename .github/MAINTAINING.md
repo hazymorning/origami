@@ -51,6 +51,7 @@ The README is the main documentation, and in the end it is what people get from 
 - A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again. History and reasons stay out, and how a module works inside belongs in the module reference.
 - It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
 - Each part's README says what it needs to work, such as cards, integrations, modules, helpers and scripts, with links to its files. No part depends on another one, except Get started.
+- A setting that many people would want but few would look for gets a GitHub tip (`> [!TIP]`) where people read anyway, with a short example and a link to the module reference, such as Base's `words` for the long words of German or French. The repository's cards don't use such words themselves, because they belong to one language.
 
 The README is done when the rule checks pass and every claim matches the files. Then the maintainer reads it from top to bottom, and someone who doesn't know Origami sets up the core and one part with nothing but the README.
 

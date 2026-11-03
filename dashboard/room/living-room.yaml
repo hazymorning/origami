@@ -59,7 +59,7 @@ origami_popup:
           rows: 1
     # The palette on All opens the scenes. The one turned on last is highlighted until the lamps are turned off.
     scenes:
-      width: 272px
+      width: fit-content
       frameless: true
       cards:
         - type: custom:bubble-card
@@ -286,7 +286,7 @@ cards:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_lights'
-          # All has the layout of the speaker card, with keys for the scenes and the lamps and a slider for the brightness
+          # All has a slider for the brightness at the bottom, as the speaker card has, and keys for the scenes and the lamps
           - type: custom:bubble-card
             card_type: button
             button_type: switch
@@ -296,8 +296,6 @@ cards:
             modules:
               - origami_base
               - origami_light
-            origami_base:
-              group: true
             button_action:
               tap_action:
                 action: more-info
