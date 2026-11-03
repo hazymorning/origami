@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
+This folder holds ten modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, especially for card heights, so details may still change. The modules work as shown in the dashboard.
@@ -23,7 +23,6 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Fan](#fan) | `origami_fan` | button | Spins the icon at the fan's speed. |
 | [Climate](#climate) | `origami_climate` | button | Shows what a thermostat does. |
 | [Media](#media) | `origami_media` | media player | Shows speakers and TVs. |
-| [Speaker Select](#speaker-select) | `origami_speaker` | media player, button | The speaker rows of a music pop-up. |
 | [Slider](#slider) | `origami_slider` | button with a slider, sub-buttons | Turns a card into a standalone slider, or sub-buttons into rows with names, tracks and values. |
 | [Button](#button) | `origami_button` | sub-buttons, button | Rows and grids of buttons, segmented bars, tiles with labels and rows that scroll sideways. |
 | [Header](#header) | `origami_header` | separator | A section header with values or a small switch. |
@@ -98,7 +97,7 @@ For a light, `state_content: brightness` shows the brightness instead of the sta
 
 <br>
 
-The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami_button` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. So do the `leader` and `art` options of Media and Speaker Select, Media's `state`, Speaker Select's `selected`, Popup's `art`, Header's `icon_color` and Button's `active` and `color`. A Media card's `name` can be Jinja or JavaScript in `${ }`, but not a map.
+The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami_button` and `origami_popup` keys of a sub-button accept a value, a map from the entity's state to a value, or JavaScript in `${ }`. So do Media's `leader`, `art` and `state`, Popup's `art`, Header's `icon_color` and Button's `active` and `color`. A Media card's `name` can be Jinja or JavaScript in `${ }`, but not a map.
 
 - `state`, `attr` and `entity` refer to the sub-button's entity, or to the card's entity if the sub-button has none.
 - `states(id)` returns another entity's state. `hass` is also available.
@@ -176,7 +175,7 @@ All keys except `on` and `label` work the same in Header, Button and Popup. On a
 
 For a fixed name or icon, or one in Jinja, the sub-button's own `name` and `icon` are enough, because Bubble Card renders those itself. These keys are for `${ }` templates, which read the states at once, and for maps.
 
-Bubble Card writes the state line from `state_content`. Without it, a card has no state line unless it has `button_type: state`. Climate, Media and Speaker Select write their own state line, and Media also the name, so `state_content` has no effect there, except that an empty list, `state_content: []`, hides Media's line. Bubble Card's editor writes the older `show_state` and `show_attribute` keys as `state_content`, and Base and Media read both.
+Bubble Card writes the state line from `state_content`. Without it, a card has no state line unless it has `button_type: state`. Climate and Media write their own state line, and Media also the name, so `state_content` has no effect there, except that an empty list, `state_content: []`, hides Media's line. Bubble Card's editor writes the older `show_state` and `show_attribute` keys as `state_content`, and Base and Media read both.
 
 ```yaml
 # Regular card
@@ -449,7 +448,7 @@ The Media options go under `origami_media:`.
 | `icons` | | Maps a state or an input to an icon. The keys can be `playing`, `paused`, `idle`, `on`, `off`, `unavailable`, `bluetooth`, `tv` or `line`. A player that is on but reports nothing else uses `on`. Without an entry, the card keeps its own icon. |
 | `keep_name` | `false` | With the speaker layout, the name line keeps the card's name, and the state line shows the title and the artist while music plays. |
 | `state` | | Replaces the module's state line while it has a value. Accepts a template, such as one that reads a title from a template sensor. A value that repeats the name hides the state line, so a template can leave a single line, such as Nothing playing. |
-| `badge` | `false` | Marks the group leader with a crown and its members with a link on the icon, as in Speaker Select. |
+| `badge` | `false` | Marks the group leader with a crown and its members with a link on the icon. |
 | `icon_color` | | Maps the same keys as `icons` to an icon color, which shows while there is no cover. A key with a color also keeps the icon's background neutral. |
 | `cover` | `icon` | Where the cover shows: `icon` in the icon, `above` as a large square above the name, `only` as that square with nothing else on the card, or `background` filling the card. `background` combines with `icon` or `above` in a list, such as `[background, icon]`. Also accepts a map from the state or a template, as shown below. |
 | `cover_mix` | `25` | How strongly the cover shows while it fills the card, in percent. The card's color makes up the rest. |
@@ -673,80 +672,6 @@ living_room_repeat:
         entity_id: media_player.living_room
       data:
         repeat: "{{ {'off': 'all', 'all': 'one'}.get(state_attr('media_player.living_room', 'repeat'), 'off') }}"
-```
-
-</details>
-
-### Speaker Select
-
-The Speaker Select module creates the speaker rows of a music pop-up, and it works with Base. A row shows the speaker's name, what it plays and its cover. A crown marks a group's leader and a link its members, whose rows show the leader's name. The selected row has a stronger fill.
-
-<img width="800" alt="Four speaker rows for a playing group leader, a group member, a paused speaker and an offline speaker" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-speaker.webp">
-
-<details>
-<summary>Example</summary>
-
-<br>
-
-```yaml
-type: custom:bubble-card
-card_type: media-player
-entity: media_player.living_room
-name: Living
-force_icon: true
-modules:
-  - origami_base
-  - origami_speaker
-sub_button:
-  main:
-    - entity: media_player.living_room
-      name: Volume
-      css_class: readout
-      show_name: true
-      show_icon: false
-      show_background: false
-rows: 1
-```
-
-The sub-button with `css_class: readout` shows the volume. The options go under `origami_speaker:`.
-
-| Option | Description |
-| --- | --- |
-| `selected` | An `input_select`, a `select` or a template. The row whose entity ID or name matches the helper's state, or the template's result, has a stronger fill. |
-
-`players`, `leader`, `art`, `ignore_art`, `inputs` and `icons` work as in the [Media](#media) module.
-
-```yaml
-origami_speaker:
-  selected: input_select.selected_speaker
-  ignore_art:
-    - example.com/blank
-    - placeholder
-```
-
-Groups work as in Media, and Base's `words` option can shorten a leader's name, such as `Living room: Living`. A tap does not select the speaker, so give each row a tap action that sets the selection. A readout without its own tap action passes the tap to the row. Rows need no `hide` option.
-
-To make the whole row a volume slider, use a button card with `button_type: slider` and an icon. A stray touch can then make a speaker loud.
-
-```yaml
-type: custom:bubble-card
-card_type: button
-button_type: slider
-entity: media_player.living_room
-name: Living
-icon: mdi:speaker
-modules:
-  - origami_base
-  - origami_speaker
-sub_button:
-  main:
-    - entity: media_player.living_room
-      name: Volume
-      css_class: readout
-      show_name: true
-      show_icon: false
-      show_background: false
-rows: 1
 ```
 
 </details>
@@ -1630,7 +1555,7 @@ The theme sets the pop-up background, and the pop-up casts the theme's `shadow-e
 
 ## Writing a module
 
-A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, Tiles, which turns a sub-buttons card into a grid, and Speaker Select, which reads a media player with `media()`.
+A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, and Tiles, which turns a sub-buttons card into a grid.
 
 Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, 13.4 for `pending()`, and 13.5 for the fill and the shadow of a key in `--org-key-bg` and `--org-key-shadow`. These are the helpers:
 
@@ -1648,7 +1573,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `matches(hass, item, id)` | Whether the entity has the value that a sub-button's tap sets, or `null` if there is nothing to compare. |
 | `why(hass, item, id, keys)` and `filled(hass, item, id, keys)` | `why()` gives the reason Base fills a sub-button, `set`, `accent` or `on`, or `null`, and `filled()` whether it does. The optional `keys` from `subs()` add the sub-button's `on` and `disabled`. The rule ignores layout options and `show_background`, and Base never fills readouts, dropdowns and sliders. |
 | `has(value)`, `yes(value)`, `pick(map, key, off)` and `slug(value)` | `has()` tells whether a value is set, and `yes()` whether it means true, as `true`, `1`, `yes` and `on` do. `pick()` reads a map's entry for a key in any case, with the keys `true` and `false` as `on` and `off`. With `off` set to `true`, `unavailable` and `unknown` fall back to the `off` entry. `slug()` writes a value as Bubble Card writes a class name, so `Accent` reads as `accent`. |
-| `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media and Speaker Select show it, with the options `env`, `tv` for the TV layout and `cfg` for the module's `players`, `leader`, `art`, `ignore_art` and `inputs`. It returns the group, music, input, cover and app, the players as `twins`, whether the player is active and the device on, the media color and an `icon()` function for an `icons` map. `picture()` returns a picture's address, or `null` if it is empty, not a web address or server path, or contains an entry of `ignore`. |
+| `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media shows it, with the options `env`, `tv` for the TV layout and `cfg` for the module's `players`, `leader`, `art`, `ignore_art` and `inputs`. It returns the group, music, input, cover and app, the players as `twins`, whether the player is active and the device on, the media color and an `icon()` function for an `icons` map. `picture()` returns a picture's address, or `null` if it is empty, not a web address or server path, or contains an entry of `ignore`. |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size, list)` and `icon(element, icon)` | `text()` and `values()` return the CSS rules that show a text or a value's keys in a sub-button, and `values()` can take the list from `subs()`. `icon()` sets an element's icon, and without one gives back the element's own. |
 | `badge(role)` and `part(host, class, build)` | `badge()` marks the card's icon with a crown for a `leader` or a link for a `member`, and removes the mark without a role. `part()` returns the child of `host` with this class, built once with `build`, such as Media's progress ring. |
 | `cover(address, opacity, host)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | The CSS rules for a cover in a media card's icon, which keep the last cover until the next one has loaded when `host` is the icon's box, for the values in a container as chips or plain text, as in Header and Popup, and for filled active controls, as on Base's sub-buttons and Media's play and power buttons. A filled control keeps the shadow of its place from `--org-key-shadow`. |

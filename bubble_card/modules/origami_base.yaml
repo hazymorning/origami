@@ -882,7 +882,7 @@ origami_base:
           }
           return el ?? null;
         },
-        // badge() marks a group's leader with a crown and its members with a link on the card's icon, for Media and Speaker Select. Without a role, the mark goes.
+        // badge() marks a group's leader with a crown and its members with a link on the card's icon, for Media. Without a role, the mark goes.
         badge: (role) => {
           const host = card.querySelector(".bubble-main-icon-container");
           if (!host || (!role && !host.querySelector(":scope > .org-group-badge"))) return;
@@ -1147,7 +1147,7 @@ origami_base:
       opacity: 1 !important;
     }
     ${(() => {
-      // A slider sub-button whose entity is off shows Home Assistant's word for that state, such as Off, instead of 0 %, and an unavailable one shows a dash, as Speaker Select's readout does
+      // A slider sub-button whose entity is off shows Home Assistant's word for that state, such as Off, instead of 0 %, and an unavailable one shows a dash
       const org = card._org;
       // Bubble Card's sliders move only these entities. A slider for any other entity, such as a sensor, or one with read_only_slider only shows a value, so it has no mark.
       const moves = ["light", "media_player", "cover", "input_number", "number", "fan", "climate"];
@@ -1234,7 +1234,7 @@ origami_base:
       color: var(--primary-text-color) !important;
     }
     ${card._org.opts.frame ? `
-    ${[].concat(this.config.modules ?? []).some((m) => ["origami_media", "origami_speaker"].includes(m)) ? `.org-group-badge {
+    ${[].concat(this.config.modules ?? []).includes("origami_media") ? `.org-group-badge {
       position: absolute;
       top: -3px;
       inset-inline-end: -3px;

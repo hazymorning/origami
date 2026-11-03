@@ -60,8 +60,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Speaker Select
 
-- `selected` takes the helper that selects a speaker.
-- Speaker Select also works on a button card with a slider, so a speaker's whole row sets its volume.
+- The Speaker Select module is gone. The music pop-up picks a speaker with a dropdown and groups speakers in a list, and Media marks a group with `badge`, so Speaker Select had nothing left to do.
 
 #### Climate
 
@@ -182,9 +181,8 @@ These changes are in the `next` branch and come with the next release.
 - A press on the play key shows its feedback on the round key, instead of a square that started at its middle. Every key of the play row takes taps on at least a 40 px square, also where its icon is small.
 - Button's `active` option also matches buttons whose name is a number.
 - With Base's `vertical` option, an accent sub-button that sets a value is filled only while its entity has that value.
-- Speaker Select keeps the line after the name in the middle of the row while it scrolls. Long lines in Media and Speaker Select also scroll when their text arrived while the pop-up was closed.
+- Long lines in Media also scroll when their text arrived while the pop-up was closed.
 - A pop-up without a header starts its content as far below the top edge as a pop-up with a header.
-- Each Speaker Select readout shows the volume of its own entity.
 - With both `toggle` and `group`, Base shows the pill switches.
 - Numbers follow the Swiss number format with apostrophes.
 - A value that replaces a hidden sub-button also shows when Bubble Card hides the group around it.
@@ -206,24 +204,25 @@ Every module changed, and some options were renamed or work differently. The [mo
 5. Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. Such a card with Base alone looks like a plain Bubble card.
 6. The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`.
 7. On media cards, `art_entity` and `app_entity` still work. New cards use `layout: tv` with both entities in `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` from `origami_base` to `origami_media`. The old places still work.
-8. Media and Speaker Select keep the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
+8. Media keeps the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
 9. Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.
-10. Media and Speaker Select take groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` on both kinds of cards to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`. On Speaker Select cards, set `selected` to the helper that selects a speaker, such as `input_select.selected_speaker`.
+10. Media takes groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`.
 11. The Light module is gone. Delete it under **Modules**, then **My Modules**, or delete `origami_light.yaml`, and take `origami_light` out of the cards. Until then, Base keeps its sliders neutral. Give light cards `state_content` with `state` and `brightness`, because nothing writes their state line anymore. Fan no longer writes the state line either, so give fan cards `state_content: percentage`.
-12. Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
-13. Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
-14. In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.
-15. In Popup, `subtitle_style` is now `value_style`, and the old name still works. Pop-ups with `performance_mode: performance` or their own `backdrop_blur` no longer blur the backdrop.
-16. Tile pictures fill their icon. To zoom in as before, add `image_size: 230%` to the tile.
-17. Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. To keep the color on a tile with a number or a temperature, give it a `color` under its `origami_tiles` key.
-18. Replace the room cards with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working.
-19. Replace the TV pop-up with the one from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button sends its command only once.
-20. In the menu card's `css`, replace the `.sheet` rule with the one from the [Menu](https://github.com/hazymorning/origami#menu) section.
-21. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
-22. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
-23. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
-24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
-25. Cards from 2.0 that read `--card-padding`, `--control-padding-x` or `--font-size-headline` need `12px`, `16px` and `28px` in their place, because the theme no longer has these variables.
+12. The Speaker Select module is gone. Delete it under **Modules**, then **My Modules**, or delete `origami_speaker.yaml`. For speaker rows, take the music pop-up from the [Music](https://github.com/hazymorning/origami#music) section, which picks a speaker with a dropdown and groups speakers in a list.
+13. Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
+14. Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
+15. In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.
+16. In Popup, `subtitle_style` is now `value_style`, and the old name still works. Pop-ups with `performance_mode: performance` or their own `backdrop_blur` no longer blur the backdrop.
+17. Tile pictures fill their icon. To zoom in as before, add `image_size: 230%` to the tile.
+18. Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. To keep the color on a tile with a number or a temperature, give it a `color` under its `origami_tiles` key.
+19. Replace the room cards with the cards from the [Rooms](https://github.com/hazymorning/origami#rooms) section. The old room cards keep working.
+20. Replace the TV pop-up with the one from the [TV](https://github.com/hazymorning/origami#tv) section. Bubble Card cannot repeat an action, so holding an arrow button sends its command only once.
+21. In the menu card's `css`, replace the `.sheet` rule with the one from the [Menu](https://github.com/hazymorning/origami#menu) section.
+22. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
+23. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
+24. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
+25. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
+26. Cards from 2.0 that read `--card-padding`, `--control-padding-x` or `--font-size-headline` need `12px`, `16px` and `28px` in their place, because the theme no longer has these variables.
 
 ## 2.0 · The Unfolding
 
