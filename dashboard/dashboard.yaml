@@ -1846,7 +1846,6 @@ views:
             bg_color: transparent
             bg_opacity: '100'
             bg_blur: '0'
-            shadow_opacity: '12'
             hide_backdrop: false
             modules:
               - origami_base
@@ -2342,7 +2341,6 @@ views:
             margin_top_mobile: 72px
             margin_top_desktop: 300px
             bg_opacity: 100
-            shadow_opacity: '12'
             popup_mode: adaptive-dialog
             with_bottom_offset: true
             performance_mode: performance
@@ -2738,7 +2736,6 @@ views:
             bg_color: var(--popup-background)
             bg_opacity: '100'
             bg_blur: '10'
-            shadow_opacity: '20'
             hide_backdrop: false
             popup_mode: fit-content
             with_bottom_offset: true

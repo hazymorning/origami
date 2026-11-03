@@ -66,6 +66,75 @@ window.__check = async () => {
     report('neutral sliders', fails, `${count} sliders have a neutral fill and mark, also for lights`);
   }
 
+  // Depth: the card background casts a shadow, and a gray fill never does. What lies on a card or on the page is a flat fill, and what lies on a gray fill, such as a tile, a tray or a track, has the chip shadow. A filled control keeps the shadow of its place, and so does the active part of a segmented bar.
+  {
+    const fails = [];
+    let raised = 0, flat = 0;
+    // alpha() reads the opacity of a computed color, which Chromium writes as rgb(), rgba() or color(srgb ...)
+    const alpha = (c) => c === 'transparent' ? 0 : (c.match(/^rgba\(.*,\s*([\d.]+)\)$/) || c.match(/\/\s*([\d.]+)\)$/) || [0, 1])[1] * 1;
+    // scoped() gives a value in an element's scope. The probe goes beside the element, or into a card, so it renders even where a shadow root has no slot for it.
+    const scoped = (el, prop, value) => {
+      const probe = document.createElement('div');
+      probe.style.cssText = 'display:none;' + prop + ':' + value;
+      (el.tagName === 'HA-CARD' ? el : el.parentNode).appendChild(probe);
+      const v = getComputedStyle(probe)[prop === 'box-shadow' ? 'boxShadow' : 'backgroundColor'];
+      probe.remove();
+      return v;
+    };
+    // outer() keeps the parts of a shadow that fall outside the shape and draw something, so a line drawn inside, such as the theme's ring, and an empty shadow do not count
+    const outer = (s) => {
+      if (!s || s === 'none') return '';
+      const parts = [];
+      let depth = 0, cur = '';
+      for (const ch of s + ',') {
+        if (ch === '(') depth++;
+        if (ch === ')') depth--;
+        if (ch === ',' && !depth) { parts.push(cur.trim()); cur = ''; } else cur += ch;
+      }
+      return parts.filter((p) => !/\binset\b/.test(p) && alpha((p.match(/(rgba?|color)\([^)]*\)/) ?? ['transparent'])[0]) > 0
+        && (p.replace(/(rgba?|color)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).some((g) => parseFloat(g) !== 0)).join(', ');
+    };
+    // place() tells what a control lies on: the nearest shape behind it with a fill, or else the card's own surface, which Base draws on a layer behind the content
+    const place = (el, haCard) => {
+      for (let p = el.parentElement; p && p !== haCard; p = p.parentElement) {
+        const a = alpha(getComputedStyle(p).backgroundColor);
+        if (a > 0) return a < 1 ? 'gray' : 'card';
+      }
+      const a = alpha(scoped(haCard, 'background-color', 'var(--org-surface, transparent)'));
+      return a === 0 ? 'page' : a < 1 ? 'gray' : 'card';
+    };
+    const judge = (el, cs, where, name) => {
+      if (!(alpha(cs.backgroundColor) > 0) || !(parseFloat(cs.opacity) > 0)) return;
+      const shadow = outer(cs.boxShadow);
+      if (where === 'gray') {
+        raised++;
+        const chip = outer(scoped(el, 'box-shadow', 'var(--tile-chip-shadow)'));
+        if (shadow !== chip) fails.push(`${name} lies on a gray fill, so it needs the chip shadow, and it has ${shadow || 'none'}`);
+      } else {
+        flat++;
+        if (shadow) fails.push(`${name} lies on ${where === 'page' ? 'the page' : 'the card background'}, so it is a flat fill, and it casts ${shadow}`);
+      }
+    };
+    for (const el of document.querySelectorAll('.shot bubble-card')) {
+      if (!(el.config?.modules || []).some((m) => String(m).startsWith('origami_')) || el.config.card_type === 'pop-up') continue;
+      const haCard = el.shadowRoot?.querySelector('ha-card');
+      if (!haCard) continue;
+      const card = el.config.entity ?? el.config.name ?? el.config.card_type;
+      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"]')) {
+        if (!visible(c)) continue;
+        judge(c, getComputedStyle(c), place(c, haCard), `${card} ${label(c)}`);
+        // A segmented bar draws its active part on the segment's ::before, which lies on the segment's own fill. A line drawn there, such as a list's divider, is no control.
+        const before = getComputedStyle(c, '::before');
+        if (c.matches('.bubble-sub-button') && before.content !== 'none' && Math.min(parseFloat(before.width), parseFloat(before.height)) >= 8) {
+          const own = alpha(getComputedStyle(c).backgroundColor);
+          judge(c, before, own > 0 ? (own < 1 ? 'gray' : 'card') : place(c, haCard), `${card} ${label(c)}::before`);
+        }
+      }
+    }
+    if (!raised || !flat) fails.push(`the sheet needs controls on a gray fill and on a card, and it has ${raised} and ${flat}`);
+    report('depth', fails, `${raised} controls on a gray fill cast the chip shadow, and ${flat} on a card or the page are flat`);
+  }
+
   // Corners: a shape's radius is its height times the ratio, at most a card's radius. A shape inside another one takes the outer radius less the space between them. Only switches and dots are round.
   {
     const fails = [];

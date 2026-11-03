@@ -8,7 +8,6 @@ hide_backdrop: false
 margin: 7px
 bg_opacity: '100'
 bg_blur: '10'
-shadow_opacity: '20'
 with_bottom_offset: true
 modules:
   - origami_base

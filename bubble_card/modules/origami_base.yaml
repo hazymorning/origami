@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.10.0"
+  version: "13.11.0"
   is_global: true
   supported:
     - button
@@ -573,8 +573,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, and 13.4 added pending().
-        version: 13.4,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), and 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too.
+        version: 13.5,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -865,8 +865,8 @@ origami_base:
             + card._org.each(chip, " .bubble-sub-button-icon:not(.hidden)") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
             + card._org.each(chip, " .bubble-sub-button-name-container:empty") + " { display: none !important; }";
         },
-        // fill() returns the rules that fill active controls, such as filled sub-buttons and Media's play button, with their icons and names
-        fill: (sel) => !sel.length ? "" : sel.join(", ") + " { color: var(--text-color-active) !important; background-color: var(--fill-active) !important; }\n"
+        // fill() returns the rules that fill active controls, such as filled sub-buttons and Media's play button, with their icons and names. A control keeps the depth of the place where it lies, which --org-key-shadow holds.
+        fill: (sel) => !sel.length ? "" : sel.join(", ") + " { color: var(--text-color-active) !important; background-color: var(--fill-active) !important; box-shadow: var(--org-key-shadow, none) !important; }\n"
           + card._org.each(sel, " :is(.bubble-sub-button-icon, .bubble-sub-button-name-container, .bubble-media-button-icon)") + " { color: var(--text-color-active) !important; --icon-primary-color: var(--text-color-active) !important; opacity: 1 !important; }",
         // plain() returns the rules that show the sub-buttons in a container as plain text values, for Header and Popup
         plain: (scope, weight) => scope + " { gap: var(--ha-space-3) !important; }\n"
@@ -938,7 +938,7 @@ origami_base:
         compact,
         tile: !!cfgB.tile,
         frameless,
-        // On a tile and on a frameless card, the content stands on a gray surface, the tile's own or the page's, so the keys take the look for gray surfaces. On a tile, the icon and the sliders are chips of the card's color with a shadow. On a frameless card, they have the keys' fill, as the tiles of a Button row have, so no chip edge shows on a dark page.
+        // A tile and a frameless card have no card background, so neither casts the card's shadow
         gray: !!cfgB.tile || frameless,
         large: !!cfgB.large,
         animate: !!(cfgB.animate ?? this.config.origami_button?.animate),
@@ -954,8 +954,7 @@ origami_base:
           : type === "media-player" ? this.config.show_state !== false
           : ["show_state", "show_attribute"].some((k) => this.config[k] ?? this.config.button_type === "state") || !!this.config.show_last_changed || !!this.config.show_last_updated)(this.config.state_content),
         // Header, Tiles, Button and Popup draw separator, sub-buttons and pop-up cards themselves, so Base only gives them its helpers and Fade in
-        bare: ["separator", "sub-buttons", "pop-up"].includes(type),
-        dark: !!hass.themes?.darkMode
+        bare: ["separator", "sub-buttons", "pop-up"].includes(type)
       };
       card._org.me = look(hass, entity);
       // The card's words also reach the state line that Bubble Card writes from state_content, unless a module writes that line itself, as Climate and Media do, or the line is a template
@@ -1188,14 +1187,18 @@ origami_base:
       --org-color: ${card._org.me.color};
       --org-surface: ${card._org.opts.frameless ? "transparent" : card._org.opts.tile ? "var(--tile-background, var(--fill-subtle))" : "var(--ha-card-background)"};
       --org-surface-shadow: ${card._org.opts.gray ? "0 0 #0000" : "var(--ha-card-box-shadow)"};
+      /* The icon's area, a key, a switch and a slider's track are flat gray fills on a card and on the page. On a tile, which is a gray fill, they have the card background and the chip shadow, as the module reference explains under Depth. */
       --org-inset: ${card._org.opts.tile ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
       --org-inset-shadow: ${card._org.opts.tile ? "var(--tile-chip-shadow, var(--ha-card-box-shadow))" : "0 0 #0000"};
-      --org-field: ${card._org.opts.gray ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--fill-subtle))"};
+      /* A lit icon tints the fill or the card background that it has. On the page, where its fill would be gray on gray, it takes the theme's tint, which mixes its color into the card background, so it looks lit and not dull. */
+      --org-field: ${card._org.opts.frameless ? "var(--tint)" : "color-mix(in srgb, currentColor var(--tint-strength), var(--org-inset))"};
       --org-chip-bg: ${card._org.me.lit ? "var(--org-field)" : "var(--org-inset)"};
       /* An icon that is not lit takes the text color, and on a compact card the secondary text color, as in a slim list */
       --org-chip-rest: ${card._org.opts.compact ? "var(--secondary-text-color)" : "var(--primary-text-color)"};
       --org-chip-ink: ${card._org.me.lit ? "var(--org-color)" : "var(--org-chip-rest)"};
-      --org-key-bg: ${card._org.opts.gray ? "var(--fill-subtle)" : card._org.opts.dark ? "var(--fill-strong)" : "var(--ha-card-background)"};
+      /* A key with a background, and a filled one, has the same material, and a tray gives its keys the other one */
+      --org-key-bg: var(--org-inset);
+      --org-key-shadow: var(--org-inset-shadow);
       /* The padding option sets the space between the card's edge and its content, and the row is as tall as the icon plus this space above and below it. A frameless card has no padding unless the option sets one. */
       --org-pad: ${card._org.opts.pad || (card._org.opts.frameless ? "0px" : "var(--ha-space-4)")};
       --org-sub-text: ${card._org.opts.text || "var(--ha-font-size-s)"};
@@ -1568,8 +1571,8 @@ origami_base:
     }
     ha-card .bubble-sub-button.background-on${card._org.key},
     ha-card .bubble-sub-button.background-off${card._org.key} {
-      background-color: var(--org-inset) !important;
-      box-shadow: var(--org-inset-shadow) !important;
+      background-color: var(--org-key-bg) !important;
+      box-shadow: var(--org-key-shadow) !important;
     }
     ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {
       --mdc-icon-size: var(--org-icon-size);
@@ -1592,6 +1595,9 @@ origami_base:
       background-color: var(--org-inset) !important;
       box-shadow: var(--org-inset-shadow);
       border-radius: var(--org-tile-radius) !important;
+      /* A key in a tray stands out from it: in a gray tray on a card, a key with a background or a filled key has the card background and the chip shadow, and in the tray on a tile, which has the card background, it is a flat fill */
+      --org-key-bg: ${card._org.opts.tile ? "var(--fill-subtle)" : "var(--tile-chip-background, var(--ha-card-background))"};
+      --org-key-shadow: ${card._org.opts.tile ? "0 0 #0000" : "var(--tile-chip-shadow, var(--ha-card-box-shadow))"};
     }
     /* Bubble Card puts the keys of a card with rows below its own row into a group of their own, which takes the tray's spacing */
     ha-card .bubble-sub-button-container > .bubble-sub-button-group {
@@ -1624,12 +1630,6 @@ origami_base:
       height: var(--org-group-key) !important;
       padding: 0 var(--ha-space-1) !important;
       border-radius: calc(var(--org-tile-radius) - var(--org-group-pad)) !important;
-      background: none !important;
-      box-shadow: none !important;
-    }
-    ha-card .bubble-sub-button.background-on${card._org.key},
-    ha-card .bubble-sub-button.background-off${card._org.key} {
-      background-color: var(--org-key-bg) !important;
     }
     ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {
       --mdc-icon-size: var(--icon-size-xs);
@@ -1660,7 +1660,7 @@ origami_base:
         const text = org.picker(hass, sub, sel, top ? card._org.opts.text || "var(--ha-font-size-m)" : "var(--org-sub-text, var(--ha-font-size-s))");
         if (!text) return;
         // The dropdown is a chip in the active color with its arrow after the name, as large as a chip in Button's rows. The arrow is as large as the card's icons, as on a key. The chevron fills less than half of its icon, so the chip's end has less padding, and the chevron ends about as far from the edge as the name starts. The key gives the chip the weight of Base's own rules for sub-buttons, which come before it.
-        rules.push(...text, sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: none !important; color: var(--text-color-active) !important; }",
+        rules.push(...text, sel + org.key + " { --org-key-h: var(--bubble-sub-button-height, var(--org-sub-h, " + h + ")); height: var(--org-key-h) !important; min-width: 0 !important; width: auto !important; padding-block: 0 !important; padding-inline: var(--ha-space-4) var(--ha-space-2) !important; border-radius: calc(var(--org-key-h) * var(--radius-ratio, 0.35)) !important; background-color: var(--fill-active) !important; box-shadow: var(--org-key-shadow, none) !important; color: var(--text-color-active) !important; }",
           sel + " .bubble-sub-button-name-container { font-weight: var(--ha-font-weight-bold) !important; color: inherit !important; }",
           sel + " .bubble-dropdown-container { width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; margin-inline-start: var(--ha-space-1); }",
           sel + " .bubble-dropdown-arrow { --mdc-icon-size: var(--org-icon-size); width: var(--org-icon-size) !important; height: var(--org-icon-size) !important; color: inherit !important; }",

@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.12.0"
+  version: "3.13.0"
   supported:
     - sub-buttons
     - button
@@ -129,7 +129,7 @@ origami_button:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.4)) throw new Error("origami_button needs origami_base 13.4 or later");
+      if (org?.hass !== hass || !(org.version >= 13.5)) throw new Error("origami_button needs origami_base 13.5 or later");
       const cfg = this.config.origami_button ?? {};
       const lang = hass.locale?.language ?? hass.language ?? "en";
       // A name matches an active value in any script. Bubble Card's class names for the same text count too, so a css_class still matches.
@@ -261,11 +261,14 @@ origami_button:
       --org-btn-height: ${card._orgB.seg ? card._orgB.height || "var(--control-height)" : card._orgB.bg ? card._orgB.height || "var(--control-height-icon)" : "auto"};
       /* A button's sides have 40 % of its height as padding, which is 16 px on a 40 px button */
       --org-btn-padding: ${card._orgB.seg ? "0 var(--ha-space-2)" : card._orgB.bg ? "0 calc(var(--org-btn-height) * 0.4)" : "var(--ha-space-2) var(--ha-space-4)"};
-      --org-btn-bg: ${card._orgB.bg || card._orgB.seg ? "var(--fill-subtle)" : "transparent"};
+      /* A button looks like a key on the same card: a flat fill on a card and on the page, and the card background with the chip shadow on a tile. A segmented bar is a gray fill. */
+      --org-btn-bg: ${card._orgB.seg ? "var(--fill-subtle)" : card._orgB.bg ? "var(--org-key-bg, var(--fill-subtle))" : "transparent"};
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
       --org-btn-field: ${card._orgB.field};
       --org-btn-lamp: ${card._orgB.lamp};
+      /* A lit button tints what a key has on its card, and on the page, where a key is gray on gray, the card background, as the theme's tint does */
+      --org-btn-lit: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--org-key-bg, var(--ha-card-background)));
       --org-btn-radius: calc(${card._orgB.seg || card._orgB.bg ? "var(--org-btn-height)" : "var(--control-height-icon)"} * var(--radius-ratio, 0.35));
     }
     ${card._orgB.lamps}
@@ -298,6 +301,7 @@ origami_button:
       gap: 0 !important;
       border-radius: ${card._orgB.seg ? "0" : "var(--org-btn-radius)"} !important;
       background: ${card._orgB.below ? "none" : "var(--org-value-chip, var(--org-btn-bg))"} !important;
+      ${card._orgB.bg && !card._orgB.seg && !card._orgB.below ? "box-shadow: var(--org-key-shadow, none) !important;" : ""}
       color: ${card._orgB.seg || card._orgB.chips || card._orgB.below ? "var(--primary-text-color)" : "var(--secondary-text-color)"} !important;
       font-size: var(--ha-font-size-m) !important;
       transition: var(--transition-interactive) !important;
@@ -343,7 +347,8 @@ origami_button:
       height: var(--org-btn-field) !important;
       margin: 0 !important;
       border-radius: min(calc(var(--org-btn-field) * var(--radius-ratio, 0.35)), var(--ha-card-border-radius));
-      background: var(--org-value-chip, var(--org-btn-bg));` : "margin-inline: 0 var(--ha-space-2) !important;"}
+      background: var(--org-value-chip, var(--org-btn-bg));
+      ${card._orgB.bg ? "box-shadow: var(--org-key-shadow, none);" : ""}` : "margin-inline: 0 var(--ha-space-2) !important;"}
       color: ${card._orgB.chips ? "var(--secondary-text-color)" : "inherit"} !important;
       opacity: ${card._orgB.seg ? "calc(var(--org-btn-opacity) * var(--opacity-strong))" : "var(--org-btn-opacity)"} !important;
       ${card._orgB.below ? "transition: var(--transition-interactive);" : ""}
@@ -386,6 +391,8 @@ origami_button:
       z-index: -1;
       border-radius: calc(var(--org-btn-radius) - var(--org-btn-inset));
       background-color: var(--fill-active);
+      /* The bar is a gray fill, so the active segment in it has the chip shadow, as a key in a tray */
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow));
       opacity: 0;
       transition: opacity var(--duration-normal) ease;
     }
@@ -419,6 +426,7 @@ origami_button:
     ${card._orgB.bars}
     ${card._orgB.barOn.length ? card._org.each(card._orgB.barOn, "") + ` {
       background: var(--fill-active) !important;
+      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
       color: var(--text-color-active) !important;
     }
     ` + card._org.each(card._orgB.barOn, " .bubble-sub-button-name-container") + ` {
@@ -475,11 +483,11 @@ origami_button:
     }
     ${card._org.fade(".bubble-sub-button-bottom-container", "var(--ha-space-4)")}` : ""}
     ${card._orgB.on("")} {
-      ${card._orgB.seg || card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : card._orgB.bg ? "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;" : ""}
+      ${card._orgB.seg || card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : card._orgB.bg ? "background: var(--org-btn-lit) !important;" : ""}
       color: ${card._orgB.toggle && !card._orgB.below ? "var(--text-color-active)" : "var(--primary-text-color)"} !important;
     }
     ${card._orgB.on(" .bubble-sub-button-icon:not(.hidden)")} {
-      ${!card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : "background: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--ha-card-background)) !important;"}
+      ${!card._orgB.below ? "" : card._orgB.toggle ? "background: var(--fill-active) !important;" : "background: var(--org-btn-lit) !important;"}
       color: ${card._orgB.toggle ? "var(--text-color-active)" : "var(--org-btn-lamp)"} !important;
       opacity: 1 !important;
     }

@@ -18,7 +18,9 @@ Origami:
   radius-small: 'calc(var(--control-height-mini) * var(--radius-ratio))'
   radius-circle: 'var(--ha-border-radius-circle, 50%)'
 
-  # Borders and shadows
+  # Borders and shadows. The card background casts a shadow, and a gray fill never does. A card casts card-shadow on the page,
+  # a pop-up, a mini pop-up or a menu casts shadow-elevated, and a control on a gray fill, such as a tile or a tray, casts
+  # chip-shadow. Each shadow starts with shadow-edge, and the module reference explains the rule under Depth.
   border-width: '0'
   border-color: 'color-mix(in srgb, var(--primary-text-color) var(--border-contrast), transparent)'
   card-ring: 'inset 0 0 0 var(--border-width) var(--border-color)'
@@ -32,9 +34,9 @@ Origami:
   fill-active: 'var(--toggle-on)'
   accent-color-background: 'color-mix(in srgb, var(--ok-color) var(--tint-strength), var(--ha-card-background))'
 
-  # Tiles are flat, and their icon sits on the card background with a shadow
+  # A tile is a gray fill, so its icon, its keys and its switch have tile-chip-background and the chip shadow, as the keys in a gray
+  # tray on a card do. Each mode below sets tile-chip-background.
   tile-background: 'var(--fill-subtle)'
-  tile-chip-background: 'var(--ha-card-background)'
   tile-chip-shadow: 'var(--chip-shadow)'
 
   # Opacity
@@ -240,6 +242,7 @@ Origami:
       dashboard-background: '#F2F0EB'
       ha-card-background: '#FFFFFF'
       popup-background: '#F0EEEA'
+      tile-chip-background: 'var(--ha-card-background)'
 
       # Text and icons
       primary-text-color: '#4F4C49'
@@ -286,7 +289,7 @@ Origami:
       card-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.05), 0 4px 10px -4px rgba(var(--shadow-tint), 0.1)'
       chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.06), 0 2px 6px -2px rgba(var(--shadow-tint), 0.1)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.15)'
-      shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 16px 40px -12px rgba(var(--shadow-tint), 0.22)'
+      shadow-elevated: 'var(--shadow-edge), 0 2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 16px 40px -12px rgba(var(--shadow-tint), 0.22)'
       navbar-shadow: '0px -1px 2px rgba(var(--shadow-tint), 0.03), 0px -8px 24px -8px rgba(var(--shadow-tint), 0.1)'
 
       # Header
@@ -331,6 +334,9 @@ Origami:
       # Cards are two steps lighter than the background, so buttons never look like cards
       ha-card-background: '#2F2D2A'
       popup-background: '#181715'
+
+      # A control on a gray fill is one step lighter than that fill, on a tile as in a tray on a card
+      tile-chip-background: 'var(--fill-strong)'
 
       # Text and icons
       primary-text-color: '#E5E3DD'
@@ -377,7 +383,7 @@ Origami:
       card-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3), 0 6px 14px -6px rgba(var(--shadow-tint), 0.5)'
       chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3), 0 3px 7px -3px rgba(var(--shadow-tint), 0.45)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.65)'
-      shadow-elevated: '0 2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 20px 48px -12px rgba(var(--shadow-tint), 0.7)'
+      shadow-elevated: 'var(--shadow-edge), 0 2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 20px 48px -12px rgba(var(--shadow-tint), 0.7)'
       navbar-shadow: '0px -1px 2px rgba(var(--shadow-tint), 0.3), 0px -10px 28px -8px rgba(var(--shadow-tint), 0.55)'
 
       # Header

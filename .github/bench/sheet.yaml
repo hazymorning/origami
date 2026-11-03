@@ -285,6 +285,25 @@ sections:
           bottom:
             - {entity: light.kitchen, name: Kitchen, tap_action: {action: toggle}}
             - {entity: switch.printer, name: Printer, tap_action: {action: toggle}}
+      # The speaker as a switch in a header and as a segmented bar. The chosen part lies on a gray fill, so it has the chip shadow.
+      - type: custom:bubble-card
+        card_type: separator
+        name: Speaker
+        modules: [origami_header]
+        origami_header: {value_style: switch}
+        sub_button:
+          main:
+            - {name: Living, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.living_room}}}
+            - {name: Kitchen, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.kitchen_speaker}}}
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_button]
+        origami_button: {segmented: true}
+        sub_button:
+          main: []
+          bottom:
+            - {name: Living, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.living_room}}}
+            - {name: Kitchen, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.kitchen_speaker}}}
       # A grid whose named group stays cells, as a vacuum's room buttons do
       - type: custom:bubble-card
         card_type: sub-buttons

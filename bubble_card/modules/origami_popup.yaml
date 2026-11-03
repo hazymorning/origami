@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.14.0"
+  version: "4.15.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -41,6 +41,8 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: !org.has(this.config.backdrop_blur) && this.config.performance_mode !== "performance" && !this.config.hide_backdrop,
+        // A pop-up lies above the page, so it casts the theme's shadow for what lies above, as a mini pop-up and a menu do. Only shadow_opacity: 0 turns it off.
+        shadow: !org.has(this.config.shadow_opacity) || Number(this.config.shadow_opacity) > 0,
         // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 4 px. Bubble Card's editor leaves an emptied backdrop_blur as '', which counts as none set.
         dimBlur: ((b) => !org.has(b) ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(4px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
         // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
@@ -229,6 +231,9 @@ origami_popup:
       --org-popup-pad: var(--ha-space-4);
       --org-header-pad-bottom: var(--ha-space-2);
     }
+    ${card._orgP.shadow ? `.bubble-pop-up.is-popup-opened {
+      box-shadow: var(--shadow-elevated);
+    }` : ""}
     .bubble-pop-up.no-header:not(.popup-mode-centered):not(.editor) > .bubble-header-container::before {
         display: none;
     }
@@ -436,6 +441,7 @@ origami_popup:
       box-shadow: none;
       border-radius: 0;
       --fill-subtle: var(--ha-card-background);
+      --org-key-shadow: var(--shadow-elevated);
     }
     .org-mini.frameless .org-mini-box {
       gap: var(--ha-space-2);

@@ -32,6 +32,7 @@ These changes are in the `next` branch and come with the next release.
 - All dividing lines share one width and the theme's line color.
 - A compact card's icon has no background, as in a slim list.
 - On a compact card, a slider sub-button with `always_visible: true` takes the place of the pill switch.
+- In a gray tray on a card, a key with a background and a filled key cast the chip shadow, and in the tray on a tile, the keys are flat. A key that turns on keeps the shadow of its place, also a dropdown.
 - Controls at the end of a row end at the card's padding, and a tray with three keys has the same width on every card, so trays and side sliders line up.
 - A dropdown whose options are entity IDs, such as a speaker picker, shows the chosen entity's name in a chip, with a small icon before it. Its menu lists the entities' names with an icon for each state, it is as wide as its longest option, and it has the spacing of a mini pop-up. In a card's own row, the dropdown is as tall as the name and the state line, and its text is as large as the name.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
@@ -78,6 +79,7 @@ These changes are in the `next` branch and come with the next release.
 - Header and Popup share their value keys: `name`, `icon`, `color`, `name_color` and `background`.
 - New options: `size: large`, `title_action`, `value_size`, `icon_gap`, `scroll` and `value_position: above`, which puts the values in a small line above the title.
 - The `switch` value style joins the values into one small switch.
+- A chosen value on a switch or a chip has the active fill, as every active control. On a switch, it also casts the chip shadow.
 - Header writes the title itself, so a title with a `${ }` template shows at once.
 
 #### Popup
@@ -88,6 +90,7 @@ These changes are in the `next` branch and come with the next release.
 - `value_position: beside` puts the values beside the title.
 - The backdrop is blurred through Bubble Card's own `backdrop_blur` variable, which older Safari also reads, and as with `backdrop_blur`, the pop-up's surface then has no blur of its own, so the phone draws one blur instead of two. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
+- A pop-up casts the theme's `shadow-elevated`, as a mini pop-up does, whatever `shadow_opacity` says, unless it is `0`. The buttons of a frameless mini pop-up cast it too.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
 - `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One opens above its key where it fits, or else on the side with more room. It grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change. A mini pop-up with its own `width` lines up with its key, `width: fit-content` makes it as wide as its widest card, such as a list of buttons, and cards taller than its `max_height` scroll inside it and fade out at its edges. With `frameless: true`, its cards stand on the dim like the buttons of a sheet. The dim has the color and the blur of Bubble Card's backdrop, and beside Home Assistant's sidebar it covers what the backdrop covers.
@@ -98,7 +101,8 @@ These changes are in the `next` branch and come with the next release.
 - `active` also matches the entity that a button's tap targets.
 - Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
 - A button with `css_class: divider` is a short line between two buttons.
-- The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`.
+- The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`, and it casts the chip shadow.
+- On a button card, a lit button has the tint of the card's lit icon. On a tile, the buttons have the card background and the chip shadow, as keys do.
 - Button also works on button cards, where it styles the bottom sub-buttons.
 - A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
 
@@ -121,6 +125,7 @@ These changes are in the `next` branch and come with the next release.
 - New options: `sign` for every row, and the `state_color` and `image_size` keys for a tile.
 - `sign: check` marks a chosen row with a check, such as a speaker in a group, from its entity or its own `on` key. With `pending`, a tapped row shows the sign it is about to get until its state changes, and `background: false` leaves out the list's panel inside a card or a mini pop-up, and a slim list then keeps its first and last names as far from the edge as the text around it.
 - `sign: add` puts a plus in the icon's place of a row that isn't chosen, and a check once it is, such as for the speakers that can join a group.
+- A list without a panel stands on the card around it, so its icons are flat fills there.
 - Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.
 
 #### Table
@@ -129,7 +134,8 @@ These changes are in the `next` branch and come with the next release.
 
 #### Theme
 
-- New shadows: a fine edge, a contact shadow and a soft drop in a dark tone of the background's hue. The new `shadow-edge` and `chip-shadow` tokens hold them.
+- New shadows in a dark tone of the background's hue, which follow one rule: the card background casts a shadow, and a gray fill never does. Each starts with a fine edge, the new `shadow-edge`. A card casts `card-shadow`, a pop-up, a mini pop-up or a menu `shadow-elevated`, and a control on a gray fill, such as a tile or a tray, the new `chip-shadow`. The module reference explains the rule under Depth.
+- In dark mode, a control on a gray fill is one step lighter than that fill, on a tile as in a tray. Each mode sets `tile-chip-background`.
 - Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
 - The `scroller-mask` token is gone, because the modules fade scrolling rows themselves.
@@ -141,6 +147,7 @@ These changes are in the `next` branch and come with the next release.
 - The TV pop-up uses Bubble cards with the Button module instead of Paper Buttons Row.
 - The server card in the menu is a Bubble card.
 - The climate table uses the Table module.
+- The pop-ups no longer set `shadow_opacity`, because Popup gives every pop-up the theme's shadow.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 
 ### Bug fixes
@@ -215,7 +222,7 @@ Every module changed, and some options were renamed or work differently. The [mo
 21. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
 22. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
 23. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
-24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens.
+24. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
 25. Cards from 2.0 that read `--card-padding`, `--control-padding-x` or `--font-size-headline` need `12px`, `16px` and `28px` in their place, because the theme no longer has these variables.
 
 ## 2.0 · The Unfolding

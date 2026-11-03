@@ -9,7 +9,6 @@ show_icon: false
 scrolling_effect: false
 bg_opacity: '100'
 bg_blur: '0'
-shadow_opacity: '12'
 hide_backdrop: false
 margin: 7px
 margin_top_mobile: 0px

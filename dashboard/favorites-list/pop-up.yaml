@@ -18,7 +18,6 @@ bg_color: transparent
 bg_opacity: '100'
 bg_blur: '0'
 backdrop_blur: '10'
-shadow_opacity: '20'
 modules:
   - origami_base
   - origami_popup

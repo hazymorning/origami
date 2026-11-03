@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.7.0"
+  version: "3.8.0"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
@@ -143,7 +143,8 @@ origami_tiles:
         if (entity && (!obj || obj.state === "unavailable")) rules.push(list ? "ha-card " + sel + " > *, ha-card " + sel + "::after { opacity: var(--opacity-disabled) !important; }" : sel + " { opacity: var(--opacity-disabled); }");
         // A row without a state line keeps its name in the middle
         if (list && !org.has(state)) rules.push(sel + " .bubble-sub-button-name-container::after { display: none; }");
-        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: var(--tint); }");
+        // A colored icon tints the card background of its chip, and without a panel it takes the theme's tint, as a lit icon on the page does
+        if (color) rules.push(sel + " { --org-tile-color: " + color + "; --org-tile-chip: " + (t.panel ? "color-mix(in srgb, currentColor var(--tint-strength), var(--org-tile-chip-bg))" : "var(--tint)") + "; }");
         if (list) {
           if (sign === "open") signs.open.push(one);
           if (sign === "switch") signs[on ? "on" : "switch"].push(one);
@@ -207,6 +208,8 @@ origami_tiles:
     /* In a list, a row holds an icon's background, as a card does, so all rows have the same height. The rows touch, so two icons are as far apart as an icon is from the list's edge. The sign at a row's end has a column as wide as the icons' column. A slim row is as tall as a one-line row in Home Assistant's own lists, and its icon and its sign are small. */
     .bubble-sub-button-group${card._orgTi.group} {
       --org-row-min: ${card._orgTi.row || (card._orgTi.slim ? "var(--control-height-list)" : card._orgTi.list ? "calc(var(--tile-size) + 2 * var(--ha-space-2))" : "calc(var(--tile-size) + 2 * var(--ha-space-4))")};
+      /* A tile and a list's panel are gray fills, so an icon on them has the card background and the chip shadow. A list without a panel stands on the card around it, so its icons are flat fills there. */
+      --org-tile-chip-bg: ${card._orgTi.panel ? "var(--tile-chip-background, var(--ha-card-background))" : "var(--fill-subtle)"};
       display: grid !important;
       grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
       gap: ${card._orgTi.list ? "0" : "var(--ha-space-3)"} !important;
@@ -256,12 +259,12 @@ origami_tiles:
       margin: 0 !important;
       margin-inline-end: var(--ha-space-3) !important;
       border-radius: ${card._orgTi.slim ? "0" : "var(--radius-inner)"} !important;
-      box-shadow: ${card._orgTi.slim ? "none" : "var(--tile-chip-shadow, var(--ha-card-box-shadow))"};
+      box-shadow: ${card._orgTi.slim || !card._orgTi.panel ? "none" : "var(--tile-chip-shadow, var(--ha-card-box-shadow))"};
       transition: var(--transition-interactive);
     }
     .bubble-sub-button-icon {
       --mdc-icon-size: ${card._orgTi.slim ? "var(--icon-size-s)" : "var(--icon-size-m)"} !important;
-      background-color: ${card._orgTi.slim ? "transparent" : "var(--org-tile-chip, var(--tile-chip-background, var(--ha-card-background)))"};
+      background-color: ${card._orgTi.slim ? "transparent" : "var(--org-tile-chip, var(--org-tile-chip-bg))"};
       color: var(--org-tile-color, ${card._orgTi.slim ? "var(--secondary-text-color)" : "var(--primary-text-color)"}) !important;
     }
     /* In a slim row, the name and the state share one line. The name keeps at least 40 % of it, or its measured width if that is less, and the state takes at most the rest. Bubble Card's own state text has a row of no height below them. */

@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.6.4"
+  version: "3.7.0"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -97,7 +97,7 @@ origami_header:
         requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
       }
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_header needs origami_base 13.1 or later");
+      if (org?.hass !== hass || !(org.version >= 13.5)) throw new Error("origami_header needs origami_base 13.5 or later");
       const { env, ctx } = org;
       const cfg = this.config.origami_header ?? {};
       // Header writes the title, as Bubble Card would. A title in ${ } reads the states at once, so it is there when the header first shows. Jinja in {{ }} comes from Home Assistant a moment later, and a header without a name shows its entity's name.
@@ -156,8 +156,6 @@ origami_header:
       return "";
     })()}
     ha-card {
-      /* A chosen value stands on the card background, and in dark mode on a lighter surface, as on a switch */
-      --org-header-pick: ${card._org.opts.dark ? "color-mix(in srgb, var(--primary-text-color) 22%, var(--ha-card-background))" : "var(--ha-card-background)"};
       --org-header-weight: ${card._orgH.weight};
       --org-header-icon-color: ${card._orgH.color};
       --org-header-icon-size: ${card._orgH.size};
@@ -275,10 +273,7 @@ origami_header:
     ` + card._org.each(card._orgH.bare, " .bubble-sub-button-icon:not(.hidden)") + ` {
       --mdc-icon-size: var(--icon-size-xs) !important;
     }` : ""}
-    ${card._orgH.chip && card._orgH.picked.length ? card._org.each(card._orgH.picked, "") + ` {
-      background-color: var(--org-header-pick) !important;
-      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
-    }` : ""}
+    ${card._orgH.chip ? card._org.fill(card._orgH.picked) : ""}
     ${card._orgH.scroll ? `
     /* A row of chips is a row of boxes, so it keeps more space from the cards below it than a title alone */
     ha-card .bubble-container {
@@ -308,6 +303,8 @@ origami_header:
       padding: var(--ha-space-1) !important;
       border-radius: var(--radius-control, 14px) !important;
       background-color: var(--fill-subtle) !important;
+      /* The track is a gray fill, so the chosen value in it has the chip shadow, as a key in a tray */
+      --org-key-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow));
     }
     ha-card .bubble-sub-button-container .bubble-sub-button {
       box-sizing: border-box;
@@ -328,11 +325,7 @@ origami_header:
     ha-card .bubble-sub-button-container .bubble-sub-button.bubble-action-enabled:active {
       transform: scale(var(--press-scale));
     }
-    ${card._orgH.picked.length ? card._org.each(card._orgH.picked, "") + ` {
-      background: var(--org-header-pick) !important;
-      box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
-      color: var(--primary-text-color) !important;
-    }` : ""}` : ""}
+    ${card._org.fill(card._orgH.picked)}` : ""}
     ${card._orgH.above ? `
     /* The values stand above the title. The header fills the height of its place, such as a cell in a grid next to a taller card, and centers its two lines in it. */
     :host {

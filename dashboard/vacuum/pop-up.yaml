@@ -11,7 +11,6 @@ margin_top_desktop: 30%
 bg_opacity: '100'
 bg_blur: '0'
 backdrop_blur: '10'
-shadow_opacity: '12'
 button_type: name
 show_icon: false
 with_bottom_offset: true

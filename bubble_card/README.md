@@ -40,8 +40,6 @@ Give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a 
 
 Color mostly shows that a device is on. The icon takes Home Assistant's state color, such as amber for a light or green for a switch, and the area behind it a tint of that color.
 
-On a gray surface, such as a tile, a list or a card with Base's `tile` option, the area behind an icon, a switch or a key is the card background with a shadow. The theme's `tile-chip-background` and `tile-chip-shadow` set this look. Set them to `var(--fill-subtle)` and `none` in a copy of the theme for flat areas.
-
 Base and the Tiles module follow Home Assistant's rules for when an entity is on and which color it takes, with two exceptions: a paused or idle media player counts as off, and a thermostat that reports its action counts as on only while it heats, cools, dries or runs its fan.
 
 Controls stay neutral. An active control is filled with `fill-active`, the text color, like a Home Assistant switch that is on. An open dropdown shows its menu without Bubble Card's ring in the accent color.
@@ -51,6 +49,24 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
 - A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name. In the card's own row, its text is as large as a card's name. The sub-button's icon stands before the name, as small as a chip's icon. Without `icon`, it is the helper's icon, and `show_icon: false` hides it. Its menu shows each entity's name and icon, and options such as None keep their text. A menu is as wide as its longest option and has the spacing of a mini pop-up: 16 px around its rows and 8 px to its dropdown. Each icon has the same space to its row's start as above and below it. Base's `words` option renames the entities, with the entity ID or the name as the key.
+
+</details>
+
+<details>
+<summary>Depth</summary>
+
+<br>
+
+The card background casts a shadow, as paper does, and a gray fill never casts one.
+
+- A card casts the card shadow on the page. A pop-up, a mini pop-up and a menu cast the stronger shadow of what lies above the page, and so does each button of a frameless mini pop-up, which has no panel.
+- On a card, on the page and in a pop-up, a control is a flat gray fill, such as the area behind an icon, a key, a switch or a slider's track.
+- A gray fill that holds controls gives each of them the card background and a small shadow, which the theme calls the chip shadow. In a tray on a card, these are the keys with a background. On a tile, they are the icon, the keys, the switch, the slider and a tray, whose keys are flat fills again.
+- A control that turns on changes only its color, to `fill-active`, and keeps the shadow of its place. The chosen value in a switch or a segmented bar has the chip shadow, and a chosen chip on the page has none.
+- A lit icon tints its fill or its card background. On the page, it takes the theme's `tint`, which mixes its color into the card background, so it looks lit.
+- In dark mode, a control on a gray fill is one step lighter than that fill.
+
+The theme's `tile-chip-background` and `tile-chip-shadow` set the controls on a gray fill. In a copy of the theme, `var(--fill-subtle)` as `tile-chip-background` in both modes and `none` as `tile-chip-shadow` make them flat.
 
 </details>
 
@@ -1129,7 +1145,7 @@ sub_button:
         action: toggle
 ```
 
-On a switch and on chips, a value stands out while its entity has the value its tap sets, unless its own `on` key decides. In a scrolling row, the chosen chip scrolls into view. This switch chooses what the lamp list shows:
+On a switch and on chips, a value is filled with `fill-active` while its entity has the value its tap sets, unless its own `on` key decides. In a switch, it also has the chip shadow, as described under Depth in [How the modules work together](#how-the-modules-work-together). In a scrolling row, the chosen chip scrolls into view. This switch chooses what the lamp list shows:
 
 ```yaml
 type: custom:bubble-card
@@ -1548,7 +1564,7 @@ cards:
             mini_popup: volume
 ```
 
-In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. With `width: fit-content`, it is as wide as its widest card, so a list of buttons is as wide as its longest button in any language. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
+In place of the list, a mini pop-up can be a map with its cards under `cards`, its `width` and its `max_height`, such as `240px`. With `width: fit-content`, it is as wide as its widest card, so a list of buttons is as wide as its longest button in any language. A narrower mini pop-up lines up with its key: with the key's end edge when the key is in the end half of the pop-up's cards, else with its start edge. Cards taller than `max_height` or the screen scroll inside it and fade out at its edges while they scroll, as in Bubble Card's pop-ups. With `frameless: true`, it has no panel, so its cards stand on the dim 8 px apart, like the buttons of a sheet, and their subtle fills take the card background so they stay solid, with the shadow of a mini pop-up. The dim has the color and the blur of Bubble Card's backdrop. This one lists a speaker's inputs, and Button fills the input that the speaker plays:
 
 ```yaml
 origami_popup:
@@ -1608,7 +1624,7 @@ sub_button:
 cards: []  # Add the pop-up's cards here
 ```
 
-The theme sets the pop-up background. The main README explains the dashboard's pop-ups under [Pop-ups](../README.md#pop-ups).
+The theme sets the pop-up background, and the pop-up casts the theme's `shadow-elevated`, whatever `shadow_opacity` says, unless it is `0`. The main README explains the dashboard's pop-ups under [Pop-ups](../README.md#pop-ups).
 
 </details>
 
@@ -1616,7 +1632,7 @@ The theme sets the pop-up background. The main README explains the dashboard's p
 
 A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, Tiles, which turns a sub-buttons card into a grid, and Speaker Select, which reads a media player with `media()`.
 
-Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, and 13.4 for `pending()`. These are the helpers:
+Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, 13.4 for `pending()`, and 13.5 for the fill and the shadow of a key in `--org-key-bg` and `--org-key-shadow`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1635,7 +1651,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `media(hass, id, options)` and `picture(address, ignore)` | `media()` reads a media player as Media and Speaker Select show it, with the options `env`, `tv` for the TV layout and `cfg` for the module's `players`, `leader`, `art`, `ignore_art` and `inputs`. It returns the group, music, input, cover and app, the players as `twins`, whether the player is active and the device on, the media color and an `icon()` function for an `icons` map. `picture()` returns a picture's address, or `null` if it is empty, not a web address or server path, or contains an entry of `ignore`. |
 | `text(selector, item, text, size)`, `values(env, config, key, scope, size, list)` and `icon(element, icon)` | `text()` and `values()` return the CSS rules that show a text or a value's keys in a sub-button, and `values()` can take the list from `subs()`. `icon()` sets an element's icon, and without one gives back the element's own. |
 | `badge(role)` and `part(host, class, build)` | `badge()` marks the card's icon with a crown for a `leader` or a link for a `member`, and removes the mark without a role. `part()` returns the child of `host` with this class, built once with `build`, such as Media's progress ring. |
-| `cover(address, opacity, host)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | The CSS rules for a cover in a media card's icon, which keep the last cover until the next one has loaded when `host` is the icon's box, for the values in a container as chips or plain text, as in Header and Popup, and for filled active controls, as on Base's sub-buttons and Media's play and power buttons. |
+| `cover(address, opacity, host)`, `chips(scope)`, `plain(scope, weight)` and `fill(selectors)` | The CSS rules for a cover in a media card's icon, which keep the last cover until the next one has loaded when `host` is the icon's box, for the values in a container as chips or plain text, as in Header and Popup, and for filled active controls, as on Base's sub-buttons and Media's play and power buttons. A filled control keeps the shadow of its place from `--org-key-shadow`. |
 | `dropdown(sub)`, `menu(scope)` and `picker(hass, sub, selector, size)` | `dropdown()` tells whether a sub-button from `subs()` is a dropdown. `menu()` returns the rules that show the menus of the dropdowns in `scope` as list rows. `picker()` shows a dropdown whose options are entity IDs with the chosen entity's name in `size`, writes each menu item's name and icon, and returns the rules for the name, or `null` for a dropdown with other options. |
 | `fresh(element, text)`, `write(element, text)` and `readouts(hass, config, id, text, class)` | `fresh()` tells whether an element that Bubble Card does not hand over needs a new text, and `write()` writes it. `readouts()` writes into every sub-button with `css_class: readout`, or the class in `class`, a text that `text` makes from that sub-button's entity. |
 | `rename(text)` | The word that the card's `words` option sets for a name or a value, or `null`. |
