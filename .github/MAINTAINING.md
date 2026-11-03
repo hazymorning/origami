@@ -144,7 +144,7 @@ All text is written for people: short, plain English that sounds like a person w
 
 ## Images
 
-- All images follow one standard, so the gallery looks like one piece. No phone mockups or other device frames: a part lies flat, as it is, and is never tilted.
+- All images follow one standard, so the gallery looks like one piece. No phone mockups or other typical app presentation styles, and never a diagonal division.
 - The hero shows the maintainer's own dashboard, because it shows best how Origami looks in daily use. It gets more care than any other image.
 - Screenshots come from a real Home Assistant with the real theme, font and cards.
 - Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
