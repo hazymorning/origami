@@ -91,108 +91,99 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 </details>
 
-> [!TIP]
-> Some of Home Assistant's words are long or sound odd in German, French and other languages. Base's [`words`](bubble_card/README.md#language) option changes them on a card, such as `Nicht verfügbar` to `Offline`:
->
-> ```yaml
-> origami_base:
->   words:
->     Nicht verfügbar: Offline
-> ```
-
 ## Home view
 
-### [Menu](dashboard/menu/)
+### Menu
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Replaces Home Assistant's header with a menu that slides down from the top.
+Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [Setup](dashboard/menu/)
 
-### [Greeting and notifications](dashboard/greeting/)
+### Greeting and notifications
 
 <img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/greeting.webp">
 
-A greeting with the next event, and notifications right beside it.
+A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [Setup](dashboard/greeting/)
 
-### [Weather](dashboard/weather/)
+### Weather
 
 <img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
 
-Today's weather, in a color that matches it.
+Today's weather, in a color that matches it. Needs the Origami Weather card. [Setup](dashboard/weather/)
 
-### [Favorites](dashboard/favorites/)
+### Favorites
 
 <img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
-Tiles that come and go with what's happening at home.
+Tiles that come and go with what's happening at home. [Setup](dashboard/favorites/)
 
-### [Rooms](dashboard/rooms/)
+### Rooms
 
 <img width="800" alt="The rooms header and the room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
 
-Each room's climate and lights at a glance.
+Each room's climate and lights at a glance. [Setup](dashboard/rooms/)
 
-### [Climate table](dashboard/climate-table/)
+### Climate table
 
 <img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/climate-table.webp">
 
-Every room's climate in one table.
+Every room's climate in one table. [Setup](dashboard/climate-table/)
 
-### [Navigation bar](dashboard/navigation-bar/)
+### Navigation bar
 
 <img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
 
-The most used pop-ups and what's playing, within thumb's reach.
+The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [Setup](dashboard/navigation-bar/)
 
 ## Pop-ups
 
-### [Room](dashboard/room/)
+### Room
 
 <img width="800" alt="The room pop-up with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Everything for one room in one place.
+Everything for one room in one place. [Setup](dashboard/room/)
 
-### [Lights](dashboard/lights/)
+### Lights
 
 <img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-All the lights, from scenes down to each lamp.
+All the lights, from scenes down to each lamp. [Setup](dashboard/lights/)
 
-### [Music](dashboard/music/)
+### Music
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and its group pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
-Music, speaker groups and volume.
+Music, speaker groups and volume. [Setup](dashboard/music/)
 
-### [TV](dashboard/tv/)
+### TV
 
 <img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
 
-Remote, apps and volume for an Android TV.
+Remote, apps and volume for the TV. [Setup](dashboard/tv/)
 
-### [Fan](dashboard/fan/)
+### Fan
 
 <img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
 
-A fan's speed, mode and timer.
+A fan's speed, mode and timer. [Setup](dashboard/fan/)
 
-### [Favorites list](dashboard/favorites-list/)
+### Favorites list
 
 <img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-pop-up.webp">
 
-Quick access to favorites: other pop-ups, devices, anything really.
+Quick access to favorites: other pop-ups, devices, anything really. [Setup](dashboard/favorites-list/)
 
-### [Server](dashboard/server/)
+### Server
 
 <img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
 
-The server's health, backups and updates.
+The server's health, backups and updates. The graph needs Plotly Graph Card. [Setup](dashboard/server/)
 
-### [Vacuum](dashboard/vacuum/)
+### Vacuum
 
 <img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
 
-The vacuum, for the whole home or room by room.
+The vacuum, for the whole home or room by room. [Setup](dashboard/vacuum/)
 
 ## More
 
@@ -238,7 +229,3 @@ An assistant that guesses gets the details wrong. This helps:
 - Keep a copy of the configuration before pasting anything.
 
 </details>
-
-## License
-
-Origami is licensed under [AGPL-3.0](LICENSE). The Montserrat files in `www/fonts` keep their own [SIL Open Font License](www/fonts/OFL.txt).

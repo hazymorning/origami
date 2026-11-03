@@ -8,7 +8,7 @@ Hides Home Assistant's header and puts a menu in its place that slides down from
 
 - [Get started](../../README.md#get-started), with the Base module
 - [Origami Header](https://github.com/hazymorning/origami_header) from HACS, which needs Home Assistant 2026.9 or later
-- For the server card: [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/) with four sensors turned on, as described for the [server pop-up](../server/README.md#setup), and automatic backups
+- Optional: [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/) with four sensors turned on, as described for the [server pop-up](../server/README.md#setup), and automatic backups, for the server card
 
 ## Setup
 
@@ -21,7 +21,7 @@ Hides Home Assistant's header and puts a menu in its place that slides down from
        - /hacsfiles/origami_header/origami-header.js
    ```
 
-3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** opens the File editor app.
+3. In [`card.yaml`](card.yaml), change or delete the buttons that don't fit. **Files** opens the File editor app. Without the server card, delete `cards:` and the card below it.
 4. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started). The header is gone from then on. To edit the dashboard, select **Edit** in the menu or add `?edit=1` to the address.
 5. Open the menu from a button with this tap action:
 

@@ -13,33 +13,9 @@ performance_mode: performance
 modules:
   - origami_base
   - origami_popup
-# A blurred picture of the current program appears behind the pop-up
-styles: |-
-  ${(() => {
-    const cast = hass.states["media_player.living_room_tv_cast"];
-    const art = cast?.attributes?.entity_picture_local ?? cast?.attributes?.entity_picture;
-    const on = ["playing", "paused", "buffering"].includes(cast?.state);
-    const url = on && typeof art === "string" && art ? 'url("' + art.replace(/"/g, "%22") + '")' : null;
-    return `.bubble-pop-up-background::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      border-radius: inherit;
-      background-image: ${url ?? "none"};
-      background-size: cover;
-      background-position: center;
-      filter: blur(50px) saturate(170%);
-      opacity: ${url ? "0.16" : "0"};
-      pointer-events: none;
-      clip-path: inset(0 round var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0);
-      transition: opacity var(--duration-normal, 0.3s) ease;
-    }
-    .bubble-pop-up-container > * {
-      position: relative;
-      z-index: 1;
-    }`;
-  })()}
+origami_popup:
+  # A blurred picture of what's cast to the TV shows behind the pop-up
+  art: media_player.living_room_tv_cast
 cards:
   - type: vertical-stack
     cards:

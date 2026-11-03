@@ -17,6 +17,9 @@ Scenes, all lamps at once, or each lamp on its own. The scenes start with the on
 3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_lights`.
 
+> [!TIP]
+> Each scene's `css_class`, such as `evening`, picks the colors of its circle under `styles`, and `start` names a class for each time of day, so the row begins with the scene that fits. A class without colors gets a gray circle.
+
 ## Entities
 
 | Entity | Used for |

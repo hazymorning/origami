@@ -13,7 +13,7 @@ Media, lights and climate of one room together. On **All**, the palette opens th
 ## Setup
 
 1. Choose the example that fits the room: [`living-room.yaml`](living-room.yaml) for a room with a TV, a fan and a group of lamps, or [`bathroom.yaml`](bathroom.yaml) for a room with a speaker and a few lamps.
-2. Open [Scripts](https://my.home-assistant.io/redirect/scripts/) and select **Create script**, then **Create new script**. In the three-dot menu, select **Edit in YAML**, paste [`thermostat-step.yaml`](thermostat-step.yaml) and save it with the name **Thermostat step**, so its entity ID is `script.thermostat_step`.
+2. For the thermostat's minus and plus, open [Scripts](https://my.home-assistant.io/redirect/scripts/) and select **Create script**, then **Create new script**. In the three-dot menu, select **Edit in YAML**, paste [`thermostat-step.yaml`](thermostat-step.yaml) and save it with the name **Thermostat step**, so its entity ID is `script.thermostat_step`. Home Assistant has no action that moves a target temperature by a step, so the script does it, within the thermostat's range.
 3. For the living room, open **Settings**, **Devices & services**, **Helpers** and select **Create helper**, then **Group** and **Light group**. Name it **Living room** and add the room's lamps, so its entity ID is `light.living_room`.
 4. For the bathroom, create a **Toggle** helper named **Bath time** in the same place, so its entity ID is `input_boolean.bath_time`. Without bath time, delete its card in [`bathroom.yaml`](bathroom.yaml).
 5. In the file, change the entities to the room's own. In [`living-room.yaml`](living-room.yaml), also change `Optical In` to the name of the speaker's TV input.
@@ -23,6 +23,9 @@ Media, lights and climate of one room together. On **All**, the palette opens th
 For each further room, add a copy of the example that fits it, with its own `hash`, `name` and entities. Without a speaker that plays the TV's sound, delete the TV card.
 
 A tap on the speaker, the TV, the fan or the count of lamps opens another pop-up, such as the [TV pop-up](../tv/README.md) with `#popup_tv`. Those pop-ups are optional. Point the taps to existing pop-ups or change their tap action.
+
+> [!TIP]
+> Base's [`words`](../../bubble_card/README.md#language) option renames a word on one card, such as `Ein: An` in German.
 
 ## Entities
 

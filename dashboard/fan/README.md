@@ -7,7 +7,7 @@ Speed, mode, timer and oscillation in one pop-up. The timer turns the fan off af
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Fan and Button
-- A [timer](https://www.home-assistant.io/integrations/timer/) helper and the automation [`fan-timer.yaml`](fan-timer.yaml), for the timer
+- Optional: a [timer](https://www.home-assistant.io/integrations/timer/) helper and the automation [`fan-timer.yaml`](fan-timer.yaml), for the timer
 
 ## Setup
 
@@ -16,6 +16,8 @@ Speed, mode, timer and oscillation in one pop-up. The timer turns the fan off af
 3. In [`pop-up.yaml`](pop-up.yaml), change `fan.bedroom` to the fan's entity ID and `Nature` and `Normal` to its presets, as [States](https://my.home-assistant.io/redirect/tools_states/) under **Settings**, **Tools** lists them in `preset_modes`. Delete the controls that the fan doesn't have, such as the mode buttons, the oscillation keys or the arrows.
 4. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 5. Open the pop-up from a button whose tap action is **Navigate** to `#popup_fan`, such as the fan in the [favorites list](../favorites-list/README.md).
+
+Without the timer, skip steps 1 and 2, and delete `mini_popups` and the timer key in the title from [`pop-up.yaml`](pop-up.yaml).
 
 ## Entities
 
