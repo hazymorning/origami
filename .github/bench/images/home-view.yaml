@@ -1,0 +1,165 @@
+# The whole home view on one phone, with the navigation bar at the bottom. The menu has its own image, because it is closed until it opens.
+kind: phone
+fit: 200
+cards:
+- file: greeting/card.yaml
+- file: weather/card.yaml
+- file: favorites/header.yaml
+- file: favorites/tiles.yaml
+- file: rooms/header.yaml
+- type: grid
+  columns: 2
+  cards:
+  - file: rooms/room.yaml
+  - file: rooms/room.yaml
+    replace:
+      living_room: bedroom
+      Living room: Bedroom
+      mdi:sofa: mdi:bed-king-outline
+  - file: rooms/room.yaml
+    replace:
+      living_room: kitchen
+      Living room: Kitchen
+      mdi:sofa: mdi:countertop-outline
+  - file: rooms/room.yaml
+    replace:
+      living_room: office
+      Living room: Office
+      mdi:sofa: mdi:desk
+- file: navigation-bar/card.yaml
+states:
+  light.kitchen:
+    state: 'on'
+    attributes:
+      friendly_name: Kitchen
+  light.office:
+    state: 'off'
+    attributes:
+      friendly_name: Office
+  sensor.kitchen_temperature:
+    state: '22.3'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.kitchen_humidity:
+    state: '58'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  binary_sensor.kitchen_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.office_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  media_player.living_room:
+    state: playing
+    attributes:
+      friendly_name: Living room
+      media_title: Slow Morning
+      media_artist: Paper Lanterns
+      entity_picture: /local/cover-1.jpg
+      group_members:
+      - media_player.living_room
+      - media_player.bedroom
+      volume_level: 0.32
+      media_duration: 214
+      media_position: 71
+      media_position_updated_at: '2026-11-04T12:39:00+00:00'
+      supported_features: 152463
+  media_player.bedroom:
+    state: playing
+    attributes:
+      friendly_name: Bedroom
+      media_title: Slow Morning
+      media_artist: Paper Lanterns
+      entity_picture: /local/cover-1.jpg
+      group_members:
+      - media_player.living_room
+      - media_player.bedroom
+  media_player.office:
+    state: idle
+    attributes:
+      friendly_name: Office
+  media_player.living_room_tv:
+    state: 'off'
+    attributes:
+      friendly_name: Living room TV
+  media_player.living_room_tv_cast:
+    state: 'off'
+    attributes:
+      friendly_name: Living room TV
+  light.living_room_floor_lamp:
+    state: 'on'
+    attributes:
+      friendly_name: Floor lamp
+  light.living_room_string_lights:
+    state: 'on'
+    attributes:
+      friendly_name: String lights
+dark:
+  states:
+    light.kitchen:
+      state: 'off'
+      attributes:
+        friendly_name: Kitchen
+    sensor.kitchen_temperature:
+      state: '20.8'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.kitchen_humidity:
+      state: '55'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.office_temperature:
+      state: '18.9'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.office_humidity:
+      state: '45'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.living_room_humidity:
+      state: '49'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.bedroom_humidity:
+      state: '58'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    media_player.living_room:
+      state: idle
+      attributes:
+        friendly_name: Living room
+        group_members:
+        - media_player.living_room
+    media_player.bedroom:
+      state: playing
+      attributes:
+        friendly_name: Bedroom
+        media_title: Low Tide
+        media_artist: Quiet Harbour
+        entity_picture: /local/cover-2.jpg
+        group_members:
+        - media_player.bedroom
+        volume_level: 0.18
+        media_duration: 252
+        media_position: 160
+        media_position_updated_at: '2026-11-04T22:39:00+00:00'
+        supported_features: 152463
+    light.living_room_floor_lamp:
+      state: 'off'
+      attributes:
+        friendly_name: Floor lamp
+    light.living_room_string_lights:
+      state: 'off'
+      attributes:
+        friendly_name: String lights

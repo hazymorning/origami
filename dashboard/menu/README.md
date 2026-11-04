@@ -1,6 +1,6 @@
 # Menu
 
-<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp"> <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
+<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp">  <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
 
 A menu in place of Home Assistant's header, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
 

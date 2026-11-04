@@ -17,7 +17,7 @@ which the README shows side by side, and has:
   open: the hash of the pop-up to open
   states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
   time: the clock, and clock: the time in the status bar
-  click, preview, admin, scale: passed to the bench, as bench.mjs describes
+  click, preview, admin, scale, fit: passed to the bench, as bench.mjs describes. With fit, the phone is as tall as the page
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top
@@ -141,7 +141,7 @@ def make(name):
             'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
             'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards}],
         }
-        for k in ('open', 'click', 'preview', 'admin', 'scale'):
+        for k in ('open', 'click', 'preview', 'admin', 'scale', 'fit'):
             if k in keys:
                 scenario[k] = keys[k]
         path = os.path.join(work, f'scenario-{mode}.yaml')
@@ -157,6 +157,7 @@ def make(name):
             out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
             im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
             out['time'] = keys.get('clock', '19:30')
+            out['screen'] = im.height // 2
             if 'cut' in keys:
                 out['cut'] = keys['cut']
         else:

@@ -5,7 +5,7 @@ This folder holds ten modules for [Bubble Card](https://github.com/Clooos/Bubble
 > [!WARNING]
 > These modules are experimental. Bubble Card's CSS is complex, especially for card heights, so details may still change. The modules work as shown in the dashboard.
 
-<img width="400" alt="A pop-up built from the modules, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-popup-light.webp"> <img width="400" alt="A pop-up built from the modules, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-popup-dark.webp">
+<img width="400" alt="A pop-up built from the modules, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-popup-light.webp">  <img width="400" alt="A pop-up built from the modules, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-popup-dark.webp">
 
 ## Installation
 
@@ -57,7 +57,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 
 <br>
 
-<img width="400" alt="A card with a tray, a tile and a switch with their shadows, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-depth-light.webp"> <img width="400" alt="A card with a tray, a tile and a switch with their shadows, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-depth-dark.webp">
+<img width="400" alt="A card with a tray, a tile and a switch with their shadows, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-depth-light.webp">  <img width="400" alt="A card with a tray, a tile and a switch with their shadows, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-depth-dark.webp">
 
 The card background casts a shadow, as paper does, and a gray fill never does. So a control always stands out from what it lies on:
 
@@ -131,7 +131,7 @@ sub_button:
 
 The Base module is the frame for button and media player cards. It sets the height and the styles of the icon and the text, and it keeps the sub-buttons neutral.
 
-<img width="400" alt="A regular card, a tile and two compact rows with the pill switch, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-base-light.webp"> <img width="400" alt="A regular card, a tile and two compact rows with the pill switch, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-base-dark.webp">
+<img width="400" alt="A regular card, a tile and two compact rows with the pill switch, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-base-light.webp">  <img width="400" alt="A regular card, a tile and two compact rows with the pill switch, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-base-dark.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -257,7 +257,7 @@ The controls at the end of a row line up from card to card. Each one ends at the
 
 With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.
 
-<img width="400" alt="The rooms header and four room cards, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-light.webp"> <img width="400" alt="The rooms header and four room cards, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-dark.webp">
+<img width="400" alt="The rooms header and four room cards, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-light.webp">  <img width="400" alt="The rooms header and four room cards, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-dark.webp">
 
 A tap anywhere on the card runs the button action, and a hold runs the hold action. With `button_type: name` and no `tap_action`, this includes the icon. A sub-button without its own tap, hold or double tap action passes the tap to the card. Dropdowns and sliders keep working.
 
@@ -323,7 +323,7 @@ origami_base:
 
 The Fan module spins a fan card's icon at the fan's speed. The icon spins backwards while the fan runs in reverse. It stands still when the device asks for reduced motion. Base fills the power button while the fan runs and the button for the current speed. With `state_content: percentage`, the state line shows the speed, or Home Assistant's word for off while the fan is off and reports a speed of 0.
 
-<img width="400" alt="Two fan cards, one at speed two and one that is off, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-fan-light.webp"> <img width="400" alt="Two fan cards, one at speed two and one that is off, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-fan-dark.webp">
+<img width="400" alt="Two fan cards, one at speed two and one that is off, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-fan-light.webp">  <img width="400" alt="Two fan cards, one at speed two and one that is off, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-fan-dark.webp">
 
 <details>
 <summary>Example</summary>
@@ -376,7 +376,7 @@ rows: 1.375
 
 The Climate module shows what a thermostat is doing. While it heats, cools, dries or runs its fan, the state line names that action, and the card takes the color of the matching mode. At other times, the state line shows the action, such as Idle, or the mode. The icon is muted while the thermostat is off. Thermostats without `hvac_action` count as on in every mode except off.
 
-<img width="400" alt="Three thermostats that are heating, idle and off, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-climate-light.webp"> <img width="400" alt="Three thermostats that are heating, idle and off, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-climate-dark.webp">
+<img width="400" alt="Three thermostats that are heating, idle and off, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-climate-light.webp">  <img width="400" alt="Three thermostats that are heating, idle and off, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-climate-dark.webp">
 
 <details>
 <summary>Example</summary>
@@ -428,7 +428,7 @@ The plus and minus buttons need their own actions, such as a script that moves t
 
 The Media module styles media player cards. With the speaker layout, the card shows the title and the artist while music plays, the source while the speaker uses an input, and the cover in the icon. With the TV layout, the state line shows what plays, the running app or the TV's state.
 
-<img width="400" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-media-light.webp"> <img width="400" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-media-dark.webp">
+<img width="400" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-media-light.webp">  <img width="400" alt="A speaker with a volume slider, a TV in TV mode and a compact speaker, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-media-dark.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -682,7 +682,7 @@ living_room_repeat:
 
 The Slider module turns a slider button card into a standalone slider without icon or state, and it works with Base. Its keys stand after the track. On a sub-buttons card, slider sub-buttons become rows with a name, a track and a value. The name takes the first half of a row and the track the second, so a track is never wider than half the card. A row's track is 28 px tall, a little lower than a key, and the rows stand 12 px apart. A row's name has the size and weight of a name in a list, and its track has no grip, so the value never meets one. Every track has the subtle fill of a Button row's tiles, and every value stands in its track, in the medium weight.
 
-<img width="400" alt="A subwoofer level slider and a fan speed slider, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-slider-light.webp"> <img width="400" alt="A subwoofer level slider and a fan speed slider, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-slider-dark.webp">
+<img width="400" alt="A subwoofer level slider and a fan speed slider, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-slider-light.webp">  <img width="400" alt="A subwoofer level slider and a fan speed slider, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-slider-dark.webp">
 
 <details>
 <summary>Example</summary>
@@ -814,7 +814,7 @@ sub_button:
 
 The Button module creates rows and grids of buttons on a sub-buttons card, and styles the bottom sub-buttons of a button card the same way. Put every button under `sub_button: bottom`, with `show_name: true` where the name should show. Buttons can also form segmented bars or a row that scrolls sideways, as in the [TV pop-up](../dashboard/tv/README.md).
 
-<img width="400" alt="Scenes with the active scene highlighted, two toggles and a plain text button, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-button-light.webp"> <img width="400" alt="Scenes with the active scene highlighted, two toggles and a plain text button, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-button-dark.webp">
+<img width="400" alt="Scenes with the active scene highlighted, two toggles and a plain text button, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-button-light.webp">  <img width="400" alt="Scenes with the active scene highlighted, two toggles and a plain text button, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-button-dark.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1011,7 +1011,7 @@ sub_button:
 
 The Header module turns a separator card into a section header, with the card's name as the title and its sub-buttons as values beside or above it. It is not related to the Origami Header card from the dashboard setup.
 
-<img width="400" alt="Headers with text, a colored dot and chips, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-header-light.webp"> <img width="400" alt="Headers with text, a colored dot and chips, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-header-dark.webp">
+<img width="400" alt="Headers with text, a colored dot and chips, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-header-light.webp">  <img width="400" alt="Headers with text, a colored dot and chips, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-header-dark.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1133,7 +1133,7 @@ The header sets its own height, so it needs no `grid_options`, and Popup's `gap`
 
 The Tiles module turns a sub-buttons card into a grid of tiles or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
 
-<img width="400" alt="Six tiles with the oven and the vacuum sorted to the front, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-light.webp"> <img width="400" alt="Six tiles with the oven and the vacuum sorted to the front, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-dark.webp">
+<img width="400" alt="Six tiles with the oven and the vacuum sorted to the front, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-light.webp">  <img width="400" alt="Six tiles with the oven and the vacuum sorted to the front, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-dark.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1344,7 +1344,7 @@ sub_button:
 
 The Table module turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and all rows share the columns. A cell hidden by its visibility conditions leaves its column empty, and a row with all cells hidden takes no space.
 
-<img width="400" alt="The rooms header with the climate table open, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp"> <img width="400" alt="The rooms header with the climate table open, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
+<img width="400" alt="The rooms header with the climate table open, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp">  <img width="400" alt="The rooms header with the climate table open, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
 
 <details>
 <summary>Options and example</summary>

@@ -1,8 +1,8 @@
 # Room pop-up
 
-<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp"> <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
+<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp">  <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
 
-<img width="400" alt="The bathroom pop-up with the speaker, the lamps and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom-light.webp"> <img width="400" alt="The bathroom pop-up with the speaker, the lamps and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom-dark.webp">
+<img width="400" alt="The bathroom pop-up with the speaker, the lamps and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom-light.webp">  <img width="400" alt="The bathroom pop-up with the speaker, the lamps and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom-dark.webp">
 
 A room's media, lights and climate in one pop-up, made of blocks for the room's devices. It comes as two examples: a living room with a TV, a fan and a group of lamps, and a bathroom with a speaker and a few lamps.
 

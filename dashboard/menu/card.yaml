@@ -86,16 +86,17 @@ cards:
         tap_action:
           action: more-info
 css: |-
+  /* The menu looks like a pop-up: the same backdrop, background and shadow */
   .scrim {
-    backdrop-filter: blur(14px);
-    background:
-      linear-gradient(var(--card-shadow-color), var(--card-shadow-color)),
-      color-mix(in srgb, var(--primary-background-color) 28%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: var(--bubble-backdrop-background-color);
   }
   .sheet {
     padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px);
     gap: var(--ha-space-5);
-    box-shadow: var(--ha-card-box-shadow);
+    background: var(--popup-background);
+    box-shadow: var(--shadow-elevated);
   }
   .buttons {
     gap: var(--ha-space-3);

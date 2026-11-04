@@ -99,95 +99,70 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 ## Home view
 
+<img width="400" alt="The whole home view with the greeting, the weather, favorites, rooms and the navigation bar, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view-light.webp">  <img width="400" alt="The whole home view with the greeting, the weather, favorites, rooms and the navigation bar, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view-dark.webp">
+
+The start page, from the greeting down to the navigation bar:
+
+- **Greeting and notifications.** A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [More](dashboard/greeting/)
+- **Weather.** Today's weather, in a color that matches it. Needs the Origami Weather card. [More](dashboard/weather/)
+- **Favorites.** Tiles that come and go with what's happening at home. [More](dashboard/favorites/)
+- **Rooms.** Each room's climate and lights at a glance. [More](dashboard/rooms/)
+- **Climate table.** Every room's climate in one table. [More](dashboard/climate-table/)
+- **Navigation bar.** The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [More](dashboard/navigation-bar/)
+
 ### Menu
 
-<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp"> <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
+<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp">  <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
 
 Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [More](dashboard/menu/)
-
-### Greeting and notifications
-
-<img width="400" alt="The greeting with the next event above it and the notifications beside it, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting-light.webp"> <img width="400" alt="The greeting with the next event above it and the notifications beside it, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting-dark.webp">
-
-A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [More](dashboard/greeting/)
-
-### Weather
-
-<img width="400" alt="The weather card, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-light.webp"> <img width="400" alt="The weather card, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-dark.webp">
-
-Today's weather, in a color that matches it. Needs the Origami Weather card. [More](dashboard/weather/)
-
-### Favorites
-
-<img width="400" alt="Favorites as tiles, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-light.webp"> <img width="400" alt="Favorites as tiles, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-dark.webp">
-
-Tiles that come and go with what's happening at home. [More](dashboard/favorites/)
-
-### Rooms
-
-<img width="400" alt="The rooms header and the room cards, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-light.webp"> <img width="400" alt="The rooms header and the room cards, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-dark.webp">
-
-Each room's climate and lights at a glance. [More](dashboard/rooms/)
-
-### Climate table
-
-<img width="400" alt="The climate table with a row for each room, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp"> <img width="400" alt="The climate table with a row for each room, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
-
-Every room's climate in one table. [More](dashboard/climate-table/)
-
-### Navigation bar
-
-<img width="400" alt="The navigation bar with the now playing card above it, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-light.webp"> <img width="400" alt="The navigation bar with the now playing card above it, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-dark.webp">
-
-The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [More](dashboard/navigation-bar/)
 
 ## Pop-ups
 
 ### Room
 
-<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp"> <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
+<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp">  <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
 
 Everything for one room in one place. [More](dashboard/room/)
 
 ### Lights
 
-<img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-light.webp"> <img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-dark.webp">
+<img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-light.webp">  <img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-dark.webp">
 
 All the lights, from scenes down to each lamp. [More](dashboard/lights/)
 
 ### Music
 
-<img width="400" alt="The music pop-up with the cover, the play row and the volume, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-light.webp"> <img width="400" alt="The music pop-up with the cover, the play row and the volume, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-dark.webp">
+<img width="400" alt="The music pop-up with the cover, the play row and the volume, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-light.webp">  <img width="400" alt="The music pop-up with the cover, the play row and the volume, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-dark.webp">
 
 Music, speaker groups and volume. [More](dashboard/music/)
 
 ### TV
 
-<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp"> <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
+<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp">  <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
 
 Remote, apps and volume for the TV. [More](dashboard/tv/)
 
 ### Fan
 
-<img width="400" alt="The fan pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-light.webp"> <img width="400" alt="The fan pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-dark.webp">
+<img width="400" alt="The fan pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-light.webp">  <img width="400" alt="The fan pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-dark.webp">
 
 A fan's speed, mode and timer. [More](dashboard/fan/)
 
 ### Favorites list
 
-<img width="400" alt="The favorites pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-light.webp"> <img width="400" alt="The favorites pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-dark.webp">
+<img width="400" alt="The favorites pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-light.webp">  <img width="400" alt="The favorites pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-dark.webp">
 
 Quick access to favorites: other pop-ups, devices, anything really. [More](dashboard/favorites-list/)
 
 ### Server
 
-<img width="400" alt="The server pop-up with its status, the load and the updates, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-light.webp"> <img width="400" alt="The server pop-up with its status, the load and the updates, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-dark.webp">
+<img width="400" alt="The server pop-up with its status, the load and the updates, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-light.webp">  <img width="400" alt="The server pop-up with its status, the load and the updates, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-dark.webp">
 
 The server's health, backups and updates. The graph needs Plotly Graph Card. [More](dashboard/server/)
 
 ### Vacuum
 
-<img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-light.webp"> <img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-dark.webp">
+<img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-light.webp">  <img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-dark.webp">
 
 The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
 

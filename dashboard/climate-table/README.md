@@ -1,6 +1,6 @@
 # Climate table
 
-<img width="400" alt="The climate table with a row for each room, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp"> <img width="400" alt="The climate table with a row for each room, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
+<img width="400" alt="The climate table with a row for each room, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp">  <img width="400" alt="The climate table with a row for each room, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
 
 Every room's temperature, humidity, windows and heating in one table. Arrows mark the warmest and the coldest room, and the most humid and the driest.
 

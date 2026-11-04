@@ -1,6 +1,6 @@
 # TV pop-up
 
-<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp"> <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
+<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp">  <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
 
 What's on, the TV's apps, a remote and the volume of the speaker that plays the TV's sound.
 
