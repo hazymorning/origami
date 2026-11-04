@@ -1,6 +1,5 @@
-# The whole home view on one phone, with the navigation bar at the bottom. The menu has its own image, because it is closed until it opens.
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. The menu has its own image, because it is closed until it opens.
 kind: phone
-fit: 200
 cards:
 - file: greeting/card.yaml
 - file: weather/card.yaml
@@ -99,6 +98,14 @@ states:
     state: 'on'
     attributes:
       friendly_name: String lights
+  fan.bedroom: &id001
+    state: 'off'
+    attributes:
+      friendly_name: Bedroom fan
+      percentage: 0
+      preset_modes:
+      - Nature
+      - Normal
 dark:
   states:
     light.kitchen:
@@ -163,3 +170,4 @@ dark:
       state: 'off'
       attributes:
         friendly_name: String lights
+    fan.bedroom: *id001

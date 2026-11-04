@@ -2,7 +2,7 @@
 //   node frame.mjs <frame.json>
 // frame.json has kind and out, and:
 //   phone: a phone for a pop-up or the menu, on a plain background a little lighter than the light page or darker than the dark one.
-//     mode, shot, font, time, bg, screen for the height below the status bar, and cut to show only its top.
+//     mode, shot, font, time, bg, and cut to show only its top.
 //   panel: a card on its page, as in 2.0. shot and width.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,9 +16,8 @@ const { chromium } = require('playwright');
 const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const data = (f, type) => `data:${type};base64,` + fs.readFileSync(f).toString('base64');
 
-// The phone is as tall as its screen, which is usually 863 px below the bar and taller for a whole page
-const W = 412, BAR = 52, RADIUS = 22;
-const H = BAR + (spec.screen || 863);
+// A phone with a 412 × 915 screen and a 52 px status bar
+const W = 412, H = 915, BAR = 52, RADIUS = 22;
 const wifi = 'M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z';
 
 const phone = (mode, p, cut) => `

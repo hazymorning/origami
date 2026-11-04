@@ -6,7 +6,7 @@
 //     Takes a screenshot of each section of a scenario, such as cards from a real home, which stay outside the repository.
 //     A scenario can set the page's size and scale with viewport and scale, the clock with time, such as 2026-11-04T19:30,
 //     and load other cards with resources, a list of their files next to the scenario. click lists elements to tap before the shots.
-//     preview shows other cards as in the card editor, and admin makes the user an admin. fit makes the screen as tall as the page plus fit px.
+//     preview shows other cards as in the card editor, and admin makes the user an admin.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
@@ -248,12 +248,6 @@ try {
     if (shot) {
       // Taps that a scenario makes before the shots, such as on a key that opens a mini pop-up
       for (const sel of scenario.click || []) { await p.click(sel); await p.waitForTimeout(900); }
-      // A page that fits makes the screen as tall as its sections, plus fit px for a bar at the bottom, so a shot shows the whole page
-      if (scenario.fit !== undefined) {
-        const h = await p.evaluate(() => Math.max(...[...document.querySelectorAll('.shot')].map((s) => s.getBoundingClientRect().bottom)));
-        await p.setViewportSize({ width: p.viewportSize().width, height: Math.ceil(h + Number(scenario.fit)) });
-        await p.waitForTimeout(900);
-      }
       fs.mkdirSync(outDir, { recursive: true });
       for (const [i, s] of (await p.$$('.shot')).entries()) await s.screenshot({ path: path.join(outDir, `${(await s.getAttribute('data-id')) || i}-${mode}.png`) });
       if (scenario.open || scenario.viewport) await p.screenshot({ path: path.join(outDir, `page-${mode}.png`) });
