@@ -239,7 +239,7 @@ Origami:
 
       # Surfaces
       background-color: '#F6F5F3'
-      dashboard-background: '#F2F0EB'
+      dashboard-background: '#F6F4F1'
       ha-card-background: '#FFFFFF'
       popup-background: '#F0EEEA'
       tile-chip-background: 'var(--ha-card-background)'
@@ -248,7 +248,7 @@ Origami:
       primary-text-color: '#4F4C49'
       secondary-text-color: 'color-mix(in srgb, var(--primary-text-color) 78%, transparent)'
       fill-base: '#8A7A64'
-      fill-contrast: '8%'
+      fill-contrast: '7%'
       icon-color: '#BDBBB8'
       disabled-text-color: '#BDBBB8'
 
