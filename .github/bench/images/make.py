@@ -10,7 +10,7 @@ home.yaml has the example home: its states, the answers to templates and message
 which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>-light.webp and <name>-dark.webp,
 which the README shows side by side, and has:
 
-  kind: panel for a card, phone for a pop-up or the menu on a phone, or hero for images/v3/hero.webp
+  kind: panel for a card, or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys
   home: true puts the home view behind the cards
@@ -121,12 +121,6 @@ def make(name):
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(work)
     font = os.path.join(CACHE, 'status-font.woff2')
-    if spec['kind'] == 'hero':
-        hero = {'kind': 'hero', 'font': font, 'out': os.path.join(work, 'hero.png')}
-        for m in ('light', 'dark'):
-            hero[m] = {'time': layer(home, spec, m).get('clock', '19:30')}
-        save(frame(hero, work), os.path.join(OUT, name + '.webp'), False)
-        return
     phone = spec['kind'] == 'phone'
     phone_page = phone or 'bottom' in spec
     # The bench serves the cards and the pictures from the scenario's folder
