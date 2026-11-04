@@ -1,0 +1,9 @@
+kind: phones
+home: true
+open: '#popup_favorites'
+cards:
+  - {file: favorites-list/pop-up.yaml}
+states:
+  media_player.living_room_tv: {state: 'off', attributes: {friendly_name: TV, source_list: [Netflix, YouTube, HDMI 1]}}
+  vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
+  sensor.robot_cleaning_progress: {state: '100', attributes: {unit_of_measurement: '%'}}

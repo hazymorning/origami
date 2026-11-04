@@ -1,0 +1,27 @@
+kind: phones
+home: true
+open: '#popup_music'
+cards:
+  - {file: music/pop-up.yaml}
+entities:
+  media_player.living_room: {entity_id: media_player.living_room, device_id: d_living_room, platform: music_assistant}
+  button.living_room_favorite_now_playing: {entity_id: button.living_room_favorite_now_playing, device_id: d_living_room, platform: music_assistant, translation_key: favorite_now_playing}
+  media_player.bedroom: {entity_id: media_player.bedroom, device_id: d_bedroom, platform: music_assistant}
+  media_player.office: {entity_id: media_player.office, device_id: d_office, platform: music_assistant}
+states:
+  input_select.selected_speaker:
+    state: media_player.living_room
+    attributes: {friendly_name: Selected speaker, options: [media_player.living_room, media_player.bedroom, media_player.office]}
+  media_player.living_room:
+    state: playing
+    attributes: {friendly_name: Living room, volume_level: 0.26, is_volume_muted: false, media_title: Paper Boats, media_artist: Lumen Fields, media_album_name: Low Tide, entity_picture: /local/cover-1.jpg, media_duration: 241, media_position: 96, media_position_updated_at: '2026-11-04T19:30:00+00:00', shuffle: false, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth, Optical In], group_members: [media_player.living_room, media_player.bedroom], supported_features: 4127295}
+  media_player.bedroom:
+    state: playing
+    attributes: {friendly_name: Bedroom, volume_level: 0.18, media_title: Paper Boats, media_artist: Lumen Fields, entity_picture: /local/cover-1.jpg, shuffle: false, group_members: [media_player.living_room, media_player.bedroom]}
+  media_player.office:
+    state: idle
+    attributes: {friendly_name: Office, volume_level: 0.2, group_members: [media_player.office]}
+  button.living_room_favorite_now_playing: {state: '2026-11-03T21:04:00+00:00', attributes: {friendly_name: Favorite current song}}
+  number.group_volume: {state: '22', attributes: {friendly_name: Group volume, unit_of_measurement: '%', min: 0, max: 100, step: 1, mode: slider}}
+  script.group_speakers: {state: 'off', attributes: {friendly_name: Group speakers}}
+  light.living_room_display: {state: 'on', attributes: {friendly_name: Display}}

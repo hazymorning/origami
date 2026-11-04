@@ -14,7 +14,7 @@ home view, which stands behind every pop-up. Each <name>.yaml makes images/v3/<n
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys
   home: true puts the home view behind the cards
   open: the hash of the pop-up to open
-  states, templates, messages, words, time: added to those of home.yaml, as in a bench scenario
+  states, entities, templates, messages, words, time: added to those of home.yaml, as in a bench scenario
   click, preview, admin, scale: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
@@ -35,9 +35,14 @@ CARDS = {
     'origami-notifications.js': 'https://raw.githubusercontent.com/hazymorning/origami_notifications/v1.6.0/dist/origami-notifications.js',
     'origami-header.js': 'https://raw.githubusercontent.com/hazymorning/origami_header/v0.4.3/origami-header.js',
     'navbar-card.js': 'https://github.com/joseluis9595/lovelace-navbar-card/releases/download/v1.8.0/navbar-card.js',
-    'plotly-graph-card.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v3.3.5/plotly-graph-card.js',
+    'plotly-graph-card.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-graph-card.js',
+    'card-BgJGmfH_.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/card-BgJGmfH_.js',
+    'rolldown-runtime-B0Z9INg1.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/rolldown-runtime-B0Z9INg1.js',
+    'plotly-DHew52Zl.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-DHew52Zl.js',
     'status-font.woff2': 'https://fonts.gstatic.com/s/googlesans/v76/4UasrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RPjIUvQ.woff2',
 }
+# Parts of a card that the card loads itself
+CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js'}
 # A phone's screen below the status bar, which frame.mjs draws
 PHONE = {'width': 412, 'height': 915 - 52}
 
@@ -88,10 +93,11 @@ def make(name):
     scenario = {
         'time': spec.get('time', home['time']),
         'states': merged('states'),
+        'entities': merged('entities'),
         'templates': (spec.get('templates') or []) + (home.get('templates') or []),
         'words': merged('words'),
         'messages': merged('messages'),
-        'resources': [n for n in CARDS if n.endswith('.js')],
+        'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
         'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
         'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else spec.get('width', 396), 'cards': cards}],
     }

@@ -1,0 +1,16 @@
+kind: phones
+home: true
+open: '#popup_vacuum'
+cards:
+  - {file: vacuum/pop-up.yaml}
+templates:
+  - {match: "state_translated('vacuum.robot')", result: Cleaning}
+states:
+  vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, battery_level: 64}}
+  sensor.robot_battery: {state: '64', attributes: {unit_of_measurement: '%', device_class: battery, friendly_name: Robot battery}}
+  sensor.robot_current_room: {state: Kitchen, attributes: {friendly_name: Robot current room}}
+  counter.vacuum_bin: {state: '1', attributes: {friendly_name: Vacuum bin, maximum: 3, minimum: 0, step: 1, initial: 0}}
+  sensor.robot_main_brush_time_left: {state: '212', attributes: {unit_of_measurement: h, friendly_name: Main brush}}
+  sensor.robot_side_brush_time_left: {state: '96', attributes: {unit_of_measurement: h, friendly_name: Side brush}}
+  sensor.robot_filter_time_left: {state: '41', attributes: {unit_of_measurement: h, friendly_name: Filter}}
+  sensor.robot_sensor_time_left: {state: '18', attributes: {unit_of_measurement: h, friendly_name: Sensors}}

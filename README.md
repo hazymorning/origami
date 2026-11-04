@@ -157,7 +157,7 @@ All the lights, from scenes down to each lamp. [Setup](dashboard/lights/)
 
 ### Music
 
-<img width="800" alt="The music pop-up with the cover, the play row and the volume, and its group pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
+<img width="800" alt="The music pop-up with the cover, the play row and the volume, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
 Music, speaker groups and volume. [Setup](dashboard/music/)
 
