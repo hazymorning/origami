@@ -1,6 +1,6 @@
 # Weather
 
-<img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
+<img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
 
 The temperature, the weather and today's low and high, in a calm color for each kind of weather. A tap opens the forecast.
 

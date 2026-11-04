@@ -150,7 +150,7 @@ All text is written for people: short, plain English that sounds like a person w
 - The hero shows the maintainer's own dashboard, because it shows best how Origami looks in daily use. It gets more care than any other image.
 - Screenshots show the real theme, font, modules and cards. The hero comes from a real Home Assistant. `python3 .github/bench/images/make.py` makes the other images with the bench, from the example home's states in `.github/bench/images`, and frames them.
 - Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
-- README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones.
+- README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones. While a release is built, they point to `next` instead, so the READMEs on `next` show the new images, and the last step before the merge points them back to `main`. `check_rules.py --release` fails while one still points to `next`.
 - Until the last pass, each image in the README already has its final file name under `images/v3/` and an `alt` text that says what it will show. An image whose file doesn't exist yet is a placeholder. `check_rules.py` lists every placeholder, so the list is the shot list, and `check_rules.py --release` fails while one is left.
 
 ## README cards

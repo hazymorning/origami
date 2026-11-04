@@ -1,6 +1,6 @@
 # Favorites list
 
-<img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-pop-up.webp">
+<img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up.webp">
 
 A list of favorites, like other pop-ups, devices or anything else worth a shortcut. The sign at the end of a row shows what a tap does.
 

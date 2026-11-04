@@ -202,13 +202,16 @@ for readme in sorted((ROOT / "dashboard").glob("*/README.md")):
 
 # Screenshots: an image in a README or the module reference whose file doesn't exist yet is a placeholder.
 # The list is the shot list for the last pass before the release, and with --release, a placeholder fails.
+# While a release is built, the images point to next, so its READMEs show them. With --release, such an image fails.
 shots = {}
 for name in READMES:
     for tag in re.findall(r"<img\b[^>]*>", (ROOT / name).read_text(encoding="utf-8")):
-        src = re.search(r'src="https://raw\.githubusercontent\.com/hazymorning/origami/main/([^"]+)"', tag)
-        if src and not (ROOT / src.group(1)).exists():
+        src = re.search(r'src="https://raw\.githubusercontent\.com/hazymorning/origami/(main|next)/([^"]+)"', tag)
+        if src and RELEASE and src.group(1) == "next":
+            fail(name, f"{src.group(2)} points to next instead of main")
+        if src and not (ROOT / src.group(2)).exists():
             alt = re.search(r'alt="([^"]*)"', tag)
-            shots.setdefault(src.group(1), alt.group(1) if alt else "")
+            shots.setdefault(src.group(2), alt.group(1) if alt else "")
 if shots:
     print(f"{len(shots)} screenshots are still placeholders:")
     print("\n".join(f"  {path}: {alt}" for path, alt in shots.items()))

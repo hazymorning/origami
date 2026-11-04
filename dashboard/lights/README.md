@@ -1,6 +1,6 @@
 # Lights pop-up
 
-<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
 All lamps of a room at once or each one on its own, and the room's scenes.
 

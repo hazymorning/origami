@@ -1,6 +1,6 @@
 # Favorites
 
-<img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
+<img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
 
 Tiles for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed.
 

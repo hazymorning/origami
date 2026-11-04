@@ -1,6 +1,6 @@
 # Server pop-up
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 How the Home Assistant server is doing, with its backups and updates, and buttons to back up, check the configuration and restart. The top line names the most urgent problem, like a full disk or a backup that's due.
 
