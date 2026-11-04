@@ -1,5 +1,5 @@
 # Two fan cards, one at speed two and one that is off
-kind: panels
+kind: panel
 cards:
   - &fan
     type: custom:bubble-card
@@ -37,3 +37,8 @@ cards:
 states:
   fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
   fan.office: {state: 'off', attributes: {friendly_name: Office fan, percentage: 0, percentage_step: 33.33}}
+# In the evening, the office fan runs at speed two and the bedroom fan is off
+dark:
+  states:
+    fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, percentage_step: 33.33}}
+    fan.office: {state: 'on', attributes: {friendly_name: Office fan, percentage: 66, percentage_step: 33.33}}

@@ -1,17 +1,32 @@
-kind: phones
+# Midday: the bathroom at rest, with the mirror on. Late evening: a bath with music, the night light and the heating up.
+kind: phone
 home: true
 open: '#popup_bathroom'
 cards:
   - {file: room/bathroom.yaml}
-states:
-  media_player.bathroom:
-    state: playing
-    attributes: {friendly_name: Bathroom, volume_level: 0.22, media_title: Daybreak, media_artist: Paper Boats, media_content_type: music, entity_picture: /local/cover-1.jpg, source: WiFi, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
-  light.bathroom_mirror: {state: 'on', attributes: {friendly_name: Mirror, brightness: 120, supported_color_modes: [brightness], color_mode: brightness}}
-  light.bathroom_night_light: {state: 'off', attributes: {friendly_name: Night light, supported_color_modes: [brightness]}}
-  input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
-  sensor.bathroom_temperature: {state: '22.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
-  sensor.bathroom_humidity: {state: '64', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
-  climate.bathroom:
-    state: heat
-    attributes: {friendly_name: Bathroom, hvac_action: heating, hvac_modes: ['off', heat], temperature: 23, current_temperature: 22.6, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
+light:
+  states:
+    media_player.bathroom:
+      state: paused
+      attributes: {friendly_name: Bathroom, volume_level: 0.18, media_title: Daybreak, media_artist: Paper Boats, media_content_type: music, entity_picture: /local/cover-1.jpg, source: WiFi, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
+    light.bathroom_mirror: {state: 'on', attributes: {friendly_name: Mirror, brightness: 200, supported_color_modes: [brightness], color_mode: brightness}}
+    light.bathroom_night_light: {state: 'off', attributes: {friendly_name: Night light, supported_color_modes: [brightness]}}
+    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
+    sensor.bathroom_temperature: {state: '21.2', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
+    sensor.bathroom_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
+    climate.bathroom:
+      state: heat
+      attributes: {friendly_name: Bathroom, hvac_action: idle, hvac_modes: ['off', heat], temperature: 21, current_temperature: 21.2, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
+dark:
+  states:
+    media_player.bathroom:
+      state: playing
+      attributes: {friendly_name: Bathroom, volume_level: 0.22, media_title: Low Tide, media_artist: Quiet Harbour, media_content_type: music, entity_picture: /local/cover-2.jpg, source: WiFi, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
+    light.bathroom_mirror: {state: 'off', attributes: {friendly_name: Mirror, supported_color_modes: [brightness]}}
+    light.bathroom_night_light: {state: 'on', attributes: {friendly_name: Night light, brightness: 60, supported_color_modes: [brightness], color_mode: brightness}}
+    input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
+    sensor.bathroom_temperature: {state: '23.4', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
+    sensor.bathroom_humidity: {state: '71', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
+    climate.bathroom:
+      state: heat
+      attributes: {friendly_name: Bathroom, hvac_action: heating, hvac_modes: ['off', heat], temperature: 24, current_temperature: 23.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5}

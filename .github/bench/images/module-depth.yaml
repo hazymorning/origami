@@ -1,5 +1,5 @@
 # A card with a tray, a tile and a switch with their shadows
-kind: panels
+kind: panel
 cards:
   # A card with keys in a tray
   - type: custom:bubble-card
@@ -7,6 +7,7 @@ cards:
     button_type: switch
     entity: climate.living_room
     name: Living room
+    icon: mdi:radiator
     modules: [origami_base, origami_climate]
     origami_base: {group: true}
     origami_climate:
@@ -60,3 +61,10 @@ states:
   fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
   input_select.selected_speaker: {state: media_player.living_room, attributes: {friendly_name: Speaker, options: [media_player.living_room, media_player.kitchen]}}
   switch.desk_power: {state: 'on', attributes: {friendly_name: Desk power}}
+# In the evening, the thermostat is idle, the fan runs at speed one, the kitchen speaker is chosen and the desk is off
+dark:
+  states:
+    climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, hvac_modes: ['off', heat], temperature: 20, current_temperature: 20.6, min_temp: 7, max_temp: 30, target_temp_step: 0.5}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33}}
+    input_select.selected_speaker: {state: media_player.kitchen, attributes: {friendly_name: Speaker, options: [media_player.living_room, media_player.kitchen]}}
+    switch.desk_power: {state: 'off', attributes: {friendly_name: Desk power}}

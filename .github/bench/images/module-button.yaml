@@ -1,5 +1,5 @@
 # Scenes with the active scene highlighted, two toggles and a plain text button
-kind: panels
+kind: panel
 cards:
   - type: custom:bubble-card
     card_type: sub-buttons
@@ -37,3 +37,11 @@ states:
   light.living_room_string_lights: {state: 'off', attributes: {friendly_name: String lights}}
 templates:
   - {match: sensor.living_room_scene, result: evening}
+# In the evening, Late is the active scene and the string lights are on instead of the candles
+dark:
+  states:
+    sensor.living_room_scene: {state: late, attributes: {friendly_name: Living room scene}}
+    switch.living_room_candles: {state: 'off', attributes: {friendly_name: Candles}}
+    light.living_room_string_lights: {state: 'on', attributes: {friendly_name: String lights}}
+  templates:
+    - {match: sensor.living_room_scene, result: late}

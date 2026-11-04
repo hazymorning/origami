@@ -1,4 +1,4 @@
-kind: phones
+kind: phone
 home: true
 preview: true
 admin: true
@@ -16,4 +16,12 @@ states:
   sensor.backup_last_successful_automatic_backup: {state: '2026-11-04T03:40:00+00:00', attributes: {device_class: timestamp}}
 templates:
   - {match: "Uptime unknown", result: Up 3 days}
-  - {match: "Disk almost full", result: All good}
+light:
+  templates:
+    - {match: "Disk almost full", result: All good}
+dark:
+  states:
+    sensor.system_monitor_processor_use: {state: '4', attributes: {unit_of_measurement: '%', friendly_name: Processor use}}
+    sensor.system_monitor_memory_usage: {state: '38', attributes: {unit_of_measurement: '%', friendly_name: Memory usage}}
+  templates:
+    - {match: "Disk almost full", result: 1 update}

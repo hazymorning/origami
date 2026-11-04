@@ -1,19 +1,36 @@
-kind: phones
+# Midday: a video on YouTube at a low volume. Late evening: a film on Netflix, a little louder.
+kind: phone
 home: true
 open: '#popup_tv'
 cards:
   - {file: tv/pop-up.yaml}
 templates:
   - {match: "'mdi:volume-off' if", result: ''}
-  - {match: "round(0) | int", result: '28'}
 states:
-  media_player.living_room:
-    state: 'on'
-    attributes: {friendly_name: Living room, volume_level: 0.28, is_volume_muted: false, source: Optical In, source_list: [WiFi, Bluetooth, Optical In], group_members: [media_player.living_room]}
-  media_player.living_room_tv:
-    state: 'on'
-    attributes: {friendly_name: Living room TV, app_name: YouTube, source: YouTube, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}
-  media_player.living_room_tv_cast:
-    state: playing
-    attributes: {friendly_name: Living room TV, app_name: YouTube, media_title: Autumn in the Alps, media_content_type: video, entity_picture: /local/cover-2.jpg}
   remote.living_room_tv: {state: 'on', attributes: {friendly_name: Living room TV}}
+light:
+  templates:
+    - {match: "round(0) | int", result: '18'}
+  states:
+    media_player.living_room:
+      state: 'on'
+      attributes: {friendly_name: Living room, volume_level: 0.18, is_volume_muted: false, source: Optical In, source_list: [WiFi, Bluetooth, Optical In], group_members: [media_player.living_room]}
+    media_player.living_room_tv:
+      state: 'on'
+      attributes: {friendly_name: Living room TV, app_name: YouTube, source: YouTube, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}
+    media_player.living_room_tv_cast:
+      state: playing
+      attributes: {friendly_name: Living room TV, app_name: YouTube, media_title: Autumn in the Alps, media_content_type: video, entity_picture: /local/cover-1.jpg}
+dark:
+  templates:
+    - {match: "round(0) | int", result: '31'}
+  states:
+    media_player.living_room:
+      state: 'on'
+      attributes: {friendly_name: Living room, volume_level: 0.31, is_volume_muted: false, source: Optical In, source_list: [WiFi, Bluetooth, Optical In], group_members: [media_player.living_room]}
+    media_player.living_room_tv:
+      state: 'on'
+      attributes: {friendly_name: Living room TV, app_name: Netflix, source: Netflix, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}
+    media_player.living_room_tv_cast:
+      state: playing
+      attributes: {friendly_name: Living room TV, app_name: Netflix, media_title: The Long Valley, media_content_type: video, entity_picture: /local/cover-2.jpg}

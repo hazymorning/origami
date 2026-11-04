@@ -1,5 +1,5 @@
 # A speaker with a volume slider, a TV in TV mode and a compact speaker
-kind: panels
+kind: panel
 cards:
   - type: custom:bubble-card
     card_type: media-player
@@ -53,3 +53,15 @@ states:
   media_player.kitchen:
     state: paused
     attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Harbour Lights, media_artist: The Folds, entity_picture: /local/cover-2.jpg, group_members: [media_player.kitchen]}
+# In the evening, another song plays, the TV shows Netflix and the kitchen plays another album
+dark:
+  states:
+    media_player.living_room:
+      state: playing
+      attributes: {friendly_name: Living room, volume_level: 0.18, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg, group_members: [media_player.living_room], source: Network, source_list: [Network, Bluetooth, Optical In]}
+    media_player.living_room_tv:
+      state: 'on'
+      attributes: {friendly_name: TV, app_name: Netflix, source: Netflix, source_list: [YouTube, Netflix, Live TV]}
+    media_player.kitchen:
+      state: paused
+      attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.kitchen]}

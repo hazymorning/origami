@@ -1,5 +1,5 @@
 # Headers with text, a colored dot and chips
-kind: panels
+kind: panel
 trim: 16
 cards:
   - type: custom:bubble-card
@@ -30,3 +30,10 @@ cards:
             color: '#88A37E'
           tap_action: {action: more-info}
   - {file: rooms/header.yaml}
+# In the evening, the bedroom is warmer and drier
+dark:
+  states:
+    sensor.bedroom_temperature: {state: '20.4', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.bedroom_humidity: {state: '49', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.living_room_temperature: {state: '20.6', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.living_room_humidity: {state: '47', attributes: {unit_of_measurement: '%', device_class: humidity}}

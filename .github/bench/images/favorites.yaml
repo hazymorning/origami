@@ -1,4 +1,4 @@
-kind: panels
+kind: panel
 cards:
   - {file: favorites/header.yaml}
   - {file: favorites/tiles.yaml}

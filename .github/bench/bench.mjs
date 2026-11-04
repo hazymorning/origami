@@ -93,6 +93,17 @@ customElements.define('ha-icon', class extends HTMLElement {
   attributeChangedCallback() { this.connectedCallback(); }
   connectedCallback() { this.shadowRoot.querySelector('path').setAttribute('d', window.__MDI[this.icon.replace(/^mdi:/, '')] || ''); }
 });
+// Home Assistant's default icons for the domains the parts show without an icon of their own
+const weatherIcons = { 'clear-night': 'weather-night', cloudy: 'weather-cloudy', exceptional: 'alert-circle-outline', fog: 'weather-fog',
+  hail: 'weather-hail', lightning: 'weather-lightning', 'lightning-rainy': 'weather-lightning-rainy', partlycloudy: 'weather-partly-cloudy',
+  pouring: 'weather-pouring', rainy: 'weather-rainy', snowy: 'weather-snowy', 'snowy-rainy': 'weather-snowy-rainy', sunny: 'weather-sunny',
+  windy: 'weather-windy', 'windy-variant': 'weather-windy-variant' };
+const domainIcons = { vacuum: 'robot-vacuum', timer: 'timer-outline', calendar: 'calendar', update: 'package-up', person: 'account',
+  counter: 'counter', sun: 'white-balance-sunny', fan: 'fan', light: 'lightbulb', media_player: 'cast', climate: 'thermostat' };
+const stateIcon = (s) => {
+  const domain = s.entity_id.split('.')[0];
+  return 'mdi:' + ((domain === 'weather' && weatherIcons[s.state]) || domainIcons[domain] || 'circle-outline');
+};
 customElements.define('ha-state-icon', class extends HTMLElement {
   set stateObj(v) { this._s = v; this.draw(); }
   get stateObj() { return this._s; }
@@ -104,7 +115,7 @@ customElements.define('ha-state-icon', class extends HTMLElement {
     if (!this._s || !this.isConnected) return;
     let i = this.querySelector('ha-icon');
     if (!i) { i = document.createElement('ha-icon'); this.appendChild(i); }
-    i.setAttribute('icon', this._i || this._s.attributes?.icon || 'mdi:circle-outline');
+    i.setAttribute('icon', this._i || this._s.attributes?.icon || stateIcon(this._s));
   }
 });
 customElements.define('ha-select', class extends HTMLElement {

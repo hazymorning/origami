@@ -1,4 +1,4 @@
-kind: panels
+kind: panel
 trim: 16
 cards:
   - {file: rooms/header.yaml}
@@ -19,3 +19,12 @@ states:
   sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}
   binary_sensor.kitchen_window: {state: 'off', attributes: {device_class: window}}
   binary_sensor.office_window: {state: 'off', attributes: {device_class: window}}
+dark:
+  states:
+    light.kitchen: {state: 'off', attributes: {friendly_name: Kitchen}}
+    sensor.kitchen_temperature: {state: '20.8', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.kitchen_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.office_temperature: {state: '18.9', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.office_humidity: {state: '45', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.living_room_humidity: {state: '49', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.bedroom_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}

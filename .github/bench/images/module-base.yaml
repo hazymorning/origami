@@ -1,5 +1,5 @@
 # A regular card, a tile and two compact rows with the pill switch
-kind: panels
+kind: panel
 trim: 16
 cards:
   - type: custom:bubble-card
@@ -61,3 +61,10 @@ states:
   fan.air_purifier: {state: 'off', attributes: {friendly_name: Air purifier}}
   switch.desk_power: {state: 'on', attributes: {friendly_name: Desk power}}
   switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+# In the evening, other devices are on
+dark:
+  states:
+    switch.coffee_machine: {state: 'off', attributes: {friendly_name: Coffee machine}}
+    fan.air_purifier: {state: 'on', attributes: {friendly_name: Air purifier, percentage: 40}}
+    switch.desk_power: {state: 'off', attributes: {friendly_name: Desk power}}
+    switch.printer: {state: 'on', attributes: {friendly_name: Printer}}

@@ -1,3 +1,6 @@
-kind: panels
+kind: panel
 cards:
   - {file: greeting/card.yaml}
+light:
+  states:
+    vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, icon: 'mdi:robot-vacuum', battery_level: 64}}

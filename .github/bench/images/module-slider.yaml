@@ -1,5 +1,5 @@
 # A subwoofer level slider and a fan speed slider
-kind: panels
+kind: panel
 cards:
   - type: custom:bubble-card
     card_type: button
@@ -31,3 +31,8 @@ cards:
 states:
   number.subwoofer_level: {state: '2', attributes: {friendly_name: Subwoofer level, min: -6, max: 6, step: 1, mode: slider}}
   fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
+# In the evening, the subwoofer is turned down and the fan runs slower
+dark:
+  states:
+    number.subwoofer_level: {state: '-2', attributes: {friendly_name: Subwoofer level, min: -6, max: 6, step: 1, mode: slider}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33}}
