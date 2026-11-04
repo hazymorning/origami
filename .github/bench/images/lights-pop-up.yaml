@@ -1,0 +1,22 @@
+kind: phones
+home: true
+open: '#popup_lights'
+cards:
+  - {file: lights/pop-up.yaml}
+templates:
+  - {match: "lamps on", result: '3 lamps on · 59%'}
+states:
+  light.living_room:
+    state: 'on'
+    attributes: {friendly_name: Living room, brightness: 150, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.living_room_floor_lamp, light.living_room_string_lights, light.living_room_tv, light.living_room_table_lamp, light.living_room_ceiling]}
+  light.living_room_ceiling: {state: 'off', attributes: {friendly_name: Ceiling, supported_color_modes: [brightness]}}
+  light.living_room_floor_lamp: {state: 'on', attributes: {friendly_name: Floor lamp, brightness: 170, supported_color_modes: [brightness], color_mode: brightness}}
+  light.living_room_string_lights: {state: 'on', attributes: {friendly_name: String lights, brightness: 110, supported_color_modes: [brightness], color_mode: brightness}}
+  light.living_room_tv: {state: 'off', attributes: {friendly_name: TV light, supported_color_modes: [brightness]}}
+  light.living_room_table_lamp: {state: 'on', attributes: {friendly_name: Table lamp, brightness: 140, supported_color_modes: [brightness], color_mode: brightness}}
+  scene.living_room_evening: {state: '2026-11-04T18:00:30+00:00', attributes: {friendly_name: Evening}}
+  scene.living_room_late: {state: '2026-11-03T21:40:00+00:00', attributes: {friendly_name: Late}}
+  scene.living_room_night: {state: '2026-11-03T23:10:00+00:00', attributes: {friendly_name: Night}}
+  scene.living_room_dinner: {state: '2026-11-02T19:00:00+00:00', attributes: {friendly_name: Dinner}}
+  scene.living_room_morning: {state: '2026-11-04T07:05:00+00:00', attributes: {friendly_name: Morning}}
+  scene.living_room_movie: {state: '2026-11-01T20:30:00+00:00', attributes: {friendly_name: Movie}}

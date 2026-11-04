@@ -1,6 +1,8 @@
 // Runs in the page: a stand-in for Home Assistant's hass object, and the scenario's cards in sections.
 (async () => {
   const sc = await (await fetch('/scenario.json')).json();
+  // Other cards that the scenario loads, from the folder next to it
+  for (const r of sc.resources || []) await import('/local/' + r.split('/').pop());
   const lang = sc.language || 'en';
   const now = Date.now();
   const states = {};
@@ -30,7 +32,7 @@
   };
   const hass = {
     states, entities: sc.entities || {}, devices: {}, areas: {},
-    user: { id: 'u', name: 'Test', is_admin: false, is_owner: false },
+    user: { id: 'u', name: 'Test', is_admin: !!sc.admin, is_owner: false },
     language: lang, selectedLanguage: lang,
     locale: { language: lang, number_format: 'language', time_format: 'language', date_format: 'language', first_weekday: 'language', time_zone: 'local' },
     config: { time_zone: 'UTC', unit_system: { temperature: '°C', length: 'km' }, components: [], version: '2026.10.0' },
@@ -63,11 +65,21 @@
     callApi: async () => ({}),
     callWS: async (msg) => {
       if (msg?.type === 'frontend/get_icons') return { resources: msg.category === 'entity_component' ? icons : {} };
+      if (sc.messages && msg?.type in sc.messages) return sc.messages[msg.type];
       throw { code: 'unknown_command', message: 'Unknown command.' };
     },
     connection: {
-      // A Jinja template gets an empty result, as from a server that has not answered yet
-      subscribeMessage: async (cb, msg) => { if (msg?.type === 'render_template') setTimeout(() => cb({ result: '' }), 0); return async () => {}; },
+      // A Jinja template gets the result of the scenario's first templates entry whose match it contains, or an empty one, as from a server that has not answered yet
+      subscribeMessage: async (cb, msg) => {
+        if (msg?.type === 'render_template') {
+          const t = (sc.templates || []).find((x) => String(msg.template).includes(x.match));
+          setTimeout(() => cb({ result: t ? t.result : '' }), 0);
+        } else if (sc.messages && msg?.type in sc.messages) {
+          // Other subscriptions, such as a weather forecast, get the scenario's answer for their type
+          setTimeout(() => cb(sc.messages[msg.type]), 0);
+        }
+        return async () => {};
+      },
       subscribeEvents: async () => async () => {},
       sendMessagePromise: async () => ({}),
       addEventListener() {}, removeEventListener() {}

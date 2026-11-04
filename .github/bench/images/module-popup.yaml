@@ -1,0 +1,113 @@
+# A pop-up built from the modules: the header's values as text, lamps, a thermostat, a fan and a speaker
+kind: phones
+home: true
+open: '#popup_bedroom'
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#popup_bedroom'
+    name: Bedroom
+    show_header: true
+    show_icon: false
+    button_type: name
+    popup_mode: adaptive-dialog
+    hide_backdrop: false
+    scrolling_effect: false
+    margin: 7px
+    margin_top_mobile: 80px
+    bg_opacity: '100'
+    bg_blur: '0'
+    backdrop_blur: '10'
+    with_bottom_offset: true
+    modules: [origami_base, origami_popup]
+    origami_popup:
+      value_style: text
+      gap: var(--ha-space-4)
+    sub_button:
+      main:
+        - {entity: sensor.bedroom_temperature, icon: mdi:thermometer, show_state: true, show_background: false}
+        - {entity: sensor.bedroom_humidity, icon: mdi:water-percent, show_state: true, show_background: false}
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.bedroom_ceiling
+            name: Ceiling
+            icon: mdi:ceiling-light-outline
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, join: first}
+            sub_button:
+              main:
+                - {entity: light.bedroom_ceiling, sub_button_type: slider, always_visible: true}
+            rows: 1
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.bedroom_bedside
+            name: Bedside lamp
+            icon: mdi:lamp-outline
+            modules: [origami_base]
+            origami_base: {compact: true, tile: true, join: last}
+            sub_button:
+              main:
+                - {entity: light.bedroom_bedside, sub_button_type: slider, always_visible: true}
+            rows: 1
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: climate.bedroom
+            name: Thermostat
+            icon: mdi:radiator
+            modules: [origami_base, origami_climate]
+            origami_base: {group: true, tile: true}
+            origami_climate:
+              icons: {'off': mdi:radiator-off}
+            sub_button:
+              main:
+                - {icon: mdi:minus, show_background: true}
+                - {entity: climate.bedroom, css_class: readout, show_icon: false, show_name: false, show_background: false, state_content: temperature}
+                - {icon: mdi:plus, show_background: true}
+            rows: 1.375
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: fan.bedroom
+            name: Fan
+            icon: mdi:fan
+            modules: [origami_base, origami_fan]
+            origami_base: {group: true, tile: true}
+            sub_button:
+              main:
+                - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: fan.toggle, target: {entity_id: fan.bedroom}}}
+                - {name: '1', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 33}}}
+                - {name: '2', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 66}}}
+                - {name: '3', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 100}}}
+            state_content: percentage
+            rows: 1.375
+          - type: custom:bubble-card
+            card_type: media-player
+            button_type: state
+            entity: media_player.bedroom
+            name: Speaker
+            icon: mdi:speaker
+            modules: [origami_base, origami_media]
+            origami_base: {group: true}
+            hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+            sub_button:
+              main:
+                - {icon: mdi:pause, show_background: true, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.bedroom}}}
+                - {icon: mdi:skip-next, show_background: false, tap_action: {action: perform-action, perform_action: media_player.media_next_track, target: {entity_id: media_player.bedroom}}}
+              bottom:
+                - {entity: media_player.bedroom, sub_button_type: slider, always_visible: true}
+            rows: '2.2'
+states:
+  light.bedroom: {state: 'on', attributes: {friendly_name: Bedroom}}
+  light.bedroom_ceiling: {state: 'off', attributes: {friendly_name: Ceiling, brightness: 0, supported_color_modes: [brightness], color_mode: brightness}}
+  light.bedroom_bedside: {state: 'on', attributes: {friendly_name: Bedside lamp, brightness: 115, supported_color_modes: [brightness], color_mode: brightness}}
+  climate.bedroom: {state: heat, attributes: {friendly_name: Thermostat, hvac_action: heating, hvac_modes: ['off', heat], temperature: 19.5, current_temperature: 18.6, min_temp: 7, max_temp: 30, target_temp_step: 0.5}}
+  fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, percentage_step: 33.33}}
+  media_player.bedroom:
+    state: playing
+    attributes: {friendly_name: Speaker, volume_level: 0.24, media_title: Harbour Lights, media_artist: The Folds, entity_picture: /local/cover-2.jpg, group_members: [media_player.bedroom]}

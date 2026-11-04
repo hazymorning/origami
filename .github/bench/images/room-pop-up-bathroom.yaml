@@ -1,0 +1,17 @@
+kind: phones
+home: true
+open: '#popup_bathroom'
+cards:
+  - {file: room/bathroom.yaml}
+states:
+  media_player.bathroom:
+    state: playing
+    attributes: {friendly_name: Bathroom, volume_level: 0.22, media_title: Daybreak, media_artist: Paper Boats, media_content_type: music, entity_picture: /local/cover-1.jpg, source: WiFi, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
+  light.bathroom_mirror: {state: 'on', attributes: {friendly_name: Mirror, brightness: 120, supported_color_modes: [brightness], color_mode: brightness}}
+  light.bathroom_night_light: {state: 'off', attributes: {friendly_name: Night light, supported_color_modes: [brightness]}}
+  input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
+  sensor.bathroom_temperature: {state: '22.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
+  sensor.bathroom_humidity: {state: '64', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
+  climate.bathroom:
+    state: heat
+    attributes: {friendly_name: Bathroom, hvac_action: heating, hvac_modes: ['off', heat], temperature: 23, current_temperature: 22.6, min_temp: 7, max_temp: 30, target_temp_step: 0.5}

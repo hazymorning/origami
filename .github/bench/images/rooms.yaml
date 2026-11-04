@@ -1,0 +1,21 @@
+kind: panels
+trim: 16
+cards:
+  - {file: rooms/header.yaml}
+  - type: grid
+    columns: 2
+    cards:
+      - {file: rooms/room.yaml}
+      - file: rooms/room.yaml
+        replace: {living_room: bedroom, Living room: Bedroom, mdi:sofa: mdi:bed-king-outline}
+      - file: rooms/room.yaml
+        replace: {living_room: kitchen, Living room: Kitchen, mdi:sofa: mdi:countertop-outline}
+      - file: rooms/room.yaml
+        replace: {living_room: office, Living room: Office, mdi:sofa: mdi:desk}
+states:
+  light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
+  light.office: {state: 'off', attributes: {friendly_name: Office}}
+  sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature}}
+  sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}
+  binary_sensor.kitchen_window: {state: 'off', attributes: {device_class: window}}
+  binary_sensor.office_window: {state: 'off', attributes: {device_class: window}}

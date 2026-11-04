@@ -1,0 +1,10 @@
+kind: panels
+trim: 16
+cards:
+  - {file: rooms/header.yaml}
+  - file: climate-table/card.yaml
+    with: {styles: null}
+states:
+  input_boolean.climate_table: {state: 'on', attributes: {friendly_name: Climate table}}
+  climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, temperature: 21, current_temperature: 21.4}}
+  climate.bedroom: {state: heat, attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 19, current_temperature: 18.6}}

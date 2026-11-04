@@ -1,0 +1,62 @@
+# A card with a tray, a tile and a switch with their shadows
+kind: panels
+cards:
+  # A card with keys in a tray
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: climate.living_room
+    name: Living room
+    modules: [origami_base, origami_climate]
+    origami_base: {group: true}
+    origami_climate:
+      icons: {heating: mdi:radiator, 'off': mdi:radiator-off}
+    sub_button:
+      main:
+        - {icon: mdi:minus, show_background: true}
+        - {entity: climate.living_room, css_class: readout, show_icon: false, show_name: false, show_background: false, state_content: temperature}
+        - {icon: mdi:plus, show_background: true}
+    rows: 1.375
+  # A tile, whose tray's keys are flat again
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: fan.bedroom
+    name: Bedroom
+    icon: mdi:fan
+    modules: [origami_base, origami_fan]
+    origami_base: {group: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: fan.toggle, target: {entity_id: fan.bedroom}}}
+        - {name: '1', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 33}}}
+        - {name: '2', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 66}}}
+    state_content: percentage
+    rows: 1.375
+  # A switch in a header and a compact row with the pill switch
+  - type: custom:bubble-card
+    card_type: separator
+    name: Speaker
+    modules: [origami_base, origami_header]
+    origami_header: {value_style: switch}
+    sub_button:
+      main:
+        - {name: Living, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.selected_speaker}, data: {option: media_player.living_room}}}
+        - {name: Kitchen, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.selected_speaker}, data: {option: media_player.kitchen}}}
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: switch.desk_power
+    name: Desk power
+    icon: mdi:desk
+    modules: [origami_base]
+    origami_base: {compact: true, toggle: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+    rows: 1
+states:
+  climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: heating, hvac_modes: ['off', heat], temperature: 21.5, current_temperature: 20.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5}}
+  fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
+  input_select.selected_speaker: {state: media_player.living_room, attributes: {friendly_name: Speaker, options: [media_player.living_room, media_player.kitchen]}}
+  switch.desk_power: {state: 'on', attributes: {friendly_name: Desk power}}

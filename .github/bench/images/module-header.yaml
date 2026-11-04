@@ -1,0 +1,32 @@
+# Headers with text, a colored dot and chips
+kind: panels
+trim: 16
+cards:
+  - type: custom:bubble-card
+    card_type: separator
+    name: Bedroom
+    modules: [origami_base, origami_header]
+    origami_header: {weight: medium}
+    sub_button:
+      main:
+        - entity: sensor.bedroom_temperature
+          show_icon: false
+          show_name: true
+          origami_header: {name: '${num(state, 1)}° · ${num(states("sensor.bedroom_humidity"), 0, "%")}'}
+          tap_action: {action: none}
+  - type: custom:bubble-card
+    card_type: separator
+    name: Climate
+    modules: [origami_base, origami_header]
+    origami_header: {icon_size: var(--dot-size)}
+    sub_button:
+      main:
+        - entity: sensor.living_room_temperature
+          icon: mdi:circle
+          show_name: true
+          show_background: false
+          origami_header:
+            name: ${num(state)}° / ${num(states('sensor.living_room_humidity'), 0, '%')}
+            color: '#88A37E'
+          tap_action: {action: more-info}
+  - {file: rooms/header.yaml}

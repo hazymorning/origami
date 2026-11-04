@@ -1,0 +1,8 @@
+kind: phones
+home: true
+open: '#popup_fan'
+cards:
+  - {file: fan/pop-up.yaml}
+templates:
+  - {match: "'Low' if p", result: Medium}
+  - {match: "state_attr(entity, 'percentage')", result: 66%}

@@ -4,6 +4,10 @@
 //     Renders sheet.yaml and checks the design rules. It takes a few seconds.
 //   node .github/bench/bench.mjs shot <scenario.yaml> <folder> [--modes light,dark] [--rtl]
 //     Takes a screenshot of each section of a scenario, such as cards from a real home, which stay outside the repository.
+//     A scenario can set the page's size and scale with viewport and scale, the clock with time, such as 2026-11-04T19:30,
+//     and load other cards with resources, a list of their files next to the scenario. click lists elements to tap before the shots.
+//     preview shows other cards as in the card editor, and admin makes the user an admin.
+//     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
 // Bubble Card's version below is downloaded once into .cache. Raise it when the dashboard moves to a newer Bubble Card.
@@ -67,8 +71,11 @@ const rgb = (o) => Object.fromEntries(Object.entries(o).filter(([k, v]) => /^#[0
 // Stand-ins for the Home Assistant elements that Bubble Card uses
 const standIns = `
 customElements.define('ha-card', class extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block;position:relative}</style><slot></slot>'; }
+  // Home Assistant's own look for a card, which cards that don't set their own use
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block;position:relative;box-sizing:border-box;background:var(--ha-card-background,var(--card-background-color,#fff));box-shadow:var(--ha-card-box-shadow,none);border-radius:var(--ha-card-border-radius,12px);border:var(--ha-card-border-width,1px) solid var(--ha-card-border-color,var(--divider-color,#e0e0e0));color:var(--primary-text-color)}</style><slot></slot>'; }
 });
+// Home Assistant's dashboard root, which some cards wait for before they register
+customElements.define('hui-root', class extends HTMLElement { requestUpdate() {} });
 customElements.define('ha-ripple', class extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:none}</style>'; }
   startPress() {} endPress() {}
@@ -108,8 +115,9 @@ customElements.define('ha-dropdown-item', class extends HTMLElement {
 const met = (c, h) => c.condition === 'or' ? (c.conditions || []).some((x) => met(x, h))
   : c.condition === 'and' ? (c.conditions || []).every((x) => met(x, h))
   : c.condition && c.condition !== 'state' ? true
-  : (c.state === undefined || [].concat(c.state).map(String).includes(h?.states?.[c.entity]?.state))
-    && (c.state_not === undefined || ![].concat(c.state_not).map(String).includes(h?.states?.[c.entity]?.state));
+  : ((v) => (c.state === undefined || [].concat(c.state).map(String).includes(v))
+    && (c.state_not === undefined || ![].concat(c.state_not).map(String).includes(v)))(
+    String(c.attribute ? h?.states?.[c.entity]?.attributes?.[c.attribute] : h?.states?.[c.entity]?.state));
 customElements.define('hui-card', class extends HTMLElement {
   load() { this.build(); }
   set config(c) { this._c = c; if (this.isConnected) this.build(); }
@@ -146,6 +154,17 @@ customElements.define('hui-card', class extends HTMLElement {
       };
       el.addEventListener('card-visibility-changed', (e) => { e.stopPropagation(); vis(); });
       vis();
+    } else if (c.type === 'grid') {
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:grid;gap:var(--grid-card-gap,8px);grid-template-columns:repeat(' + (c.columns || 2) + ',minmax(0,1fr))';
+      for (const cc of c.cards || []) { const k = document.createElement('hui-card'); k.hass = this._h; k.config = cc; grid.appendChild(k); this._kids.push(k); }
+      this.appendChild(grid);
+    } else if (String(c.type).startsWith('custom:') && customElements.get(c.type.slice(7))) {
+      // Another custom card that the scenario loads with resources
+      const el = document.createElement(c.type.slice(7));
+      el.setConfig(c); el.hass = this._h; this.appendChild(el); this._kids.push(el);
+      // As in the card editor, where a card such as a menu shows itself in place
+      if (window.__PREVIEW) el.preview = true;
     } else {
       const box = document.createElement('div');
       box.textContent = c.type;
@@ -173,6 +192,7 @@ html, body { margin: 0; background: var(--dashboard-background); color: var(--pr
 <script src="/mdi.js"></script>
 <script>${standIns}
 window.__DARK = ${mode === 'dark'};
+window.__PREVIEW = ${!!scenario.preview};
 </script>
 </head><body>
 <script src="/bubble-card.js"></script>
@@ -204,17 +224,20 @@ const errors = [];
 let failed = false;
 try {
   for (const mode of modes) {
-    const context = await browser.newContext({ deviceScaleFactor: shot ? 2 : 1, viewport: { width: 1200, height: 1600 }, colorScheme: mode });
+    const context = await browser.newContext({ deviceScaleFactor: shot ? scenario.scale || 2 : 1, viewport: shot && scenario.viewport || { width: 1200, height: 1600 }, colorScheme: mode, timezoneId: 'UTC' });
     const p = await context.newPage();
+    if (shot && scenario.time) await p.clock.setFixedTime(new Date(scenario.time));
     p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
     p.on('pageerror', (e) => errors.push(e.message));
     await p.goto(`http://127.0.0.1:${port}/?mode=${mode}`);
     await p.waitForFunction(() => window.__ready === true, null, { timeout: 30000 })
       .catch((e) => { throw new Error('The page did not finish: ' + (errors.join(' | ') || e.message)); });
     if (shot) {
+      // Taps that a scenario makes before the shots, such as on a key that opens a mini pop-up
+      for (const sel of scenario.click || []) { await p.click(sel); await p.waitForTimeout(900); }
       fs.mkdirSync(outDir, { recursive: true });
       for (const [i, s] of (await p.$$('.shot')).entries()) await s.screenshot({ path: path.join(outDir, `${(await s.getAttribute('data-id')) || i}-${mode}.png`) });
-      if (scenario.open) await p.screenshot({ path: path.join(outDir, `page-${mode}.png`) });
+      if (scenario.open || scenario.viewport) await p.screenshot({ path: path.join(outDir, `page-${mode}.png`) });
       continue;
     }
     for (const r of await p.evaluate(() => window.__check())) {

@@ -1,0 +1,39 @@
+# Two fan cards, one at speed two and one that is off
+kind: panels
+cards:
+  - &fan
+    type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: fan.bedroom
+    name: Bedroom
+    icon: mdi:fan
+    modules: [origami_base, origami_fan]
+    origami_base: {group: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: fan.toggle, target: {entity_id: fan.bedroom}}}
+        - {name: '1', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 33}}}
+        - {name: '2', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 66}}}
+        - {name: '3', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.bedroom}, data: {percentage: 100}}}
+    state_content: percentage
+    rows: 1.375
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: fan.office
+    name: Office
+    icon: mdi:fan
+    modules: [origami_base, origami_fan]
+    origami_base: {group: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: fan.toggle, target: {entity_id: fan.office}}}
+        - {name: '1', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.office}, data: {percentage: 33}}}
+        - {name: '2', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.office}, data: {percentage: 66}}}
+        - {name: '3', show_icon: false, show_name: true, show_background: false, tap_action: {action: perform-action, perform_action: fan.set_percentage, target: {entity_id: fan.office}, data: {percentage: 100}}}
+    state_content: percentage
+    rows: 1.375
+states:
+  fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
+  fan.office: {state: 'off', attributes: {friendly_name: Office fan, percentage: 0, percentage_step: 33.33}}

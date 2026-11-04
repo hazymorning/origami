@@ -151,7 +151,7 @@ Everything for one room in one place. [Setup](dashboard/room/)
 
 ### Lights
 
-<img width="800" alt="The lights pop-up with its scenes, the slider for all lamps and the lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
 All the lights, from scenes down to each lamp. [Setup](dashboard/lights/)
 

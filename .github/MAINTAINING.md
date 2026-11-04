@@ -146,9 +146,9 @@ All text is written for people: short, plain English that sounds like a person w
 
 ## Images
 
-- All images follow one standard, so the gallery looks like one piece. No phone mockups or other typical app presentation styles, and never a diagonal division.
+- All images follow one standard, so the gallery looks like one piece. A card shows its light and dark mode side by side on a transparent background, as in 2.0. A pop-up or the menu shows on two phones, light and dark, that face the camera on white watercolor paper, as in the hero. Never a diagonal division.
 - The hero shows the maintainer's own dashboard, because it shows best how Origami looks in daily use. It gets more care than any other image.
-- Screenshots come from a real Home Assistant with the real theme, font and cards.
+- Screenshots show the real theme, font, modules and cards. The hero comes from a real Home Assistant. `python3 .github/bench/images/make.py` makes the other images with the bench, from the example home's states in `.github/bench/images`, and frames them.
 - Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
 - README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones.
 - Until the last pass, each image in the README already has its final file name under `images/v3/` and an `alt` text that says what it will show. An image whose file doesn't exist yet is a placeholder. `check_rules.py` lists every placeholder, so the list is the shot list, and `check_rules.py --release` fails while one is left.
