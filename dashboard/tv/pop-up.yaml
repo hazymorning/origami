@@ -9,7 +9,6 @@ margin_top_desktop: 300px
 bg_opacity: 100
 popup_mode: adaptive-dialog
 with_bottom_offset: true
-performance_mode: performance
 modules:
   - origami_base
   - origami_popup

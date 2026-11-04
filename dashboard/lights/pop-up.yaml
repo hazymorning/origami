@@ -17,7 +17,6 @@ backdrop_blur: '10'
 button_type: name
 show_icon: false
 with_bottom_offset: true
-performance_mode: performance
 modules:
   - origami_base
   - origami_popup
