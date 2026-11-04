@@ -61,7 +61,9 @@ const defaults = {
   'state-fan-active-color': 'var(--cyan-color)', 'state-media_player-active-color': 'var(--light-blue-color)',
   'state-inactive-color': 'var(--grey-color)', 'ha-font-size-2xl': '24px', 'ha-font-size-3xl': '28px',
   'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%', 'state-light-active-color': 'var(--amber-color)',
-  'mdc-theme-primary': 'var(--primary-color)', 'mdc-theme-text-primary-on-background': 'var(--primary-text-color)'
+  'mdc-theme-primary': 'var(--primary-color)', 'mdc-theme-text-primary-on-background': 'var(--primary-text-color)',
+  // Home Assistant's spacing scale, 4 px a step
+  ...Object.fromEntries(Array.from({ length: 21 }, (_, i) => ['ha-space-' + i, i * 4 + 'px']))
 };
 const vars = (o) => Object.entries(o).map(([k, v]) => `--${k}: ${v};`).join('\n');
 // Home Assistant adds rgb-<name> as r, g, b for each hex color of a theme that has no rgb-<name> of its own

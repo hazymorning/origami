@@ -1,6 +1,6 @@
 # Navigation bar
 
-<img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar.webp">
+<img width="400" alt="The navigation bar with the now playing card above it, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-light.webp"> <img width="400" alt="The navigation bar with the now playing card above it, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-dark.webp">
 
 A bar at the bottom of the screen with buttons for the most used pop-ups and the menu, and a card for what's playing. Holding the music button plays or pauses, and holding the lights button opens a list to turn the lights off or on and pick a scene.
 

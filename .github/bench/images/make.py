@@ -6,20 +6,23 @@ Without names, it makes every image that has a file here. It needs Python with P
 and the bench set up as .github/bench/bench.mjs says. The other cards and the status bar's font are
 downloaded once into .github/bench/.cache.
 
-home.yaml has the example home: the clock, the states, the answers to templates and messages, and the
-home view, which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp and has:
+home.yaml has the example home: its states, the answers to templates and messages, and the home view,
+which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>-light.webp and <name>-dark.webp,
+which the README shows side by side, and has:
 
-  kind: panels for a card in light and dark mode side by side, or phones for a pop-up or the menu on two phones
+  kind: panel for a card, phone for a pop-up or the menu on a phone, or hero for images/v3/hero.webp
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys
   home: true puts the home view behind the cards
   open: the hash of the pop-up to open
-  states, entities, templates, messages, words, time: added to those of home.yaml, as in a bench scenario
+  states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
+  time: the clock, and clock: the time in the status bar
   click, preview, admin, scale: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top
-  clock: the time in the status bar
+  light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
+    home.yaml has them too, for the whole home.
 """
 import json, os, shutil, subprocess, sys, urllib.request
 import yaml
@@ -78,71 +81,98 @@ def card(c):
     return c
 
 
+DICTS = ('states', 'entities', 'words', 'messages')
+
+
+def layer(home, spec, mode):
+    """The keys for one mode: home.yaml, then its mode, then the image's file, then its mode"""
+    out = {}
+    for src in (home, home.get(mode) or {}, spec, spec.get(mode) or {}):
+        for k, v in src.items():
+            if k in ('light', 'dark', 'home'):
+                continue
+            if k in DICTS:
+                out[k] = {**out.get(k, {}), **(v or {})}
+            elif k == 'templates':
+                out[k] = (v or []) + out.get(k, [])
+            else:
+                out[k] = v
+    return out
+
+
+def save(im, dest, rgb):
+    os.makedirs(OUT, exist_ok=True)
+    (im.convert('RGB') if rgb else im).save(dest, 'WEBP', quality=86 if rgb else 90, method=6)
+    print(f'{os.path.basename(dest)}: {im.width} × {im.height}, {os.path.getsize(dest) // 1024} KB')
+
+
+def frame(spec, work):
+    with open(os.path.join(work, 'frame.json'), 'w') as f:
+        json.dump(spec, f)
+    subprocess.run(['node', os.path.join(HERE, 'frame.mjs'), os.path.join(work, 'frame.json')], check=True)
+    # Corners outside the rounded canvas stay transparent
+    return Image.open(spec['out'])
+
+
 def make(name):
     spec = load(os.path.join(HERE, name + '.yaml'))
     home = load(os.path.join(HERE, 'home.yaml'))
     work = os.path.join(CACHE, 'images', name)
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(work)
-    phones = spec['kind'] == 'phones'
-    phone_page = phones or 'bottom' in spec
-    cards = [card(c) for c in spec.get('cards', [])]
-    if spec.get('home'):
-        cards = [card(c) for c in home['home']] + cards
-    merged = lambda key: {**(home.get(key) or {}), **(spec.get(key) or {})}
-    scenario = {
-        'time': spec.get('time', home['time']),
-        'states': merged('states'),
-        'entities': merged('entities'),
-        'templates': (spec.get('templates') or []) + (home.get('templates') or []),
-        'words': merged('words'),
-        'messages': merged('messages'),
-        'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
-        'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
-        'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else spec.get('width', 396), 'cards': cards}],
-    }
-    for k in ('open', 'click', 'preview', 'admin', 'scale'):
-        if k in spec:
-            scenario[k] = spec[k]
+    font = os.path.join(CACHE, 'status-font.woff2')
+    if spec['kind'] == 'hero':
+        hero = {'kind': 'hero', 'font': font, 'out': os.path.join(work, 'hero.png')}
+        for m in ('light', 'dark'):
+            hero[m] = {'time': layer(home, spec, m).get('clock', '19:30')}
+        save(frame(hero, work), os.path.join(OUT, name + '.webp'), False)
+        return
+    phone = spec['kind'] == 'phone'
+    phone_page = phone or 'bottom' in spec
     # The bench serves the cards and the pictures from the scenario's folder
     for n in CARDS:
         os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
     for n in os.listdir(os.path.join(HERE, 'files')):
         os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))
-    with open(os.path.join(work, 'scenario.yaml'), 'w') as f:
-        yaml.safe_dump(scenario, f, allow_unicode=True, sort_keys=False, width=1000)
-    subprocess.run(['node', os.path.join(HERE, '../bench.mjs'), 'shot', os.path.join(work, 'scenario.yaml'), work], check=True)
+    for mode in ('light', 'dark'):
+        keys = layer(home, spec, mode)
+        cards = [card(c) for c in keys.get('cards', [])]
+        if keys.get('home') or spec.get('home'):
+            cards = [card(c) for c in home['home']] + cards
+        scenario = {
+            'time': keys['time'],
+            **{k: keys.get(k, {}) for k in DICTS},
+            'templates': keys.get('templates', []),
+            'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
+            'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
+            'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards}],
+        }
+        for k in ('open', 'click', 'preview', 'admin', 'scale'):
+            if k in keys:
+                scenario[k] = keys[k]
+        path = os.path.join(work, f'scenario-{mode}.yaml')
+        with open(path, 'w') as f:
+            yaml.safe_dump(scenario, f, allow_unicode=True, sort_keys=False, width=1000)
+        subprocess.run(['node', os.path.join(HERE, '../bench.mjs'), 'shot', path, work, '--modes', mode], check=True)
 
-    shots = {m: os.path.join(work, f'{"page" if phone_page else "shot"}-{m}.png') for m in ('light', 'dark')}
-    frame = {'kind': 'phones' if phones else 'panels', 'out': os.path.join(work, 'framed.png'),
-             'font': os.path.join(CACHE, 'status-font.woff2'), **shots}
-    for m, path in shots.items():
-        im = Image.open(path).convert('RGB')
-        if phones:
+        shot = os.path.join(work, f'{"page" if phone_page else "shot"}-{mode}.png')
+        im = Image.open(shot).convert('RGB')
+        out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
+        if phone:
             # The status bar has the color of the screen's top edge, and the top row, such as a menu's edge, sits behind it
-            frame['bg_' + m] = '#%02x%02x%02x' % im.getpixel((20, 2))
+            out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
             im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
-        if 'bottom' in spec:
-            im = im.crop((0, im.height - spec['bottom'] * 2, im.width, im.height))
-        if 'trim' in spec:
-            im = im.crop((0, spec['trim'] * 2, im.width, im.height))
-        im.save(path)
-    if phones:
-        frame.update({'time': spec.get('clock', '19:30'), **({'cut': spec['cut']} if 'cut' in spec else {})})
-    else:
-        frame['panel'] = PHONE['width'] if 'bottom' in spec else spec.get('width', 396)
-    with open(os.path.join(work, 'frame.json'), 'w') as f:
-        json.dump(frame, f)
-    subprocess.run(['node', os.path.join(HERE, 'frame.mjs'), os.path.join(work, 'frame.json')], check=True)
-
-    im = Image.open(frame['out'])
-    os.makedirs(OUT, exist_ok=True)
-    dest = os.path.join(OUT, name + '.webp')
-    if phones:
-        im.convert('RGB').save(dest, 'WEBP', quality=86, method=6)
-    else:
-        im.save(dest, 'WEBP', quality=90, method=6)
-    print(f'{name}: {im.width} × {im.height}, {os.path.getsize(dest) // 1024} KB')
+            out['time'] = keys.get('clock', '19:30')
+            if 'cut' in keys:
+                out['cut'] = keys['cut']
+        else:
+            if 'bottom' in keys:
+                im = im.crop((0, im.height - keys['bottom'] * 2, im.width, im.height))
+            if 'trim' in keys:
+                im = im.crop((0, keys['trim'] * 2, im.width, im.height))
+            out['width'] = PHONE['width'] if 'bottom' in keys else keys.get('width', 396)
+        im.save(shot)
+        save(frame(out, work), os.path.join(OUT, f'{name}-{mode}.webp'), False)
 
 
 if __name__ == '__main__':

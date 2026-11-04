@@ -1,5 +1,5 @@
-# The example home at 19:30 on a November evening, shared by every image
-time: '2026-11-04T19:30:00'
+# The example home on a day in November, shared by every image. The light images show it at midday,
+# the dark ones late in the evening, under light and dark below.
 # The home view, behind every pop-up
 home:
   - {file: greeting/card.yaml}
@@ -23,7 +23,7 @@ states:
     state: 'off'
     attributes: {friendly_name: Household, message: Book club, start_time: '2026-11-06 19:00:00', end_time: '2026-11-06 21:00:00', all_day: false, description: '', location: ''}
   sensor.weather_warning_level: {state: '0', attributes: {friendly_name: Weather warnings}}
-  timer.bath: {state: active, attributes: {friendly_name: Bath, duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T19:48:00+00:00'}}
+  timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T19:48:00+00:00'}}
   sensor.oven_ready_in: {state: unknown, attributes: {friendly_name: Oven ready}}
   sensor.dinner:
     state: Margherita
@@ -34,10 +34,8 @@ states:
   media_player.bedroom: {state: idle, attributes: {friendly_name: Bedroom}}
   fan.bedroom:
     state: 'on'
-    attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33, oscillating: true, preset_mode: Normal, preset_modes: [Nature, Normal]}
-  timer.bedroom_fan:
-    state: active
-    attributes: {friendly_name: Bedroom fan, duration: '3:00:00', finishes_at: '2026-11-04T22:10:00+00:00', remaining: '3:00:00'}
+    attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33, oscillating: false, preset_mode: Normal, preset_modes: [Nature, Normal]}
+  timer.bedroom_fan: {state: idle, attributes: {friendly_name: Bedroom fan, duration: '0:00:00'}}
   input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
   input_datetime.bath_time_end: {state: '2026-11-04 19:48:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true, timestamp: 1793821680}}
   switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
@@ -70,3 +68,52 @@ words:
   rainy: Rainy
   sunny: Sunny
   returning: Returning
+# The light images: midday, with the sun out, lunch in the oven, the printer at work and the vacuum cleaning
+light:
+  time: '2026-11-04T12:40:00'
+  clock: '12:40'
+  states:
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 21}}
+    weather.home:
+      state: sunny
+      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
+    timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
+    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
+    sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
+    sensor.oven: {state: 180 °C, attributes: {friendly_name: Oven}}
+    switch.printer: {state: 'on', attributes: {friendly_name: Printer}}
+    input_datetime.printer_end: {state: '2026-11-04 12:58:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: sunny, temperature: 15, templow: 7, precipitation_probability: 0}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: partlycloudy, temperature: 13, templow: 6, precipitation_probability: 10}
+# The dark images: late in the evening, with music in the bedroom, a bath running and the vacuum back in its dock
+dark:
+  time: '2026-11-04T22:40:00'
+  clock: '22:40'
+  states:
+    weather.home:
+      state: clear-night
+      attributes: {friendly_name: Home, temperature: 6.8, temperature_unit: °C, humidity: 84, wind_speed: 4, wind_speed_unit: km/h, pressure: 1021, supported_features: 3}
+    calendar.household:
+      state: 'off'
+      attributes: {friendly_name: Household, message: Dentist, start_time: '2026-11-05 09:00:00', end_time: '2026-11-05 10:00:00', all_day: false, description: '', location: ''}
+    timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T22:52:00+00:00'}}
+    input_datetime.bath_time_end: {state: '2026-11-04 22:52:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true}}
+    sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
+    sensor.oven: {state: 'Off', attributes: {friendly_name: Oven}}
+    vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
+    media_player.bedroom: {state: playing, attributes: {friendly_name: Bedroom, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg}}
+    light.living_room: {state: 'off', attributes: {friendly_name: Living room}}
+    light.bedroom: {state: 'on', attributes: {friendly_name: Bedroom, brightness: 90}}
+    sensor.living_room_temperature: {state: '20.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Living room temperature}}
+    sensor.bedroom_temperature: {state: '19.2', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bedroom temperature}}
+    binary_sensor.bedroom_window: {state: 'off', attributes: {friendly_name: Bedroom window, device_class: window}}
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: sunny, temperature: 15, templow: 6, precipitation_probability: 0}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}

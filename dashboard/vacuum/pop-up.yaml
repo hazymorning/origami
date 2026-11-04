@@ -207,6 +207,7 @@ cards:
           columns: 2
           active_style: toggle
           icon_size: var(--icon-size-s)
+          padding: 0 0 var(--ha-space-2)
           active: "${states('vacuum.robot') === 'cleaning' ? states('sensor.robot_current_room') : ''}"
         sub_button:
           main: []
@@ -252,3 +253,73 @@ cards:
                   entity_id: vacuum.robot
                 data:
                   cleaning_area_id: bathroom
+      # The suction power. A level is filled while the vacuum has its fan speed, which each level's css_class names
+      # as the vacuum's fan_speed_list attribute does.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        scrolling_effect: false
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          columns: 2
+          segmented: Suction
+          active: "${hass.states['vacuum.robot']?.attributes?.fan_speed ?? ''}"
+        sub_button:
+          main: []
+          bottom:
+            - name: Suction label
+              group:
+                - name: Suction
+                  show_name: true
+                  show_icon: false
+                  origami_button:
+                    background: transparent
+                  tap_action:
+                    action: none
+            - name: Suction
+              group:
+                - name: '1'
+                  css_class: quiet
+                  show_name: true
+                  show_icon: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.set_fan_speed
+                    target:
+                      entity_id: vacuum.robot
+                    data:
+                      fan_speed: quiet
+                - name: '2'
+                  css_class: balanced
+                  show_name: true
+                  show_icon: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.set_fan_speed
+                    target:
+                      entity_id: vacuum.robot
+                    data:
+                      fan_speed: balanced
+                - name: '3'
+                  css_class: turbo
+                  show_name: true
+                  show_icon: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.set_fan_speed
+                    target:
+                      entity_id: vacuum.robot
+                    data:
+                      fan_speed: turbo
+                - name: '4'
+                  css_class: max
+                  show_name: true
+                  show_icon: false
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.set_fan_speed
+                    target:
+                      entity_id: vacuum.robot
+                    data:
+                      fan_speed: max

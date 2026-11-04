@@ -24,7 +24,7 @@ modules:
 cards:
   - type: vertical-stack
     cards:
-      # Each row is a favorite. The sign at its end shows what a tap does.
+      # Each row is a favorite, with a chevron at its end like the rows of every card here
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
@@ -32,6 +32,7 @@ cards:
           - origami_tiles
         origami_tiles:
           layout: list
+          sign: open
         sub_button:
           bottom:
             - entity: input_boolean.bath_time
@@ -81,6 +82,7 @@ cards:
           - origami_tiles
         origami_tiles:
           layout: list
+          sign: open
         sub_button:
           bottom:
             - entity: fan.bedroom
@@ -113,6 +115,7 @@ cards:
           - origami_tiles
         origami_tiles:
           layout: list
+          sign: open
         sub_button:
           bottom:
             - name: Server

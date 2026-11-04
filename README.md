@@ -1,7 +1,7 @@
 <img alt="Origami on two phones in light and dark mode, with the greeting, the weather, favorites and rooms" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero.webp">
 
-<a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=black&labelColor=white"></a>
-<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-black?labelColor=white"></a>
+<a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=F2F0EB&labelColor=181715"></a>
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-F2F0EB?labelColor=181715"></a>
 
 Origami is a dashboard for Home Assistant. It has changed with daily use for many years and now finally feels somewhat finished. Many of its parts, like one music card for multiple speakers or tables made with Bubble Card, took countless hours of trial and error.
 
@@ -101,95 +101,95 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 ### Menu
 
-<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
+<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp"> <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
 
-Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [Setup](dashboard/menu/)
+Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [More](dashboard/menu/)
 
 ### Greeting and notifications
 
-<img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting.webp">
+<img width="400" alt="The greeting with the next event above it and the notifications beside it, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting-light.webp"> <img width="400" alt="The greeting with the next event above it and the notifications beside it, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting-dark.webp">
 
-A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [Setup](dashboard/greeting/)
+A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [More](dashboard/greeting/)
 
 ### Weather
 
-<img width="800" alt="The weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
+<img width="400" alt="The weather card, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-light.webp"> <img width="400" alt="The weather card, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-dark.webp">
 
-Today's weather, in a color that matches it. Needs the Origami Weather card. [Setup](dashboard/weather/)
+Today's weather, in a color that matches it. Needs the Origami Weather card. [More](dashboard/weather/)
 
 ### Favorites
 
-<img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
+<img width="400" alt="Favorites as tiles, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-light.webp"> <img width="400" alt="Favorites as tiles, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-dark.webp">
 
-Tiles that come and go with what's happening at home. [Setup](dashboard/favorites/)
+Tiles that come and go with what's happening at home. [More](dashboard/favorites/)
 
 ### Rooms
 
-<img width="800" alt="The rooms header and the room cards, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
+<img width="400" alt="The rooms header and the room cards, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-light.webp"> <img width="400" alt="The rooms header and the room cards, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-dark.webp">
 
-Each room's climate and lights at a glance. [Setup](dashboard/rooms/)
+Each room's climate and lights at a glance. [More](dashboard/rooms/)
 
 ### Climate table
 
-<img width="800" alt="The climate table with a row for each room, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table.webp">
+<img width="400" alt="The climate table with a row for each room, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-light.webp"> <img width="400" alt="The climate table with a row for each room, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/climate-table-dark.webp">
 
-Every room's climate in one table. [Setup](dashboard/climate-table/)
+Every room's climate in one table. [More](dashboard/climate-table/)
 
 ### Navigation bar
 
-<img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar.webp">
+<img width="400" alt="The navigation bar with the now playing card above it, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-light.webp"> <img width="400" alt="The navigation bar with the now playing card above it, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar-dark.webp">
 
-The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [Setup](dashboard/navigation-bar/)
+The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [More](dashboard/navigation-bar/)
 
 ## Pop-ups
 
 ### Room
 
-<img width="800" alt="The living room pop-up with the TV, the lights and the climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room.webp">
+<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp"> <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
 
-Everything for one room in one place. [Setup](dashboard/room/)
+Everything for one room in one place. [More](dashboard/room/)
 
 ### Lights
 
-<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
+<img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-light.webp"> <img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-dark.webp">
 
-All the lights, from scenes down to each lamp. [Setup](dashboard/lights/)
+All the lights, from scenes down to each lamp. [More](dashboard/lights/)
 
 ### Music
 
-<img width="800" alt="The music pop-up with the cover, the play row and the volume, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up.webp">
+<img width="400" alt="The music pop-up with the cover, the play row and the volume, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-light.webp"> <img width="400" alt="The music pop-up with the cover, the play row and the volume, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-dark.webp">
 
-Music, speaker groups and volume. [Setup](dashboard/music/)
+Music, speaker groups and volume. [More](dashboard/music/)
 
 ### TV
 
-<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up.webp">
+<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp"> <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
 
-Remote, apps and volume for the TV. [Setup](dashboard/tv/)
+Remote, apps and volume for the TV. [More](dashboard/tv/)
 
 ### Fan
 
-<img width="800" alt="The fan pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
+<img width="400" alt="The fan pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-light.webp"> <img width="400" alt="The fan pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-dark.webp">
 
-A fan's speed, mode and timer. [Setup](dashboard/fan/)
+A fan's speed, mode and timer. [More](dashboard/fan/)
 
 ### Favorites list
 
-<img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up.webp">
+<img width="400" alt="The favorites pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-light.webp"> <img width="400" alt="The favorites pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-dark.webp">
 
-Quick access to favorites: other pop-ups, devices, anything really. [Setup](dashboard/favorites-list/)
+Quick access to favorites: other pop-ups, devices, anything really. [More](dashboard/favorites-list/)
 
 ### Server
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
+<img width="400" alt="The server pop-up with its status, the load and the updates, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-light.webp"> <img width="400" alt="The server pop-up with its status, the load and the updates, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-dark.webp">
 
-The server's health, backups and updates. The graph needs Plotly Graph Card. [Setup](dashboard/server/)
+The server's health, backups and updates. The graph needs Plotly Graph Card. [More](dashboard/server/)
 
 ### Vacuum
 
-<img width="800" alt="The vacuum pop-up with the battery, the bin and the rooms, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
+<img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-light.webp"> <img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-dark.webp">
 
-The vacuum, for the whole home or room by room. [Setup](dashboard/vacuum/)
+The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
 
 ## More
 
@@ -226,12 +226,12 @@ Most changes need a few lines: `primary-color` and `accent-color` in each mode f
 
 <br>
 
-An assistant that guesses gets the details wrong. This helps:
+Many details in Origami look like they could be done in an easier way, but most of them came out of a lot of trial and error on real phones: why a value is worked out in the card instead of a template sensor, why a pop-up uses a mini pop-up instead of a helper, or why a size comes from the theme instead of the card. An AI assistant doesn't know that history, so where it has to guess, it often undoes one of these choices without noticing. These steps give it what it needs:
 
-- Give it the files of the part, not a link or a screenshot.
-- Ask it to read the part's README and the [module reference](bubble_card/README.md) before it writes anything.
-- Ask it to stick to Bubble Card's options and the modules, then templates and scripts, and to build a new card only when nothing else works. Never card-mod.
-- Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get.
-- Keep a copy of the configuration before pasting anything.
+- Give it the files of the part, not a link or a screenshot. It can only follow what it can read, and a screenshot doesn't show the options behind the look.
+- Ask it to read the part's README and the [module reference](bubble_card/README.md) before it writes anything. They say which options exist and why a part is built the way it is, so it doesn't make up options that the modules don't have.
+- Ask it to stick to Bubble Card's options and the modules first, then templates and scripts, and to build a new card only when nothing else works. That keeps the look in one place, so the part still fits the rest of the dashboard after an update. Never card-mod, because it writes over the same styles as the modules, and the two get in each other's way.
+- Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get, and a part with a made-up ID doesn't work.
+- Keep a copy of the configuration before pasting anything, so a change that goes wrong is easy to undo.
 
 </details>
