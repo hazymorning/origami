@@ -1,7 +1,8 @@
 // Frames the bench's shots for the README, as make.py asks. Each image has rounded corners on a transparent background.
 //   node frame.mjs <frame.json>
 // frame.json has kind and out, and:
-//   phone: a phone on white watercolor paper, for a pop-up or the menu. mode, shot, font, time, bg, and cut to show only its top.
+//   phone: a phone for a pop-up or the menu, on a plain background a little lighter than the light page or darker than the dark one.
+//     mode, shot, font, time, bg, and cut to show only its top.
 //   panel: a card on its page, as in 2.0. shot and width.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,11 +38,10 @@ const phone = (mode, p, cut) => `
     <span class="edge"></span>
   </div>`;
 
-const paperStyle = `
+const phoneStyle = `
 @font-face { font-family: 'Status'; src: url(${spec.font ? data(spec.font, 'font/woff2') : ''}) format('woff2'); font-weight: 100 900; }
 html, body { margin: 0; background: transparent; }
 .canvas { position: relative; overflow: hidden; border-radius: ${RADIUS}px; }
-.paper { position: absolute; inset: 0; }
 .row { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
 .phone { position: relative; width: ${W}px; height: ${H}px; border-radius: 50px; background: var(--bg); }
 .light { --fg: #1d1c1a; box-shadow: 0 0 0 .5px rgba(80,70,60,.10), 2px 3px 4px rgba(70,60,50,.10), 14px 18px 30px rgba(70,60,50,.13), 34px 46px 80px rgba(70,60,50,.12); }
@@ -66,19 +66,9 @@ html, body { margin: 0; background: transparent; }
 .phone::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
 .light::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.9), inset -1px -1px 0 rgba(0,0,0,.05); }
 .dark::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.03); }
-`;// Watercolor paper: a soft relief, lit from the top left
-const paper = `
-<svg class="paper" width="100%" height="100%">
-  <filter id="grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency="0.045 0.06" numOctaves="5" seed="7" result="noise"/>
-    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="1.1" diffuseConstant="1" lighting-color="#ffffff">
-      <feDistantLight azimuth="235" elevation="64"/>
-    </feDiffuseLighting>
-  </filter>
-  <rect width="100%" height="100%" fill="#faf8f3"/>
-  <rect width="100%" height="100%" filter="url(#grain)" style="mix-blend-mode: multiply" opacity="0.18"/>
-</svg>`;
+`;
+// The background behind the phone: a little lighter than the light page, #F6F4F1, or a little darker than the dark one, #181715
+const ground = { light: '#FBFAF8', dark: '#111010' };
 
 let width, height, html;
 if (spec.kind === 'panel') {
@@ -92,8 +82,8 @@ img { display: block; width: ${width}px; border-radius: ${RADIUS}px; }
   const SIDE = 100, TOP = 100;
   width = W + 2 * SIDE;
   height = spec.cut ? TOP + spec.cut : TOP + H + TOP;
-  html = `<!doctype html><html><head><style>${paperStyle}</style></head><body>
-<div class="canvas" style="width:${width}px;height:${height}px">${paper}
+  html = `<!doctype html><html><head><style>${phoneStyle}</style></head><body>
+<div class="canvas" style="width:${width}px;height:${height}px;background:${ground[spec.mode]}">
 <div class="row" style="top:${TOP}px">${phone(spec.mode, spec, spec.cut)}</div></div></body></html>`;
 }
 

@@ -20,7 +20,7 @@ light:
       attributes: {friendly_name: Living room TV, app_name: YouTube, source: YouTube, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}
     media_player.living_room_tv_cast:
       state: playing
-      attributes: {friendly_name: Living room TV, app_name: YouTube, media_title: Autumn in the Alps, media_content_type: video, entity_picture: /local/cover-1.jpg}
+      attributes: {friendly_name: Living room TV, app_name: YouTube, media_title: Autumn in the Alps, media_content_type: video, entity_picture: /local/tv-1.jpg}
 dark:
   templates:
     - {match: "round(0) | int", result: '31'}
@@ -33,4 +33,4 @@ dark:
       attributes: {friendly_name: Living room TV, app_name: Netflix, source: Netflix, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}
     media_player.living_room_tv_cast:
       state: playing
-      attributes: {friendly_name: Living room TV, app_name: Netflix, media_title: The Long Valley, media_content_type: video, entity_picture: /local/cover-2.jpg}
+      attributes: {friendly_name: Living room TV, app_name: Netflix, media_title: The Long Valley, media_content_type: video, entity_picture: /local/tv-2.jpg}

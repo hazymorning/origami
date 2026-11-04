@@ -1,5 +1,8 @@
 # The example home on a day in November, shared by every image. The light images show it at midday,
 # the dark ones late in the evening, under light and dark below.
+# The pictures in files are photos from Wikimedia Commons under CC0 or in the public domain: cover-1 "Sunset behind golden
+# grass (Unsplash)", cover-2 "Calm-sea-haleiwa (Unsplash)", tv-1 "Allgäu alps autumn 2017-10-13" and tv-2 "Misty
+# morning-Chugach-SAO-013 (52502228147)".
 # The home view, behind every pop-up
 home:
   - {file: greeting/card.yaml}
@@ -25,9 +28,7 @@ states:
   sensor.weather_warning_level: {state: '0', attributes: {friendly_name: Weather warnings}}
   timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T19:48:00+00:00'}}
   sensor.oven_ready_in: {state: unknown, attributes: {friendly_name: Oven ready}}
-  sensor.dinner:
-    state: Margherita
-    attributes: {friendly_name: Dinner, recipe: {name: Margherita, image: /local/dinner.jpg}}
+  sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
   sensor.oven: {state: 200 °C, attributes: {friendly_name: Oven}}
   vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, battery_level: 64}}
   sensor.robot_cleaning_progress: {state: '42', attributes: {unit_of_measurement: '%', friendly_name: Cleaning progress}}
@@ -79,7 +80,6 @@ light:
       attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
     timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
     input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
-    sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
     sensor.oven: {state: 180 °C, attributes: {friendly_name: Oven}}
     switch.printer: {state: 'on', attributes: {friendly_name: Printer}}
     input_datetime.printer_end: {state: '2026-11-04 12:58:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
@@ -102,7 +102,6 @@ dark:
       attributes: {friendly_name: Household, message: Dentist, start_time: '2026-11-05 09:00:00', end_time: '2026-11-05 10:00:00', all_day: false, description: '', location: ''}
     timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T22:52:00+00:00'}}
     input_datetime.bath_time_end: {state: '2026-11-04 22:52:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true}}
-    sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
     sensor.oven: {state: 'Off', attributes: {friendly_name: Oven}}
     vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
     media_player.bedroom: {state: playing, attributes: {friendly_name: Bedroom, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg}}
