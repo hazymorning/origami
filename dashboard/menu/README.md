@@ -4,6 +4,9 @@
 
 A menu in place of Home Assistant's header, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
 
+> [!NOTE]
+> Home Assistant still has no proper way to hide its header, and other ways let it show up for a moment each time a dashboard opens. The Origami Header card avoids that by hooking into the dashboard's own code, so it's a bit experimental, and a Home Assistant update can break it until the card is updated.
+
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the Base module

@@ -252,8 +252,9 @@ cards:
                   entity_id: vacuum.robot
                 data:
                   cleaning_area_id: bathroom
-      # The suction power. A level is filled while the vacuum has its fan speed, which each level's css_class names
-      # as the vacuum's fan_speed_list attribute does.
+      # The vacuum's settings, each a label and a small switch. A choice is filled while it holds, which its css_class names.
+      # Suction is the vacuum's fan speed, with the names its fan_speed_list attribute lists.
+      # Passes and no-go zones only keep a choice in two helpers. They show only while the helpers exist.
       - type: custom:bubble-card
         card_type: sub-buttons
         scrolling_effect: false
@@ -262,8 +263,11 @@ cards:
           - origami_button
         origami_button:
           columns: 2
-          segmented: Suction
-          active: "${hass.states['vacuum.robot']?.attributes?.fan_speed ?? ''}"
+          segmented: Suction, Passes, No-go zones
+          active: >-
+            ${[hass.states['vacuum.robot']?.attributes?.fan_speed,
+            'passes-' + states('input_select.vacuum_passes'),
+            'zones-' + states('input_boolean.vacuum_no_go_zones')].join(',')}
         sub_button:
           main: []
           bottom:
@@ -322,3 +326,90 @@ cards:
                       entity_id: vacuum.robot
                     data:
                       fan_speed: max
+            - name: Passes label
+              group:
+                - name: Passes
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_select.vacuum_passes']}"
+                  origami_button:
+                    background: transparent
+                  tap_action:
+                    action: none
+            - name: Passes
+              group:
+                - name: 1×
+                  css_class: passes-1
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_select.vacuum_passes']}"
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_option
+                    target:
+                      entity_id: input_select.vacuum_passes
+                    data:
+                      option: '1'
+                - name: 2×
+                  css_class: passes-2
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_select.vacuum_passes']}"
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_option
+                    target:
+                      entity_id: input_select.vacuum_passes
+                    data:
+                      option: '2'
+                - name: 3×
+                  css_class: passes-3
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_select.vacuum_passes']}"
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_option
+                    target:
+                      entity_id: input_select.vacuum_passes
+                    data:
+                      option: '3'
+            - name: No-go zones label
+              group:
+                - name: No-go zones
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_boolean.vacuum_no_go_zones']}"
+                  origami_button:
+                    background: transparent
+                  tap_action:
+                    action: none
+            - name: No-go zones
+              group:
+                - name: 'On'
+                  css_class: zones-on
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_boolean.vacuum_no_go_zones']}"
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.vacuum_no_go_zones
+                - name: 'Off'
+                  css_class: zones-off
+                  show_name: true
+                  show_icon: false
+                  origami_base:
+                    hidden: "${!hass.states['input_boolean.vacuum_no_go_zones']}"
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_boolean.turn_off
+                    target:
+                      entity_id: input_boolean.vacuum_no_go_zones

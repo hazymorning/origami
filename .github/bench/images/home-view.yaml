@@ -155,6 +155,17 @@ dark:
         hvac_action: heating
         temperature: 19.5
         current_temperature: 19.2
+    weather.home:
+      state: cloudy
+      attributes:
+        friendly_name: Home
+        temperature: 7.4
+        temperature_unit: °C
+        humidity: 86
+        wind_speed: 9
+        wind_speed_unit: km/h
+        pressure: 1012
+        supported_features: 3
   cards:
   - file: greeting/card.yaml
   - file: weather/card.yaml

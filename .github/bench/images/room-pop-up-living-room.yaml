@@ -8,7 +8,7 @@ cards:
 states:
   media_player.living_room_tv_cast:
     state: playing
-    attributes: {friendly_name: Living room TV, app_name: Netflix, media_title: The Long Valley, media_content_type: video, entity_picture: /local/tv-2.jpg}
+    attributes: {friendly_name: Living room TV, app_name: Netflix, media_title: Moon Over the Sea, media_content_type: video, entity_picture: /local/tv-2.jpg}
   switch.living_room_console: {state: 'off', attributes: {friendly_name: Console}}
   light.living_room_tv: {state: 'off', attributes: {friendly_name: TV light, supported_color_modes: [brightness]}}
   light.living_room_ceiling: {state: 'off', attributes: {friendly_name: Ceiling, supported_color_modes: [brightness]}}

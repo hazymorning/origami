@@ -1,34 +1,147 @@
 # Midday: cleaning the kitchen on the second suction level. Late evening: back in its dock and charged, set to the quiet
-# level for the night, with the maintenance mini pop-up open from the wrench and the sensors due for cleaning.
 kind: phone
 home: true
 open: '#popup_vacuum'
 cards:
-  - {file: vacuum/pop-up.yaml}
+- file: vacuum/pop-up.yaml
 states:
-  sensor.robot_main_brush_time_left: {state: '212', attributes: {unit_of_measurement: h, friendly_name: Main brush}}
-  sensor.robot_side_brush_time_left: {state: '96', attributes: {unit_of_measurement: h, friendly_name: Side brush}}
-  sensor.robot_filter_time_left: {state: '41', attributes: {unit_of_measurement: h, friendly_name: Filter}}
-  sensor.robot_sensor_time_left: {state: '18', attributes: {unit_of_measurement: h, friendly_name: Sensors}}
+  sensor.robot_main_brush_time_left:
+    state: '212'
+    attributes:
+      unit_of_measurement: h
+      friendly_name: Main brush
+  sensor.robot_side_brush_time_left:
+    state: '96'
+    attributes:
+      unit_of_measurement: h
+      friendly_name: Side brush
+  sensor.robot_filter_time_left:
+    state: '41'
+    attributes:
+      unit_of_measurement: h
+      friendly_name: Filter
+  sensor.robot_sensor_time_left:
+    state: '18'
+    attributes:
+      unit_of_measurement: h
+      friendly_name: Sensors
+  input_select.vacuum_passes:
+    state: '1'
+    attributes:
+      friendly_name: Vacuum passes
+      options:
+      - '1'
+      - '2'
+      - '3'
+  input_boolean.vacuum_no_go_zones:
+    state: 'on'
+    attributes:
+      friendly_name: Vacuum no-go zones
 light:
   templates:
-    - {match: "state_translated('vacuum.robot')", result: Cleaning}
+  - match: state_translated('vacuum.robot')
+    result: Cleaning
   states:
-    vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, battery_level: 64, fan_speed: balanced, fan_speed_list: ['off', quiet, balanced, turbo, max, max_plus, custom]}}
-    sensor.robot_battery: {state: '64', attributes: {unit_of_measurement: '%', device_class: battery, friendly_name: Robot battery}}
-    sensor.robot_current_room: {state: Kitchen, attributes: {friendly_name: Robot current room}}
-    counter.vacuum_bin: {state: '1', attributes: {friendly_name: Vacuum bin, maximum: 3, minimum: 0, step: 1, initial: 0}}
+    vacuum.robot:
+      state: cleaning
+      attributes:
+        friendly_name: Robot
+        battery_level: 64
+        fan_speed: balanced
+        fan_speed_list:
+        - 'off'
+        - quiet
+        - balanced
+        - turbo
+        - max
+        - max_plus
+        - custom
+    sensor.robot_battery:
+      state: '64'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: battery
+        friendly_name: Robot battery
+    sensor.robot_current_room:
+      state: Kitchen
+      attributes:
+        friendly_name: Robot current room
+    counter.vacuum_bin:
+      state: '1'
+      attributes:
+        friendly_name: Vacuum bin
+        maximum: 3
+        minimum: 0
+        step: 1
+        initial: 0
 dark:
   templates:
-    - {match: "state_translated('vacuum.robot')", result: Docked}
+  - match: state_translated('vacuum.robot')
+    result: Docked
   states:
-    vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100, fan_speed: quiet, fan_speed_list: ['off', quiet, balanced, turbo, max, max_plus, custom]}}
-    sensor.robot_battery: {state: '100', attributes: {unit_of_measurement: '%', device_class: battery, friendly_name: Robot battery}}
-    sensor.robot_current_room: {state: Bedroom, attributes: {friendly_name: Robot current room}}
-    counter.vacuum_bin: {state: '2', attributes: {friendly_name: Vacuum bin, maximum: 3, minimum: 0, step: 1, initial: 0}}
-    sensor.robot_main_brush_time_left: {state: '187', attributes: {unit_of_measurement: h, friendly_name: Main brush}}
-    sensor.robot_side_brush_time_left: {state: '71', attributes: {unit_of_measurement: h, friendly_name: Side brush}}
-    sensor.robot_filter_time_left: {state: '16', attributes: {unit_of_measurement: h, friendly_name: Filter}}
-    sensor.robot_sensor_time_left: {state: '0', attributes: {unit_of_measurement: h, friendly_name: Sensors}}
-  # The header's sub-button takes the tap, not its icon
-  click: ['.bubble-sub-button:has(ha-icon[icon="mdi:wrench-outline"]) >> nth=-1']
+    vacuum.robot:
+      state: docked
+      attributes:
+        friendly_name: Robot
+        battery_level: 100
+        fan_speed: quiet
+        fan_speed_list:
+        - 'off'
+        - quiet
+        - balanced
+        - turbo
+        - max
+        - max_plus
+        - custom
+    sensor.robot_battery:
+      state: '100'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: battery
+        friendly_name: Robot battery
+    sensor.robot_current_room:
+      state: Bedroom
+      attributes:
+        friendly_name: Robot current room
+    counter.vacuum_bin:
+      state: '2'
+      attributes:
+        friendly_name: Vacuum bin
+        maximum: 3
+        minimum: 0
+        step: 1
+        initial: 0
+    sensor.robot_main_brush_time_left:
+      state: '187'
+      attributes:
+        unit_of_measurement: h
+        friendly_name: Main brush
+    sensor.robot_side_brush_time_left:
+      state: '71'
+      attributes:
+        unit_of_measurement: h
+        friendly_name: Side brush
+    sensor.robot_filter_time_left:
+      state: '16'
+      attributes:
+        unit_of_measurement: h
+        friendly_name: Filter
+    sensor.robot_sensor_time_left:
+      state: '0'
+      attributes:
+        unit_of_measurement: h
+        friendly_name: Sensors
+    input_select.vacuum_passes:
+      state: '2'
+      attributes:
+        friendly_name: Vacuum passes
+        options:
+        - '1'
+        - '2'
+        - '3'
+    input_boolean.vacuum_no_go_zones:
+      state: 'off'
+      attributes:
+        friendly_name: Vacuum no-go zones
+  click:
+  - .bubble-sub-button:has(ha-icon[icon="mdi:wrench-outline"]) >> nth=-1

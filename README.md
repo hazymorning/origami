@@ -103,18 +103,18 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 The start page, from the greeting down to the navigation bar:
 
-- **Greeting and notifications.** A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card. [More](dashboard/greeting/)
-- **Weather.** Today's weather, in a color that matches it. Needs the Origami Weather card. [More](dashboard/weather/)
-- **Favorites.** Tiles that come and go with what's happening at home. [More](dashboard/favorites/)
-- **Rooms.** Each room's climate and lights at a glance. [More](dashboard/rooms/)
-- **Climate table.** Every room's climate in one table. [More](dashboard/climate-table/)
-- **Navigation bar.** The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card. [More](dashboard/navigation-bar/)
+- **[Greeting and notifications](dashboard/greeting/).** A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card.
+- **[Weather](dashboard/weather/).** Today's weather, in a color that matches it. Needs the Origami Weather card.
+- **[Favorites](dashboard/favorites/).** Tiles that come and go with what's happening at home.
+- **[Rooms](dashboard/rooms/).** Each room's climate and lights at a glance.
+- **[Climate table](dashboard/climate-table/).** Every room's climate in one table.
+- **[Navigation bar](dashboard/navigation-bar/).** The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card.
 
 ### Menu
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
-Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [More](dashboard/menu/)
+Not really needed, but nice to have: a menu that slides down from the top and truly hides Home Assistant's header, without it flashing up while the page loads. Needs the Origami Header card. [More](dashboard/menu/)
 
 ## Pop-ups
 
