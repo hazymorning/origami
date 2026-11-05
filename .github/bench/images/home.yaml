@@ -69,14 +69,14 @@ words:
   rainy: Rainy
   sunny: Sunny
   returning: Returning
-# The light images: midday, with the sun out, lunch in the oven, the printer at work and the vacuum cleaning
+# The light images: midday under a partly cloudy sky, with lunch in the oven, the printer at work and the vacuum cleaning
 light:
   time: '2026-11-04T12:40:00'
   clock: '12:40'
   states:
     sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 21}}
     weather.home:
-      state: sunny
+      state: partlycloudy
       attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
     timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
     input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
@@ -87,8 +87,8 @@ light:
     weather/subscribe_forecast:
       type: daily
       forecast:
-        - {datetime: '2026-11-04T11:00:00+00:00', condition: sunny, temperature: 15, templow: 7, precipitation_probability: 0}
-        - {datetime: '2026-11-05T11:00:00+00:00', condition: partlycloudy, temperature: 13, templow: 6, precipitation_probability: 10}
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: partlycloudy, temperature: 15, templow: 7, precipitation_probability: 10}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 13, templow: 6, precipitation_probability: 20}
 # The dark images: late in the evening, with music in the bedroom, a bath running and the vacuum back in its dock
 dark:
   time: '2026-11-04T22:40:00'

@@ -1,31 +1,6 @@
-# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. The menu has its own image, because it is closed until it opens.
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows two favorites,
+# dark two others and the climate table open. The menu has its own image, because it is closed until it opens.
 kind: phone
-cards:
-- file: greeting/card.yaml
-- file: weather/card.yaml
-- file: favorites/header.yaml
-- file: favorites/tiles.yaml
-- file: rooms/header.yaml
-- type: grid
-  columns: 2
-  cards:
-  - file: rooms/room.yaml
-  - file: rooms/room.yaml
-    replace:
-      living_room: bedroom
-      Living room: Bedroom
-      mdi:sofa: mdi:bed-king-outline
-  - file: rooms/room.yaml
-    replace:
-      living_room: kitchen
-      Living room: Kitchen
-      mdi:sofa: mdi:countertop-outline
-  - file: rooms/room.yaml
-    replace:
-      living_room: office
-      Living room: Office
-      mdi:sofa: mdi:desk
-- file: navigation-bar/card.yaml
 states:
   light.kitchen:
     state: 'on'
@@ -98,14 +73,6 @@ states:
     state: 'on'
     attributes:
       friendly_name: String lights
-  fan.bedroom: &id001
-    state: 'off'
-    attributes:
-      friendly_name: Bedroom fan
-      percentage: 0
-      preset_modes:
-      - Nature
-      - Normal
 dark:
   states:
     light.kitchen:
@@ -170,4 +137,67 @@ dark:
       state: 'off'
       attributes:
         friendly_name: String lights
-    fan.bedroom: *id001
+    input_boolean.climate_table:
+      state: 'on'
+      attributes:
+        friendly_name: Climate table
+    climate.living_room:
+      state: heat
+      attributes:
+        friendly_name: Living room
+        hvac_action: idle
+        temperature: 19
+        current_temperature: 20.6
+    climate.bedroom:
+      state: heat
+      attributes:
+        friendly_name: Bedroom
+        hvac_action: heating
+        temperature: 19.5
+        current_temperature: 19.2
+  cards:
+  - file: greeting/card.yaml
+  - file: weather/card.yaml
+  - file: favorites/header.yaml
+  - file: favorites/tiles.yaml
+    only:
+    - Bedroom
+    - Bath
+  - file: rooms/header.yaml
+  - file: climate-table/card.yaml
+    with:
+      styles: null
+  - type: grid
+    columns: 2
+    cards: &id001
+    - file: rooms/room.yaml
+    - file: rooms/room.yaml
+      replace:
+        living_room: bedroom
+        Living room: Bedroom
+        mdi:sofa: mdi:bed-king-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: kitchen
+        Living room: Kitchen
+        mdi:sofa: mdi:countertop-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: office
+        Living room: Office
+        mdi:sofa: mdi:desk
+  - file: navigation-bar/card.yaml
+light:
+  cards:
+  - file: greeting/card.yaml
+  - file: weather/card.yaml
+  - file: favorites/header.yaml
+  - file: favorites/tiles.yaml
+    only:
+    - Oven
+    - Vacuum
+  - file: rooms/header.yaml
+  - type: grid
+    columns: 2
+    cards: *id001
+  - file: navigation-bar/card.yaml

@@ -12,7 +12,8 @@ which the README shows side by side, and has:
 
   kind: panel for a card, or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
-    where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys
+    where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
+    only: [names] keeps only the bottom sub-buttons with these names, such as two of the favorites
   home: true puts the home view behind the cards
   open: the hash of the pop-up to open
   states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
@@ -70,6 +71,9 @@ def card(c):
         for a, b in (c.get('replace') or {}).items():
             text = text.replace(a, b)
         out = yaml.safe_load(text)
+        if 'only' in c:
+            # Keep only the bottom sub-buttons with these names, such as two of the favorites
+            out['sub_button']['bottom'] = [b for b in out['sub_button']['bottom'] if b.get('name') in c['only']]
         for k, v in (c.get('with') or {}).items():
             if v is None:
                 out.pop(k, None)
