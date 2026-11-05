@@ -1,4 +1,5 @@
-# Midday: the Morning scene left on one lamp. Late evening: the Late scene on three dimmed lamps.
+# Midday: the Morning scene left on one lamp. Late evening: the Late scene on three dimmed lamps, with the lamps' mini
+# pop-up open from the Lamps header.
 kind: phone
 home: true
 open: '#popup_lights'
@@ -35,3 +36,5 @@ dark:
     light.living_room_table_lamp: {state: 'on', attributes: {friendly_name: Table lamp, brightness: 85, supported_color_modes: [brightness], color_mode: brightness}}
     scene.living_room_morning: {state: '2026-11-04T07:05:00+00:00', attributes: {friendly_name: Morning}}
     scene.living_room_late: {state: '2026-11-04T22:10:00+00:00', attributes: {friendly_name: Late}}
+  # The header's sub-button takes the tap, not its icon
+  click: ['.bubble-sub-button.content-icon-right >> nth=-1']

@@ -118,11 +118,33 @@ customElements.define('ha-state-icon', class extends HTMLElement {
     i.setAttribute('icon', this._i || this._s.attributes?.icon || stateIcon(this._s));
   }
 });
+// Home Assistant's dropdown: a tap opens its menu next to it, above everything else, as the top layer does on the phone
+customElements.define('ha-dropdown', class extends HTMLElement {
+  constructor() {
+    super();
+    this.distance = 0;
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>[part=menu]{display:none;position:fixed;z-index:1000;flex-direction:column;box-sizing:border-box;width:max-content;background:var(--wa-color-surface-raised,var(--card-background-color));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--shadow-elevated,0 4px 16px rgba(0,0,0,.2))}:host([open]) [part=menu]{display:flex}</style><div part="menu"><slot></slot></div>';
+  }
+  // Bubble Card opens it with open, and the menu then stands below its dropdown, the ha-select around it
+  get open() { return this.hasAttribute('open'); }
+  set open(v) {
+    if (v) {
+      const r = (this.getRootNode().host || this).getBoundingClientRect(), menu = this.shadowRoot.querySelector('[part=menu]');
+      menu.style.top = r.bottom + (Number(this.distance) || 0) + 'px';
+      menu.style.left = r.left + 'px';
+    }
+    this.toggleAttribute('open', !!v);
+  }
+});
 customElements.define('ha-select', class extends HTMLElement {
-  constructor() { super(); this.updateComplete = Promise.resolve(true); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block}.m{display:none}</style><div class="m"><slot></slot></div>'; }
+  constructor() {
+    super();
+    this.updateComplete = Promise.resolve(true);
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block}</style><ha-dropdown><slot></slot></ha-dropdown>';
+  }
 });
 customElements.define('ha-dropdown-item', class extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<slot name="icon"></slot><slot></slot>'; }
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:flex;align-items:center;gap:8px;white-space:nowrap}:host([selected]){background:var(--ha-color-fill-primary-quiet-resting)}</style><slot name="icon"></slot><slot></slot>'; }
 });
 // Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, conditional cards and Bubble cards that hide themselves, and draws an empty box for other cards.
 const met = (c, h) => c.condition === 'or' ? (c.conditions || []).some((x) => met(x, h))

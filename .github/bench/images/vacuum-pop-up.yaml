@@ -1,4 +1,5 @@
-# Midday: cleaning the kitchen on the second suction level. Late evening: back in its dock and charged, set to the quiet level for the night.
+# Midday: cleaning the kitchen on the second suction level. Late evening: back in its dock and charged, set to the quiet
+# level for the night, with the maintenance mini pop-up open from the wrench and the sensors due for cleaning.
 kind: phone
 home: true
 open: '#popup_vacuum'
@@ -25,3 +26,9 @@ dark:
     sensor.robot_battery: {state: '100', attributes: {unit_of_measurement: '%', device_class: battery, friendly_name: Robot battery}}
     sensor.robot_current_room: {state: Bedroom, attributes: {friendly_name: Robot current room}}
     counter.vacuum_bin: {state: '2', attributes: {friendly_name: Vacuum bin, maximum: 3, minimum: 0, step: 1, initial: 0}}
+    sensor.robot_main_brush_time_left: {state: '187', attributes: {unit_of_measurement: h, friendly_name: Main brush}}
+    sensor.robot_side_brush_time_left: {state: '71', attributes: {unit_of_measurement: h, friendly_name: Side brush}}
+    sensor.robot_filter_time_left: {state: '16', attributes: {unit_of_measurement: h, friendly_name: Filter}}
+    sensor.robot_sensor_time_left: {state: '0', attributes: {unit_of_measurement: h, friendly_name: Sensors}}
+  # The header's sub-button takes the tap, not its icon
+  click: ['.bubble-sub-button:has(ha-icon[icon="mdi:wrench-outline"]) >> nth=-1']

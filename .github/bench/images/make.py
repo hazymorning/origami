@@ -7,8 +7,8 @@ and the bench set up as .github/bench/bench.mjs says. The other cards and the st
 downloaded once into .github/bench/.cache.
 
 home.yaml has the example home: its states, the answers to templates and messages, and the home view,
-which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>-light.webp and <name>-dark.webp,
-which the README shows side by side, and has:
+which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp, with its light and dark mode
+side by side, and has:
 
   kind: panel for a card, or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
@@ -133,6 +133,7 @@ def make(name):
         os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
     for n in os.listdir(os.path.join(HERE, 'files')):
         os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))
+    framed = {}
     for mode in ('light', 'dark'):
         keys = layer(home, spec, mode)
         cards = [card(c) for c in keys.get('cards', [])]
@@ -171,7 +172,14 @@ def make(name):
                 im = im.crop((0, keys['trim'] * 2, im.width, im.height))
             out['width'] = PHONE['width'] if 'bottom' in keys else keys.get('width', 396)
         im.save(shot)
-        save(frame(out, work), os.path.join(OUT, f'{name}-{mode}.webp'), False)
+        framed[mode] = frame(out, work).convert('RGBA')
+    # Light and dark side by side, with a transparent gap between them
+    gap = 40
+    light, dark = framed['light'], framed['dark']
+    both = Image.new('RGBA', (light.width + gap + dark.width, max(light.height, dark.height)), (0, 0, 0, 0))
+    both.paste(light, (0, 0))
+    both.paste(dark, (light.width + gap, 0))
+    save(both, os.path.join(OUT, f'{name}.webp'), False)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
-# Midday: the living room and the office play together. Late evening: the bedroom plays on its own, quietly.
+# Midday: the living room and the office play together. Late evening: the bedroom and the office play together,
+# with the group mini pop-up open from the link key.
 kind: phone
 home: true
 open: '#popup_music'
@@ -37,11 +38,12 @@ dark:
       attributes: {friendly_name: Selected speaker, options: [media_player.living_room, media_player.bedroom, media_player.office]}
     media_player.bedroom:
       state: playing
-      attributes: {friendly_name: Bedroom, volume_level: 0.12, is_volume_muted: false, media_title: Low Tide, media_artist: Quiet Harbour, media_album_name: Night Swim, entity_picture: /local/cover-2.jpg, media_duration: 312, media_position: 204, media_position_updated_at: '2026-11-04T22:40:00+00:00', shuffle: true, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth], group_members: [media_player.bedroom], supported_features: 4127295}
+      attributes: {friendly_name: Bedroom, volume_level: 0.12, is_volume_muted: false, media_title: Low Tide, media_artist: Quiet Harbour, media_album_name: Night Swim, entity_picture: /local/cover-2.jpg, media_duration: 312, media_position: 204, media_position_updated_at: '2026-11-04T22:40:00+00:00', shuffle: true, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth], group_members: [media_player.bedroom, media_player.office], supported_features: 4127295}
     media_player.living_room:
       state: idle
       attributes: {friendly_name: Living room, volume_level: 0.26, source_list: [Music Assistant, Bluetooth, Optical In], group_members: [media_player.living_room]}
     media_player.office:
-      state: idle
-      attributes: {friendly_name: Office, volume_level: 0.2, group_members: [media_player.office]}
+      state: playing
+      attributes: {friendly_name: Office, volume_level: 0.14, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg, group_members: [media_player.bedroom, media_player.office]}
     number.group_volume: {state: '12', attributes: {friendly_name: Group volume, unit_of_measurement: '%', min: 0, max: 100, step: 1, mode: slider}}
+  click: ['ha-icon[icon="mdi:link-variant"] >> nth=0']
