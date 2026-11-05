@@ -33,6 +33,9 @@ The theme has Origami's colors, sizes and shadows for light and dark mode.
 
 3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
+> [!TIP]
+> Origami and its weather card are made to follow the phone's light and dark mode, which most phones switch with the sun. Light or dark all day works just as well: choose **Light** or **Dark** next to the theme in the user profile.
+
 </details>
 
 <details>
