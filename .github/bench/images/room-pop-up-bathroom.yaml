@@ -1,4 +1,4 @@
-# Midday: the bathroom at rest, with the mirror on. Late evening: a bath with music, the night light and the heating up.
+# Midday: the bathroom at rest, with the mirror on. Late evening: a bath with music from a phone over Bluetooth, the night light and the heating up.
 kind: phone
 home: true
 open: '#popup_bathroom'
@@ -21,7 +21,7 @@ dark:
   states:
     media_player.bathroom:
       state: playing
-      attributes: {friendly_name: Bathroom, volume_level: 0.22, media_title: Low Tide, media_artist: Quiet Harbour, media_content_type: music, entity_picture: /local/cover-2.jpg, source: WiFi, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
+      attributes: {friendly_name: Bathroom, volume_level: 0.22, media_title: Low Tide, media_artist: Quiet Harbour, media_content_type: music, entity_picture: /local/cover-2.jpg, source: Bluetooth, source_list: [WiFi, Bluetooth], group_members: [media_player.bathroom]}
     light.bathroom_mirror: {state: 'off', attributes: {friendly_name: Mirror, supported_color_modes: [brightness]}}
     light.bathroom_night_light: {state: 'on', attributes: {friendly_name: Night light, brightness: 60, supported_color_modes: [brightness], color_mode: brightness}}
     input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}

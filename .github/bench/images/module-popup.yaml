@@ -1,4 +1,5 @@
-# A pop-up built from the modules: the header's values as text, lamps, a thermostat, a fan and a speaker
+# A pop-up built from the modules: the header's values as text, lamps, a thermostat, a fan and a speaker.
+# The dark image shows its scenes open as a mini pop-up, from the palette key in the header.
 kind: phone
 home: true
 open: '#popup_bedroom'
@@ -23,10 +24,27 @@ cards:
     origami_popup:
       value_style: text
       gap: var(--ha-space-4)
+      # The palette key opens the scenes as a mini pop-up, which the dark image shows open
+      mini_popups:
+        scenes:
+          width: fit-content
+          frameless: true
+          cards:
+            - type: custom:bubble-card
+              card_type: sub-buttons
+              modules: [origami_base, origami_button]
+              origami_button: {columns: 1, icon_size: var(--icon-size-xs), active: Reading}
+              sub_button:
+                main: []
+                bottom:
+                  - {name: Wake up, icon: mdi:weather-sunset-up, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.bedroom_wake_up}}}
+                  - {name: Reading, icon: mdi:book-open-variant, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.bedroom_reading}}}
+                  - {name: Night, icon: mdi:weather-night, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.bedroom_night}}}
     sub_button:
       main:
         - {entity: sensor.bedroom_temperature, icon: mdi:thermometer, show_state: true, show_background: false}
         - {entity: sensor.bedroom_humidity, icon: mdi:water-percent, show_state: true, show_background: false}
+        - {icon: mdi:palette-outline, tap_action: {action: fire-dom-event, mini_popup: scenes}}
     cards:
       - type: vertical-stack
         cards:
@@ -123,6 +141,7 @@ light:
       state: playing
       attributes: {friendly_name: Speaker, volume_level: 0.3, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.bedroom]}
 dark:
+  click: ['ha-icon[icon="mdi:palette-outline"] >> nth=0']
   states:
     media_player.bedroom:
       state: playing

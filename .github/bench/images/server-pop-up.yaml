@@ -1,4 +1,5 @@
-# Midday: one update waits. Late evening: the update is in and all is good. Each graph shows the 24 hours before its time,
+# Midday: one update waits. Late evening: the update is in, but the backups failed for five days, so the status says Backup due,
+# the backup's age is orange and a backup started by hand is running. Each graph shows the 24 hours before its time,
 # with the nightly backup at 03:15 and a little more memory in use in the evening.
 kind: phone
 home: true
@@ -238,8 +239,14 @@ light:
       - {s: '37.6', lu: 1793795400}
 dark:
   templates:
-  - {match: Disk almost full, result: All good}
+  - {match: Disk almost full, result: Backup due}
   states:
+    sensor.backup_last_successful_automatic_backup:
+      state: '2026-10-31T03:12:00+00:00'
+      attributes: {device_class: timestamp, friendly_name: Last successful automatic backup}
+    sensor.backup_backup_manager_state:
+      state: create_backup
+      attributes: {friendly_name: Backup manager state}
     update.home_assistant_core_update:
       state: 'off'
       attributes: {friendly_name: Home Assistant Core Update, installed_version: 2026.11.0, latest_version: 2026.11.0}

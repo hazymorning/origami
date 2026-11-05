@@ -1,4 +1,5 @@
-# Midday: music from the speaker, one lamp on. Late evening: the TV with the speaker as its sound, the Late scene and the heating.
+# Midday: music from the speaker, one lamp on. Late evening: the TV with the speaker as its sound, the heating, and the scenes
+# mini pop-up open with Late chosen.
 kind: phone
 home: true
 open: '#popup_living_room'
@@ -34,6 +35,7 @@ light:
       state: heat
       attributes: {friendly_name: Living room, hvac_action: idle, hvac_modes: ['off', heat], temperature: 21, current_temperature: 21.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
 dark:
+  click: ['ha-icon[icon="mdi:palette-outline"] >> nth=0']
   states:
     media_player.living_room:
       state: 'on'

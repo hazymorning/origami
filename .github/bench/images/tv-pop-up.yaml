@@ -1,4 +1,4 @@
-# Midday: a video on YouTube at a low volume. Late evening: a film on Netflix, a little louder.
+# Midday: a video on YouTube at a low volume. Late evening: a film on Netflix with the speaker muted, so the volume button shows the mute icon.
 kind: phone
 home: true
 open: '#popup_tv'
@@ -23,11 +23,12 @@ light:
       attributes: {friendly_name: Living room TV, app_name: YouTube, media_title: Autumn in the Alps, media_content_type: video, entity_picture: /local/tv-1.jpg}
 dark:
   templates:
-    - {match: "round(0) | int", result: '31'}
+    - {match: "round(0) | int", result: ''}
+    - {match: "'mdi:volume-off' if", result: 'mdi:volume-off'}
   states:
     media_player.living_room:
       state: 'on'
-      attributes: {friendly_name: Living room, volume_level: 0.31, is_volume_muted: false, source: Optical In, source_list: [WiFi, Bluetooth, Optical In], group_members: [media_player.living_room]}
+      attributes: {friendly_name: Living room, volume_level: 0.31, is_volume_muted: true, source: Optical In, source_list: [WiFi, Bluetooth, Optical In], group_members: [media_player.living_room]}
     media_player.living_room_tv:
       state: 'on'
       attributes: {friendly_name: Living room TV, app_name: Netflix, source: Netflix, source_list: [Netflix, YouTube, Prime Video, Disney+, Spotify, Plex]}

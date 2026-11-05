@@ -169,7 +169,7 @@ dark:
       styles: null
   - type: grid
     columns: 2
-    cards: &id001
+    cards:
     - file: rooms/room.yaml
     - file: rooms/room.yaml
       replace:
@@ -199,5 +199,21 @@ light:
   - file: rooms/header.yaml
   - type: grid
     columns: 2
-    cards: *id001
+    cards:
+    - file: rooms/room.yaml
+    - file: rooms/room.yaml
+      replace:
+        living_room: bedroom
+        Living room: Bedroom
+        mdi:sofa: mdi:bed-king-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: kitchen
+        Living room: Kitchen
+        mdi:sofa: mdi:countertop-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: office
+        Living room: Office
+        mdi:sofa: mdi:desk
   - file: navigation-bar/card.yaml

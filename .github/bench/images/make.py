@@ -81,7 +81,8 @@ def card(c):
                 out[k] = v
         return out
     if isinstance(c, dict):
-        return {k: ([card(x) for x in v] if k == 'cards' and isinstance(v, list) else v) for k, v in c.items()}
+        # Cards inside a stack, a grid or a conditional card can come from files too
+        return {k: ([card(x) for x in v] if k == 'cards' and isinstance(v, list) else card(v) if k == 'card' else v) for k, v in c.items()}
     return c
 
 
