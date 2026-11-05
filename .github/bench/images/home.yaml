@@ -49,6 +49,8 @@ states:
   sensor.office_temperature: {state: '20.1', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Office temperature}}
   sensor.office_humidity: {state: '47', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Office humidity}}
   binary_sensor.living_room_window: {state: 'off', attributes: {friendly_name: Living room window, device_class: window}}
+  binary_sensor.office_window: {state: 'off', attributes: {friendly_name: Office window, device_class: window}}
+  climate.office: {state: heat, attributes: {friendly_name: Office, hvac_action: idle, temperature: 20, current_temperature: 20.1}}
   binary_sensor.bedroom_window: {state: 'on', attributes: {friendly_name: Bedroom window, device_class: window}}
   input_boolean.climate_table: {state: 'off', attributes: {friendly_name: Climate table}}
   input_boolean.all_rooms: {state: 'off', attributes: {friendly_name: All rooms}}

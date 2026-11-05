@@ -7,9 +7,6 @@ button_type: name
 show_header: true
 show_icon: false
 scrolling_effect: false
-bg_opacity: '100'
-bg_blur: '0'
-hide_backdrop: false
 margin: 7px
 margin_top_mobile: 0px
 margin_top_desktop: 20%

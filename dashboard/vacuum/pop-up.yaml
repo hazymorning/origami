@@ -4,13 +4,9 @@ hash: '#popup_vacuum'
 name: Vacuum
 show_header: true
 popup_mode: fit-content
-hide_backdrop: false
 margin: 7px
 margin_top_mobile: 24px
 margin_top_desktop: 30%
-bg_opacity: '100'
-bg_blur: '0'
-backdrop_blur: '10'
 button_type: name
 show_icon: false
 with_bottom_offset: true

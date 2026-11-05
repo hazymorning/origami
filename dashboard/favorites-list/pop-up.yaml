@@ -7,17 +7,12 @@ show_header: true
 show_icon: false
 show_previous_button: false
 popup_mode: adaptive-dialog
-hide_backdrop: false
 scrolling_effect: false
 with_bottom_offset: true
 margin: 7px
 margin_top_mobile: 174px
 margin_top_desktop: 30%
 width_desktop: ''
-bg_color: transparent
-bg_opacity: '100'
-bg_blur: '0'
-backdrop_blur: '10'
 modules:
   - origami_base
   - origami_popup

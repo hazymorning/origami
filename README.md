@@ -1,7 +1,7 @@
 <img alt="Origami on two phones in light and dark mode, with the greeting, the weather, favorites and rooms" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero.webp">
 
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=F6F4F1&labelColor=181715"></a>
-<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-F6F4F1?labelColor=181715"></a>
+<a href="https://github.com/hazymorning?tab=repositories&q=origami"><img alt="Origami suite" src="https://img.shields.io/badge/Origami-Suite-F6F4F1?labelColor=181715&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBvbHlnb24gcG9pbnRzPSIwLjUsOS41IDkuOCwxNCA2LjQsMTYuNiIgZmlsbD0iI0M5QzJCOCIvPjxwb2x5Z29uIHBvaW50cz0iNi40LDE2LjYgMTIsMTEuNiAxNy42LDE2LjYgMTIsMjEuNCIgZmlsbD0iI0Y2RjRGMSIvPjxwb2x5Z29uIHBvaW50cz0iMTIsMTEuNiAxNy42LDE2LjYgMTIsMjEuNCIgZmlsbD0iI0Q4RDJDOCIvPjxwb2x5Z29uIHBvaW50cz0iOC44LDE0LjggMTMuMiwyIDE1LjgsMTQuNiAxMiwxMS42IiBmaWxsPSIjRjZGNEYxIi8%2BPHBvbHlnb24gcG9pbnRzPSIxMy4yLDIgMTUuOCwxNC42IDE3LjgsMTIuNCIgZmlsbD0iI0M5QzJCOCIvPjxwb2x5Z29uIHBvaW50cz0iMTUsMTUuNiAyMSw1LjYgMTguNiwxNi40IiBmaWxsPSIjRjZGNEYxIi8%2BPHBvbHlnb24gcG9pbnRzPSIyMSw1LjYgMjMuOCw3LjggMjAuMiw3LjYiIGZpbGw9IiNGNkY0RjEiLz48L3N2Zz4="></a>
 
 Origami is a dashboard for Home Assistant. It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
 
@@ -14,7 +14,7 @@ The idea is that nothing feels overwhelming, everyone at home can use it, and it
 Start with the theme, the font and Bubble Card. Each part below lists what else it needs.
 
 <details>
-<summary><b>1. Theme</b></summary>
+<summary><b>Install the theme</b></summary>
 
 <br>
 
@@ -38,7 +38,7 @@ The theme has Origami's colors, sizes and shadows for light and dark mode.
 </details>
 
 <details>
-<summary><b>2. Font</b></summary>
+<summary><b>Add the font</b></summary>
 
 <br>
 
@@ -58,7 +58,7 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](www/f
 </details>
 
 <details>
-<summary><b>3. Bubble Card</b></summary>
+<summary><b>Install Bubble Card</b></summary>
 
 <br>
 
@@ -105,12 +105,12 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 The start page, from the greeting down to the navigation bar:
 
-- **[Greeting and notifications](dashboard/greeting/).** A greeting with the next event, and notifications right beside it. Needs the Origami Notifications card.
-- **[Weather](dashboard/weather/).** Today's weather, in a color that matches it. Needs the Origami Weather card.
-- **[Favorites](dashboard/favorites/).** Tiles that come and go with what's happening at home.
+- **[Greeting and notifications](dashboard/greeting/).** The next event and what needs attention. Needs the Origami Notifications card.
+- **[Weather](dashboard/weather/).** Today's weather with its high and low. Needs the Origami Weather card.
+- **[Favorites](dashboard/favorites/).** Tiles that come and go with what's happening.
 - **[Rooms](dashboard/rooms/).** Each room's climate and lights at a glance.
 - **[Climate table](dashboard/climate-table/).** Every room's climate in one table.
-- **[Navigation bar](dashboard/navigation-bar/).** The most used pop-ups and what's playing, within thumb's reach. Needs Navbar Card.
+- **[Navigation bar](dashboard/navigation-bar/).** The most used pop-ups within thumb's reach. Needs Navbar Card.
 
 ### Menu
 
@@ -128,7 +128,7 @@ Everything for one room in one place. [More](dashboard/room/)
 
 ### Lights
 
-<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, and with its lamps open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
 All the lights, from scenes down to each lamp. [More](dashboard/lights/)
 
@@ -164,7 +164,7 @@ The server's health, backups and updates. The graph needs Plotly Graph Card. [Mo
 
 ### Vacuum
 
-<img width="800" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, and with its map open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
+<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
 

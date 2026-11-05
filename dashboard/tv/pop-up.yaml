@@ -6,7 +6,6 @@ button_type: name
 show_icon: false
 margin_top_mobile: 72px
 margin_top_desktop: 300px
-bg_opacity: 100
 popup_mode: adaptive-dialog
 with_bottom_offset: true
 modules:

@@ -2,7 +2,6 @@ kind: phone
 home: true
 preview: true
 admin: true
-cut: 560
 cards:
   # The card shows its menu in place, as in the card editor. These rules put it where the real menu opens: at the top, over the page.
   - file: menu/card.yaml

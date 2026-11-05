@@ -74,9 +74,11 @@
         if (msg?.type === 'render_template') {
           const t = (sc.templates || []).find((x) => String(msg.template).includes(x.match));
           setTimeout(() => cb({ result: t ? t.result : '' }), 0);
-        } else if (sc.messages && msg?.type in sc.messages) {
-          // Other subscriptions, such as a weather forecast, get the scenario's answer for their type
-          setTimeout(() => cb(sc.messages[msg.type]), 0);
+        } else if (sc.messages && (msg?.type + ':' + msg?.forecast_type in sc.messages || msg?.type in sc.messages)) {
+          // Other subscriptions, such as a weather forecast, get the scenario's answer for their type, or for their type and
+          // forecast type, such as weather/subscribe_forecast:hourly, where one is given
+          const key = msg.type + ':' + msg.forecast_type;
+          setTimeout(() => cb(sc.messages[key in sc.messages ? key : msg.type]), 0);
         }
         return async () => {};
       },

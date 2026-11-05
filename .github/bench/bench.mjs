@@ -6,7 +6,8 @@
 //     Takes a screenshot of each section of a scenario, such as cards from a real home, which stay outside the repository.
 //     A scenario can set the page's size and scale with viewport and scale, the clock with time, such as 2026-11-04T19:30,
 //     and load other cards with resources, a list of their files next to the scenario. click lists elements to tap before the shots.
-//     preview shows other cards as in the card editor, and admin makes the user an admin.
+//     preview shows other cards as in the card editor, and admin makes the user an admin. seed makes Math.random repeat the
+//     same numbers, so a card that places things at random, such as the weather card's clouds, looks the same in every shot.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
@@ -123,17 +124,25 @@ customElements.define('ha-dropdown', class extends HTMLElement {
   constructor() {
     super();
     this.distance = 0;
-    this.attachShadow({ mode: 'open' }).innerHTML = '<style>[part=menu]{display:none;position:fixed;z-index:1000;flex-direction:column;box-sizing:border-box;width:max-content;background:var(--wa-color-surface-raised,var(--card-background-color));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--shadow-elevated,0 4px 16px rgba(0,0,0,.2))}:host([open]) [part=menu]{display:flex}</style><div part="menu"><slot></slot></div>';
+    // The menu is a popover in the top layer, as Home Assistant's is, so a pop-up's transform doesn't move it
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>[part=menu]{display:none;position:fixed;inset:auto;margin:0;padding:0;border:0;overflow:visible;flex-direction:column;box-sizing:border-box;width:max-content;color:inherit;background:var(--wa-color-surface-raised,var(--card-background-color));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--shadow-elevated,0 4px 16px rgba(0,0,0,.2))}[part=menu]:popover-open{display:flex}</style><div part="menu" popover="manual"><slot></slot></div>';
   }
-  // Bubble Card opens it with open, and the menu then stands below its dropdown, the ha-select around it
+  // Bubble Card opens it with open, and the menu then stands below its dropdown, the ha-select around it. As Home Assistant's
+  // menus do, it follows the dropdown while it is open, such as while a pop-up still slides up.
   get open() { return this.hasAttribute('open'); }
   set open(v) {
-    if (v) {
+    this.toggleAttribute('open', !!v);
+    const menu = this.shadowRoot.querySelector('[part=menu]');
+    if (v && !menu.matches(':popover-open')) menu.showPopover();
+    if (!v && menu.matches(':popover-open')) menu.hidePopover();
+    const place = () => {
+      if (!this.open) return;
       const r = (this.getRootNode().host || this).getBoundingClientRect(), menu = this.shadowRoot.querySelector('[part=menu]');
       menu.style.top = r.bottom + (Number(this.distance) || 0) + 'px';
       menu.style.left = r.left + 'px';
-    }
-    this.toggleAttribute('open', !!v);
+      requestAnimationFrame(place);
+    };
+    if (v) place();
   }
 });
 customElements.define('ha-select', class extends HTMLElement {
@@ -269,6 +278,17 @@ let failed = false;
 try {
   for (const mode of modes) {
     const context = await browser.newContext({ deviceScaleFactor: shot ? scenario.scale || 2 : 1, viewport: shot && scenario.viewport || { width: 1200, height: 1600 }, colorScheme: mode, timezoneId: 'UTC' });
+    // A seeded Math.random, mulberry32, for cards that place things at random. Each script file draws from its own sequence,
+    // so a card gets the same numbers however the other cards' calls interleave with its own.
+    if (shot && scenario.seed !== undefined) await context.addInitScript((seed) => {
+      const streams = new Map();
+      const next = (s) => { s.a = (s.a + 0x6D2B79F5) | 0; let t = Math.imul(s.a ^ (s.a >>> 15), 1 | s.a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      Math.random = () => {
+        const file = (new Error().stack.split('\n')[2] || '').replace(/:\d+:\d+\)?$/, '').replace(/^.*\//, '');
+        if (!streams.has(file)) streams.set(file, { a: seed >>> 0 });
+        return next(streams.get(file));
+      };
+    }, scenario.seed);
     const p = await context.newPage();
     if (shot && scenario.time) await p.clock.setFixedTime(new Date(scenario.time));
     p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
@@ -277,6 +297,13 @@ try {
     await p.waitForFunction(() => window.__ready === true, null, { timeout: 30000 })
       .catch((e) => { throw new Error('The page did not finish: ' + (errors.join(' | ') || e.message)); });
     if (shot) {
+      // With a seed, animations that count time in frames stand still once the page is ready, so what the seed placed stays in place
+      if (scenario.seed !== undefined) await p.evaluate(() => {
+        const now = performance.now();
+        performance.now = () => now;
+        const raf = window.requestAnimationFrame.bind(window);
+        window.requestAnimationFrame = (cb) => raf(() => cb(now));
+      });
       // Taps that a scenario makes before the shots, such as on a key that opens a mini pop-up
       for (const sel of scenario.click || []) { await p.click(sel); await p.waitForTimeout(900); }
       fs.mkdirSync(outDir, { recursive: true });

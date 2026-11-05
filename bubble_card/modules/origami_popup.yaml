@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.16.0"
+  version: "4.17.0"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -41,10 +41,10 @@ origami_popup:
         icon: !this.config.entity,
         any: [".bubble-sub-button:not(.hidden)", ...forced].join(", "),
         blur: !org.has(this.config.backdrop_blur) && this.config.performance_mode !== "performance" && !this.config.hide_backdrop,
-        // A pop-up lies above the page, so it casts the theme's shadow for what lies above, as a mini pop-up and a menu do. Only shadow_opacity: 0 turns it off.
+        // A pop-up lies above the page, so it casts the theme's shadow for what lies above: shadow-sheet, which rises from its top edge, while it stands at the bottom of the screen, and shadow-elevated in the middle, as a mini pop-up and a menu do. Only shadow_opacity: 0 turns it off.
         shadow: !org.has(this.config.shadow_opacity) || Number(this.config.shadow_opacity) > 0,
-        // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 4 px. Bubble Card's editor leaves an emptied backdrop_blur as '', which counts as none set.
-        dimBlur: ((b) => !org.has(b) ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(4px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
+        // The dim behind a mini pop-up blurs the pop-up as the backdrop blurs the page: by the pop-up's own backdrop_blur, or else by 10 px. Bubble Card's editor leaves an emptied backdrop_blur as '', which counts as none set.
+        dimBlur: ((b) => !org.has(b) ? (this.config.performance_mode !== "performance" && !this.config.hide_backdrop ? "blur(10px)" : "none") : Number(b) > 0 ? "blur(" + Number(b) + "px)" : "none")(this.config.backdrop_blur),
         // The Art option shows a cover behind the pop-up's content, with Media's cover mix and blur. With a media player's entity ID, it is the cover that Media shows for that player, so a music card and its pop-up show the same picture at the same moment. While its value is empty, the last cover fades out.
         art: cfg.art === undefined ? null : ((v) => /^media_player\.\w+$/.test(v) ? org.media(hass, v, { env }).art : org.picture(v))(String(org.value(env, cfg.art, ctx) ?? "").trim()) ?? "",
         mix: cfg.cover_mix ?? 16,
@@ -232,6 +232,9 @@ origami_popup:
       --org-header-pad-bottom: var(--ha-space-2);
     }
     ${card._orgP.shadow ? `.bubble-pop-up.is-popup-opened {
+      box-shadow: var(--shadow-sheet);
+    }
+    .bubble-pop-up.popup-mode-centered.is-popup-opened {
       box-shadow: var(--shadow-elevated);
     }` : ""}
     .bubble-pop-up.no-header:not(.popup-mode-centered):not(.editor) > .bubble-header-container::before {
@@ -263,9 +266,9 @@ origami_popup:
     .bubble-pop-up-background::after {
       z-index: 0;
     }`}
-    ${card._orgP.blur ? `/* Without a backdrop_blur of its own, or with an empty one, the backdrop blurs the page as backdrop_blur: 4 would, through Bubble Card's own variable, which older Safari reads too. As with backdrop_blur, the pop-up's surface then has no blur of its own, which would only blur the blurred page again. */
+    ${card._orgP.blur ? `/* Without a backdrop_blur of its own, or with an empty one, the backdrop blurs the page as backdrop_blur: 10 would, through Bubble Card's own variable, which older Safari reads too, so every pop-up blurs the page the same way. As with backdrop_blur, the pop-up's surface then has no blur of its own, which would only blur the blurred page again. */
     .bubble-backdrop {
-      --custom-backdrop-filter: blur(4px);
+      --custom-backdrop-filter: blur(10px);
     }
     .bubble-pop-up {
       --custom-popup-filter: none !important;

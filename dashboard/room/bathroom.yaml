@@ -8,7 +8,6 @@ scrolling_effect: false
 margin: 7px
 margin_top_mobile: 22px
 margin_top_desktop: 30%
-bg_opacity: '100'
 modules:
   - origami_base
   - origami_popup

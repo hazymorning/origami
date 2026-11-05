@@ -1,5 +1,7 @@
-# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows two favorites,
-# dark two others and the climate table open. The menu has its own image, because it is closed until it opens.
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows two favorites
+# under a sky with the sun half behind a cloud, dark two others, the weather in the notifications and the climate table open.
+# The menu has its own image, because it is closed until it opens. The seed keeps the clouds where they look best.
+seed: 27
 kind: phone
 states:
   light.kitchen:
@@ -155,17 +157,65 @@ dark:
         hvac_action: heating
         temperature: 19.5
         current_temperature: 19.2
+    climate.office:
+      state: heat
+      attributes:
+        friendly_name: Office
+        hvac_action: idle
+        temperature: 18
+        current_temperature: 18.9
+    timer.bath:
+      state: idle
+      attributes:
+        friendly_name: Bath
+        icon: mdi:bathtub-outline
+        duration: '0:25:00'
+    input_boolean.bath_time:
+      state: 'off'
+      attributes:
+        friendly_name: Bath time
+    calendar.household:
+      state: 'off'
+      attributes:
+        friendly_name: Household
+        message: Dentist
+        start_time: '2026-11-06 09:00:00'
+        end_time: '2026-11-06 10:00:00'
+        all_day: false
+        description: ''
+        location: ''
     weather.home:
       state: cloudy
       attributes:
         friendly_name: Home
-        temperature: 7.4
+        temperature: 3
         temperature_unit: °C
         humidity: 86
         wind_speed: 9
         wind_speed_unit: km/h
         pressure: 1012
         supported_features: 3
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+      - {datetime: '2026-11-04T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 1, precipitation_probability: 10}
+      - {datetime: '2026-11-05T11:00:00+00:00', condition: sunny, temperature: 8, templow: 1, precipitation_probability: 0}
+    weather/subscribe_forecast:hourly:
+      type: hourly
+      forecast:
+      - {datetime: '2026-11-04T23:00:00+00:00', condition: cloudy, temperature: 2, precipitation_probability: 5}
+      - {datetime: '2026-11-05T00:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T01:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T02:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T03:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T04:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T05:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T06:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T07:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T08:00:00+00:00', condition: cloudy, temperature: 2, precipitation_probability: 5}
+      - {datetime: '2026-11-05T09:00:00+00:00', condition: cloudy, temperature: 4, precipitation_probability: 5}
+      - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
   - file: weather/card.yaml
@@ -206,7 +256,7 @@ light:
   - file: favorites/tiles.yaml
     only:
     - Oven
-    - Vacuum
+    - Printer
   - file: rooms/header.yaml
   - type: grid
     columns: 2

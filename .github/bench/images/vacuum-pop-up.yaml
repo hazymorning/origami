@@ -1,5 +1,5 @@
 # Midday: cleaning the kitchen on the second suction level, with the bin two runs full. Late evening: back in its dock
-# and charged, with a full bin and the map open.
+# and charged, with a full bin and other settings.
 kind: phone
 home: true
 open: '#popup_vacuum'
@@ -154,5 +154,3 @@ dark:
       attributes:
         friendly_name: Robot map
         entity_picture: /local/vacuum-map.png
-  click:
-  - .bubble-sub-button:has(ha-icon[icon="mdi:map-outline"]) >> nth=-1

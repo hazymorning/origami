@@ -88,10 +88,10 @@ These changes are in the `next` branch and come with the next release.
 - `gap` sets the space between the cards of a vertical stack.
 - Popup writes the title itself, so a title with a `${ }` template shows at once, such as the view that a helper chooses.
 - `value_position: beside` puts the values beside the title.
-- The backdrop is blurred through Bubble Card's own `backdrop_blur` variable, which older Safari also reads, and as with `backdrop_blur`, the pop-up's surface then has no blur of its own, so the phone draws one blur instead of two. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set.
+- Every pop-up blurs the page behind it by 10 px, as with `backdrop_blur: 10`, unless it sets its own `backdrop_blur`. The backdrop is blurred through Bubble Card's own `backdrop_blur` variable, which older Safari also reads, and as with `backdrop_blur`, the pop-up's surface then has no blur of its own, so the phone draws one blur instead of two. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set.
 - Pop-ups keep Bubble Card's header layout when the header has a button, a switch or a slider.
 - A mini pop-up has the card background, as a menu does, so it stands out from the dimmed pop-up behind it.
-- A pop-up casts the theme's `shadow-elevated`, as a mini pop-up does, whatever `shadow_opacity` says, unless it is `0`. The buttons of a frameless mini pop-up lie on the dim as on a gray fill, so they cast the chip shadow, and it shows whole.
+- A pop-up at the bottom of the screen casts the theme's new `shadow-sheet`, which rises from its top edge, and a centered one `shadow-elevated`, as a mini pop-up does, whatever `shadow_opacity` says, unless it is `0`. The buttons of a frameless mini pop-up lie on the dim as on a gray fill, so they cast the chip shadow, and it shows whole.
 - With `scrolling_effect: false`, a long title ends with an ellipsis.
 - A dropdown in the header, such as a speaker picker, shows the chosen entity's name as large as the title, with a chevron about as wide as the name's small letters. While the title is empty, it stands in the title's place and the other values stand at the end, before the close button.
 - `mini_popups` adds mini pop-ups: small pop-ups with cards of their own that a key in the pop-up opens with `fire-dom-event`. One opens above its key where it fits, or else on the side with more room. It grows out of its key over the dimmed pop-up as Home Assistant's menus do, and shrinks back into it when it closes, so it can stand in for a view that a helper switches. The pop-up draws its mini pop-ups ahead, so a slow phone shows the whole motion too, and the edge next to the key stays in place while the mini pop-up's cards change. A mini pop-up with its own `width` lines up with its key, `width: fit-content` makes it as wide as its widest card, such as a list of buttons, and cards taller than its `max_height` scroll inside it and fade out at its edges. With `frameless: true`, its cards stand on the dim like the buttons of a sheet. The dim has the color and the blur of Bubble Card's backdrop, and beside Home Assistant's sidebar it covers what the backdrop covers.
@@ -135,7 +135,7 @@ These changes are in the `next` branch and come with the next release.
 
 #### Theme
 
-- New shadows in a dark tone of the background's hue, which follow one rule: the card background casts a shadow, and a gray fill never does. Each starts with a fine edge, the new `shadow-edge`. A card casts `card-shadow`, a pop-up, a mini pop-up or a menu `shadow-elevated`, and a control on a gray fill, such as a tile or a tray, the new `chip-shadow`. The module reference explains the rule under Depth.
+- New shadows in a dark tone of the background's hue, which follow one rule: the card background casts a shadow, and a gray fill never does. Each starts with a fine edge, the new `shadow-edge`. A card casts `card-shadow`, a mini pop-up or a menu `shadow-elevated`, a pop-up at the bottom of the screen the new `shadow-sheet`, and a control on a gray fill, such as a tile or a tray, the new `chip-shadow`. The module reference explains the rule under Depth.
 - In dark mode, a control on a gray fill is one step lighter than that fill, on a tile as in a tray. Each mode sets `tile-chip-background`.
 - Every corner follows one rule: the radius is the shape's height times the new `radius-ratio`, which is 0.35. The new `radius-control` token is the radius of a 40 px shape.
 - Open doors are cyan, as open windows are.
@@ -224,7 +224,7 @@ Every module changed, and some options were renamed or work differently. The [mo
 22. For the new server card, replace the card under `cards:` in the menu card with the one from the [Menu](https://github.com/hazymorning/origami#menu) section. The old server card keeps working.
 23. For the new climate table, replace the grid card that holds the climate table with the card from the [Climate table](https://github.com/hazymorning/origami#climate-table) section. The old table keeps working.
 24. Update Navbar Card to version 1.8.0 or later. The navbar's styles and its progress line need it.
-25. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
+25. Run `frontend.reload_themes` after the update, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` and `shadow-sheet` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
 26. Cards from 2.0 that read `--card-padding`, `--control-padding-x` or `--font-size-headline` need `12px`, `16px` and `28px` in their place, because the theme no longer has these variables.
 
 ## 2.0 · The Unfolding

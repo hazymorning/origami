@@ -14,18 +14,20 @@ side by side, and has:
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
     only: [names] keeps only the bottom sub-buttons with these names, such as two of the favorites
+    copy: {entity: [entities]} repeats every list entry whose entity is the entity once for each of the others, right after it,
+    as a part's README says to add more of something, such as the rows of a speaker for more speakers
   home: true puts the home view behind the cards
   open: the hash of the pop-up to open
   states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
   time: the clock, and clock: the time in the status bar
-  click, preview, admin, scale: passed to the bench, as bench.mjs describes
+  click, preview, admin, scale, seed: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
 """
-import json, os, shutil, subprocess, sys, urllib.request
+import json, os, re, shutil, subprocess, sys, urllib.request
 import yaml
 from PIL import Image
 
@@ -71,6 +73,8 @@ def card(c):
         for a, b in (c.get('replace') or {}).items():
             text = text.replace(a, b)
         out = yaml.safe_load(text)
+        if 'copy' in c:
+            out = copies(out, c['copy'])
         if 'only' in c:
             # Keep only the bottom sub-buttons with these names, such as two of the favorites
             out['sub_button']['bottom'] = [b for b in out['sub_button']['bottom'] if b.get('name') in c['only']]
@@ -84,6 +88,22 @@ def card(c):
         # Cards inside a stack, a grid or a conditional card can come from files too
         return {k: ([card(x) for x in v] if k == 'cards' and isinstance(v, list) else card(v) if k == 'card' else v) for k, v in c.items()}
     return c
+
+
+def copies(node, copy):
+    """Repeats each list entry whose entity is in copy once for each of its other entities, such as a speaker's row"""
+    if isinstance(node, dict):
+        return {k: copies(v, copy) for k, v in node.items()}
+    if isinstance(node, list):
+        out = []
+        for item in node:
+            out.append(copies(item, copy))
+            if isinstance(item, dict) and item.get('entity') in copy:
+                src = item['entity']
+                text = yaml.safe_dump(item, allow_unicode=True, sort_keys=False, width=1000)
+                out += [yaml.safe_load(re.sub(re.escape(src) + r'\b', dst, text)) for dst in copy[src]]
+        return out
+    return node
 
 
 DICTS = ('states', 'entities', 'words', 'messages')
@@ -147,7 +167,7 @@ def make(name):
             'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
             'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards}],
         }
-        for k in ('open', 'click', 'preview', 'admin', 'scale'):
+        for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed'):
             if k in keys:
                 scenario[k] = keys[k]
         path = os.path.join(work, f'scenario-{mode}.yaml')

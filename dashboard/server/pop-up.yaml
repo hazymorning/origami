@@ -5,15 +5,11 @@ name: Server
 show_header: true
 popup_mode: fit-content
 close_by_clicking_outside: true
-hide_backdrop: false
 scrolling_effect: false
 margin: 7px
 margin_top_mobile: 80px
 margin_top_desktop: 0px
 width_desktop: 500px
-bg_opacity: '100'
-bg_blur: '0'
-backdrop_blur: '10'
 button_type: name
 show_icon: false
 with_bottom_offset: true

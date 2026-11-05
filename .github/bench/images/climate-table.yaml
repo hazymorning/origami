@@ -1,17 +1,18 @@
-# The climate table with six rooms: the card's three and three more, added as its README describes
+# The climate table with six rooms: the card's three and three more, added as its README describes, each with a window and a thermostat
 kind: panel
 trim: 16
 cards:
 - file: rooms/header.yaml
   replace:
+    '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'
     '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
 - file: climate-table/card.yaml
   replace:
     '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
     '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'']': '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'', ''sensor.hallway_humidity'', ''sensor.kids_room_humidity'', ''sensor.bathroom_humidity'']'
     ? "        - entity: sensor.office_humidity\n          css_class: humidity\n"
-    : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Hall\n      group:\n        - entity: sensor.hallway_temperature\n          name: Hall\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.hallway_window\n          css_class: window\n        - entity: sensor.hallway_temperature\n          css_class: temperature\n        - entity: sensor.hallway_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name: Bath\n      group:\n        - entity: sensor.bathroom_temperature\n\
-      \          name: Bath\n          show_name: true\n          css_class: room\n        - entity: climate.bathroom\n          css_class: thermostat\n        - entity: sensor.bathroom_temperature\n          css_class: temperature\n        - entity: sensor.bathroom_humidity\n          css_class: humidity\n"
+    : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Hall\n      group:\n        - entity: sensor.hallway_temperature\n          name: Hall\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.hallway_window\n          css_class: window\n        - entity: climate.hallway\n          css_class: thermostat\n        - entity: sensor.hallway_temperature\n          css_class: temperature\n        - entity: sensor.hallway_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name: Bath\n      group:\n        - entity: sensor.bathroom_temperature\n\
+      \          name: Bath\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.bathroom_window\n          css_class: window\n        - entity: climate.bathroom\n          css_class: thermostat\n        - entity: sensor.bathroom_temperature\n          css_class: temperature\n        - entity: sensor.bathroom_humidity\n          css_class: humidity\n"
   with:
     styles: null
 states:
@@ -77,6 +78,17 @@ states:
     attributes:
       unit_of_measurement: '%'
       device_class: humidity
+  climate.hallway:
+    state: heat
+    attributes:
+      friendly_name: Hall
+      hvac_action: idle
+      temperature: 19
+      current_temperature: 19.8
+  binary_sensor.bathroom_window:
+    state: 'off'
+    attributes:
+      device_class: window
   binary_sensor.hallway_window:
     state: 'off'
     attributes:
@@ -87,6 +99,9 @@ states:
       device_class: window
 dark:
   states:
+    climate.hallway: {state: heat, attributes: {friendly_name: Hall, hvac_action: idle, temperature: 18, current_temperature: 19.4}}
+    climate.office: {state: heat, attributes: {friendly_name: Office, hvac_action: idle, temperature: 18, current_temperature: 18.9}}
+    binary_sensor.bathroom_window: {state: 'on', attributes: {device_class: window}}
     climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, temperature: 19, current_temperature: 20.6}}
     climate.bedroom: {state: heat, attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 19.5, current_temperature: 19.2}}
     climate.kids_room: {state: heat, attributes: {friendly_name: Kids room, hvac_action: idle, temperature: 19, current_temperature: 19.6}}

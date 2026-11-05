@@ -104,13 +104,16 @@ sub_button:
           css_class: temperature
         - entity: sensor.bedroom_humidity
           css_class: humidity
-    # The office has no window contact and no thermostat
     - name: Office
       group:
         - entity: sensor.office_temperature
           name: Office
           show_name: true
           css_class: room
+        - entity: binary_sensor.office_window
+          css_class: window
+        - entity: climate.office
+          css_class: thermostat
         - entity: sensor.office_temperature
           css_class: temperature
         - entity: sensor.office_humidity

@@ -4,10 +4,7 @@ hash: '#popup_fan'
 name: Fan
 show_header: false
 popup_mode: fit-content
-hide_backdrop: false
 margin: 7px
-bg_opacity: '100'
-bg_blur: '10'
 with_bottom_offset: true
 modules:
   - origami_base

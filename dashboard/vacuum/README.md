@@ -1,6 +1,6 @@
 # Vacuum pop-up
 
-<img width="800" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, and with its map open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
+<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 Starts the vacuum for the whole home or single rooms, sets its suction and, with a little extra work, passes and no-go zones, and shows its battery, its bin, its map and the parts that need care.
 

@@ -10,7 +10,7 @@ Every room's temperature, humidity, windows and heating in one table. Arrows mar
 
 ## Setup
 
-1. In [`card.yaml`](card.yaml), change each row to one of the home's rooms, with a short name such as **Living** or **Bed**, so the table fits on a phone and its columns line up. To add a room, copy a row. A room keeps only the cells it has sensors for, as the office has no window contact and no thermostat.
+1. In [`card.yaml`](card.yaml), change each row to one of the home's rooms, with a short name such as **Living** or **Bed**, so the table fits on a phone and its columns line up. To add a room, copy a row. A room keeps only the cells it has sensors for, so delete the window or the thermostat where a room has none.
 2. In the columns `temperature` and `humidity`, list the sensors of all rows in each of the three templates, so the arrows compare every room.
 3. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 
@@ -24,6 +24,6 @@ Every room's temperature, humidity, windows and heating in one table. Arrows mar
 | --- | --- |
 | `sensor.living_room_temperature`, `sensor.bedroom_temperature`, `sensor.office_temperature` | The temperature with its arrows, and the dot before the name, from blue for cold to red for hot |
 | `sensor.living_room_humidity`, `sensor.bedroom_humidity`, `sensor.office_humidity` | The humidity with its arrows |
-| `binary_sensor.living_room_window`, `binary_sensor.bedroom_window` | The windows, which stand out while open |
-| `climate.living_room`, `climate.bedroom` | The target temperature, which stands out while the thermostat heats. A tap opens the thermostat. |
+| `binary_sensor.living_room_window`, `binary_sensor.bedroom_window`, `binary_sensor.office_window` | The windows, which stand out while open |
+| `climate.living_room`, `climate.bedroom`, `climate.office` | The target temperature, which stands out while the thermostat heats. A tap opens the thermostat. |
 | `input_boolean.climate_table` | Optional: opens and closes the table |
