@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.17.0"
+  version: "4.17.1"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -231,11 +231,13 @@ origami_popup:
       --org-popup-pad: var(--ha-space-4);
       --org-header-pad-bottom: var(--ha-space-2);
     }
-    ${card._orgP.shadow ? `.bubble-pop-up.is-popup-opened {
-      box-shadow: var(--shadow-sheet);
+    ${card._orgP.shadow ? `/* The shadow comes and goes with the pop-up as it slides. Without its own shadow_opacity, Bubble Card hides the shadow while
+       the pop-up opens and closes, so it would pop in a moment late. The :not() with an ID gives these rules more weight than that one. */
+    .bubble-pop-up:is(.is-popup-opened, .is-opening, .is-closing):not(#org-none) {
+      box-shadow: var(--shadow-sheet) !important;
     }
-    .bubble-pop-up.popup-mode-centered.is-popup-opened {
-      box-shadow: var(--shadow-elevated);
+    .bubble-pop-up.popup-mode-centered:is(.is-popup-opened, .is-opening, .is-closing):not(#org-none) {
+      box-shadow: var(--shadow-elevated) !important;
     }` : ""}
     .bubble-pop-up.no-header:not(.popup-mode-centered):not(.editor) > .bubble-header-container::before {
         display: none;

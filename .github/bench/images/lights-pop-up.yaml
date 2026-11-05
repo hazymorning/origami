@@ -13,7 +13,8 @@ states:
   scene.living_room_movie: {state: '2026-11-01T20:30:00+00:00', attributes: {friendly_name: Movie}}
 light:
   templates:
-    - {match: "lamps on", result: '1 lamp on · 45%'}
+    - {match: "lamps on", result: '1 lamp on'}
+    - {match: "2.55", result: '45%'}
   states:
     light.living_room:
       state: 'on'
@@ -25,7 +26,8 @@ light:
     scene.living_room_late: {state: '2026-11-03T21:40:00+00:00', attributes: {friendly_name: Late}}
 dark:
   templates:
-    - {match: "lamps on", result: '3 lamps on · 32%'}
+    - {match: "lamps on", result: '3 lamps on'}
+    - {match: "2.55", result: '32%'}
   states:
     light.living_room:
       state: 'on'

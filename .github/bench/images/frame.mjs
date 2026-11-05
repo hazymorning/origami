@@ -35,7 +35,6 @@ const phone = (mode, p, cut) => `
       <img class="shot" src="${data(p.shot, 'image/png')}">
       ${cut ? '' : '<span class="handle"></span>'}
     </div>
-    <span class="edge"></span>
   </div>`;
 
 const phoneStyle = `
@@ -44,8 +43,10 @@ html, body { margin: 0; background: transparent; }
 .canvas { position: relative; overflow: hidden; border-radius: ${RADIUS}px; }
 .row { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
 .phone { position: relative; width: ${W}px; height: ${H}px; border-radius: 50px; background: var(--bg); }
-.light { --fg: #1d1c1a; box-shadow: 0 0 0 .5px rgba(80,70,60,.10), 2px 3px 4px rgba(70,60,50,.10), 14px 18px 30px rgba(70,60,50,.13), 34px 46px 80px rgba(70,60,50,.12); }
-.dark { --fg: #f4f2ee; box-shadow: 0 0 0 .5px rgba(0,0,0,.5), 2px 3px 4px rgba(30,25,20,.22), 14px 18px 30px rgba(30,25,20,.20), 34px 46px 80px rgba(30,25,20,.16); }
+/* The phone lies a little above the background, lit from above: a fine edge, a contact shadow and soft layers that fall
+   straight down and fade out inside the margin, so no edge of the image cuts them */
+.light { --fg: #1d1c1a; box-shadow: 0 0 0 .5px rgba(60,50,40,.09), 0 1px 2px rgba(60,50,40,.05), 0 3px 6px -1px rgba(60,50,40,.05), 0 10px 20px -6px rgba(60,50,40,.07), 0 24px 48px -12px rgba(60,50,40,.10), 0 40px 72px -24px rgba(60,50,40,.08); }
+.dark { --fg: #f4f2ee; box-shadow: 0 0 0 .5px rgba(0,0,0,.7), inset 0 .5px 0 rgba(255,255,255,.07), 0 1px 2px rgba(0,0,0,.3), 0 3px 6px -1px rgba(0,0,0,.25), 0 10px 20px -6px rgba(0,0,0,.35), 0 24px 48px -12px rgba(0,0,0,.45), 0 40px 72px -24px rgba(0,0,0,.4); }
 .screen { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; background: var(--bg); }
 .shot { position: absolute; left: 0; top: ${BAR}px; width: ${W}px; display: block; }
 .bar { position: absolute; left: 0; right: 0; top: 0; height: ${BAR}px; z-index: 2; color: var(--fg); font: 400 15px/1 'Status'; }
@@ -59,13 +60,6 @@ html, body { margin: 0; background: transparent; }
 .level { font: 600 10px/1 'Status'; color: var(--bg); letter-spacing: -.2px; }
 .tip { position: absolute; right: -2.5px; top: 4px; width: 1.6px; height: 5px; border-radius: 0 1px 1px 0; background: currentColor; opacity: .5; }
 .handle { position: absolute; left: 50%; bottom: 8px; z-index: 2; width: 108px; height: 4px; margin-left: -54px; border-radius: 2px; background: var(--fg); opacity: .35; }
-/* The phone's rounded side catches the light along its right edge */
-.edge { position: absolute; top: 50px; bottom: 50px; right: 6px; width: 1px; }
-.light .edge { background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.09) 12%, rgba(0,0,0,.09) 88%, rgba(0,0,0,0)); box-shadow: 1px 0 0 rgba(255,255,255,.55); }
-.dark .edge { background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,.07) 12%, rgba(255,255,255,.07) 88%, rgba(255,255,255,0)); }
-.phone::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
-.light::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.9), inset -1px -1px 0 rgba(0,0,0,.05); }
-.dark::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.03); }
 `;
 // The background behind the phone: a little lighter than the light page, #F6F4F1, or a little darker than the dark one, #181715
 const ground = { light: '#FBFAF8', dark: '#111010' };

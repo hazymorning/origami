@@ -60,19 +60,19 @@ sub_button:
 cards:
   - type: vertical-stack
     cards:
-      # The room, how many lamps are on and their brightness, a power button and a slider for all lamps.
+      # How many lamps are on as the title, their brightness below it, a power button and a slider for all lamps.
       # The key after the slider opens a row for each lamp.
       - type: custom:bubble-card
         card_type: button
         button_type: state
         entity: light.living_room
-        name: Living room
+        name: >-
+          {%- set n = expand('light.living_room') | selectattr('state', 'eq', 'on') | list | count -%}
+          {{ 'All off' if n == 0 else n ~ (' lamp on' if n == 1 else ' lamps on') }}
         show_icon: false
         state_content: >-
-          {%- set n = expand(entity) | selectattr('state', 'eq', 'on') | list | count -%}
           {%- set b = state_attr(entity, 'brightness') -%}
-          {{ 'All lamps off' if n == 0 else n ~ (' lamp on' if n == 1 else ' lamps on')
-          ~ (' · ' ~ (b / 2.55) | round | int ~ '%' if b else '') }}
+          {{ (b / 2.55) | round | int ~ '%' if b else '' }}
         modules:
           - origami_base
         origami_base:

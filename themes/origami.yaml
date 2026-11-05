@@ -19,9 +19,9 @@ Origami:
   radius-circle: 'var(--ha-border-radius-circle, 50%)'
 
   # Borders and shadows. The card background casts a shadow, and a gray fill never does. A card casts card-shadow on the page,
-  # a mini pop-up or a menu casts shadow-elevated, a pop-up at the bottom of the screen casts shadow-sheet, its mirror that rises
-  # from its top edge, and a control on a gray fill, such as a tile or a tray, casts chip-shadow. Each shadow starts with
-  # shadow-edge, and the module reference explains the rule under Depth.
+  # a mini pop-up or a menu casts shadow-elevated, a pop-up at the bottom of the screen casts shadow-sheet, soft layers that rise
+  # from its top edge and follow its corners, and a control on a gray fill, such as a tile or a tray, casts chip-shadow. Each
+  # shadow starts with shadow-edge, and the module reference explains the rule under Depth.
   border-width: '0'
   border-color: 'color-mix(in srgb, var(--primary-text-color) var(--border-contrast), transparent)'
   card-ring: 'inset 0 0 0 var(--border-width) var(--border-color)'
@@ -291,7 +291,7 @@ Origami:
       chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.06), 0 2px 6px -2px rgba(var(--shadow-tint), 0.1)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.15)'
       shadow-elevated: 'var(--shadow-edge), 0 2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 16px 40px -12px rgba(var(--shadow-tint), 0.22)'
-      shadow-sheet: 'var(--shadow-edge), 0 -2px 6px -2px rgba(var(--shadow-tint), 0.08), 0 -16px 40px -12px rgba(var(--shadow-tint), 0.22)'
+      shadow-sheet: 'var(--shadow-edge), 0 -1px 3px rgba(var(--shadow-tint), 0.04), 0 -4px 12px rgba(var(--shadow-tint), 0.04), 0 -12px 32px rgba(var(--shadow-tint), 0.06)'
       navbar-shadow: '0px -1px 2px rgba(var(--shadow-tint), 0.03), 0px -8px 24px -8px rgba(var(--shadow-tint), 0.1)'
 
       # Header
@@ -386,7 +386,7 @@ Origami:
       chip-shadow: 'var(--shadow-edge), 0 1px 2px rgba(var(--shadow-tint), 0.3), 0 3px 7px -3px rgba(var(--shadow-tint), 0.45)'
       card-shadow-color: 'rgba(var(--shadow-tint), 0.65)'
       shadow-elevated: 'var(--shadow-edge), 0 2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 20px 48px -12px rgba(var(--shadow-tint), 0.7)'
-      shadow-sheet: 'var(--shadow-edge), 0 -2px 6px -2px rgba(var(--shadow-tint), 0.5), 0 -20px 48px -12px rgba(var(--shadow-tint), 0.7)'
+      shadow-sheet: 'var(--shadow-edge), 0 -1px 3px rgba(var(--shadow-tint), 0.25), 0 -4px 12px rgba(var(--shadow-tint), 0.25), 0 -12px 32px rgba(var(--shadow-tint), 0.35)'
       navbar-shadow: '0px -1px 2px rgba(var(--shadow-tint), 0.3), 0px -10px 28px -8px rgba(var(--shadow-tint), 0.55)'
 
       # Header

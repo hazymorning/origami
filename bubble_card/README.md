@@ -1551,7 +1551,7 @@ sub_button:
 cards: []  # Add the pop-up's cards here
 ```
 
-The theme sets the pop-up background, so Bubble Card's `bg_color`, `bg_opacity` and `bg_blur` aren't needed. A pop-up at the bottom of the screen casts the theme's `shadow-sheet`, which rises from its top edge, and a centered one `shadow-elevated`, whatever `shadow_opacity` says, unless it is `0`. The main README explains the dashboard's pop-ups under [Pop-ups](../README.md#pop-ups).
+The theme sets the pop-up background, so Bubble Card's `bg_color`, `bg_opacity` and `bg_blur` aren't needed. A pop-up at the bottom of the screen casts the theme's `shadow-sheet`, which rises from its top edge, and a centered one `shadow-elevated`, whatever `shadow_opacity` says, unless it is `0`. The shadow slides in and out with the pop-up. The main README explains the dashboard's pop-ups under [Pop-ups](../README.md#pop-ups).
 
 </details>
 
