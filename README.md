@@ -3,9 +3,9 @@
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/hazymorning/origami?label=Release&color=F6F4F1&labelColor=181715"></a>
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme"><img alt="HACS custom repository" src="https://img.shields.io/badge/HACS-Custom-F6F4F1?labelColor=181715"></a>
 
-Origami is a dashboard for Home Assistant. It has changed with daily use for many years and now finally feels somewhat finished. Many of its parts, like one music card for multiple speakers or tables made with Bubble Card, took countless hours of trial and error.
+Origami is a dashboard for Home Assistant. It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
 
-The goal is to show only what's important, be easy to use for everyone at home and look good without trying too hard. It's not the easiest dashboard for beginners, but a flexible foundation to build on.
+The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. A small digital version of a home is something people look at and use every day, so it should feel pleasant. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
@@ -99,7 +99,7 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 ## Home view
 
-<img width="400" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view-light.webp">  <img width="400" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view-dark.webp">
+<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view.webp">
 
 The start page, from the greeting down to the navigation bar:
 
@@ -112,7 +112,7 @@ The start page, from the greeting down to the navigation bar:
 
 ### Menu
 
-<img width="400" alt="The menu sliding in from the top, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-light.webp">  <img width="400" alt="The menu sliding in from the top, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu-dark.webp">
+<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
 Replaces Home Assistant's header with a menu that slides down from the top. Needs the Origami Header card. [More](dashboard/menu/)
 
@@ -120,49 +120,49 @@ Replaces Home Assistant's header with a menu that slides down from the top. Need
 
 ### Room
 
-<img width="400" alt="The living room pop-up with the TV, the lights and the climate, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-light.webp">  <img width="400" alt="The living room pop-up with the TV, the lights and the climate, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room-dark.webp">
+<img width="800" alt="The living room pop-up with the speaker or the TV, the lights and the climate, and with its scenes open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room.webp">
 
 Everything for one room in one place. [More](dashboard/room/)
 
 ### Lights
 
-<img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-light.webp">  <img width="400" alt="The lights pop-up with its scenes and the slider for all lamps, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up-dark.webp">
+<img width="800" alt="The lights pop-up with its scenes and the slider for all lamps, and with its lamps open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
 All the lights, from scenes down to each lamp. [More](dashboard/lights/)
 
 ### Music
 
-<img width="400" alt="The music pop-up with the cover, the play row and the volume, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-light.webp">  <img width="400" alt="The music pop-up with the cover, the play row and the volume, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up-dark.webp">
+<img width="800" alt="The music pop-up with the cover, the play row and the volume, and with its group open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up.webp">
 
 Music, speaker groups and volume. [More](dashboard/music/)
 
 ### TV
 
-<img width="400" alt="The TV pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-light.webp">  <img width="400" alt="The TV pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up-dark.webp">
+<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up.webp">
 
 Remote, apps and volume for the TV. [More](dashboard/tv/)
 
 ### Fan
 
-<img width="400" alt="The fan pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-light.webp">  <img width="400" alt="The fan pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-dark.webp">
+<img width="800" alt="The fan pop-up, and with its timer open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
 A fan's speed, mode and timer. [More](dashboard/fan/)
 
 ### Favorites list
 
-<img width="400" alt="The favorites pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-light.webp">  <img width="400" alt="The favorites pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up-dark.webp">
+<img width="800" alt="The favorites pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-pop-up.webp">
 
 Quick access to favorites: other pop-ups, devices, anything really. [More](dashboard/favorites-list/)
 
 ### Server
 
-<img width="400" alt="The server pop-up with its status, the load and the updates, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-light.webp">  <img width="400" alt="The server pop-up with its status, the load and the updates, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up-dark.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 The server's health, backups and updates. The graph needs Plotly Graph Card. [More](dashboard/server/)
 
 ### Vacuum
 
-<img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-light.webp">  <img width="400" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up-dark.webp">
+<img width="800" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, and with its maintenance list open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
 

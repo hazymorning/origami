@@ -1,6 +1,6 @@
 # Rooms
 
-<img width="400" alt="The rooms header and the room cards, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-light.webp">  <img width="400" alt="The rooms header and the room cards, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms-dark.webp">
+<img width="800" alt="The rooms header and the room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
 
 A card for each room with its climate and lights, which opens the room's pop-up. The header shows the average temperature and how many windows are open.
 

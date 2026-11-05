@@ -1,6 +1,6 @@
 # Fan pop-up
 
-<img width="400" alt="The fan pop-up, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-light.webp">  <img width="400" alt="The fan pop-up, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up-dark.webp">
+<img width="800" alt="The fan pop-up, and with its timer open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
 Speed, presets, oscillation and direction for one fan, and a timer that turns it off after 1, 3 or 5 hours.
 
