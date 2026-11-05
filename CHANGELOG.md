@@ -38,6 +38,7 @@ These changes are in the `next` branch and come with the next release.
 - A new cover keeps the last one in place until it has loaded, so switching speakers never leaves a cover or a pop-up's background empty.
 - `frameless` removes a card's background, shadow and padding, such as for a large cover in a pop-up. Its content reaches the edges, with the same gap between all its rows, and its icon, keys and sliders have the subtle fill of a Button row's tiles.
 - A sub-button's `label` key puts a small line under its text, such as CPU under 12 %, so a card can show values with labels beside its name.
+- On a key with an icon and a name, such as Pause, the icon is a step smaller and stands 8 px from the name.
 - `join` lets cards in a vertical stack share one background, as the rows of a list, such as the lamps of a pop-up. The list keeps the card's padding at its ends, and its rows' controls are 8 px apart. A compact row's slider is 28 px tall, as its switch and Slider's rows are, so two rows' sliders are 12 px apart.
 - `hidden` hides a whole card while its template is true, such as a list of lamps while its header is closed. The card takes no space in a stack, a section or a mini pop-up, as a conditional card's, and it changes at the same moment as the cards around it.
 - Module authors get four new helpers: `shows()`, `unframe()`, `backdrop()` and `pending()`, which Button and Tiles share for a button or a row that waits after a tap.

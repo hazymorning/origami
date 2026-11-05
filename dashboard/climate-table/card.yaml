@@ -93,7 +93,7 @@ sub_button:
     - name: Bedroom
       group:
         - entity: sensor.bedroom_temperature
-          name: Bedroom
+          name: Bed
           show_name: true
           css_class: room
         - entity: binary_sensor.bedroom_window

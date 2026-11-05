@@ -380,6 +380,24 @@ sections:
               main:
                 - {icon: mdi:chevron-down, show_background: true, tap_action: {action: fire-dom-event, mini_popup: volume}}
                 - {icon: mdi:dots-horizontal, show_background: true, tap_action: {action: fire-dom-event, mini_popup: inputs}}
+      # A key with an icon and a name beside two keys with only an icon, as on the server card
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: switch.printer
+        name: Printer
+        icon: mdi:printer
+        modules: [origami_base]
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          main: []
+          bottom:
+            - name: Actions
+              group:
+                - {name: Print, icon: mdi:printer-outline, show_name: true, origami_base: {'on': true}}
+                - {icon: mdi:file-check-outline, fill_width: false}
+                - {icon: mdi:restart, fill_width: false}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button

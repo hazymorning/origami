@@ -253,6 +253,8 @@ rows: 1
 
 The controls at the end of a row line up from card to card. Each one ends at the card's padding, and a tray with three keys is as wide as the slider of a compact card. A value between the keys, such as a thermostat's target, keeps the tray's width when it changes. Only a longer value, such as a range, makes the tray wider.
 
+On a key with an icon and a name, such as Pause, the icon is 20 px and stands 8 px from the name, so it never outweighs the text. An icon alone keeps its full size.
+
 #### Name under the icon
 
 With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.

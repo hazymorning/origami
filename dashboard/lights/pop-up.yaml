@@ -64,7 +64,8 @@ sub_button:
 cards:
   - type: vertical-stack
     cards:
-      # The room, how many lamps are on and their brightness, a power button and the scenes
+      # The room, how many lamps are on and their brightness, a power button and a slider for all lamps.
+      # The key after the slider opens a row for each lamp.
       - type: custom:bubble-card
         card_type: button
         button_type: state
@@ -78,23 +79,8 @@ cards:
           ~ (' · ' ~ (b / 2.55) | round | int ~ '%' if b else '') }}
         modules:
           - origami_base
-          - origami_button
         origami_base:
           large: true
-        origami_button:
-          scroll: true
-          icon_size: 0px
-          # While a lamp is on, the scene turned on last is highlighted. A scene's state is the time it was last turned on.
-          # The list has the same scenes as the buttons below.
-          active: >-
-            ${state !== 'on' ? '' : ['scene.living_room_night', 'scene.living_room_morning',
-            'scene.living_room_dinner', 'scene.living_room_evening', 'scene.living_room_movie',
-            'scene.living_room_late'].reduce((last, id) => (Date.parse(states(id)) || 0) >
-            (Date.parse(states(last)) || 0) ? id : last, '')}
-          # The row starts with the scene for the time of day, named by its css_class
-          start: >-
-            ${(h => h < 5 || h >= 23 ? 'night' : h < 17 ? 'morning' : h < 19 ? 'dinner' : h < 21 ?
-            'evening' : 'late')(new Date().getHours())}
         button_action:
           tap_action:
             action: none
@@ -106,6 +92,40 @@ cards:
               show_background: true
               tap_action:
                 action: toggle
+          bottom:
+            - name: All lamps
+              group:
+                - sub_button_type: slider
+                  always_visible: true
+                - icon: mdi:chevron-down
+                  fill_width: false
+                  show_background: true
+                  tap_action:
+                    action: fire-dom-event
+                    mini_popup: lamps
+      # The scenes, without a card around them. While a lamp is on, the scene turned on last is highlighted.
+      # A scene's state is the time it was last turned on. The list has the same scenes as the buttons below.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_base:
+          frameless: true
+        origami_button:
+          scroll: true
+          icon_size: 0px
+          active: >-
+            ${states('light.living_room') !== 'on' ? '' : ['scene.living_room_night', 'scene.living_room_morning',
+            'scene.living_room_dinner', 'scene.living_room_evening', 'scene.living_room_movie',
+            'scene.living_room_late'].reduce((last, id) => (Date.parse(states(id)) || 0) >
+            (Date.parse(states(last)) || 0) ? id : last, '')}
+          # The row starts with the scene for the time of day, named by its css_class
+          start: >-
+            ${(h => h < 5 || h >= 23 ? 'night' : h < 17 ? 'morning' : h < 19 ? 'dinner' : h < 21 ?
+            'evening' : 'late')(new Date().getHours())}
+        sub_button:
+          main: []
           bottom:
             - name: Scenes
               group:
@@ -200,48 +220,3 @@ cards:
           .late {
             --scene: linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67);
           }
-  - type: vertical-stack
-    cards:
-      # A tap on the header opens a row for each lamp over the pop-up
-      - type: custom:bubble-card
-        card_type: separator
-        name: Lamps
-        modules:
-          - origami_base
-          - origami_header
-        origami_header:
-          weight: medium
-          icon_size: var(--icon-size-s)
-          title_action: true
-        sub_button:
-          main:
-            - icon: mdi:chevron-right
-              content_layout: icon-right
-              show_name: true
-              show_background: false
-              origami_header:
-                # Counts the lamps of the light group that are on
-                name: >-
-                  ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
-                  states(id) === 'on').length))(hass.states['light.living_room']?.attributes?.entity_id ?? [])}
-              tap_action:
-                action: fire-dom-event
-                mini_popup: lamps
-      # Sets all lamps of the light group at once
-      - type: custom:bubble-card
-        card_type: button
-        button_type: slider
-        entity: light.living_room
-        name: All lamps
-        show_name: true
-        show_state: false
-        show_icon: false
-        slider_value_position: right
-        tap_action:
-          action: none
-        modules:
-          - origami_base
-          - origami_slider
-        origami_slider:
-          master: true
-        rows: 1

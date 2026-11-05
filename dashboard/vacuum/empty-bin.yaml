@@ -1,0 +1,38 @@
+alias: Vacuum empty bin
+description: >-
+  Sends the vacuum to the spot where its bin gets emptied, unless it's cleaning, and sets the bin in the
+  vacuum pop-up back to empty. Without a spot, it only sets the bin back.
+mode: single
+fields:
+  vacuum:
+    name: Vacuum
+    required: true
+    selector:
+      entity:
+        domain: vacuum
+  counter:
+    name: Bin counter
+    required: true
+    selector:
+      entity:
+        domain: counter
+  spot:
+    name: Spot
+    description: Where the vacuum goes to have its bin emptied, as x and y on its map, such as [25500, 27500].
+    selector:
+      object: {}
+sequence:
+  # Roborock's own command to drive to a point on the map
+  - if:
+      - condition: template
+        value_template: "{{ spot is defined and spot | count == 2 and not is_state(vacuum, 'cleaning') }}"
+    then:
+      - action: vacuum.send_command
+        target:
+          entity_id: "{{ vacuum }}"
+        data:
+          command: app_goto_target
+          params: "{{ spot }}"
+  - action: counter.reset
+    target:
+      entity_id: "{{ counter }}"

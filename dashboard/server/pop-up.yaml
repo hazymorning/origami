@@ -292,7 +292,7 @@ cards:
                 color: $ex vars.cRam
             filters: $ex [...get("smooth_filters"), ...get("max_marker")]
         layout:
-          height: 250
+          height: 130
           dragmode: false
           paper_bgcolor: |-
             $fn () => {
@@ -337,11 +337,12 @@ cards:
               };
               const cpu = last(vars.cpu), ram = last(vars.ram);
               if (cpu == null || ram == null) return [];
+              // The two chips keep apart, and stay inside the graph
               let yc = cpu, yr = ram;
-              if (Math.abs(yc - yr) < 9) {
-                const mid = (yc + yr) / 2;
-                if (yc < yr) { yc = mid - 4.5; yr = mid + 4.5; }
-                else { yc = mid + 4.5; yr = mid - 4.5; }
+              if (Math.abs(yc - yr) < 22) {
+                const mid = Math.min(Math.max((yc + yr) / 2, 11), 91);
+                if (yc < yr) { yc = mid - 11; yr = mid + 11; }
+                else { yc = mid + 11; yr = mid - 11; }
               }
               const chip = (label, val, y, color) => ({
                 xref: "paper", x: 1, xanchor: "left", xshift: 8,
@@ -376,9 +377,13 @@ cards:
             range:
               - 0
               - 102
-            tick0: 0
-            dtick: 25
-            ticksuffix: '%'
+            # Only 50 and 100, so the axis stays clear of the times below it
+            tickvals:
+              - 50
+              - 100
+            ticktext:
+              - 50%
+              - 100%
           shapes:
             - type: line
               xref: paper

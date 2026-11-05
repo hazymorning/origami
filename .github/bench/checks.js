@@ -209,6 +209,25 @@ window.__check = async () => {
     report('end column', fails, `${count} trays and side sliders are as wide as the end column`);
   }
 
+  // Icon beside a name: on a key of a card that Base frames, an icon next to a name is 20 px and stands 8 px from the name, on the side where the name is
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => ['button', 'media-player', 'climate', 'cover', 'select', 'calendar'].includes(c.cfg.card_type))) {
+      const size = length(card, 'var(--icon-size-s)'), gap = length(card, 'var(--ha-space-2)');
+      for (const el of card.root.querySelectorAll('.bubble-sub-button:not([class*="bubble-sub-button-slider-"]):not(.content-icon-top):not(.content-icon-bottom)')) {
+        if (el.closest('ha-card[data-org-fill="bottom"] .bubble-sub-button-bottom-container')) continue;
+        const icon = el.querySelector('.bubble-sub-button-icon.icon-with-state'), name = el.querySelector('.bubble-sub-button-name-container');
+        if (!icon || !name || !visible(icon) || !visible(name)) continue;
+        const a = icon.getBoundingClientRect(), b = name.getBoundingClientRect();
+        const space = a.left < b.left ? b.left - a.right : a.left - b.right;
+        count++;
+        if (!near(a.width, size) || !near(space, gap)) fails.push(`card ${card.i} ${label(el)}: icon ${r1(a.width)} px, ${r1(space)} px from the name, expected ${r1(size)} and ${r1(gap)}`);
+      }
+    }
+    report('icon beside a name', fails, `${count} icons beside a name are a step smaller and 8 px from it`);
+  }
+
   // Icon only: a Button button that shows only its icon is square
   {
     const fails = [];

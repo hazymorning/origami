@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.11.1"
+  version: "13.12.0"
   is_global: true
   supported:
     - button
@@ -1578,6 +1578,18 @@ origami_base:
       --mdc-icon-size: var(--org-icon-size);
       margin: 0 !important;
       color: var(--primary-text-color) !important;
+    }
+    /* An icon next to a text, such as on a Pause key, is smaller and keeps a little space from the text, on the side where the text is */
+    ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon.icon-with-state:not(.hidden) {
+      --mdc-icon-size: var(--icon-size-s);
+      margin-inline-end: var(--ha-space-2) !important;
+    }
+    ha-card .bubble-sub-button.content-icon-right${card._org.key} .bubble-sub-button-icon.icon-with-state:not(.hidden) {
+      margin: 0 !important;
+      margin-inline-start: var(--ha-space-2) !important;
+    }
+    ha-card .bubble-sub-button:is(.content-icon-top, .content-icon-bottom)${card._org.key} .bubble-sub-button-icon.icon-with-state:not(.hidden) {
+      margin: 0 !important;
     }
     `}
     ${card._org.opts.group ? `

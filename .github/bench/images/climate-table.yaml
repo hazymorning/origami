@@ -4,13 +4,13 @@ trim: 16
 cards:
 - file: rooms/header.yaml
   replace:
-    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.kitchen_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
+    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
 - file: climate-table/card.yaml
   replace:
-    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.kitchen_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
-    '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'']': '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'', ''sensor.kitchen_humidity'', ''sensor.kids_room_humidity'', ''sensor.bathroom_humidity'']'
+    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
+    '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'']': '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'', ''sensor.hallway_humidity'', ''sensor.kids_room_humidity'', ''sensor.bathroom_humidity'']'
     ? "        - entity: sensor.office_humidity\n          css_class: humidity\n"
-    : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Kitchen\n      group:\n        - entity: sensor.kitchen_temperature\n          name: Kitchen\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kitchen_window\n          css_class: window\n        - entity: sensor.kitchen_temperature\n          css_class: temperature\n        - entity: sensor.kitchen_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name: Bath\n      group:\n        - entity: sensor.bathroom_temperature\n\
+    : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Hall\n      group:\n        - entity: sensor.hallway_temperature\n          name: Hall\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.hallway_window\n          css_class: window\n        - entity: sensor.hallway_temperature\n          css_class: temperature\n        - entity: sensor.hallway_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name: Bath\n      group:\n        - entity: sensor.bathroom_temperature\n\
       \          name: Bath\n          show_name: true\n          css_class: room\n        - entity: climate.bathroom\n          css_class: thermostat\n        - entity: sensor.bathroom_temperature\n          css_class: temperature\n        - entity: sensor.bathroom_humidity\n          css_class: humidity\n"
   with:
     styles: null
@@ -47,12 +47,12 @@ states:
       hvac_action: heating
       temperature: 23
       current_temperature: 22.6
-  sensor.kitchen_temperature:
-    state: '22.3'
+  sensor.hallway_temperature:
+    state: '19.8'
     attributes:
       unit_of_measurement: °C
       device_class: temperature
-  sensor.kitchen_humidity:
+  sensor.hallway_humidity:
     state: '58'
     attributes:
       unit_of_measurement: '%'
@@ -77,7 +77,7 @@ states:
     attributes:
       unit_of_measurement: '%'
       device_class: humidity
-  binary_sensor.kitchen_window:
+  binary_sensor.hallway_window:
     state: 'off'
     attributes:
       device_class: window
@@ -95,8 +95,8 @@ dark:
     sensor.bedroom_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}
     sensor.office_temperature: {state: '18.9', attributes: {unit_of_measurement: °C, device_class: temperature}}
     sensor.office_humidity: {state: '45', attributes: {unit_of_measurement: '%', device_class: humidity}}
-    sensor.kitchen_temperature: {state: '20.8', attributes: {unit_of_measurement: °C, device_class: temperature}}
-    sensor.kitchen_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.hallway_temperature: {state: '19.4', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.hallway_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity}}
     sensor.kids_room_temperature: {state: '19.6', attributes: {unit_of_measurement: °C, device_class: temperature}}
     sensor.kids_room_humidity: {state: '53', attributes: {unit_of_measurement: '%', device_class: humidity}}
     sensor.bathroom_temperature: {state: '24.1', attributes: {unit_of_measurement: °C, device_class: temperature}}

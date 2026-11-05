@@ -1,4 +1,5 @@
-# Midday: cleaning the kitchen on the second suction level. Late evening: back in its dock and charged, set to the quiet
+# Midday: cleaning the kitchen on the second suction level, with the bin two runs full. Late evening: back in its dock
+# and charged, with a full bin and the map open.
 kind: phone
 home: true
 open: '#popup_vacuum'
@@ -37,6 +38,11 @@ states:
     state: 'on'
     attributes:
       friendly_name: Vacuum no-go zones
+  image.robot_map:
+    state: '2026-11-04T12:38:00+00:00'
+    attributes:
+      friendly_name: Robot map
+      entity_picture: /local/vacuum-map.png
 light:
   templates:
   - match: state_translated('vacuum.robot')
@@ -67,7 +73,7 @@ light:
       attributes:
         friendly_name: Robot current room
     counter.vacuum_bin:
-      state: '1'
+      state: '2'
       attributes:
         friendly_name: Vacuum bin
         maximum: 3
@@ -104,7 +110,7 @@ dark:
       attributes:
         friendly_name: Robot current room
     counter.vacuum_bin:
-      state: '2'
+      state: '3'
       attributes:
         friendly_name: Vacuum bin
         maximum: 3
@@ -143,5 +149,10 @@ dark:
       state: 'off'
       attributes:
         friendly_name: Vacuum no-go zones
+    image.robot_map:
+      state: '2026-11-04T22:05:00+00:00'
+      attributes:
+        friendly_name: Robot map
+        entity_picture: /local/vacuum-map.png
   click:
-  - .bubble-sub-button:has(ha-icon[icon="mdi:wrench-outline"]) >> nth=-1
+  - .bubble-sub-button:has(ha-icon[icon="mdi:map-outline"]) >> nth=-1

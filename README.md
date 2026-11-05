@@ -164,7 +164,7 @@ The server's health, backups and updates. The graph needs Plotly Graph Card. [Mo
 
 ### Vacuum
 
-<img width="800" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, and with its maintenance list open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
+<img width="800" alt="The vacuum pop-up with the battery, the bin, the rooms and the suction, and with its map open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
 

@@ -67,13 +67,36 @@ origami_popup:
               origami_tiles:
                 state: "${Number(state) <= 0 ? 'Due' : num(state, 0, attr.unit_of_measurement)}"
                 state_color: "${Number(state) <= 0 ? 'var(--error-color)' : ''}"
+    # The map key above the rooms opens the vacuum's map, with how long ago it changed
+    map:
+      - type: custom:bubble-card
+        card_type: separator
+        name: Map
+        modules:
+          - origami_header
+        sub_button:
+          main:
+            - entity: image.robot_map
+              show_name: true
+              show_icon: false
+              show_background: false
+              origami_header:
+                name: ${ago(state)}
+              tap_action:
+                action: none
+      - type: picture-entity
+        entity: image.robot_map
+        show_name: false
+        show_state: false
+        tap_action:
+          action: more-info
 sub_button:
   main: []
   bottom: []
 cards:
   - type: vertical-stack
     cards:
-      # The vacuum's state as the name and how long ago it changed below it, with the battery and the bin at the end
+      # The vacuum's state as the name and how long ago it changed below it, with the battery at the end
       - type: custom:bubble-card
         card_type: button
         button_type: name
@@ -102,22 +125,6 @@ cards:
                 label: "${states('vacuum.robot') === 'docked' && Number(state) < 100 ? 'Charging' : 'Battery'}"
               tap_action:
                 action: more-info
-            # The bin, which fills with each run and turns red when full. A tap after emptying it sets it back to 0%.
-            - entity: counter.vacuum_bin
-              show_name: true
-              show_icon: false
-              show_background: false
-              origami_base:
-                name: ${num(Math.min(state / attr.maximum, 1) * 100, 0, '%') || '–'}
-                name_color: "${Number(state) >= Number(attr.maximum) ? 'var(--error-color)' : ''}"
-                label: Bin
-              tap_action:
-                action: perform-action
-                perform_action: counter.reset
-                target:
-                  entity_id: counter.vacuum_bin
-                confirmation:
-                  text: Mark the bin as empty?
           bottom:
             - name: Controls
               group:
@@ -158,10 +165,12 @@ cards:
                     perform_action: vacuum.return_to_base
                     target:
                       entity_id: vacuum.robot
+                # Stop, while there's no bin
                 - name: Stop
                   icon: mdi:stop
                   fill_width: false
                   origami_base:
+                    hidden: "${!!hass.states['counter.vacuum_bin']}"
                     disabled: "${!['cleaning', 'paused', 'returning'].includes(state)}"
                     'on': false
                   tap_action:
@@ -169,7 +178,35 @@ cards:
                     perform_action: vacuum.stop
                     target:
                       entity_id: vacuum.robot
-      # The wrench opens the maintenance list and turns red when a part is due
+                # The bin, which fills with each run and turns red when full, drawn under styles below.
+                # A tap sends the vacuum to the spot where the bin gets emptied and sets the bin back to empty.
+                - entity: counter.vacuum_bin
+                  name: Bin
+                  icon: mdi:delete-outline
+                  css_class: bin
+                  fill_width: false
+                  origami_base:
+                    hidden: "${!hass.states['counter.vacuum_bin']}"
+                    color: "${Number(state) >= Number(attr.maximum) ? 'var(--error-color)' : ''}"
+                    'on': false
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.vacuum_empty_bin
+                    data:
+                      vacuum: vacuum.robot
+                      counter: counter.vacuum_bin
+                      spot: [25500, 27500]
+                    confirmation:
+                      text: Empty the bin?
+        # The bin's key fills from the bottom as the bin fills, in red once it's full
+        styles: |-
+          ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bin {
+            background-image: linear-gradient(to top, ${(c => Number(c?.state) >= Number(c?.attributes?.maximum) ?
+            'color-mix(in srgb, var(--error-color) 24%, transparent)' : 'var(--fill-strong)')(hass.states['counter.vacuum_bin'])}
+            ${(c => Math.min(Number(c?.state) / Number(c?.attributes?.maximum), 1) * 100 || 0)(hass.states['counter.vacuum_bin'])}%,
+            transparent 0) !important;
+          }
+      # The map opens the vacuum's map. The wrench opens the maintenance list and turns red when a part is due.
       - type: custom:bubble-card
         card_type: separator
         name: Rooms
@@ -180,6 +217,14 @@ cards:
           icon_size: var(--icon-size-s)
         sub_button:
           main:
+            - name: Map
+              icon: mdi:map-outline
+              show_background: false
+              origami_header:
+                hidden: "${!hass.states['image.robot_map']}"
+              tap_action:
+                action: fire-dom-event
+                mini_popup: map
             - name: Maintenance
               icon: mdi:wrench-outline
               show_background: false

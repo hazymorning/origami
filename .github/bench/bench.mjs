@@ -146,7 +146,7 @@ customElements.define('ha-select', class extends HTMLElement {
 customElements.define('ha-dropdown-item', class extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:flex;align-items:center;gap:8px;white-space:nowrap}:host([selected]){background:var(--ha-color-fill-primary-quiet-resting)}</style><slot name="icon"></slot><slot></slot>'; }
 });
-// Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, conditional cards and Bubble cards that hide themselves, and draws an empty box for other cards.
+// Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, grids, conditional and picture entity cards and Bubble cards that hide themselves, and draws an empty box for other cards.
 const met = (c, h) => c.condition === 'or' ? (c.conditions || []).some((x) => met(x, h))
   : c.condition === 'and' ? (c.conditions || []).every((x) => met(x, h))
   : c.condition && c.condition !== 'state' ? true
@@ -194,6 +194,15 @@ customElements.define('hui-card', class extends HTMLElement {
       grid.style.cssText = 'display:grid;gap:var(--grid-card-gap,8px);grid-template-columns:repeat(' + (c.columns || 2) + ',minmax(0,1fr))';
       for (const cc of c.cards || []) { const k = document.createElement('hui-card'); k.hass = this._h; k.config = cc; grid.appendChild(k); this._kids.push(k); }
       this.appendChild(grid);
+    } else if (c.type === 'picture-entity') {
+      // Home Assistant's picture entity card with the entity's picture, such as a vacuum's map, without a name or state
+      const card = document.createElement('ha-card');
+      card.style.overflow = 'hidden';
+      const img = document.createElement('img');
+      img.style.cssText = 'display:block;width:100%';
+      card.appendChild(img); this.appendChild(card);
+      this._check = () => { const src = this._h?.states?.[c.entity]?.attributes?.entity_picture; if (src && img.getAttribute('src') !== src) img.src = src; };
+      this._check();
     } else if (String(c.type).startsWith('custom:') && customElements.get(c.type.slice(7))) {
       // Another custom card that the scenario loads with resources
       const el = document.createElement(c.type.slice(7));

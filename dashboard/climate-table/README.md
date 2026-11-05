@@ -10,7 +10,7 @@ Every room's temperature, humidity, windows and heating in one table. Arrows mar
 
 ## Setup
 
-1. In [`card.yaml`](card.yaml), change each row to one of the home's rooms, with a short name such as **Living**, so the table fits on a phone. To add a room, copy a row. A room keeps only the cells it has sensors for, as the office has no window contact and no thermostat.
+1. In [`card.yaml`](card.yaml), change each row to one of the home's rooms, with a short name such as **Living** or **Bed**, so the table fits on a phone and its columns line up. To add a room, copy a row. A room keeps only the cells it has sensors for, as the office has no window contact and no thermostat.
 2. In the columns `temperature` and `humidity`, list the sensors of all rows in each of the three templates, so the arrows compare every room.
 3. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 
