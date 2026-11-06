@@ -840,7 +840,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. The card is as tall as its buttons, so the gaps around it stay those of the page. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
-| `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 56 px by default. |
+| `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 64 px by default. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
 | `start` | | Takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end. |
 
@@ -940,7 +940,7 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
     background: var(--tint)
 ```
 
-With `content_layout: icon-top` or `icon-bottom`, a button is a box like a tile, with its icon in a field above or below its name, as the scenes in the [lights pop-up](../dashboard/lights/README.md) and the [favorites](../dashboard/favorites/README.md). In a row, the boxes share one width, and a highlighted box is tinted and has a bold name. With `background: false`, the box and the field have no fill.
+With `content_layout: icon-top` or `icon-bottom`, a button is a box like a tile, with its icon in a field above or below its name, as the scenes in the [lights pop-up](../dashboard/lights/README.md) and the [favorites](../dashboard/favorites/README.md). The field has 12 px of the box around it, and the boxes in a row share one width. A highlighted box has a bold name and keeps its fill, and its field is tinted in the button's own color, as a lit tile's icon is. A box whose field holds a picture or colors is tinted itself instead. With `background: false`, the box and the field have no fill.
 
 A button's own `order` moves it in the row, such as `-1` to the front, and a map from its state moves it only in those states. In a box or with `labels: below`, its own `field` fills the field with a picture or colors instead of the icon, such as a recipe photo or a scene's colors, and its own `label` is a second line under the name, such as a scene's brightness. A gradient needs quotes, because YAML reads `#` as the start of a comment:
 

@@ -101,7 +101,8 @@ These changes are in the `next` branch and come with the next release.
 - New options: `segmented`, `scroll`, `chips`, `labels: below`, `field_size`, `outline`, `start`, `pending`, `color` and `label_size`.
 - `active` also matches the entity that a button's tap targets.
 - Each button can have its own `name`, `icon`, `color`, `name_color`, `background` and `order` under an `origami_button` key. Its `color` is also its lamp color while it is lit.
-- A button with `content_layout: icon-top` is a box like a tile, with its icon in a field above its name, and the boxes in a row share one width. A button's own `field` fills the field with a picture or a gradient instead of the icon, and its `label` adds a second line under the name, such as a scene's brightness. Both also work with `labels: below`.
+- A lit button is tinted in its own lamp color, such as the state color of its entity, instead of always the card's.
+- A button with `content_layout: icon-top` is a box like a tile, with its icon in a field above its name and 12 px around the field, and the boxes in a row share one width. A lit box tints its field in its own color, as a lit tile does. A button's own `field` fills the field with a picture or a gradient instead of the icon, and its `label` adds a second line under the name, such as a scene's brightness. Both also work with `labels: below`.
 - A button with `css_class: divider` is a short line between two buttons.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`, and it casts the chip shadow.
 - On a button card, a lit button has the tint of the card's lit icon. On a tile, the buttons have the card background and the chip shadow, as keys do.
