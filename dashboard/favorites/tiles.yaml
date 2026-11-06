@@ -1,21 +1,24 @@
 # Each tile is a sub-button. Its visibility conditions decide when it appears.
+# The tiles stand in one row that scrolls sideways. Without scroll, they stand in a grid of two columns.
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
   - origami_base
   - origami_tiles
+origami_tiles:
+  scroll: true
 grid_options:
   columns: full
   rows: auto
 sub_button:
   bottom:
     # Music, from 22:00 to 4:00
-    - name: Bedroom
+    - name: Music
       entity: media_player.bedroom
       icon: mdi:speaker
       force_icon: true
       origami_tiles:
-        state: Music
+        state: Bedroom
         color: var(--state-media_player-active-color)
       visibility:
         - condition: time

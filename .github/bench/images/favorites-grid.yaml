@@ -1,0 +1,8 @@
+# The favorites as a grid of tiles, without scroll, at the same moments as the row
+kind: panel
+cards:
+  - {file: favorites/header.yaml}
+  - file: favorites/tiles.yaml
+    with:
+      origami_tiles: null
+trim: 16
