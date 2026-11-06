@@ -194,7 +194,7 @@ origami_button:
       const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
-      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default. A stacked button is a box with its icon in a field above its name, 64 px by default, as for scenes or favorites.
+      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default. A stacked button is a box with its icon in a field above its name, 72 px by default, one and a half times a tile's icon, as for scenes or favorites. So about three and a half boxes fit on a phone, and the next one shows at the edge.
       const sized = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim();
       const field = sized || "var(--tile-size-lg)";
       const stacked = (item) => ["icon-top", "icon-bottom"].includes(item.content_layout);
@@ -261,7 +261,7 @@ origami_button:
         pad: pad || "0",
         size,
         field,
-        stack: sized || "var(--control-height-lg)",
+        stack: sized || "calc(var(--tile-size) * 1.5)",
         stackIcon: String(cfg.icon_size ?? "").trim() || "var(--icon-size-m)",
         height: opts.sub || "",
         text: opts.text || "",
@@ -345,7 +345,7 @@ origami_button:
       box-sizing: border-box;
       width: var(--org-btn-stack) !important;
       height: var(--org-btn-stack) !important;
-      border-radius: calc(var(--org-btn-stack) * var(--radius-ratio));
+      border-radius: min(calc(var(--org-btn-stack) * var(--radius-ratio)), var(--ha-card-border-radius));
       --mdc-icon-size: ${card._orgB.stackIcon} !important;
       ${card._orgB.bg ? "background: var(--tile-chip-background);\n      box-shadow: var(--tile-chip-shadow);" : ""}
     }

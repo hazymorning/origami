@@ -2,16 +2,19 @@
 
 <img width="800" alt="Favorites in a row that scrolls sideways, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
 
-A row of favorites for whatever matters right now, like a running vacuum or tonight's dinner, with an icon and a name for each. Most of them only show up when they're needed, and the row scrolls sideways when they don't fit.
+Favorites for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed. They come in two versions with the same favorites:
+
+- [`row.yaml`](row.yaml): a row of boxes with an icon and a short name, which scrolls sideways when they don't fit, as in the image
+- [`tiles.yaml`](tiles.yaml): a grid of tiles with a state line under each name, as in the [Tiles module](../../bubble_card/README.md#tiles)
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Header and Button
+- [Get started](../../README.md#get-started), with the modules Base and Header, and Button for the row or Tiles for the grid
 
 ## Setup
 
-1. In [`row.yaml`](row.yaml), keep the favorites that fit, delete the others and change their entities. A comment above each favorite says when it shows. To add one, copy a favorite and change its entity and its visibility conditions.
-2. Add [`header.yaml`](header.yaml) and then [`row.yaml`](row.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+1. Pick the row or the grid. In its file, keep the favorites that fit, delete the others and change their entities. A comment above each favorite says when it shows. To add one, copy a favorite and change its entity and its visibility conditions.
+2. Add [`header.yaml`](header.yaml) and then the file of the row or the grid to the dashboard, as described under [Get started](../../README.md#get-started).
 
 ## Optional
 
@@ -19,7 +22,7 @@ A row of favorites for whatever matters right now, like a running vacuum or toni
 
 ## Entities
 
-All favorites are examples from one home.
+All favorites are examples from one home, the same in both versions.
 
 | Favorite | Entities | Shows |
 | --- | --- | --- |
