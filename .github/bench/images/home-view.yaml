@@ -1,6 +1,6 @@
 # The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows two favorites
-# under a sky with the sun half behind a cloud, dark two others, the weather in the notifications and the climate table open.
-# The menu has its own image, because it is closed until it opens. The seed keeps the clouds where they look best.
+# at a partly cloudy midday, dark two others, the weather in the notifications and the climate table open.
+# The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
 seed: 27
 kind: phone
 states:
@@ -201,6 +201,11 @@ dark:
       forecast:
       - {datetime: '2026-11-04T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 1, precipitation_probability: 10}
       - {datetime: '2026-11-05T11:00:00+00:00', condition: sunny, temperature: 8, templow: 1, precipitation_probability: 0}
+      - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 9, templow: 3, precipitation_probability: 0}
+      - {datetime: '2026-11-07T11:00:00+00:00', condition: cloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+      - {datetime: '2026-11-08T11:00:00+00:00', condition: sunny, temperature: 11, templow: 3, precipitation_probability: 0}
+      - {datetime: '2026-11-09T11:00:00+00:00', condition: partlycloudy, temperature: 10, templow: 2, precipitation_probability: 0}
+      - {datetime: '2026-11-10T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 3, precipitation_probability: 0}
     weather/subscribe_forecast:hourly:
       type: hourly
       forecast:

@@ -90,6 +90,11 @@ light:
       forecast:
         - {datetime: '2026-11-04T11:00:00+00:00', condition: partlycloudy, temperature: 15, templow: 7, precipitation_probability: 10}
         - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 13, templow: 6, precipitation_probability: 20}
+        - {datetime: '2026-11-06T11:00:00+00:00', condition: sunny, temperature: 12, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-07T11:00:00+00:00', condition: partlycloudy, temperature: 11, templow: 5, precipitation_probability: 0}
+        - {datetime: '2026-11-08T11:00:00+00:00', condition: cloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-09T11:00:00+00:00', condition: sunny, temperature: 12, templow: 3, precipitation_probability: 0}
+        - {datetime: '2026-11-10T11:00:00+00:00', condition: partlycloudy, temperature: 13, templow: 5, precipitation_probability: 0}
 # The dark images: late in the evening, with music in the bedroom, a bath running and the vacuum back in its dock
 dark:
   time: '2026-11-04T22:40:00'
@@ -117,3 +122,8 @@ dark:
       forecast:
         - {datetime: '2026-11-04T11:00:00+00:00', condition: sunny, temperature: 15, templow: 6, precipitation_probability: 0}
         - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}
+        - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-07T11:00:00+00:00', condition: sunny, temperature: 13, templow: 5, precipitation_probability: 0}
+        - {datetime: '2026-11-08T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 6, precipitation_probability: 0}
+        - {datetime: '2026-11-09T11:00:00+00:00', condition: partlycloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-10T11:00:00+00:00', condition: sunny, temperature: 12, templow: 3, precipitation_probability: 0}
