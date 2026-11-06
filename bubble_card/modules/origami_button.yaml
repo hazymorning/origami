@@ -349,8 +349,8 @@ origami_button:
       box-sizing: border-box;
       width: var(--org-btn-stack) !important;
       height: var(--org-btn-stack) !important;
-      /* A shape inside another takes the outer radius less the space between them, so the field's corners follow the box's */
-      border-radius: calc(var(--ha-card-border-radius) - var(--ha-space-3));
+      /* The field has the corners of the icon on a tile or a room card, radius-inner, so it is as round as every other icon field */
+      border-radius: var(--radius-inner);
       --mdc-icon-size: ${card._orgB.stackIcon} !important;
       ${card._orgB.bg ? "background: var(--tile-chip-background);\n      box-shadow: var(--tile-chip-shadow);" : ""}
     }
