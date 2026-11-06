@@ -17,7 +17,7 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 
 ## Optional
 
-- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small badge with a check marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete the card with the scenes.
+- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small dot before its brightness marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete the card with the scenes.
 
 > [!TIP]
 > A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45 %`, written as the slider writes it. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.
