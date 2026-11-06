@@ -1,17 +1,17 @@
 # Favorites
 
-<img width="800" alt="Favorites as tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
+<img width="800" alt="Favorites in a row that scrolls sideways, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
 
-Tiles for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed.
+A row of favorites for whatever matters right now, like a running vacuum or tonight's dinner, with an icon and a name for each. Most of them only show up when they're needed, and the row scrolls sideways when they don't fit.
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Header and Tiles
+- [Get started](../../README.md#get-started), with the modules Base, Header and Button
 
 ## Setup
 
-1. In [`tiles.yaml`](tiles.yaml), keep the tiles that fit, delete the others and change their entities. A comment above each tile says when it shows. To add a tile, copy one and change its entity and its visibility conditions.
-2. Add [`header.yaml`](header.yaml) and then [`tiles.yaml`](tiles.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+1. In [`row.yaml`](row.yaml), keep the favorites that fit, delete the others and change their entities. A comment above each favorite says when it shows. To add one, copy a favorite and change its entity and its visibility conditions.
+2. Add [`header.yaml`](header.yaml) and then [`row.yaml`](row.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 
 ## Optional
 
@@ -19,9 +19,9 @@ Tiles for whatever matters right now, like a running vacuum or tonight's dinner.
 
 ## Entities
 
-All tiles are examples from one home.
+All favorites are examples from one home.
 
-| Tile | Entities | Shows |
+| Favorite | Entities | Shows |
 | --- | --- | --- |
 | Oven | `sensor.oven` | While the oven is on, always first |
 | Vacuum | `vacuum.robot`, `sensor.robot_cleaning_progress` | Always. While it cleans, it moves to the front and shows its progress. |

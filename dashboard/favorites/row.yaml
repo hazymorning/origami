@@ -1,22 +1,30 @@
-# Each tile is a sub-button. Its visibility conditions decide when it appears.
+# Each favorite is a sub-button: a box with its icon and a short name, in a row that scrolls sideways.
+# Its visibility conditions decide when it appears. A favorite lights up while its entity is on,
+# and one whose tap opens a pop-up lights up when its on key says so.
 type: custom:bubble-card
 card_type: sub-buttons
 modules:
   - origami_base
-  - origami_tiles
+  - origami_button
+origami_button:
+  scroll: true
+  # A little space below the row, before the next heading
+  padding: 0 0 var(--ha-space-2)
 grid_options:
   columns: full
   rows: auto
 sub_button:
+  main: []
   bottom:
     # Music, from 22:00 to 4:00
-    - name: Bedroom
+    - name: Music
       entity: media_player.bedroom
       icon: mdi:speaker
       force_icon: true
-      origami_tiles:
-        state: Music
-        color: var(--state-media_player-active-color)
+      show_name: true
+      content_layout: icon-top
+      origami_button:
+        'on': ${state === 'playing'}
       visibility:
         - condition: time
           after: '22:00'
@@ -30,7 +38,10 @@ sub_button:
     - name: Fan
       entity: fan.bedroom
       icon: mdi:fan
-      state_content: percentage
+      show_name: true
+      content_layout: icon-top
+      origami_button:
+        'on': ${state === 'on'}
       visibility:
         - condition: state
           entity: fan.bedroom
@@ -53,14 +64,14 @@ sub_button:
         navigation_path: '#popup_fan'
       hold_action:
         action: more-info
-    # Dinner, with the recipe photo as the icon
-    - name: Cooking
+    # Dinner, with the recipe photo in place of the icon
+    - name: Dinner
       entity: sensor.dinner
       icon: mdi:chef-hat
-      origami_tiles:
-        state: Dinner
-        image: ${attr.recipe?.image}
-        image_size: 230%
+      show_name: true
+      content_layout: icon-top
+      origami_button:
+        field: ${attr.recipe?.image}
       visibility:
         - condition: state
           entity: sensor.dinner
@@ -79,7 +90,10 @@ sub_button:
     - name: Oven
       entity: sensor.oven
       icon: mdi:toaster-oven
-      origami_tiles:
+      show_name: true
+      content_layout: icon-top
+      origami_button:
+        'on': true
         color: var(--state-climate-heat-color)
         order: -2
       visibility:
@@ -91,20 +105,19 @@ sub_button:
         navigation_path: '#popup_kitchen'
       hold_action:
         action: more-info
-    # Vacuum. While it cleans, the progress replaces the name.
+    # Vacuum. While it cleans, it comes first and its progress replaces the name.
     - name: Vacuum
       entity: vacuum.robot
       icon: mdi:robot-vacuum
       force_icon: true
-      origami_tiles:
+      show_name: true
+      content_layout: icon-top
+      origami_button:
         name: >-
           ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
           : Number.isNaN(p) ? '' : p < 0 ? 'Error'
           : num(p, 0, '%'))(Math.round(states('sensor.robot_cleaning_progress')))}
-        state:
-          docked: ${word('off')}
-          idle: ${word('off')}
-          cleaning: Vacuum
+        'on': ${state === 'cleaning'}
         order:
           cleaning: -1
       tap_action:
@@ -112,16 +125,15 @@ sub_button:
         navigation_path: '#popup_vacuum'
       hold_action:
         action: more-info
-    # Bath, with the remaining minutes while it runs
+    # Bath, with the remaining minutes, lit in blue while it runs
     - name: Bath
       entity: input_boolean.bath_time
       icon: mdi:shower
-      origami_tiles:
+      show_name: true
+      content_layout: icon-top
+      origami_button:
         name:
           'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
-        state:
-          'on': Running
-          'off': Ready
         color:
           'on': var(--blue-color)
       visibility:
@@ -141,11 +153,11 @@ sub_button:
     - name: Printer
       entity: switch.printer
       icon: mdi:printer-outline
-      origami_tiles:
+      show_name: true
+      content_layout: icon-top
+      origami_button:
         name:
           'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
-        state:
-          'on': Running
       tap_action:
         action: toggle
       hold_action:

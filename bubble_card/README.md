@@ -838,9 +838,9 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `chips` | `false` | The buttons are chips, with the label in the text color and the icon in the secondary color. Active chips have a bold label. |
 | `pending` | `false` | After a tap, a button shows its next look, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, never segments or buttons that only open something. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
-| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. |
+| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. The card is as tall as its buttons, so the gaps around it stay those of the page. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
-| `field_size` | `var(--tile-size-lg)` | With `labels: below`, the size of the icon fields, such as `76px`. |
+| `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 56 px by default. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
 | `start` | | Takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end. |
 
@@ -929,7 +929,7 @@ sub_button:
 
 A button is also highlighted while its entity has the value its tap sets, such as a source or a speed, as the TV pop-up's **TV** button does. A button with its own entity is highlighted while that entity is on and has a state color, unless it has `show_background: false` or `css_class: plain`, or opens something without `css_class: accent`.
 
-Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, as in Header, and Base's `on`, `disabled` and `dot`. `on` decides whether the button is highlighted, except with `css_class: plain` or `disabled`. `color` and `background` apply while the button is not highlighted, so each playlist in a row can have its own tint:
+Each button can have an `origami_button` key with `name`, `icon`, `color`, `name_color` and `background`, as in Header, and Base's `on`, `disabled` and `dot`. `on` decides whether the button is highlighted, except with `css_class: plain` or `disabled`, such as for a button that opens a pop-up, which is otherwise never highlighted. `color` is the icon's color and, while the button is highlighted, its lamp color. `background` applies while the button is not highlighted, so each playlist in a row can have its own tint:
 
 ```yaml
 - name: Chill
@@ -940,7 +940,19 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
     background: var(--tint)
 ```
 
-With `content_layout: icon-top` or `icon-bottom`, a button stacks its icon and name and is twice as tall, unless the card has `background: false`.
+With `content_layout: icon-top` or `icon-bottom`, a button is a box like a tile, with its icon in a field above or below its name, as the scenes in the [lights pop-up](../dashboard/lights/README.md) and the [favorites](../dashboard/favorites/README.md). In a row, the boxes share one width, and a highlighted box is tinted and has a bold name. With `background: false`, the box and the field have no fill.
+
+A button's own `order` moves it in the row, such as `-1` to the front, and a map from its state moves it only in those states. In a box or with `labels: below`, its own `field` fills the field with a picture or colors instead of the icon, such as a recipe photo or a scene's colors, and its own `label` is a second line under the name, such as a scene's brightness. A gradient needs quotes, because YAML reads `#` as the start of a comment:
+
+```yaml
+- name: Night
+  icon: mdi:weather-night
+  show_name: true
+  content_layout: icon-top
+  origami_button:
+    field: 'linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55)'
+    label: 10%
+```
 
 A button with only an icon is a square, except in a grid or a bar. Base's `sub_button_height` and `sub_button_text_size` set the buttons' height and label size, as for these chips under a music card:
 
@@ -1135,7 +1147,7 @@ The header sets its own height, so it needs no `grid_options`, and Popup's `gap`
 
 The Tiles module turns a sub-buttons card into a grid of tiles or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
 
-<img width="800" alt="Six tiles with the oven and the vacuum sorted to the front, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
+<img width="800" alt="A grid of tiles with the oven and the vacuum sorted to the front, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-tiles.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1197,7 +1209,7 @@ sub_button:
           before: '20:59:59'
 ```
 
-A tile whose entity is unavailable is dimmed. More tile examples are in the [favorites](../dashboard/favorites/tiles.yaml).
+A tile whose entity is unavailable is dimmed.
 
 #### List
 

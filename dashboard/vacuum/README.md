@@ -12,7 +12,7 @@ Starts the vacuum for the whole home or single rooms, sets its suction and, with
 
 1. In [`pop-up.yaml`](pop-up.yaml), change `vacuum.robot` and `sensor.robot_battery` to the vacuum's own. Change `quiet`, `balanced`, `turbo` and `max` in the suction row to the vacuum's levels, as [States](https://my.home-assistant.io/redirect/tools_states/) lists them in `fan_speed_list`, and delete the levels it doesn't have.
 2. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
-3. Open the pop-up from a button whose tap action is **Navigate** to `#popup_vacuum`, such as the vacuum tile in the [favorites](../favorites/README.md).
+3. Open the pop-up from a button whose tap action is **Navigate** to `#popup_vacuum`, such as the vacuum in the [favorites](../favorites/README.md).
 
 ## Optional
 

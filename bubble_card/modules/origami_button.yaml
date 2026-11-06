@@ -1,10 +1,10 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.14.0"
+  version: "3.15.0"
   supported:
     - sub-buttons
     - button
-  description: "Button turns the bottom sub-buttons of a sub-buttons or button card into rows, grids, chips, segmented bars, labeled tiles or a scrolling row. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
+  description: "Button turns the bottom sub-buttons of a sub-buttons or button card into rows, grids, chips, segmented bars, boxes, labeled tiles or a scrolling row. A button lights up while its entity has the value its tap sets, while its own entity is on, or when it matches the active option."
   editor:
     - name: background
       label: "Background"
@@ -88,7 +88,7 @@ origami_button:
               value: below
       default: inside
     - name: field_size
-      label: "Field size with labels below (such as 76px)"
+      label: "Field size with labels below or in a box (such as 76px)"
       selector:
         text: {}
       default: "var(--tile-size-lg)"
@@ -194,10 +194,28 @@ origami_button:
       const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
-      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default
-      const field = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim() || "var(--tile-size-lg)";
+      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default. A stacked button is a box with its icon in a field above its name, 56 px by default, as for scenes or favorites.
+      const sized = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim();
+      const field = sized || "var(--tile-size-lg)";
+      const stacked = (item) => ["icon-top", "icon-bottom"].includes(item.content_layout);
       // Each button can have its own name, icon, color, name_color and background, with the same keys as a value in Header
       const values = org.values(env, this.config, "origami_button", "ha-card .bubble-sub-button-bottom-container", opts.text || (seg ? (cfg.label_size !== "normal" ? "var(--ha-font-size-l)" : "var(--ha-font-size-m)") : "var(--ha-font-size-s)"), subs).join("\n    ");
+      // A button's own color is also its lamp while it is active, and its own order moves it in the row, such as -1 to the front. On a stacked button or with labels below, its own field fills its icon field with a picture or colors instead of the icon, such as a recipe photo or a scene's gradient, and keeps them while the button is active, so the bold name shows that. Its own label is a second line under the name, such as a scene's brightness.
+      const extra = subs.flatMap(({ n, item, opt }) => {
+        if (!opt) return [];
+        const out = [];
+        if (org.has(opt.color)) out.push(at(n) + " { --org-btn-lamp: " + String(opt.color).replace(/[;{}]/g, "") + "; }");
+        if (org.has(opt.order) && Number.isFinite(Number(opt.order))) out.push(at(n) + " { order: " + Number(opt.order) + " !important; }");
+        const stack = stacked(item);
+        if (!below && !stack) return out;
+        if (org.has(opt.field)) {
+          const pic = org.picture(String(opt.field));
+          out.push(at(n) + " .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: 0px !important; background: " + (pic ? "center / cover no-repeat url(" + JSON.stringify(pic) + ")" : String(opt.field).replace(/[;{}]/g, "")) + " !important; }");
+        }
+        // In a box, the gap between the name and the line under it is 4 px instead of the box's 8 px
+        if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(-1 * var(--ha-space-1))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); }");
+        return out;
+      }).join("\n    ");
       // A small segmented switch is a track around its group, and its active segment is filled like a segment of a whole bar
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
@@ -237,9 +255,12 @@ origami_button:
         lamps: lamps.filter(([n]) => active.includes(n)).map(([n, c]) => at(n) + " { --org-btn-lamp: " + c + "; }").join("\n    "),
         cols,
         values,
+        extra,
         pad: pad || "0",
         size,
         field,
+        stack: sized || "var(--control-height)",
+        stackIcon: String(cfg.icon_size ?? "").trim() || "var(--icon-size-m)",
         height: opts.sub || "",
         text: opts.text || "",
         bare,
@@ -259,6 +280,7 @@ origami_button:
       --org-btn-opacity: ${card._orgB.muted ? "var(--opacity-muted)" : "1"};
       --org-btn-icon-size: ${card._orgB.size};
       --org-btn-field: ${card._orgB.field};
+      --org-btn-stack: ${card._orgB.stack};
       --org-btn-lamp: ${card._orgB.lamp};
       /* A lit button tints what a key has on its card, and on the page, where a key is gray on gray, the card background, as the theme's tint does */
       --org-btn-lit: color-mix(in srgb, var(--org-btn-lamp) var(--tint-strength), var(--org-key-bg, var(--ha-card-background)));
@@ -304,12 +326,45 @@ origami_button:
       justify-content: ${card._orgB.row} !important;
       ${card._orgB.chips ? "padding-inline-end: calc(var(--org-btn-height) * 0.3) !important;" : ""}
     }
+    /* A stacked button is a box like a tile, with its icon in a field above its name. In a row, the boxes share one width. */
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
       height: auto !important;
       min-height: calc(2 * var(--org-btn-height)) !important;
+      ${card._orgB.cols ? "" : "width: calc(var(--org-btn-stack) + 2 * var(--ha-space-4)) !important;"}
       padding: var(--ha-space-3) var(--ha-space-2) !important;
       justify-content: center !important;
       gap: var(--ha-space-2) !important;
+      border-radius: var(--ha-card-border-radius) !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-icon:not(.hidden) {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: var(--org-btn-stack) !important;
+      height: var(--org-btn-stack) !important;
+      border-radius: calc(var(--org-btn-stack) * var(--radius-ratio));
+      --mdc-icon-size: ${card._orgB.stackIcon} !important;
+      ${card._orgB.bg ? "background: var(--tile-chip-background);\n      box-shadow: var(--tile-chip-shadow);" : ""}
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-name-container {
+      max-width: 100%;
+    }
+    /* The field, the name and the line under the name stand in this order, or with the field last for icon-bottom */
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
+      flex-direction: column !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-top .bubble-sub-button-icon:not(.hidden) {
+      order: 1 !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-name-container {
+      order: 2 !important;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom)::after {
+      order: 3;
+    }
+    ha-card .bubble-sub-button-bottom-container .bubble-sub-button.content-icon-bottom .bubble-sub-button-icon:not(.hidden) {
+      order: 4 !important;
     }
     ${card._orgB.seg ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-action-enabled:active {
       --org-btn-bg: var(--fill-strong);
@@ -447,14 +502,14 @@ origami_button:
       opacity: var(--opacity-muted) !important;
       pointer-events: none !important;
     }` : ""}
-    ${card._orgB.scroll && card._orgB.own ? `/* The row reaches past the card by its padding, so the buttons scroll to the screen's edge and their shadows show. The card reaches as far and lies over the cards around it, so only the buttons take taps, and a tap beside them reaches the card below, such as a slider. A swipe on a button still scrolls the row. */
+    ${card._orgB.scroll && card._orgB.own ? `/* The row reaches past the card by its padding on every side, the same on each, so the buttons scroll to the screen's edge and their shadows show, and the card takes no more space than its buttons. The card reaches as far and lies over the cards around it, so only the buttons take taps, and a tap beside them reaches the card below, such as a slider. A swipe on a button still scrolls the row. */
     ha-card {
       pointer-events: none;
     }
     ha-card .bubble-sub-button-bottom-container {
       width: auto !important;
       margin: calc(-1 * var(--scroller-bleed)) !important;
-      padding: ${card._orgB.chips ? "var(--scroller-bleed)" : "var(--scroller-padding)"} !important;
+      padding: var(--scroller-bleed) !important;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
@@ -488,3 +543,4 @@ origami_button:
       opacity: 1 !important;
       ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }
+    ${card._orgB.extra}

@@ -17,7 +17,7 @@ modules:
   - origami_base
   - origami_popup
 origami_popup:
-  gap: var(--ha-space-4)
+  gap: var(--ha-space-5)
   mini_popups:
     lamps:
       # A row for each lamp. Moving a slider to the start turns the lamp off.
@@ -60,19 +60,20 @@ sub_button:
 cards:
   - type: vertical-stack
     cards:
-      # How many lamps are on as the title, their brightness below it, a power button and a slider for all lamps.
+      # How many of the lamps are on as the title, since when below it, a power button and a slider for all lamps.
       # The key after the slider opens a row for each lamp.
       - type: custom:bubble-card
         card_type: button
         button_type: state
         entity: light.living_room
         name: >-
-          {%- set n = expand('light.living_room') | selectattr('state', 'eq', 'on') | list | count -%}
-          {{ 'All off' if n == 0 else n ~ (' lamp on' if n == 1 else ' lamps on') }}
+          {%- set lamps = expand('light.living_room') -%}
+          {%- set n = lamps | selectattr('state', 'eq', 'on') | list | count -%}
+          {{ 'Lights off' if n == 0 else n ~ ' of ' ~ lamps | count ~ ' on' }}
         show_icon: false
         state_content: >-
-          {%- set b = state_attr(entity, 'brightness') -%}
-          {{ (b / 2.55) | round | int ~ '%' if b else '' }}
+          {%- set t = states.light.living_room.last_changed | as_local -%}
+          {{ 'since ' ~ t.strftime('%H:%M' if t.date() == now().date() else '%b %-d') }}
         modules:
           - origami_base
         origami_base:
@@ -99,8 +100,9 @@ cards:
                   tap_action:
                     action: fire-dom-event
                     mini_popup: lamps
-      # The scenes, without a card around them. While a lamp is on, the scene turned on last is highlighted.
-      # A scene's state is the time it was last turned on. The list has the same scenes as the buttons below.
+      # The scenes, without a card around them. Each scene is a box with its colors, its name and its brightness.
+      # While a lamp is on, the scene turned on last is highlighted. A scene's state is the time it was last
+      # turned on, and the list has the same scenes as the buttons below.
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
@@ -110,7 +112,6 @@ cards:
           frameless: true
         origami_button:
           scroll: true
-          icon_size: 0px
           active: >-
             ${states('light.living_room') !== 'on' ? '' : ['scene.living_room_night', 'scene.living_room_morning',
             'scene.living_room_dinner', 'scene.living_room_evening', 'scene.living_room_movie',
@@ -130,6 +131,9 @@ cards:
                   css_class: night
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55)'
+                    label: 10%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -140,6 +144,9 @@ cards:
                   css_class: morning
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #f3e6cc, #e6c68a 50%, #a9c0cc)'
+                    label: 80%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -150,6 +157,9 @@ cards:
                   css_class: dinner
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #e6c68a, #c48f55 50%, #ae6e55)'
+                    label: 60%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -160,6 +170,9 @@ cards:
                   css_class: evening
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #e6c68a, #c08470 50%, #8c7185)'
+                    label: 45%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -170,6 +183,9 @@ cards:
                   css_class: movie
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #3a3448, #766481 50%, #a75050)'
+                    label: 20%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -180,39 +196,11 @@ cards:
                   css_class: late
                   show_name: true
                   content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67)'
+                    label: 30%
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
                     target:
                       entity_id: scene.living_room_late
-        # Each scene button shows a circle in the colors of its css_class below, or in gray for a css_class without colors
-        styles: |-
-          ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
-            width: 92px !important;
-            border-radius: var(--ha-card-border-radius) !important;
-          }
-          ha-card .bubble-sub-button-bottom-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
-            display: flex !important;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--scene, var(--fill-loud));
-          }
-          .night {
-            --scene: linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55);
-          }
-          .morning {
-            --scene: linear-gradient(135deg, #f3e6cc, #e6c68a 50%, #a9c0cc);
-          }
-          .dinner {
-            --scene: linear-gradient(135deg, #e6c68a, #c48f55 50%, #ae6e55);
-          }
-          .evening {
-            --scene: linear-gradient(135deg, #e6c68a, #c08470 50%, #8c7185);
-          }
-          .movie {
-            --scene: linear-gradient(135deg, #3a3448, #766481 50%, #a75050);
-          }
-          .late {
-            --scene: linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67);
-          }

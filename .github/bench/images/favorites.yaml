@@ -1,5 +1,5 @@
 kind: panel
 cards:
   - {file: favorites/header.yaml}
-  - {file: favorites/tiles.yaml}
+  - {file: favorites/row.yaml}
 trim: 16

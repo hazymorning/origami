@@ -1,5 +1,5 @@
-# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows two favorites
-# at a partly cloudy midday, dark two others, the weather in the notifications and the climate table open.
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows the favorites
+# at a partly cloudy midday, dark those of the late evening, the weather in the notifications and the climate table open.
 # The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
 seed: 27
 kind: phone
@@ -223,12 +223,10 @@ dark:
       - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
-  - file: weather/card.yaml
+  # The weather card is being redone, so a placeholder stands in its place
+  - {type: placeholder, height: 185px}
   - file: favorites/header.yaml
-  - file: favorites/tiles.yaml
-    only:
-    - Bedroom
-    - Bath
+  - file: favorites/row.yaml
   - file: rooms/header.yaml
   - file: climate-table/card.yaml
     with:
@@ -256,12 +254,10 @@ dark:
 light:
   cards:
   - file: greeting/card.yaml
-  - file: weather/card.yaml
+  # The weather card is being redone, so a placeholder stands in its place
+  - {type: placeholder, height: 185px}
   - file: favorites/header.yaml
-  - file: favorites/tiles.yaml
-    only:
-    - Oven
-    - Printer
+  - file: favorites/row.yaml
   - file: rooms/header.yaml
   - type: grid
     columns: 2

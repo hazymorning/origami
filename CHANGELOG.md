@@ -100,12 +100,13 @@ These changes are in the `next` branch and come with the next release.
 
 - New options: `segmented`, `scroll`, `chips`, `labels: below`, `field_size`, `outline`, `start`, `pending`, `color` and `label_size`.
 - `active` also matches the entity that a button's tap targets.
-- Each button can have its own `name`, `icon`, `color`, `name_color` and `background` under an `origami_button` key.
+- Each button can have its own `name`, `icon`, `color`, `name_color`, `background` and `order` under an `origami_button` key. Its `color` is also its lamp color while it is lit.
+- A button with `content_layout: icon-top` is a box like a tile, with its icon in a field above its name, and the boxes in a row share one width. A button's own `field` fills the field with a picture or a gradient instead of the icon, and its `label` adds a second line under the name, such as a scene's brightness. Both also work with `labels: below`.
 - A button with `css_class: divider` is a short line between two buttons.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`, and it casts the chip shadow.
 - On a button card, a lit button has the tint of the card's lit icon. On a tile, the buttons have the card background and the chip shadow, as keys do.
 - Button also works on button cards, where it styles the bottom sub-buttons.
-- A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it.
+- A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it. The card is as tall as its buttons, so the gaps around it stay those of the page.
 
 #### Light
 
@@ -151,6 +152,8 @@ These changes are in the `next` branch and come with the next release.
 - The climate table uses the Table module.
 - The pop-ups no longer set `shadow_opacity`, because Popup gives every pop-up the theme's shadow.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
+- The favorites are a row of boxes that scrolls sideways, each with its icon and a short name, like the scenes in the lights pop-up.
+- The lights pop-up shows how many lamps are on and since when. Each scene shows its colors in a rounded square, with the theme's corners, and its brightness under its name.
 - The weather card shows the forecast for the week and a two-story house whose rooms light up and show their temperature. Rain and snow fall in front of the house, and its images load from the repository, so a home needs no files of its own.
 
 ### Bug fixes

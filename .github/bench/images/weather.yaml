@@ -1,8 +1,8 @@
-# The weather card on its own. Light shows a partly cloudy midday with every chip on the house, two of them for open windows,
-# and dark a rainy night with three rooms lit and the rain in front of the house.
+# The weather card on its own. Light is a partly cloudy midday with two windows open, and dark a rainy night with three rooms lit.
+# The card is being redone, so for now a placeholder stands in its place.
 kind: panel
 cards:
-  - {file: weather/card.yaml}
+  - {type: placeholder, height: 185px}
 states:
   light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
   light.office: {state: 'off', attributes: {friendly_name: Office}}
