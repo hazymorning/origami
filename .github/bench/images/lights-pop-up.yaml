@@ -1,4 +1,5 @@
-# Midday: the Morning scene left on one lamp. Late evening: the Late scene on three dimmed lamps.
+# Midday: the Morning scene left on one lamp, with the light automation on. Late evening: the Late scene on three dimmed lamps,
+# set by hand with the automation off.
 kind: phone
 home: true
 open: '#popup_lights'
@@ -16,6 +17,7 @@ light:
     - {match: "' of '", result: '1 of 5 on'}
     - {match: "since", result: 'since 07:05'}
   states:
+    automation.living_room_lights: {state: 'on', attributes: {friendly_name: Living room lights}}
     light.living_room:
       state: 'on'
       attributes: {friendly_name: Living room, brightness: 115, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.living_room_floor_lamp, light.living_room_string_lights, light.living_room_tv, light.living_room_table_lamp, light.living_room_ceiling]}
@@ -29,6 +31,7 @@ dark:
     - {match: "' of '", result: '3 of 5 on'}
     - {match: "since", result: 'since 18:12'}
   states:
+    automation.living_room_lights: {state: 'off', attributes: {friendly_name: Living room lights}}
     light.living_room:
       state: 'on'
       attributes: {friendly_name: Living room, brightness: 82, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.living_room_floor_lamp, light.living_room_string_lights, light.living_room_tv, light.living_room_table_lamp, light.living_room_ceiling]}

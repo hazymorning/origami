@@ -17,7 +17,9 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 
 ## Optional
 
-- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. The scene turned on last stays highlighted while a lamp is on. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete the card with the scenes.
+- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a ring marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete the card with the scenes.
+
+- **Light automation.** For a room whose lights an automation controls, such as one that turns them on at dusk: the key beside the power button is filled while the automation is on, and a tap turns it off, so the lamps stay as they are set by hand. Change `automation.living_room_lights` to the room's automation. Without one, delete the key.
 
 > [!TIP]
 > A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45%`. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.
@@ -28,4 +30,5 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 | --- | --- |
 | `light.living_room` | The light group: how many lamps are on and since when, the power button and the slider for all lamps |
 | `light.living_room_floor_lamp`, `light.living_room_string_lights`, `light.living_room_tv`, `light.living_room_table_lamp`, `light.living_room_ceiling` | A row for each lamp |
+| `automation.living_room_lights` | Light automation: the key that turns the automation off and on |
 | `scene.living_room_night`, `scene.living_room_morning`, `scene.living_room_dinner`, `scene.living_room_evening`, `scene.living_room_movie`, `scene.living_room_late` | The scene buttons |

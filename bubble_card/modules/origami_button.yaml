@@ -210,12 +210,12 @@ origami_button:
         if (!below && !stack) return out;
         if (org.has(opt.field)) {
           const pic = org.picture(String(opt.field));
-          // The :not() with an ID gives the field more weight than the rules for a lit button. A box whose field holds colors is tinted itself while it is lit, as a scene is.
+          // The :not() with an ID gives the field more weight than the rules for a lit button. While a box whose field holds a picture or colors is active, a ring stands 2 px outside its field, as around a chosen color swatch.
           out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: 0px !important; background: " + (pic ? "center / cover no-repeat url(" + JSON.stringify(pic) + ")" : String(opt.field).replace(/[;{}]/g, "")) + " !important; }");
-          if (stack && active.includes(n) && cfg.active_style !== "toggle" && cfg.background !== false) out.push(at(n) + ":not(#org-none) { background: var(--org-btn-lit) !important; }");
+          if (stack && active.includes(n)) out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { outline: 2px solid var(--primary-text-color); outline-offset: 2px; }");
         }
-        // In a box, the line under the name follows it without the box's gap, so its letters stand 8 px below the name's, closer than the name to the field
-        if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(-1 * var(--ha-space-2))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); }");
+        // In a box, the line under the name stands closer than the box's gap, so its letters are 10 px below the name's, closer than the name to the field
+        if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(2px - var(--ha-space-2))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); }");
         return out;
       }).join("\n    ");
       // A small segmented switch is a track around its group, and its active segment is filled like a segment of a whole bar
@@ -328,7 +328,7 @@ origami_button:
       justify-content: ${card._orgB.row} !important;
       ${card._orgB.chips ? "padding-inline-end: calc(var(--org-btn-height) * 0.3) !important;" : ""}
     }
-    /* A stacked button is a box like a tile, with its icon in a field above its name. The field has 12 px above it and beside it, and the last line of text ends 12 px above the box's edge, since its line already holds 4 px below the letters. In a row, the boxes share one width, and a name may reach closer to the sides than the field. */
+    /* A stacked button is a box like a tile, with its icon in a field above its bold name, as a tile's name is. The field has 12 px above it and beside it, the name's letters start 14 px below it, and the last line of text ends 12 px above the box's edge, since its line already holds 4 px below the letters. In a row, the boxes share one width, and a name may reach closer to the sides than the field. */
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
       height: auto !important;
       min-height: calc(2 * var(--org-btn-height)) !important;
@@ -351,6 +351,8 @@ origami_button:
     }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) .bubble-sub-button-name-container {
       max-width: 100%;
+      margin-top: 2px !important;
+      font-weight: var(--ha-font-weight-bold) !important;
     }
     /* The field, the name and the line under the name stand in this order, or with the field last for icon-bottom */
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
@@ -545,7 +547,7 @@ origami_button:
       opacity: 1 !important;
       ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }
-    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip */
+    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip. A field with a picture or colors keeps them and gets a ring instead. */
     ${card._orgB.on(":is(.content-icon-top, .content-icon-bottom)")} {
       background: var(--org-value-chip, var(--org-btn-bg)) !important;
     }

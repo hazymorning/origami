@@ -60,7 +60,7 @@ sub_button:
 cards:
   - type: vertical-stack
     cards:
-      # How many of the lamps are on as the title, since when below it, a power button and a slider for all lamps.
+      # How many of the lamps are on as the title, since when below it, a key for the light automation, a power button and a slider for all lamps.
       # The key after the slider opens a row for each lamp.
       - type: custom:bubble-card
         card_type: button
@@ -85,6 +85,12 @@ cards:
         sub_button:
           bottom_layout: rows
           main:
+            # The automation that controls the lights, filled while it is on. A tap turns it off, so the lamps stay as they are set by hand.
+            - entity: automation.living_room_lights
+              icon: mdi:lightbulb-auto-outline
+              show_background: true
+              tap_action:
+                action: toggle
             - icon: mdi:power
               show_background: true
               tap_action:
