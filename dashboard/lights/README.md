@@ -22,7 +22,7 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 - **Light automation.** For a room whose lights an automation controls, such as one that turns them on at dusk: the key beside the power button is filled while the automation is on, and a tap turns it off, so the lamps stay as they are set by hand. Change `automation.living_room_lights` to the room's automation. Without one, delete the key.
 
 > [!TIP]
-> A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45%`. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.
+> A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45 %`, written as the slider writes it. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.
 
 ## Entities
 

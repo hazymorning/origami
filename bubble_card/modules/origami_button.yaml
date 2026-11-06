@@ -328,12 +328,12 @@ origami_button:
       justify-content: ${card._orgB.row} !important;
       ${card._orgB.chips ? "padding-inline-end: calc(var(--org-btn-height) * 0.3) !important;" : ""}
     }
-    /* A stacked button is a box like a tile, with its icon in a field above its bold name, as a tile's name is. The field has 12 px above it and beside it, the name's letters start 14 px below it, and the last line of text ends 12 px above the box's edge, since its line already holds 4 px below the letters. In a row, the boxes share one width, and a name may reach closer to the sides than the field. */
+    /* A stacked button is a box like a tile, with its icon in a field above its bold name, as a tile's name is. The field has 12 px above it and beside it, the name's capitals start 14 px below it and its small letters about 17 px, and the last line of text ends 18 px above the box's edge, so the text has as much room below it as the eye sees above it. Its line already holds 4 px below the letters. In a row, the boxes share one width, and a name may reach closer to the sides than the field. */
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button:is(.content-icon-top, .content-icon-bottom) {
       height: auto !important;
       min-height: calc(2 * var(--org-btn-height)) !important;
       ${card._orgB.cols ? "" : "width: calc(var(--org-btn-stack) + 2 * var(--ha-space-3)) !important;"}
-      padding: var(--ha-space-3) var(--ha-space-1) var(--ha-space-2) !important;
+      padding: var(--ha-space-3) var(--ha-space-1) calc(var(--ha-space-3) + 2px) !important;
       justify-content: center !important;
       gap: var(--ha-space-2) !important;
       border-radius: var(--ha-card-border-radius) !important;

@@ -139,7 +139,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55)'
-                    label: 10%
+                    label: 10 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -152,7 +152,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #f3e6cc, #e6c68a 50%, #a9c0cc)'
-                    label: 80%
+                    label: 80 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -165,7 +165,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #e6c68a, #c48f55 50%, #ae6e55)'
-                    label: 60%
+                    label: 60 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -178,7 +178,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #e6c68a, #c08470 50%, #8c7185)'
-                    label: 45%
+                    label: 45 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -191,7 +191,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #3a3448, #766481 50%, #a75050)'
-                    label: 20%
+                    label: 20 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on
@@ -204,7 +204,7 @@ cards:
                   content_layout: icon-top
                   origami_button:
                     field: 'linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67)'
-                    label: 30%
+                    label: 30 %
                   tap_action:
                     action: perform-action
                     perform_action: scene.turn_on

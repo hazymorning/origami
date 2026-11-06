@@ -940,7 +940,7 @@ Each button can have an `origami_button` key with `name`, `icon`, `color`, `name
     background: var(--tint)
 ```
 
-With `content_layout: icon-top` or `icon-bottom`, a button is a box like a tile, with its icon in a field above or below its name, as the scenes in the [lights pop-up](../dashboard/lights/README.md) and the [favorites](../dashboard/favorites/README.md). The field has 12 px of the box around it, and the boxes in a row share one width. A box's name is bold, as a tile's is. A highlighted box keeps its fill, and its field is tinted in the button's own color, as a lit tile's icon is. A field with a picture or colors keeps them and gets a ring instead, as a chosen color swatch does. With `background: false`, the box and the field have no fill.
+With `content_layout: icon-top` or `icon-bottom`, a button is a box like a tile, with its icon in a field above or below its name, as the scenes in the [lights pop-up](../dashboard/lights/README.md) and the [favorites](../dashboard/favorites/README.md). The field has 12 px of the box around it, the name stands 14 px below the field, and the last line ends 18 px above the box's edge. The boxes in a row share one width. A box's name is bold, as a tile's is. A highlighted box keeps its fill, and its field is tinted in the button's own color, as a lit tile's icon is. A field with a picture or colors keeps them and gets a ring instead, as a chosen color swatch does. With `background: false`, the box and the field have no fill.
 
 A button's own `order` moves it in the row, such as `-1` to the front, and a map from its state moves it only in those states. In a box or with `labels: below`, its own `field` fills the field with a picture or colors instead of the icon, such as a recipe photo or a scene's colors, and its own `label` is a second line under the name, such as a scene's brightness. A gradient needs quotes, because YAML reads `#` as the start of a comment:
 
@@ -951,7 +951,7 @@ A button's own `order` moves it in the row, such as `-1` to the front, and a map
   content_layout: icon-top
   origami_button:
     field: 'linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55)'
-    label: 10%
+    label: 10 %
 ```
 
 A button with only an icon is a square, except in a grid or a bar. Base's `sub_button_height` and `sub_button_text_size` set the buttons' height and label size, as for these chips under a music card:
