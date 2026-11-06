@@ -220,10 +220,10 @@ customElements.define('hui-card', class extends HTMLElement {
       // As in the card editor, where a card such as a menu shows itself in place
       if (window.__PREVIEW) el.preview = true;
     } else if (c.type === 'placeholder') {
-      // A card that is not ready yet, as a plain card of its height with a question mark, such as for the images
+      // A card that is not ready yet, as a plain card of its height and margins with a question mark, such as for the images
       const box = document.createElement('div');
       box.textContent = '?';
-      box.style.cssText = 'height:' + (c.height ?? '120px') + ';display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:var(--ha-card-border-radius);background:var(--ha-card-background);box-shadow:var(--ha-card-box-shadow, none);font:var(--ha-font-weight-medium) 48px var(--ha-font-family-body);color:var(--secondary-text-color)';
+      box.style.cssText = 'height:' + (c.height ?? '120px') + ';margin:' + (c.margin ?? '0') + ';display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:var(--ha-card-border-radius);background:var(--ha-card-background);box-shadow:var(--ha-card-box-shadow, none);font:var(--ha-font-weight-medium) 48px var(--ha-font-family-body);color:var(--secondary-text-color)';
       this.appendChild(box);
     } else {
       const box = document.createElement('div');

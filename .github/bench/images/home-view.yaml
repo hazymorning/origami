@@ -223,8 +223,8 @@ dark:
       - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
-  # The weather card is being redone, so a placeholder stands in its place
-  - {type: placeholder, height: 185px}
+  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
+  - {type: placeholder, height: 185px, margin: 20px 0 12px}
   - file: favorites/header.yaml
   - file: favorites/row.yaml
   - file: rooms/header.yaml
@@ -254,8 +254,8 @@ dark:
 light:
   cards:
   - file: greeting/card.yaml
-  # The weather card is being redone, so a placeholder stands in its place
-  - {type: placeholder, height: 185px}
+  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
+  - {type: placeholder, height: 185px, margin: 20px 0 12px}
   - file: favorites/header.yaml
   - file: favorites/row.yaml
   - file: rooms/header.yaml

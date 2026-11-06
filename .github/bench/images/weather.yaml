@@ -2,7 +2,7 @@
 # The card is being redone, so for now a placeholder stands in its place.
 kind: panel
 cards:
-  - {type: placeholder, height: 185px}
+  - {type: placeholder, height: 185px, margin: 20px 0 12px}
 states:
   light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
   light.office: {state: 'off', attributes: {friendly_name: Office}}
