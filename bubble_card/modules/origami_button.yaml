@@ -194,7 +194,7 @@ origami_button:
       const cols = seg || scroll ? 0 : Math.max(0, Math.min(6, parseInt(cfg.columns ?? 0, 10) || 0));
       const pad = String(cfg.padding ?? "").trim();
       const size = String(cfg.icon_size ?? "").trim() || (below ? "var(--icon-size-l)" : "var(--icon-size-2xs)");
-      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default. A stacked button is a box with its icon in a field above its name, 72 px by default, one and a half times a tile's icon, as for scenes or favorites. So about three and a half boxes fit on a phone, and the next one shows at the edge.
+      // With labels below, field_size sets the size of the icon fields, which are as large as a large tile by default. A stacked button is a box with its icon in a field above its name, 64 px by default, as for scenes or favorites.
       const sized = String(cfg.field_size ?? "").replace(/[;{}]/g, "").trim();
       const field = sized || "var(--tile-size-lg)";
       const stacked = (item) => ["icon-top", "icon-bottom"].includes(item.content_layout);
@@ -212,10 +212,12 @@ origami_button:
           const pic = org.picture(String(opt.field));
           // The :not() with an ID gives the field more weight than the rules for a lit button
           out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: 0px !important; background: " + (pic ? "center / cover no-repeat url(" + JSON.stringify(pic) + ")" : String(opt.field).replace(/[;{}]/g, "")) + " !important; }");
+          // A box with a picture or colors, such as a scene, is never off, so its name keeps the text color
+          if (stack) out.push(at(n) + " .bubble-sub-button-name-container { color: var(--primary-text-color); }");
         }
-        // While a box whose field holds a picture or colors is active, the field keeps its colors and the box its fill, and a small dot stands before the line under the name, or before the name without such a line: a 10 px circle in a 12 px space, 8 px from the text, in the lamp color at 70 %, as the dot on a room card
+        // While a box whose field holds a picture or colors is active, the field keeps its colors and the box its fill, and a small dot stands before the line under the name, or before the name without such a line: a 10 px circle in a 12 px space, 6 px from the text, in the lamp color at 70 %, as the dot on a room card
         const dotted = stack && org.has(opt.field) && active.includes(n);
-        const dot = "padding-inline-start: calc(12px + var(--ha-space-2)); background: radial-gradient(circle at center, color-mix(in srgb, var(--org-btn-lamp) 70%, transparent) 4.5px, transparent 5px) left center / 12px 12px no-repeat;";
+        const dot = "padding-inline-start: 18px; background: radial-gradient(circle at center, color-mix(in srgb, var(--org-btn-lamp) 70%, transparent) 4.5px, transparent 5px) left center / 12px 12px no-repeat;";
         const rtl = (sel) => sel.replace(/^ha-card /, "ha-card:dir(rtl) ") + " { background-position: right center; }";
         // In a box, the line under the name stands closer than the box's gap, so its letters are 10 px below the name's, closer than the name to the field
         if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(2px - var(--ha-space-2))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); " + (dotted ? dot : "") + "}", ...(dotted ? [rtl(at(n) + "::after")] : []));
@@ -265,7 +267,7 @@ origami_button:
         pad: pad || "0",
         size,
         field,
-        stack: sized || "calc(var(--tile-size) * 1.5)",
+        stack: sized || "var(--control-height-lg)",
         stackIcon: String(cfg.icon_size ?? "").trim() || "var(--icon-size-m)",
         height: opts.sub || "",
         text: opts.text || "",

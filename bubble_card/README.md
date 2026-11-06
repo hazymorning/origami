@@ -840,7 +840,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
 | `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. The card is as tall as its buttons, and the row reaches past it only at its sides, so a pop-up that scrolls ends right below it. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
-| `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 72 px by default. |
+| `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 64 px by default. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
 | `start` | | Takes the same values as `active`. The row begins at the matching button, and the buttons before it move to the end. |
 
