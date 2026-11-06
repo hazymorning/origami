@@ -151,6 +151,7 @@ These changes are in the `next` branch and come with the next release.
 - The climate table uses the Table module.
 - The pop-ups no longer set `shadow_opacity`, because Popup gives every pop-up the theme's shadow.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
+- The weather card shows the forecast for the week and a two-story house whose rooms light up and show their temperature. Rain and snow fall in front of the house, and its images load from the repository, so a home needs no files of its own.
 
 ### Bug fixes
 

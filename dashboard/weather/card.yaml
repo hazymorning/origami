@@ -3,16 +3,21 @@ weather_entity: weather.home
 color_mode: theme
 card_height: 185px
 card_padding: 16px
-card_offset: 12px 0px 12px 0px
+card_offset: 20px 0px 12px 0px
 card_tap_action:
   action: more-info
 sun_moon_size: 40
 sun_moon_x: 32
 sun_moon_y: 46
+# The chips on the house lie on a colored card, so they have the chip shadow, as on a tile
+shadow_color: var(--tile-chip-shadow)
+# Rain and snow fall in front of the house. Clouds and balloons stay away, so the house stays in view
+cloud_effects: false
+balloon_effects: false
 # One calm color for each kind of weather, and a plain one for anything else
 background_mode: color
 background_color: '#e6e3de'
-background_color_dark: '#1c1b19'
+background_color_dark: rgba(28, 27, 25, 0.7)
 background_threshold_entity: weather.home
 background_thresholds:
   - value: sunny
@@ -64,15 +69,36 @@ grid_options:
   columns: full
   rows: auto
 css: |
-  /* Today's lowest and highest temperature sit on one chip with the card's inner corners */
-  .buttons-group.grouped.with-bg > .buttons-row .button.with-bg {
-    border-radius: var(--radius-inner) !important;
-    box-shadow: var(--tile-chip-shadow, var(--ha-card-box-shadow)) !important;
+  /* Origami Weather with the Origami theme's values */
+  :host {
+    --origami-text-light: var(--primary-text-color);
+    --origami-text-dark: var(--primary-text-color);
+    --origami-bottom-font-weight: var(--ha-font-weight-normal);
+    --origami-bottom-bg-filter: var(--blur-soft);
+    /* A chip's corner is 35 % of its height: the text and 6px above and below it */
+    --origami-bottom-bg-radius: calc((1em + 12px) * var(--radius-ratio));
   }
-  /* The color changes softly when the weather changes */
+
+  /* The house lies behind the rain and snow, and the chips and the forecast lie in front */
+  #free-layer { z-index: auto; }
+  #free-layer > .buttons-group { z-index: 6; }
+  #free-layer > .has-image { z-index: 2; }
+
+  /* Each day of the forecast is a column 2em wide, so the days keep one rhythm.
+     The icons line up under the temperature, and after a swipe a day stops just past the fade. */
+  .row-horizontal-scroll { margin-inline-start: calc((var(--icon-size-xs) - 2em) / 2); scroll-padding-inline-start: var(--origami-scroll-fade-size); }
+  .row-horizontal-scroll > .button { min-width: 2em; }
+
+  /* A room's light fades in, and the card's color changes softly with the weather */
   @media (prefers-reduced-motion: no-preference) {
-    #card-root.bg-custom-color.bg-custom-color { transition: background-color 1.2s var(--ease-standard, ease), transform .4s cubic-bezier(.2, 0, .2, 1); }
+    #card-root.bg-custom-color.bg-custom-color { transition: background-color 1.2s var(--ease-standard), transform .4s cubic-bezier(.2, 0, .2, 1); }
+    #free-layer > .has-image ~ .has-image { animation: lit .9s var(--ease-standard) both; }
   }
+  @keyframes lit { from { opacity: 0; } }
+
+  /* Rain, snow, birds and planes in calmer colors */
+  #weather-effects { filter: saturate(.6); }
+
   /* On a wide screen, the heading above the card sets the space */
   @media (min-width: 768px) { :host { margin: 0 !important; } }
 button_containers:
@@ -96,45 +122,270 @@ button_containers:
             size: 40px
             weight: '700'
             color: var(--primary-text-color)
-  # Today's lowest and highest temperature
+  # The forecast for the week, which scrolls
   - position: custom
     position_anchor: bottom-left
     position_x: 0px
     position_y: 0px
-    grouped: true
-    background: true
-    separator: true
-    gap: 0px
+    custom_width: 100px
+    padding: 4px
+    gap: 12px
+    layout: horizontal-scroll
+    scroll_fade: true
+    scroll_fade_size: var(--ha-space-4)
+    align: center
+    button_style: vertical
     button_gap: 4px
-    button_icon_size: 13px
-    button_text_size: 13px
-    button_padding: 8px 12px
-    button_shadow: false
+    button_text_size: 12px
+    button_icon_size: var(--icon-size-xs)
     buttons:
       - entity: weather.home
         forecast: daily
-        shadow: false
-        background: false
         elements:
           - type: text
-            text: 'Today:'
-            margin: 0 2px 0 0
+            attribute: datetime
             weight: '500'
-          - type: text
-            attribute: templow
-            format: ' '
-            weight: '700'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
             color: var(--primary-text-color)
           - type: text
-            text: '-'
-          - type: text
             attribute: temperature
+            precision: 0
             format: °
             weight: '700'
-  # The house, the card's demo house
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 1
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 2
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 3
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 4
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 5
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: weather.home
+        forecast: daily
+        forecast_offset: 6
+        elements:
+          - type: text
+            attribute: datetime
+            weight: '500'
+            color: var(--secondary-text-color)
+          - type: icon
+            icon: weather
+            color: var(--primary-text-color)
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+  # The house
   - position: custom
     position_anchor: top-right
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: demo-home-image
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-dark.svg
+  # A room's windows light up while its light is on
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-living-room.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-living-room-dark.svg
+    visibility:
+      - condition: state
+        entity: light.living_room
+        state: 'on'
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-kitchen.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-kitchen-dark.svg
+    visibility:
+      - condition: state
+        entity: light.kitchen
+        state: 'on'
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-bedroom.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-bedroom-dark.svg
+    visibility:
+      - condition: state
+        entity: light.bedroom
+        state: 'on'
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-office.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-office-dark.svg
+    visibility:
+      - condition: state
+        entity: light.office
+        state: 'on'
+  # The temperature of the living room and the kitchen, and of the bedroom and the office while a window is open.
+  # Each chip shows while its sensor has a value, so a room without a sensor has no chip.
+  - position: custom
+    position_anchor: top-right
+    position_x: 4px
+    position_y: 4px
+    custom_width: 170px
+    background: true
+    button_background_color: var(--tile-chip-background)
+    button_blurred_background: true
+    button_padding: 6px 10px
+    button_gap: 4px
+    button_icon_size: 10px
+    button_text_size: 12px
+    buttons:
+      - entity: sensor.living_room_temperature
+        position: custom
+        position_x: 23px
+        position_y: 128px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.living_room_temperature
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: sensor.kitchen_temperature
+        position: custom
+        position_x: 101px
+        position_y: 132px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.kitchen_temperature
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: sensor.bedroom_temperature
+        position: custom
+        position_x: 22px
+        position_y: 47px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.bedroom_temperature
+          - condition: state
+            entity: binary_sensor.bedroom_window
+            state: 'on'
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+          - type: icon
+            icon: mdi:window-open-variant
+            color: var(--state-binary_sensor-window-on-color)
+      - entity: sensor.office_temperature
+        position: custom
+        position_x: 83px
+        position_y: 59px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.office_temperature
+          - condition: state
+            entity: binary_sensor.office_window
+            state: 'on'
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+          - type: icon
+            icon: mdi:window-open-variant
+            color: var(--state-binary_sensor-window-on-color)

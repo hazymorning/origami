@@ -1,0 +1,241 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="145" viewBox="0 0 510 435">
+<defs>
+<linearGradient id="roof" gradientUnits="userSpaceOnUse" x1="80.2" y1="16.0" x2="14.2" y2="203.5">
+<stop offset="0" stop-color="#FAF9F8"/>
+<stop offset="0.55" stop-color="#EFEDEA"/>
+<stop offset="1" stop-color="#E4E0DB"/>
+</linearGradient>
+<radialGradient id="pool" gradientUnits="userSpaceOnUse" cx="110.3" cy="44.1" r="357.0">
+<stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+<stop offset=".55" stop-color="#fff" stop-opacity="0.193"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="front" gradientUnits="userSpaceOnUse" x1="34.4" y1="183.6" x2="34.4" y2="381.6">
+<stop offset="0" stop-color="#DCD8D2"/>
+<stop offset="1" stop-color="#E9E6E2"/>
+</linearGradient>
+<linearGradient id="gable" gradientUnits="userSpaceOnUse" x1="0" y1="84.2" x2="0" y2="445.0">
+<stop offset="0" stop-color="#D3CDC5"/>
+<stop offset="1" stop-color="#C9C2B8"/>
+</linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2=".35" y2="1">
+<stop offset="0" stop-color="#C4CACE"/>
+<stop offset="1" stop-color="#8F99A0"/>
+</linearGradient>
+<linearGradient id="aoEave" gradientUnits="userSpaceOnUse" x1="34.4" y1="207.5" x2="34.4" y2="240.5">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.28"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.126"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.028"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="aoLedge" gradientUnits="userSpaceOnUse" x1="34.4" y1="282.6" x2="34.4" y2="301.7">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.12"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.054"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.012"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="aoLedgeG" gradientUnits="userSpaceOnUse" x1="359.3" y1="346.0" x2="359.3" y2="365.1">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.12"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.054"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.012"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="aoCanopy" gradientUnits="userSpaceOnUse" x1="34.4" y1="293.7" x2="34.4" y2="317.3">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.28"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.126"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.028"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="aoVergeF" gradientUnits="userSpaceOnUse" x1="359.3" y1="247.0" x2="383.8" y2="255.6">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.24"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.108"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.024"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="aoVergeB" gradientUnits="userSpaceOnUse" x1="475.6" y1="132.4" x2="458.6" y2="152.0">
+<stop offset="0" stop-color="#3C3228" stop-opacity="0.24"/>
+<stop offset="0.35" stop-color="#3C3228" stop-opacity="0.108"/>
+<stop offset="0.7" stop-color="#3C3228" stop-opacity="0.024"/>
+<stop offset="1" stop-color="#3C3228" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="fadeG" gradientUnits="userSpaceOnUse" x1="0" y1="350.3" x2="0" y2="451.9">
+<stop offset="0" stop-color="#fff"/>
+<stop offset="0.25" stop-color="#fff" stop-opacity="0.86"/>
+<stop offset="0.5" stop-color="#fff" stop-opacity="0.52"/>
+<stop offset="0.75" stop-color="#fff" stop-opacity="0.2"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<mask id="fade" maskUnits="userSpaceOnUse" x="-40" y="-40" width="590" height="515">
+<rect x="-40" y="-40" width="590" height="515" fill="url(#fadeG)"/>
+</mask>
+<filter id="b1" x="-1" y="-1" width="3" height="3" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="1.2"/>
+</filter>
+<filter id="b3" x="-1" y="-1" width="3" height="3" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="3"/>
+</filter>
+<clipPath id="cFront">
+<path d="M34.4 183.6L359.3 247.0L359.3 549.2L34.4 485.8Z"/>
+</clipPath>
+<clipPath id="cGable">
+<path d="M359.3 549.2L359.3 247.0L417.4 81.8L475.6 132.4L475.6 434.7Z"/>
+</clipPath>
+<clipPath id="cSil">
+<path d="M80.2 16.0L429.8 84.2L363.8 271.7L14.2 203.5Z"/>
+<path d="M429.8 84.2L495.8 141.7L495.8 149.3L429.8 94.2Z"/>
+<path d="M429.8 84.2L363.8 271.7L363.8 279.3L429.8 94.2Z"/>
+</clipPath>
+<clipPath id="cw0">
+<path d="M64.4 307.5L113.8 317.2L113.8 367.6L64.4 357.9Z"/>
+</clipPath>
+<clipPath id="cw1">
+<path d="M135.0 321.3L184.5 331.0L184.5 381.4L135.0 371.7Z"/>
+</clipPath>
+<clipPath id="cw2">
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z"/>
+</clipPath>
+<clipPath id="cw3">
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z"/>
+</clipPath>
+<clipPath id="cw4">
+<path d="M64.4 222.4L113.8 232.1L113.8 277.2L64.4 267.6Z"/>
+</clipPath>
+<clipPath id="cw5">
+<path d="M135.0 236.2L184.5 245.9L184.5 291.0L135.0 281.4Z"/>
+</clipPath>
+<clipPath id="cw6">
+<path d="M226.8 254.1L248.0 258.3L248.0 289.5L226.8 285.4Z"/>
+</clipPath>
+<clipPath id="cw7">
+<path d="M283.3 265.2L325.7 273.4L325.7 318.6L283.3 310.3Z"/>
+</clipPath>
+<clipPath id="cw8">
+<path d="M386.8 252.9L405.6 234.3L405.6 279.5L386.8 298.0Z"/>
+</clipPath>
+<clipPath id="cAttic">
+<path d="M424.0 146.7L424.0 144.5L423.7 142.5L423.3 140.8L422.8 139.4L422.1 138.3L421.3 137.6L420.4 137.3L419.5 137.3L418.5 137.8L417.4 138.6L416.4 139.8L415.4 141.3L414.4 143.2L413.6 145.2L412.8 147.5L412.1 149.9L411.6 152.4L411.2 154.9L410.9 157.3L410.8 159.7L410.9 161.9L411.2 163.9L411.6 165.6L412.1 167.0L412.8 168.1L413.6 168.8L414.4 169.2L415.4 169.1L416.4 168.6L417.4 167.8L418.5 166.6L419.5 165.1L420.4 163.3L421.3 161.2L422.1 158.9L422.8 156.5L423.3 154.0L423.7 151.5L424.0 149.1Z"/>
+</clipPath>
+<clipPath id="cDoor">
+<path d="M218.0 335.8L253.3 342.7L253.3 420.2L218.0 413.3Z"/>
+</clipPath>
+<clipPath id="cRoof">
+<path d="M80.2 16.0L429.8 84.2L363.8 271.7L14.2 203.5Z"/>
+</clipPath>
+</defs>
+<g mask="url(#fade)">
+<path d="M359.3 549.2L359.3 247.0L417.4 81.8L475.6 132.4L475.6 434.7Z" fill="url(#gable)"/>
+<g clip-path="url(#cGable)">
+<path d="M359.3 549.2L359.3 247.0L417.4 81.8L475.6 132.4L475.6 434.7Z" fill="url(#aoVergeF)"/>
+<path d="M359.3 549.2L359.3 247.0L417.4 81.8L475.6 132.4L475.6 434.7Z" fill="url(#aoVergeB)"/>
+<path d="M360.8 342.9L478.4 227.1L478.4 232.0L360.8 347.8Z" fill="#C9C2B8"/>
+<path d="M358.0 347.2L475.6 231.4L475.6 252.3L358.0 368.1Z" fill="url(#aoLedgeG)"/>
+</g>
+<path d="M34.4 183.6L359.3 247.0L359.3 549.2L34.4 485.8Z" fill="url(#front)"/>
+<g clip-path="url(#cFront)">
+<path d="M34.4 282.6L359.3 346.0L359.3 366.8L34.4 303.4Z" fill="url(#aoLedge)"/>
+</g>
+<path d="M33.1 278.9L358.0 342.4L358.0 347.2L33.1 283.8Z" fill="#E1DDD7"/>
+<path d="M34.4 277.7L359.3 341.1L358.0 342.4L33.1 278.9Z" fill="#F4F3F1"/>
+<path d="M64.4 307.5L113.8 317.2L113.8 367.6L64.4 357.9Z" fill="url(#glass)"/>
+<g clip-path="url(#cw0)">
+<path d="M64.4 307.5L113.8 317.2L113.8 367.6L64.4 357.9Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M64.4 307.5L113.8 317.2L113.8 367.6L64.4 357.9Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M89.1 312.4L89.1 362.7" fill="none" stroke="#ECE9E5" stroke-width="1.4"/>
+<path d="M62.3 357.5L116.0 368.0L116.0 370.4L62.3 359.9Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M135.0 321.3L184.5 331.0L184.5 381.4L135.0 371.7Z" fill="url(#glass)"/>
+<g clip-path="url(#cw1)">
+<path d="M135.0 321.3L184.5 331.0L184.5 381.4L135.0 371.7Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M135.0 321.3L184.5 331.0L184.5 381.4L135.0 371.7Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M159.7 326.1L159.7 376.5" fill="none" stroke="#ECE9E5" stroke-width="1.4"/>
+<path d="M132.9 371.3L186.6 381.8L186.6 384.2L132.9 373.7Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="url(#glass)"/>
+<g clip-path="url(#cw2)">
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M281.2 395.0L327.8 404.1L327.8 406.6L281.2 397.5Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="url(#glass)"/>
+<g clip-path="url(#cw3)">
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M385.8 384.1L406.6 363.7L406.6 366.1L385.8 386.5Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M64.4 222.4L113.8 232.1L113.8 277.2L64.4 267.6Z" fill="url(#glass)"/>
+<g clip-path="url(#cw4)">
+<path d="M64.4 222.4L113.8 232.1L113.8 277.2L64.4 267.6Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M64.4 222.4L113.8 232.1L113.8 277.2L64.4 267.6Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M89.1 227.2L89.1 272.4" fill="none" stroke="#ECE9E5" stroke-width="1.4"/>
+<path d="M62.3 267.2L116.0 277.6L116.0 280.1L62.3 269.6Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M135.0 236.2L184.5 245.9L184.5 291.0L135.0 281.4Z" fill="url(#glass)"/>
+<g clip-path="url(#cw5)">
+<path d="M135.0 236.2L184.5 245.9L184.5 291.0L135.0 281.4Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M135.0 236.2L184.5 245.9L184.5 291.0L135.0 281.4Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M159.7 241.0L159.7 286.2" fill="none" stroke="#ECE9E5" stroke-width="1.4"/>
+<path d="M132.9 281.0L186.6 291.4L186.6 293.9L132.9 283.4Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M226.8 254.1L248.0 258.3L248.0 289.5L226.8 285.4Z" fill="url(#glass)"/>
+<g clip-path="url(#cw6)">
+<path d="M226.8 254.1L248.0 258.3L248.0 289.5L226.8 285.4Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M226.8 254.1L248.0 258.3L248.0 289.5L226.8 285.4Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M224.7 285.0L250.1 289.9L250.1 292.4L224.7 287.4Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M283.3 265.2L325.7 273.4L325.7 318.6L283.3 310.3Z" fill="url(#glass)"/>
+<g clip-path="url(#cw7)">
+<path d="M283.3 265.2L325.7 273.4L325.7 318.6L283.3 310.3Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M283.3 265.2L325.7 273.4L325.7 318.6L283.3 310.3Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M281.2 309.9L327.8 319.0L327.8 321.4L281.2 312.3Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M386.8 252.9L405.6 234.3L405.6 279.5L386.8 298.0Z" fill="url(#glass)"/>
+<g clip-path="url(#cw8)">
+<path d="M386.8 252.9L405.6 234.3L405.6 279.5L386.8 298.0Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M386.8 252.9L405.6 234.3L405.6 279.5L386.8 298.0Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M385.8 299.0L406.6 278.5L406.6 281.0L385.8 301.4Z" fill="#FFFFFF" opacity="0.75"/>
+<path d="M424.0 146.7L424.0 144.5L423.7 142.5L423.3 140.8L422.8 139.4L422.1 138.3L421.3 137.6L420.4 137.3L419.5 137.3L418.5 137.8L417.4 138.6L416.4 139.8L415.4 141.3L414.4 143.2L413.6 145.2L412.8 147.5L412.1 149.9L411.6 152.4L411.2 154.9L410.9 157.3L410.8 159.7L410.9 161.9L411.2 163.9L411.6 165.6L412.1 167.0L412.8 168.1L413.6 168.8L414.4 169.2L415.4 169.1L416.4 168.6L417.4 167.8L418.5 166.6L419.5 165.1L420.4 163.3L421.3 161.2L422.1 158.9L422.8 156.5L423.3 154.0L423.7 151.5L424.0 149.1Z" fill="url(#glass)"/>
+<g clip-path="url(#cAttic)">
+<path d="M424.0 146.7L424.0 144.5L423.7 142.5L423.3 140.8L422.8 139.4L422.1 138.3L421.3 137.6L420.4 137.3L419.5 137.3L418.5 137.8L417.4 138.6L416.4 139.8L415.4 141.3L414.4 143.2L413.6 145.2L412.8 147.5L412.1 149.9L411.6 152.4L411.2 154.9L410.9 157.3L410.8 159.7L410.9 161.9L411.2 163.9L411.6 165.6L412.1 167.0L412.8 168.1L413.6 168.8L414.4 169.2L415.4 169.1L416.4 168.6L417.4 167.8L418.5 166.6L419.5 165.1L420.4 163.3L421.3 161.2L422.1 158.9L422.8 156.5L423.3 154.0L423.7 151.5L424.0 149.1Z" fill="none" stroke="#3C3228" stroke-width="4.5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+</g>
+<path d="M424.0 146.7L424.0 144.5L423.7 142.5L423.3 140.8L422.8 139.4L422.1 138.3L421.3 137.6L420.4 137.3L419.5 137.3L418.5 137.8L417.4 138.6L416.4 139.8L415.4 141.3L414.4 143.2L413.6 145.2L412.8 147.5L412.1 149.9L411.6 152.4L411.2 154.9L410.9 157.3L410.8 159.7L410.9 161.9L411.2 163.9L411.6 165.6L412.1 167.0L412.8 168.1L413.6 168.8L414.4 169.2L415.4 169.1L416.4 168.6L417.4 167.8L418.5 166.6L419.5 165.1L420.4 163.3L421.3 161.2L422.1 158.9L422.8 156.5L423.3 154.0L423.7 151.5L424.0 149.1Z" fill="none" stroke="#ECE9E5" stroke-width="1.4"/>
+<path d="M218.0 335.8L253.3 342.7L253.3 420.2L218.0 413.3Z" fill="#8DA399"/>
+<g clip-path="url(#cDoor)">
+<path d="M218.0 335.8L253.3 342.7L253.3 420.2L218.0 413.3Z" fill="none" stroke="#3C3228" stroke-width="5" opacity="0.35" filter="url(#b1)" transform="translate(1.2 2.6)"/>
+<path d="M218.0 335.8L253.3 342.7L253.3 373.9L218.0 367.1Z" fill="url(#aoCanopy)"/>
+</g>
+<circle cx="247.0" cy="383.1" r="1.6" fill="#ECE9E5"/>
+<path d="M262.2 334.0L251.9 344.0L251.9 348.2L262.2 338.1Z" fill="#D9D4CD"/>
+<path d="M199.0 333.7L251.9 344.0L251.9 348.2L199.0 337.9Z" fill="#E1DDD7"/>
+<path d="M209.2 323.6L262.2 334.0L251.9 344.0L199.0 333.7Z" fill="#F4F3F1"/>
+<path d="M199.0 333.7L251.9 344.0L251.7 345.0L198.8 334.7Z" fill="#FFFFFF" opacity="0.8"/>
+<path d="M360.1 433.7L477.0 318.6L477.0 435.0L360.1 550.1Z" fill="#BDB5AA"/>
+<path d="M33.8 370.1L358.6 433.5L358.6 549.8L33.8 486.4Z" fill="#D9D4CD"/>
+<g clip-path="url(#cFront)">
+<path d="M34.4 205.8L359.3 269.2L359.3 307.4L34.4 244.0Z" fill="url(#aoEave)"/>
+</g>
+<path d="M429.8 84.2L495.8 141.7L495.8 149.3L429.8 94.2Z" fill="#EEECE9"/>
+<path d="M429.8 84.2L495.8 141.7L496.5 140.9L430.5 83.5Z" fill="#FFFFFF"/>
+<path d="M429.8 84.2L363.8 271.7L363.8 279.3L429.8 94.2Z" fill="#C9C2B8"/>
+<path d="M14.2 203.5L363.8 271.7L363.8 279.3L14.2 211.1Z" fill="#E1DDD7"/>
+<path d="M80.2 16.0L429.8 84.2L363.8 271.7L14.2 203.5Z" fill="url(#roof)"/>
+<path d="M80.2 16.0L429.8 84.2L363.8 271.7L14.2 203.5Z" fill="url(#pool)"/>
+<path d="M14.2 203.5L363.8 271.7L364.0 270.6L14.4 202.4Z" fill="#FFFFFF"/>
+<path d="M80.2 16.0L429.8 84.2L429.6 85.5L80.0 17.3Z" fill="#FFFFFF"/>
+<path d="M14.2 203.5L80.2 16.0L79.1 15.6L13.0 203.1Z" fill="#FFFFFF"/>
+<path d="M363.8 271.7L429.8 84.2L430.6 84.5L364.6 272.0Z" fill="#FFFFFF"/>
+<g clip-path="url(#cSil)" fill="none" stroke="#3C3228" stroke-width="1.8" opacity="0.2" stroke-linejoin="round">
+<path d="M14.2 203.5L80.2 16.0L429.8 84.2L495.8 141.7"/>
+</g>
+<g clip-path="url(#cRoof)">
+<path d="M311.7 130.3L347.0 137.2L359.5 101.5L324.2 94.6Z" fill="#3C3228" opacity="0.14" filter="url(#b3)"/>
+</g>
+<path d="M329.1 63.6L340.1 52.7L340.1 97.7L329.1 129.0Z" fill="#CDC6BD"/>
+<path d="M304.4 58.7L329.1 63.6L329.1 129.0L304.4 124.2Z" fill="#E4E0DB"/>
+<path d="M330.7 61.2L344.2 47.9L344.2 52.0L330.7 65.4Z" fill="#D9D4CD"/>
+<path d="M300.3 55.3L330.7 61.2L330.7 65.4L300.3 59.4Z" fill="#E1DDD7"/>
+<path d="M300.3 55.3L330.7 61.2L344.2 47.9L313.8 41.9Z" fill="#F4F3F1"/>
+<path d="M309.5 53.7L327.2 57.2L335.0 49.4L317.4 46.0Z" fill="#9A9086"/>
+<path d="M304.4 58.7L304.4 124.2L303.5 124.2L303.5 58.7Z" fill="#FFFFFF" opacity="0.7"/>
+</g>
+</svg>

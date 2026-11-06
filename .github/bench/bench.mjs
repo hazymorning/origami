@@ -9,6 +9,7 @@
 //     preview shows other cards as in the card editor, and admin makes the user an admin. seed makes Math.random repeat the
 //     same numbers, so a card that places things at random, such as the weather card's clouds, looks the same in every shot.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
+//     Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
 // Bubble Card's version below is downloaded once into .cache. Raise it when the dashboard moves to a newer Bubble Card.
@@ -253,7 +254,7 @@ window.__PREVIEW = ${!!scenario.preview};
 ${shot ? '' : '<script src="/checks.js"></script>'}
 </body></html>`;
 
-const types = { '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.yaml': 'text/yaml', '.png': 'image/png', '.jpg': 'image/jpeg' };
+const types = { '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.yaml': 'text/yaml', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const send = (body, type) => { res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' }); res.end(body); };
@@ -289,6 +290,12 @@ try {
         return next(streams.get(file));
       };
     }, scenario.seed);
+    // Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree
+    await context.route(/^https:\/\/cdn\.jsdelivr\.net\/gh\/hazymorning\/origami@[^/]+\/([^?#]+)/, (route) => {
+      const file = path.join(repo, decodeURIComponent(route.request().url().match(/@[^/]+\/([^?#]+)/)[1]));
+      if (!file.startsWith(repo + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404 });
+      return route.fulfill({ body: fs.readFileSync(file), contentType: types[path.extname(file)] || 'application/octet-stream' });
+    });
     const p = await context.newPage();
     if (shot && scenario.time) await p.clock.setFixedTime(new Date(scenario.time));
     p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
