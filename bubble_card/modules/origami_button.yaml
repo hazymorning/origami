@@ -210,9 +210,9 @@ origami_button:
         if (!below && !stack) return out;
         if (org.has(opt.field)) {
           const pic = org.picture(String(opt.field));
-          // The :not() with an ID gives the field more weight than the rules for a lit button. While a box whose field holds a picture or colors is active, a ring stands 2 px outside its field, as around a chosen color swatch.
+          // The :not() with an ID gives the field more weight than the rules for a lit button. While a box whose field holds a picture or colors is active, the box is raised, as a key on a gray fill: it takes that key's color and the chip shadow, and the field keeps its colors.
           out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: 0px !important; background: " + (pic ? "center / cover no-repeat url(" + JSON.stringify(pic) + ")" : String(opt.field).replace(/[;{}]/g, "")) + " !important; }");
-          if (stack && active.includes(n)) out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { outline: 2px solid var(--primary-text-color); outline-offset: 2px; }");
+          if (stack && active.includes(n)) out.push(at(n) + ":not(#org-none) { background: var(--tile-chip-background) !important; box-shadow: var(--tile-chip-shadow) !important; }");
         }
         // In a box, the line under the name stands closer than the box's gap, so its letters are 10 px below the name's, closer than the name to the field
         if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(2px - var(--ha-space-2))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); }");
@@ -547,7 +547,7 @@ origami_button:
       opacity: 1 !important;
       ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }
-    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip. A field with a picture or colors keeps them and gets a ring instead. */
+    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip. A field with a picture or colors keeps them, and the box is raised instead. */
     ${card._orgB.on(":is(.content-icon-top, .content-icon-bottom)")} {
       background: var(--org-value-chip, var(--org-btn-bg)) !important;
     }

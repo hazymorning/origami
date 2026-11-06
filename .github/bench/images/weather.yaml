@@ -1,8 +1,8 @@
 # The weather card on its own. Light is a partly cloudy midday with two windows open, and dark a rainy night with three rooms lit.
-# The card is being redone, so for now a placeholder stands in its place.
+# The card is being redone, so for now a placeholder stands in its place. The card stands on its own here, so the placeholder has no margins.
 kind: panel
 cards:
-  - {type: placeholder, height: 185px, margin: 20px 0 0}
+  - {type: placeholder, height: 185px}
 states:
   light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
   light.office: {state: 'off', attributes: {friendly_name: Office}}

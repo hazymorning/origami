@@ -102,7 +102,7 @@ These changes are in the `next` branch and come with the next release.
 - `active` also matches the entity that a button's tap targets.
 - Each button can have its own `name`, `icon`, `color`, `name_color`, `background` and `order` under an `origami_button` key. Its `color` is also its lamp color while it is lit.
 - A lit button is tinted in its own lamp color, such as the state color of its entity, instead of always the card's.
-- A button with `content_layout: icon-top` is a box like a tile, with its icon in a field above its name, 12 px around the field, 14 px above the text and 18 px below it, and the boxes in a row share one width. A box's name is bold. A lit box tints its field in its own color, as a lit tile does, and a field with a picture or colors gets a ring instead. A button's own `field` fills the field with a picture or a gradient instead of the icon, and its `label` adds a second line under the name, such as a scene's brightness. Both also work with `labels: below`.
+- A button with `content_layout: icon-top` is a box like a tile, with its icon in a field above its name, 12 px around the field, 14 px above the text and 18 px below it, and the boxes in a row share one width. A box's name is bold. A lit box tints its field in its own color, as a lit tile does, and a box whose field holds a picture or colors is raised instead, as a key on a gray fill. A button's own `field` fills the field with a picture or a gradient instead of the icon, and its `label` adds a second line under the name, such as a scene's brightness. Both also work with `labels: below`.
 - A button with `css_class: divider` is a short line between two buttons.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`, and it casts the chip shadow.
 - On a button card, a lit button has the tint of the card's lit icon. On a tile, the buttons have the card background and the chip shadow, as keys do.
@@ -154,7 +154,7 @@ These changes are in the `next` branch and come with the next release.
 - The pop-ups no longer set `shadow_opacity`, because Popup gives every pop-up the theme's shadow.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 - The favorites come in two versions with the same favorites: a row of boxes that scrolls sideways, each with its icon and a short name, like the scenes in the lights pop-up, and a grid of tiles for a larger screen. The README shows both.
-- The lights pop-up shows how many lamps are on and since when. Each scene shows its colors in a rounded square, with the theme's corners, and its brightness under its name, and a ring marks the active scene.
+- The lights pop-up shows how many lamps are on and since when. Each scene shows its colors in a rounded square, with the theme's corners, and its brightness under its name, and the active scene's box is raised, as a key on a gray fill.
 - The weather card shows the forecast for the week and a two-story house whose rooms light up and show their temperature. Rain and snow fall in front of the house, and its images load from the repository, so a home needs no files of its own.
 
 ### Bug fixes
