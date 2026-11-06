@@ -1,0 +1,70 @@
+# A regular card, a tile and two compact rows with the pill switch
+kind: panel
+trim: 16
+cards:
+  - type: custom:bubble-card
+    card_type: separator
+    name: Devices
+    modules: [origami_base, origami_header]
+    origami_header: {weight: medium}
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: switch.coffee_machine
+    name: Coffee machine
+    icon: mdi:coffee-maker-outline
+    modules: [origami_base]
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: toggle}}
+    state_content: state
+    rows: 1.375
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: fan.air_purifier
+    name: Air purifier
+    icon: mdi:air-purifier
+    modules: [origami_base]
+    origami_base: {tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: toggle}}
+    state_content: state
+    rows: 1.375
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: switch.desk_power
+    name: Desk power
+    icon: mdi:desk
+    modules: [origami_base]
+    origami_base: {compact: true, toggle: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+    rows: 1
+  - type: custom:bubble-card
+    card_type: button
+    button_type: switch
+    entity: switch.printer
+    name: Printer
+    icon: mdi:printer-outline
+    modules: [origami_base]
+    origami_base: {compact: true, toggle: true, tile: true}
+    sub_button:
+      main:
+        - {icon: mdi:circle, show_background: true, tap_action: {action: toggle}}
+    rows: 1
+states:
+  switch.coffee_machine: {state: 'on', attributes: {friendly_name: Coffee machine}}
+  fan.air_purifier: {state: 'off', attributes: {friendly_name: Air purifier}}
+  switch.desk_power: {state: 'on', attributes: {friendly_name: Desk power}}
+  switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+# In the evening, other devices are on
+dark:
+  states:
+    switch.coffee_machine: {state: 'off', attributes: {friendly_name: Coffee machine}}
+    fan.air_purifier: {state: 'on', attributes: {friendly_name: Air purifier, percentage: 40}}
+    switch.desk_power: {state: 'off', attributes: {friendly_name: Desk power}}
+    switch.printer: {state: 'on', attributes: {friendly_name: Printer}}

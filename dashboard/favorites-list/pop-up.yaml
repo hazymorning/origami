@@ -1,0 +1,122 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_favorites'
+name: Favorites
+button_type: name
+show_header: true
+show_icon: false
+show_previous_button: false
+popup_mode: adaptive-dialog
+scrolling_effect: false
+with_bottom_offset: true
+margin: 7px
+margin_top_mobile: 174px
+margin_top_desktop: 30%
+width_desktop: ''
+modules:
+  - origami_base
+  - origami_popup
+cards:
+  - type: vertical-stack
+    cards:
+      # Each row is a favorite, with a chevron at its end like the rows of every card here
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          sign: open
+        sub_button:
+          bottom:
+            - entity: input_boolean.bath_time
+              name: Bath
+              icon: mdi:bathtub-outline
+              origami_tiles:
+                color:
+                  'on': var(--water-color)
+                state:
+                  'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')} left
+              tap_action:
+                action: toggle
+            # While the TV is off, the row turns it on. Once it is on, the row opens the TV pop-up.
+            - entity: media_player.living_room_tv
+              name: TV
+              icon: mdi:television
+              tap_action:
+                action: perform-action
+                perform_action: media_player.turn_on
+                target:
+                  entity_id: media_player.living_room_tv
+              visibility:
+                - condition: state
+                  entity: media_player.living_room_tv
+                  state: ['off', standby, unavailable, unknown]
+            - entity: media_player.living_room_tv
+              name: TV
+              icon: mdi:television
+              state_content: source
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_tv'
+              visibility:
+                - condition: state
+                  entity: media_player.living_room_tv
+                  state_not: ['off', standby, unavailable, unknown]
+      - type: custom:bubble-card
+        card_type: separator
+        name: Devices
+        modules:
+          - origami_base
+          - origami_header
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          sign: open
+        sub_button:
+          bottom:
+            - entity: fan.bedroom
+              name: Fan
+              icon: mdi:fan
+              state_content: percentage
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_fan'
+              visibility:
+                - condition: state
+                  entity: fan.bedroom
+                  state_not: [unavailable, unknown]
+            - entity: vacuum.robot
+              name: Vacuum
+              icon: mdi:robot-vacuum
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_vacuum'
+      - type: custom:bubble-card
+        card_type: separator
+        name: More
+        modules:
+          - origami_base
+          - origami_header
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_tiles
+        origami_tiles:
+          layout: list
+          sign: open
+        sub_button:
+          bottom:
+            - name: Server
+              icon: mdi:server
+              origami_tiles:
+                state: Overview
+              tap_action:
+                action: navigate
+                navigation_path: '#popup_server'

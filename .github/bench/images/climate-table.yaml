@@ -1,0 +1,118 @@
+# The climate table with six rooms: the card's three and three more, added as its README describes, each with a window and a thermostat
+kind: panel
+trim: 16
+cards:
+- file: rooms/header.yaml
+  replace:
+    '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'
+    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
+- file: climate-table/card.yaml
+  replace:
+    '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
+    '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'']': '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'', ''sensor.hallway_humidity'', ''sensor.kids_room_humidity'', ''sensor.bathroom_humidity'']'
+    ? "        - entity: sensor.office_humidity\n          css_class: humidity\n"
+    : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Hall\n      group:\n        - entity: sensor.hallway_temperature\n          name: Hall\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.hallway_window\n          css_class: window\n        - entity: climate.hallway\n          css_class: thermostat\n        - entity: sensor.hallway_temperature\n          css_class: temperature\n        - entity: sensor.hallway_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name: Bath\n      group:\n        - entity: sensor.bathroom_temperature\n\
+      \          name: Bath\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.bathroom_window\n          css_class: window\n        - entity: climate.bathroom\n          css_class: thermostat\n        - entity: sensor.bathroom_temperature\n          css_class: temperature\n        - entity: sensor.bathroom_humidity\n          css_class: humidity\n"
+  with:
+    styles: null
+states:
+  input_boolean.climate_table:
+    state: 'on'
+    attributes:
+      friendly_name: Climate table
+  climate.living_room:
+    state: heat
+    attributes:
+      friendly_name: Living room
+      hvac_action: idle
+      temperature: 21
+      current_temperature: 21.4
+  climate.bedroom:
+    state: heat
+    attributes:
+      friendly_name: Bedroom
+      hvac_action: heating
+      temperature: 19
+      current_temperature: 18.6
+  climate.kids_room:
+    state: heat
+    attributes:
+      friendly_name: Kids room
+      hvac_action: idle
+      temperature: 20
+      current_temperature: 20.3
+  climate.bathroom:
+    state: heat
+    attributes:
+      friendly_name: Bathroom
+      hvac_action: heating
+      temperature: 23
+      current_temperature: 22.6
+  sensor.hallway_temperature:
+    state: '19.8'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.hallway_humidity:
+    state: '58'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  sensor.kids_room_temperature:
+    state: '20.3'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.kids_room_humidity:
+    state: '51'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  sensor.bathroom_temperature:
+    state: '22.6'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.bathroom_humidity:
+    state: '64'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  climate.hallway:
+    state: heat
+    attributes:
+      friendly_name: Hall
+      hvac_action: idle
+      temperature: 19
+      current_temperature: 19.8
+  binary_sensor.bathroom_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.hallway_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.kids_room_window:
+    state: 'off'
+    attributes:
+      device_class: window
+dark:
+  states:
+    climate.hallway: {state: heat, attributes: {friendly_name: Hall, hvac_action: idle, temperature: 18, current_temperature: 19.4}}
+    climate.office: {state: heat, attributes: {friendly_name: Office, hvac_action: idle, temperature: 18, current_temperature: 18.9}}
+    binary_sensor.bathroom_window: {state: 'on', attributes: {device_class: window}}
+    climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, temperature: 19, current_temperature: 20.6}}
+    climate.bedroom: {state: heat, attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 19.5, current_temperature: 19.2}}
+    climate.kids_room: {state: heat, attributes: {friendly_name: Kids room, hvac_action: idle, temperature: 19, current_temperature: 19.6}}
+    climate.bathroom: {state: heat, attributes: {friendly_name: Bathroom, hvac_action: heating, temperature: 24, current_temperature: 24.1}}
+    sensor.living_room_humidity: {state: '49', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.bedroom_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.office_temperature: {state: '18.9', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.office_humidity: {state: '45', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.hallway_temperature: {state: '19.4', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.hallway_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.kids_room_temperature: {state: '19.6', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.kids_room_humidity: {state: '53', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.bathroom_temperature: {state: '24.1', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.bathroom_humidity: {state: '78', attributes: {unit_of_measurement: '%', device_class: humidity}}

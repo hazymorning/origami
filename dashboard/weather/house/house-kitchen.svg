@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="145" viewBox="0 0 510 435">
+<defs>
+<radialGradient id="g">
+<stop offset="0" stop-color="#F7E2B3"/>
+<stop offset=".55" stop-color="#EECF94"/>
+<stop offset="1" stop-color="#E6C68A"/>
+</radialGradient>
+<filter id="rim" x="-1" y="-1" width="3" height="3" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="2.2"/>
+</filter>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity="0"/>
+<stop offset=".38" stop-color="#fff" stop-opacity="0"/>
+<stop offset=".46" stop-color="#fff" stop-opacity="1"/>
+<stop offset=".6" stop-color="#fff" stop-opacity=".5"/>
+<stop offset=".66" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<filter id="glow0" x="-3" y="-3" width="7" height="7" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="5"/>
+</filter>
+<clipPath id="c0">
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z"/>
+</clipPath>
+<clipPath id="c1">
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z"/>
+</clipPath>
+<linearGradient id="fadeG" gradientUnits="userSpaceOnUse" x1="0" y1="350.3" x2="0" y2="451.9">
+<stop offset="0" stop-color="#fff"/>
+<stop offset="0.25" stop-color="#fff" stop-opacity="0.86"/>
+<stop offset="0.5" stop-color="#fff" stop-opacity="0.52"/>
+<stop offset="0.75" stop-color="#fff" stop-opacity="0.2"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<mask id="fade" maskUnits="userSpaceOnUse" x="-40" y="-40" width="590" height="515">
+<rect x="-40" y="-40" width="590" height="515" fill="url(#fadeG)"/>
+</mask>
+</defs>
+<g mask="url(#fade)">
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="#E6C68A" opacity="0.28" filter="url(#glow0)"/>
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="url(#g)"/>
+<g clip-path="url(#c0)">
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="none" stroke="#B8935A" stroke-width="5" opacity="0.3" filter="url(#rim)"/>
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="url(#sheen)" opacity="0.11"/>
+</g>
+<path d="M283.3 350.3L325.7 358.5L325.7 403.7L283.3 395.4Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="#E6C68A" opacity="0.28" filter="url(#glow0)"/>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="url(#g)"/>
+<g clip-path="url(#c1)">
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="none" stroke="#B8935A" stroke-width="5" opacity="0.3" filter="url(#rim)"/>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="url(#sheen)" opacity="0.11"/>
+</g>
+<path d="M386.8 338.0L405.6 319.4L405.6 364.6L386.8 383.2Z" fill="none" stroke="#ECE9E5" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+</svg>

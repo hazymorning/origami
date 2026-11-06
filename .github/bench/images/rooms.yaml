@@ -1,0 +1,156 @@
+# Light: four rooms and All rooms. Dark: All rooms open, with the bathroom and the kids room below and Fewer rooms.
+kind: panel
+trim: 16
+cards:
+- file: rooms/header.yaml
+- type: grid
+  columns: 2
+  cards:
+  - file: rooms/room.yaml
+  - file: rooms/room.yaml
+    replace:
+      living_room: bedroom
+      Living room: Bedroom
+      mdi:sofa: mdi:bed-king-outline
+  - file: rooms/room.yaml
+    replace:
+      living_room: kitchen
+      Living room: Kitchen
+      mdi:sofa: mdi:countertop-outline
+  - file: rooms/room.yaml
+    replace:
+      living_room: office
+      Living room: Office
+      mdi:sofa: mdi:desk
+  - file: rooms/room.yaml
+    replace:
+      living_room: bathroom
+      Living room: Bathroom
+      mdi:sofa: mdi:shower
+    with:
+      origami_base:
+        tile: true
+        vertical: true
+        hidden: ${states('input_boolean.all_rooms') !== 'on'}
+  - file: rooms/room.yaml
+    replace:
+      living_room: kids_room
+      Living room: Kids room
+      mdi:sofa: mdi:teddy-bear
+    with:
+      origami_base:
+        tile: true
+        vertical: true
+        hidden: ${states('input_boolean.all_rooms') !== 'on'}
+- file: rooms/all-rooms.yaml
+states:
+  light.kitchen:
+    state: 'on'
+    attributes:
+      friendly_name: Kitchen
+  light.office:
+    state: 'off'
+    attributes:
+      friendly_name: Office
+  sensor.kitchen_temperature:
+    state: '22.3'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.kitchen_humidity:
+    state: '58'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  binary_sensor.kitchen_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.office_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  light.bathroom:
+    state: 'off'
+    attributes:
+      friendly_name: Bathroom
+  light.kids_room:
+    state: 'off'
+    attributes:
+      friendly_name: Kids room
+  sensor.bathroom_temperature:
+    state: '22.6'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.bathroom_humidity:
+    state: '64'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  sensor.kids_room_temperature:
+    state: '20.3'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.kids_room_humidity:
+    state: '51'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  binary_sensor.bathroom_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.kids_room_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  input_boolean.all_rooms:
+    state: 'off'
+    attributes:
+      friendly_name: All rooms
+dark:
+  states:
+    light.kitchen:
+      state: 'off'
+      attributes:
+        friendly_name: Kitchen
+    sensor.kitchen_temperature:
+      state: '20.8'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.kitchen_humidity:
+      state: '55'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.office_temperature:
+      state: '18.9'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.office_humidity:
+      state: '45'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.living_room_humidity:
+      state: '49'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.bedroom_humidity:
+      state: '58'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    input_boolean.all_rooms:
+      state: 'on'
+      attributes:
+        friendly_name: All rooms
+    light.kids_room:
+      state: 'on'
+      attributes:
+        friendly_name: Kids room

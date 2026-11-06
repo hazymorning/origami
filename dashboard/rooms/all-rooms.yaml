@@ -1,0 +1,33 @@
+# Shows the rooms that stay hidden until a tap on All rooms, and hides them again
+type: custom:bubble-card
+card_type: separator
+modules:
+  - origami_base
+  - origami_header
+origami_header:
+  icon_size: var(--icon-size-l)
+  icon_color: color-mix(in srgb, var(--primary-text-color) 50%, transparent)
+grid_options:
+  columns: full
+  rows: auto
+sub_button:
+  main:
+    - name: All rooms
+      entity: input_boolean.all_rooms
+      icon: mdi:chevron-down
+      show_name: true
+      content_layout: icon-right
+      origami_header:
+        name:
+          'on': Fewer rooms
+          'off': All rooms
+        icon:
+          'on': mdi:chevron-up
+      tap_action:
+        action: toggle
+# The button stands in the middle, under the room cards
+styles: |-
+  ha-card .bubble-sub-button-container {
+    justify-content: center !important;
+    margin: 0 !important;
+  }

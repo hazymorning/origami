@@ -1,0 +1,26 @@
+kind: phone
+home: true
+preview: true
+admin: true
+cards:
+  # The card shows its menu in place, as in the card editor. These rules put it where the real menu opens: at the top, over the page.
+  - file: menu/card.yaml
+    replace:
+      "css: |-\n  /* The menu looks like a pop-up": "css: |-\n  :host { position: fixed !important; top: 0; left: 0; right: 0; z-index: 10; }\n  :host .scrim { display: block !important; opacity: 1 !important; visibility: visible !important; }\n  :host .sheet { border-radius: 0 0 var(--ha-dialog-border-radius, 20px) var(--ha-dialog-border-radius, 20px) !important; box-shadow: var(--shadow-elevated) !important; }\n  /* The menu looks like a pop-up"
+states:
+  sensor.system_monitor_uptime: {state: '2026-11-01T08:12:00+00:00', attributes: {friendly_name: Uptime, device_class: timestamp}}
+  sensor.system_monitor_processor_use: {state: '12', attributes: {unit_of_measurement: '%', friendly_name: Processor use}}
+  sensor.system_monitor_memory_usage: {state: '41', attributes: {unit_of_measurement: '%', friendly_name: Memory usage}}
+  sensor.system_monitor_disk_usage: {state: '37', attributes: {unit_of_measurement: '%', friendly_name: Disk usage}}
+  sensor.backup_last_successful_automatic_backup: {state: '2026-11-04T03:40:00+00:00', attributes: {device_class: timestamp}}
+templates:
+  - {match: "Uptime unknown", result: Up 3 days}
+light:
+  templates:
+    - {match: "Disk almost full", result: All good}
+dark:
+  states:
+    sensor.system_monitor_processor_use: {state: '4', attributes: {unit_of_measurement: '%', friendly_name: Processor use}}
+    sensor.system_monitor_memory_usage: {state: '38', attributes: {unit_of_measurement: '%', friendly_name: Memory usage}}
+  templates:
+    - {match: "Disk almost full", result: 1 update}

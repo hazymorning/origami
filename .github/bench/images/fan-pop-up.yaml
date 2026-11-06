@@ -1,0 +1,19 @@
+# Midday: medium speed and the Normal preset. Late evening: low speed, the Breeze preset and oscillation, with the timer
+# mini pop-up open from the timer key in the title.
+kind: phone
+home: true
+open: '#popup_fan'
+cards:
+  - {file: fan/pop-up.yaml}
+light:
+  templates:
+    - {match: "'Low' if p", result: Medium}
+    - {match: "state_attr(entity, 'percentage')", result: 66%}
+dark:
+  states:
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: true, preset_mode: Nature, preset_modes: [Nature, Normal]}}
+    timer.bedroom_fan: {state: active, attributes: {friendly_name: Bedroom fan, duration: '1:00:00', remaining: '1:00:00', finishes_at: '2026-11-04T23:40:00+00:00'}}
+  templates:
+    - {match: "'Low' if p", result: Low}
+    - {match: "state_attr(entity, 'percentage')", result: 33%}
+  click: ['ha-icon[icon="mdi:timer-outline"] >> nth=0']

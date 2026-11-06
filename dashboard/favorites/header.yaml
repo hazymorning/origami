@@ -1,0 +1,21 @@
+type: custom:bubble-card
+card_type: separator
+name: Favorites
+modules:
+  - origami_base
+  - origami_header
+origami_header:
+  weight: medium
+  icon_size: var(--icon-size-m)
+grid_options:
+  columns: full
+  rows: auto
+sub_button:
+  main:
+    - name: All
+      icon: mdi:chevron-right
+      show_name: true
+      content_layout: icon-right
+      tap_action:
+        action: navigate
+        navigation_path: '#popup_favorites'

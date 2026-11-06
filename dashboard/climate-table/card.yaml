@@ -1,0 +1,120 @@
+# One row for each room. A cell joins the column that its css_class names,
+# so a room without a window contact or a thermostat leaves that column empty.
+type: custom:bubble-card
+card_type: sub-buttons
+modules:
+  - origami_base
+  - origami_table
+origami_base:
+  animate: true
+origami_table:
+  columns:
+    # The dot's color goes from blue at 12° over green to red above 32°
+    - name: room
+      icon: mdi:circle
+      color_template: >-
+        ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+        [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
+        [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
+        [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
+        .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+    - name: window
+      icon_states:
+        'on': mdi:window-open-variant
+        'off': mdi:window-closed-variant
+    - name: thermostat
+      icon: mdi:thermostat
+      text_template: ${num(attr.temperature)}°
+    # This column takes the free space, so the values stand at the end.
+    # The warmest room gets an arrow up and stands out, and the coldest an arrow down.
+    # Each of the three templates lists the temperature sensors of all rows.
+    - name: temperature
+      width: 1fr
+      align: end
+      icon: mdi:thermometer
+      text_template: ${num(state, 0)}°
+      icon_template: >-
+        ${(t => +state === Math.max(...t) && +state > Math.min(...t) ? 'mdi:arrow-up'
+        : +state === Math.min(...t) && +state < Math.max(...t) ? 'mdi:arrow-down' : '')(
+        ['sensor.living_room_temperature', 'sensor.bedroom_temperature', 'sensor.office_temperature']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+      color_template: >-
+        ${(t => +state === Math.min(...t) && +state < Math.max(...t) ? 'var(--secondary-text-color)' : '')(
+        ['sensor.living_room_temperature', 'sensor.bedroom_temperature', 'sensor.office_temperature']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+      'on': >-
+        ${(t => +state === Math.max(...t) && +state > Math.min(...t))(
+        ['sensor.living_room_temperature', 'sensor.bedroom_temperature', 'sensor.office_temperature']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+    # The most humid room gets an arrow up and stands out, and the driest an arrow down.
+    # Each of the three templates lists the humidity sensors of all rows.
+    - name: humidity
+      icon: mdi:water-percent
+      text_template: ${num(state, 0, '%')}
+      icon_template: >-
+        ${(t => +state === Math.max(...t) && +state > Math.min(...t) ? 'mdi:arrow-up'
+        : +state === Math.min(...t) && +state < Math.max(...t) ? 'mdi:arrow-down' : '')(
+        ['sensor.living_room_humidity', 'sensor.bedroom_humidity', 'sensor.office_humidity']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+      color_template: >-
+        ${(t => +state === Math.min(...t) && +state < Math.max(...t) ? 'var(--secondary-text-color)' : '')(
+        ['sensor.living_room_humidity', 'sensor.bedroom_humidity', 'sensor.office_humidity']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+      'on': >-
+        ${(t => +state === Math.max(...t) && +state > Math.min(...t))(
+        ['sensor.living_room_humidity', 'sensor.bedroom_humidity', 'sensor.office_humidity']
+        .map((id) => parseFloat(states(id))).filter((v) => !isNaN(v)))}
+grid_options:
+  columns: full
+  rows: auto
+# Space between the table and the cards below it
+styles: |-
+  ha-card {
+    margin-bottom: var(--ha-space-5);
+  }
+sub_button:
+  bottom_layout: rows
+  main: []
+  bottom:
+    - name: Living room
+      group:
+        - entity: sensor.living_room_temperature
+          name: Living
+          show_name: true
+          css_class: room
+        - entity: binary_sensor.living_room_window
+          css_class: window
+        - entity: climate.living_room
+          css_class: thermostat
+        - entity: sensor.living_room_temperature
+          css_class: temperature
+        - entity: sensor.living_room_humidity
+          css_class: humidity
+    - name: Bedroom
+      group:
+        - entity: sensor.bedroom_temperature
+          name: Bed
+          show_name: true
+          css_class: room
+        - entity: binary_sensor.bedroom_window
+          css_class: window
+        - entity: climate.bedroom
+          css_class: thermostat
+        - entity: sensor.bedroom_temperature
+          css_class: temperature
+        - entity: sensor.bedroom_humidity
+          css_class: humidity
+    - name: Office
+      group:
+        - entity: sensor.office_temperature
+          name: Office
+          show_name: true
+          css_class: room
+        - entity: binary_sensor.office_window
+          css_class: window
+        - entity: climate.office
+          css_class: thermostat
+        - entity: sensor.office_temperature
+          css_class: temperature
+        - entity: sensor.office_humidity
+          css_class: humidity

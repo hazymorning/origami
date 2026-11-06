@@ -1,0 +1,47 @@
+# Scenes with the active scene highlighted, two toggles and a plain text button
+kind: panel
+cards:
+  - type: custom:bubble-card
+    card_type: sub-buttons
+    modules: [origami_base, origami_button]
+    origami_button:
+      columns: 2
+      active: "{{ states('sensor.living_room_scene') }}"
+    sub_button:
+      main: []
+      bottom:
+        - {name: Evening, icon: mdi:weather-sunset-down, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.living_room_evening}}}
+        - {name: Late, icon: mdi:weather-night-partly-cloudy, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.living_room_late}}}
+        - {name: Night, icon: mdi:weather-night, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.living_room_night}}}
+        - {name: Dinner, icon: mdi:silverware-fork-knife, show_name: true, tap_action: {action: perform-action, perform_action: scene.turn_on, target: {entity_id: scene.living_room_dinner}}}
+  - type: custom:bubble-card
+    card_type: sub-buttons
+    modules: [origami_base, origami_button]
+    origami_button: {columns: 2, active_style: toggle}
+    sub_button:
+      main: []
+      bottom:
+        - {entity: switch.living_room_candles, name: Candles, icon: mdi:candle, show_name: true, tap_action: {action: toggle}}
+        - {entity: light.living_room_string_lights, name: String lights, icon: mdi:string-lights, show_name: true, tap_action: {action: toggle}}
+  - type: custom:bubble-card
+    card_type: sub-buttons
+    modules: [origami_base, origami_button]
+    origami_button: {background: false, align: center, muted: true}
+    sub_button:
+      main: []
+      bottom:
+        - {name: All scenes, icon: mdi:chevron-right, show_name: true, content_layout: icon-right, tap_action: {action: navigate, navigation_path: '#popup_lights'}}
+states:
+  sensor.living_room_scene: {state: evening, attributes: {friendly_name: Living room scene}}
+  switch.living_room_candles: {state: 'on', attributes: {friendly_name: Candles}}
+  light.living_room_string_lights: {state: 'off', attributes: {friendly_name: String lights}}
+templates:
+  - {match: sensor.living_room_scene, result: evening}
+# In the evening, Late is the active scene and the string lights are on instead of the candles
+dark:
+  states:
+    sensor.living_room_scene: {state: late, attributes: {friendly_name: Living room scene}}
+    switch.living_room_candles: {state: 'off', attributes: {friendly_name: Candles}}
+    light.living_room_string_lights: {state: 'on', attributes: {friendly_name: String lights}}
+  templates:
+    - {match: sensor.living_room_scene, result: late}

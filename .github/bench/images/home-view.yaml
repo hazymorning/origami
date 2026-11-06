@@ -1,0 +1,281 @@
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows the favorites
+# at a partly cloudy midday, dark those of the late evening, the weather in the notifications and the climate table open.
+# The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
+seed: 27
+kind: phone
+states:
+  light.kitchen:
+    state: 'on'
+    attributes:
+      friendly_name: Kitchen
+  light.office:
+    state: 'off'
+    attributes:
+      friendly_name: Office
+  sensor.kitchen_temperature:
+    state: '22.3'
+    attributes:
+      unit_of_measurement: °C
+      device_class: temperature
+  sensor.kitchen_humidity:
+    state: '58'
+    attributes:
+      unit_of_measurement: '%'
+      device_class: humidity
+  binary_sensor.kitchen_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  binary_sensor.office_window:
+    state: 'off'
+    attributes:
+      device_class: window
+  media_player.living_room:
+    state: playing
+    attributes:
+      friendly_name: Living room
+      media_title: Slow Morning
+      media_artist: Paper Lanterns
+      entity_picture: /local/cover-1.jpg
+      group_members:
+      - media_player.living_room
+      - media_player.bedroom
+      volume_level: 0.32
+      media_duration: 214
+      media_position: 71
+      media_position_updated_at: '2026-11-04T12:39:00+00:00'
+      supported_features: 152463
+  media_player.bedroom:
+    state: playing
+    attributes:
+      friendly_name: Bedroom
+      media_title: Slow Morning
+      media_artist: Paper Lanterns
+      entity_picture: /local/cover-1.jpg
+      group_members:
+      - media_player.living_room
+      - media_player.bedroom
+  media_player.office:
+    state: idle
+    attributes:
+      friendly_name: Office
+  media_player.living_room_tv:
+    state: 'off'
+    attributes:
+      friendly_name: Living room TV
+  media_player.living_room_tv_cast:
+    state: 'off'
+    attributes:
+      friendly_name: Living room TV
+  light.living_room_floor_lamp:
+    state: 'on'
+    attributes:
+      friendly_name: Floor lamp
+  light.living_room_string_lights:
+    state: 'on'
+    attributes:
+      friendly_name: String lights
+dark:
+  states:
+    light.kitchen:
+      state: 'off'
+      attributes:
+        friendly_name: Kitchen
+    sensor.kitchen_temperature:
+      state: '20.8'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.kitchen_humidity:
+      state: '55'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.office_temperature:
+      state: '18.9'
+      attributes:
+        unit_of_measurement: °C
+        device_class: temperature
+    sensor.office_humidity:
+      state: '45'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.living_room_humidity:
+      state: '49'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    sensor.bedroom_humidity:
+      state: '58'
+      attributes:
+        unit_of_measurement: '%'
+        device_class: humidity
+    media_player.living_room:
+      state: idle
+      attributes:
+        friendly_name: Living room
+        group_members:
+        - media_player.living_room
+    media_player.bedroom:
+      state: playing
+      attributes:
+        friendly_name: Bedroom
+        media_title: Low Tide
+        media_artist: Quiet Harbour
+        entity_picture: /local/cover-2.jpg
+        group_members:
+        - media_player.bedroom
+        volume_level: 0.18
+        media_duration: 252
+        media_position: 160
+        media_position_updated_at: '2026-11-04T22:39:00+00:00'
+        supported_features: 152463
+    light.living_room_floor_lamp:
+      state: 'off'
+      attributes:
+        friendly_name: Floor lamp
+    light.living_room_string_lights:
+      state: 'off'
+      attributes:
+        friendly_name: String lights
+    input_boolean.climate_table:
+      state: 'on'
+      attributes:
+        friendly_name: Climate table
+    climate.living_room:
+      state: heat
+      attributes:
+        friendly_name: Living room
+        hvac_action: idle
+        temperature: 19
+        current_temperature: 20.6
+    climate.bedroom:
+      state: heat
+      attributes:
+        friendly_name: Bedroom
+        hvac_action: heating
+        temperature: 19.5
+        current_temperature: 19.2
+    climate.office:
+      state: heat
+      attributes:
+        friendly_name: Office
+        hvac_action: idle
+        temperature: 18
+        current_temperature: 18.9
+    timer.bath:
+      state: idle
+      attributes:
+        friendly_name: Bath
+        icon: mdi:bathtub-outline
+        duration: '0:25:00'
+    input_boolean.bath_time:
+      state: 'off'
+      attributes:
+        friendly_name: Bath time
+    calendar.household:
+      state: 'off'
+      attributes:
+        friendly_name: Household
+        message: Dentist
+        start_time: '2026-11-06 09:00:00'
+        end_time: '2026-11-06 10:00:00'
+        all_day: false
+        description: ''
+        location: ''
+    weather.home:
+      state: cloudy
+      attributes:
+        friendly_name: Home
+        temperature: 3
+        temperature_unit: °C
+        humidity: 86
+        wind_speed: 9
+        wind_speed_unit: km/h
+        pressure: 1012
+        supported_features: 3
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+      - {datetime: '2026-11-04T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 1, precipitation_probability: 10}
+      - {datetime: '2026-11-05T11:00:00+00:00', condition: sunny, temperature: 8, templow: 1, precipitation_probability: 0}
+      - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 9, templow: 3, precipitation_probability: 0}
+      - {datetime: '2026-11-07T11:00:00+00:00', condition: cloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+      - {datetime: '2026-11-08T11:00:00+00:00', condition: sunny, temperature: 11, templow: 3, precipitation_probability: 0}
+      - {datetime: '2026-11-09T11:00:00+00:00', condition: partlycloudy, temperature: 10, templow: 2, precipitation_probability: 0}
+      - {datetime: '2026-11-10T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 3, precipitation_probability: 0}
+    weather/subscribe_forecast:hourly:
+      type: hourly
+      forecast:
+      - {datetime: '2026-11-04T23:00:00+00:00', condition: cloudy, temperature: 2, precipitation_probability: 5}
+      - {datetime: '2026-11-05T00:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T01:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T02:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T03:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T04:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T05:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T06:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T07:00:00+00:00', condition: cloudy, temperature: 1, precipitation_probability: 5}
+      - {datetime: '2026-11-05T08:00:00+00:00', condition: cloudy, temperature: 2, precipitation_probability: 5}
+      - {datetime: '2026-11-05T09:00:00+00:00', condition: cloudy, temperature: 4, precipitation_probability: 5}
+      - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
+  cards:
+  - file: greeting/card.yaml
+  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
+  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - file: favorites/header.yaml
+  - file: favorites/tiles.yaml
+  - file: rooms/header.yaml
+  - file: climate-table/card.yaml
+    with:
+      styles: null
+  - type: grid
+    columns: 2
+    cards:
+    - file: rooms/room.yaml
+    - file: rooms/room.yaml
+      replace:
+        living_room: bedroom
+        Living room: Bedroom
+        mdi:sofa: mdi:bed-king-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: kitchen
+        Living room: Kitchen
+        mdi:sofa: mdi:countertop-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: office
+        Living room: Office
+        mdi:sofa: mdi:desk
+  - file: navigation-bar/card.yaml
+light:
+  cards:
+  - file: greeting/card.yaml
+  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
+  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - file: favorites/header.yaml
+  - file: favorites/tiles.yaml
+  - file: rooms/header.yaml
+  - type: grid
+    columns: 2
+    cards:
+    - file: rooms/room.yaml
+    - file: rooms/room.yaml
+      replace:
+        living_room: bedroom
+        Living room: Bedroom
+        mdi:sofa: mdi:bed-king-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: kitchen
+        Living room: Kitchen
+        mdi:sofa: mdi:countertop-outline
+    - file: rooms/room.yaml
+      replace:
+        living_room: office
+        Living room: Office
+        mdi:sofa: mdi:desk
+  - file: navigation-bar/card.yaml

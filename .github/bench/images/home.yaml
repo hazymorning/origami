@@ -1,0 +1,130 @@
+# The example home on a day in November, shared by every image. The light images show it at midday,
+# the dark ones late in the evening, under light and dark below.
+# The pictures in files are photos from Wikimedia Commons under CC0: cover-1 "Nature-forest-trees-fog", cover-2
+# "Calm-sea-haleiwa (Unsplash)", tv-1 "Misty forest on a green slope" and tv-2 "Moonlight over the Red Sea (53255278929)".
+# The home view, behind every pop-up
+home:
+  - {file: greeting/card.yaml}
+  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
+  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - {file: favorites/header.yaml}
+  - {file: favorites/tiles.yaml}
+  - {file: rooms/header.yaml}
+  - type: grid
+    columns: 2
+    cards:
+      - {file: rooms/room.yaml}
+      - file: rooms/room.yaml
+        replace: {living_room: bedroom, Living room: Bedroom, mdi:sofa: mdi:bed-king-outline}
+templates: []
+states:
+  sun.sun: {state: below_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-05T16:41:00+00:00', elevation: -22}}
+  weather.home:
+    state: partlycloudy
+    attributes: {friendly_name: Home, temperature: 9.4, temperature_unit: °C, humidity: 78, wind_speed: 11, wind_speed_unit: km/h, pressure: 1016, supported_features: 3}
+  calendar.household:
+    state: 'off'
+    attributes: {friendly_name: Household, message: Book club, start_time: '2026-11-06 19:00:00', end_time: '2026-11-06 21:00:00', all_day: false, description: '', location: ''}
+  sensor.weather_warning_level: {state: '0', attributes: {friendly_name: Weather warnings}}
+  timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T19:48:00+00:00'}}
+  sensor.oven_ready_in: {state: unknown, attributes: {friendly_name: Oven ready}}
+  sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
+  sensor.oven: {state: 200 °C, attributes: {friendly_name: Oven}}
+  vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, battery_level: 64}}
+  sensor.robot_cleaning_progress: {state: '42', attributes: {unit_of_measurement: '%', friendly_name: Cleaning progress}}
+  media_player.bedroom: {state: idle, attributes: {friendly_name: Bedroom}}
+  fan.bedroom:
+    state: 'on'
+    attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33, oscillating: false, preset_mode: Normal, preset_modes: [Nature, Normal]}
+  timer.bedroom_fan: {state: idle, attributes: {friendly_name: Bedroom fan, duration: '0:00:00'}}
+  input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
+  input_datetime.bath_time_end: {state: '2026-11-04 19:48:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true, timestamp: 1793821680}}
+  switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+  input_datetime.printer_end: {state: '2026-11-04 20:00:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
+  light.living_room: {state: 'on', attributes: {friendly_name: Living room, brightness: 180}}
+  light.bedroom: {state: 'off', attributes: {friendly_name: Bedroom}}
+  sensor.living_room_temperature: {state: '21.4', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Living room temperature}}
+  sensor.living_room_humidity: {state: '52', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Living room humidity}}
+  sensor.bedroom_temperature: {state: '18.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bedroom temperature}}
+  sensor.bedroom_humidity: {state: '56', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bedroom humidity}}
+  sensor.office_temperature: {state: '20.1', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Office temperature}}
+  sensor.office_humidity: {state: '47', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Office humidity}}
+  binary_sensor.living_room_window: {state: 'off', attributes: {friendly_name: Living room window, device_class: window}}
+  binary_sensor.office_window: {state: 'off', attributes: {friendly_name: Office window, device_class: window}}
+  climate.office: {state: heat, attributes: {friendly_name: Office, hvac_action: idle, temperature: 20, current_temperature: 20.1}}
+  binary_sensor.bedroom_window: {state: 'on', attributes: {friendly_name: Bedroom window, device_class: window}}
+  input_boolean.climate_table: {state: 'off', attributes: {friendly_name: Climate table}}
+  input_boolean.all_rooms: {state: 'off', attributes: {friendly_name: All rooms}}
+# Answers to subscriptions, such as the forecast
+messages:
+  weather/subscribe_forecast:
+    type: daily
+    forecast:
+      - {datetime: '2026-11-04T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 6, precipitation_probability: 10}
+      - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}
+      - {datetime: '2026-11-06T11:00:00+00:00', condition: rainy, temperature: 9, templow: 4, precipitation_probability: 70}
+# Home Assistant's words for states that the bench doesn't know
+words:
+  partlycloudy: Partly cloudy
+  clear-night: Clear night
+  cloudy: Cloudy
+  rainy: Rainy
+  sunny: Sunny
+  returning: Returning
+# The light images: midday under a partly cloudy sky, with lunch in the oven, the printer at work and the vacuum cleaning
+light:
+  time: '2026-11-04T12:40:00'
+  clock: '12:40'
+  states:
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 21}}
+    weather.home:
+      state: partlycloudy
+      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
+    timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
+    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
+    sensor.oven: {state: 180 °C, attributes: {friendly_name: Oven}}
+    switch.printer: {state: 'on', attributes: {friendly_name: Printer}}
+    input_datetime.printer_end: {state: '2026-11-04 12:58:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: partlycloudy, temperature: 15, templow: 7, precipitation_probability: 10}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 13, templow: 6, precipitation_probability: 20}
+        - {datetime: '2026-11-06T11:00:00+00:00', condition: sunny, temperature: 12, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-07T11:00:00+00:00', condition: partlycloudy, temperature: 11, templow: 5, precipitation_probability: 0}
+        - {datetime: '2026-11-08T11:00:00+00:00', condition: cloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-09T11:00:00+00:00', condition: sunny, temperature: 12, templow: 3, precipitation_probability: 0}
+        - {datetime: '2026-11-10T11:00:00+00:00', condition: partlycloudy, temperature: 13, templow: 5, precipitation_probability: 0}
+# The dark images: late in the evening, with music in the bedroom, a bath running and the vacuum back in its dock
+dark:
+  time: '2026-11-04T22:40:00'
+  clock: '22:40'
+  states:
+    weather.home:
+      state: clear-night
+      attributes: {friendly_name: Home, temperature: 6.8, temperature_unit: °C, humidity: 84, wind_speed: 4, wind_speed_unit: km/h, pressure: 1021, supported_features: 3}
+    calendar.household:
+      state: 'off'
+      attributes: {friendly_name: Household, message: Dentist, start_time: '2026-11-05 09:00:00', end_time: '2026-11-05 10:00:00', all_day: false, description: '', location: ''}
+    timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T22:52:00+00:00'}}
+    input_datetime.bath_time_end: {state: '2026-11-04 22:52:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true}}
+    sensor.oven: {state: 'Off', attributes: {friendly_name: Oven}}
+    vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
+    media_player.bedroom: {state: playing, attributes: {friendly_name: Bedroom, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg}}
+    light.living_room: {state: 'off', attributes: {friendly_name: Living room}}
+    light.bedroom: {state: 'on', attributes: {friendly_name: Bedroom, brightness: 90}}
+    sensor.living_room_temperature: {state: '20.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Living room temperature}}
+    sensor.bedroom_temperature: {state: '19.2', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bedroom temperature}}
+    binary_sensor.bedroom_window: {state: 'off', attributes: {friendly_name: Bedroom window, device_class: window}}
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: sunny, temperature: 15, templow: 6, precipitation_probability: 0}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}
+        - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-07T11:00:00+00:00', condition: sunny, temperature: 13, templow: 5, precipitation_probability: 0}
+        - {datetime: '2026-11-08T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 6, precipitation_probability: 0}
+        - {datetime: '2026-11-09T11:00:00+00:00', condition: partlycloudy, temperature: 10, templow: 4, precipitation_probability: 0}
+        - {datetime: '2026-11-10T11:00:00+00:00', condition: sunny, temperature: 12, templow: 3, precipitation_probability: 0}

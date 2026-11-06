@@ -1,0 +1,34 @@
+name: Design
+
+on:
+  pull_request:
+    paths:
+      - bubble_card/modules/**
+      - themes/**
+      - .github/bench/**
+      - .github/workflows/design.yml
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - bubble_card/modules/**
+      - themes/**
+      - .github/bench/**
+      - .github/workflows/design.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check the design rules
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .github/bench
+    steps:
+      - uses: actions/checkout@v7
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node bench.mjs

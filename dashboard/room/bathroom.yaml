@@ -1,0 +1,256 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_bathroom'
+name: Bathroom
+button_type: name
+show_icon: false
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 22px
+margin_top_desktop: 30%
+modules:
+  - origami_base
+  - origami_popup
+cards:
+  - type: vertical-stack
+    cards:
+      # Media: a room without a TV has only the speaker card
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.bathroom
+        name: Speaker
+        icon: mdi:speaker
+        modules:
+          - origami_base
+          - origami_media
+        origami_base:
+          group: true
+        hide:
+          power_button: true
+          previous_button: true
+          next_button: true
+          volume_button: true
+          play_pause_button: true
+        tap_action:
+          action: navigate
+          navigation_path: '#popup_music'
+        button_action:
+          tap_action:
+            action: navigate
+            navigation_path: '#popup_music'
+        sub_button:
+          main:
+            - icon: mdi:play
+              show_background: true
+              origami_base:
+                icon: "${state === 'playing' ? 'mdi:pause' : ''}"
+              tap_action:
+                action: perform-action
+                perform_action: media_player.media_play_pause
+                target:
+                  entity_id: media_player.bathroom
+            - icon: mdi:skip-next
+              show_background: false
+              tap_action:
+                action: perform-action
+                perform_action: media_player.media_next_track
+                target:
+                  entity_id: media_player.bathroom
+            # Filled while the speaker uses Bluetooth, because the tap selects it
+            - icon: mdi:bluetooth
+              show_background: false
+              origami_base:
+                icon: "${attr.source === 'Bluetooth' ? 'mdi:bluetooth-connect' : ''}"
+              tap_action:
+                action: perform-action
+                perform_action: media_player.select_source
+                target:
+                  entity_id: media_player.bathroom
+                data:
+                  source: Bluetooth
+          bottom:
+            - entity: media_player.bathroom
+              sub_button_type: slider
+              always_visible: true
+        rows: '2.2'
+
+      # Lights: with only a few lamps, each one has its own row and no group is needed
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Lights
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-s)
+            sub_button:
+              main:
+                # Counts the lamps in the list that are on
+                - icon: mdi:chevron-right
+                  show_name: true
+                  content_layout: icon-right
+                  show_background: false
+                  origami_header:
+                    name: >-
+                      ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
+                      states(id) === 'on').length))(['light.bathroom_mirror', 'light.bathroom_night_light'])}
+                  tap_action:
+                    action: navigate
+                    navigation_path: '#popup_lights'
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.bathroom_mirror
+            name: Mirror
+            icon: mdi:mirror-rectangle
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              tile: true
+            sub_button:
+              main:
+                - sub_button_type: slider
+                  always_visible: true
+                  allow_light_slider_to_0: true
+            rows: 1
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.bathroom_night_light
+            name: Night light
+            icon: mdi:lightbulb-night-outline
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              tile: true
+            sub_button:
+              main:
+                - sub_button_type: slider
+                  always_visible: true
+                  allow_light_slider_to_0: true
+            rows: 1
+          # Bath time is a Toggle helper for an automation, such as one that dims the lamps. Only the switch turns it on or off.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: input_boolean.bath_time
+            name: Bath time
+            icon: mdi:shower
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              toggle: true
+              tile: true
+            button_action:
+              tap_action:
+                action: none
+            sub_button:
+              main:
+                - icon: mdi:circle
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            rows: 1
+
+      # Climate: the header shows the temperature and the humidity, with a dot in a color for the temperature
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Climate
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-2xs)
+            sub_button:
+              main:
+                # Without the humidity, the value shows the temperature in Home Assistant's words
+                - entity: sensor.bathroom_temperature
+                  icon: mdi:circle
+                  show_state: true
+                  show_background: false
+                  origami_header:
+                    name: ${num(state, 1)}° / ${num(states('sensor.bathroom_humidity'), 0, '%')}
+                    # Blue up to 17°, green up to 22°, then yellow and orange, and red above 30°
+                    color: >-
+                      ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+                      [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
+                      [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
+                      [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
+                      .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+          # Minus and plus move the target by half a degree, and a tap on the card opens the thermostat
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: climate.bathroom
+            name: Heating
+            icon: mdi:thermostat
+            modules:
+              - origami_base
+              - origami_climate
+            origami_base:
+              group: true
+              tile: true
+            button_action:
+              tap_action:
+                action: more-info
+            sub_button:
+              main:
+                - icon: mdi:minus
+                  show_background: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.thermostat_step
+                    data:
+                      thermostat: climate.bathroom
+                      step: -0.5
+                - entity: climate.bathroom
+                  css_class: readout
+                  show_icon: false
+                  show_name: false
+                  show_background: false
+                  state_content: temperature
+                - icon: mdi:plus
+                  show_background: true
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.thermostat_step
+                    data:
+                      thermostat: climate.bathroom
+                      step: 0.5
+            rows: 1.375
+
+      # Everything off turns off the lamps. The thermostat keeps its setting.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          muted: true
+          icon_size: var(--icon-size-xs)
+          padding: var(--ha-space-6) 0 100px 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Everything off
+              icon: mdi:power
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: homeassistant.turn_off
+                target:
+                  entity_id:
+                    - light.bathroom_mirror
+                    - light.bathroom_night_light
