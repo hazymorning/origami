@@ -449,6 +449,8 @@ origami_popup:
       border-radius: 0;
       --fill-subtle: var(--ha-card-background);
       --org-key-shadow: var(--tile-chip-shadow);
+      /* A row of keys that scrolls keeps this much room above and below, so the chip shadow shows whole */
+      --org-key-room: var(--ha-space-2);
     }
     .org-mini.frameless .org-mini-box {
       gap: var(--ha-space-2);

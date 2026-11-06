@@ -107,7 +107,7 @@ These changes are in the `next` branch and come with the next release.
 - The active segment of a bar or a small switch has the fill of an active button with `active_style: toggle`, and it casts the chip shadow.
 - On a button card, a lit button has the tint of the card's lit icon. On a tile, the buttons have the card background and the chip shadow, as keys do.
 - Button also works on button cards, where it styles the bottom sub-buttons.
-- A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it. The card is as tall as its buttons, so the gaps around it stay those of the page.
+- A scrolling row reaches past its card so its buttons scroll to the screen's edge, and only its buttons take taps there. A tap beside them reaches the card next to the row, such as a slider above it. The card is as tall as its buttons, and the row reaches past it only at its sides, so the gaps around it stay those of the page and a pop-up that scrolls ends right below its last row.
 
 #### Light
 
