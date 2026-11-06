@@ -210,9 +210,13 @@ origami_button:
         if (!below && !stack) return out;
         if (org.has(opt.field)) {
           const pic = org.picture(String(opt.field));
-          // The :not() with an ID gives the field more weight than the rules for a lit button. While a box whose field holds a picture or colors is active, the box takes the color of a key on a gray fill, and the field keeps its colors. As every key on the page or in a pop-up, it changes only its color and casts no shadow, which a scrolling row would cut off.
+          // The :not() with an ID gives the field more weight than the rules for a lit button. While a box whose field holds a picture or colors is active, the field keeps its colors and the box its fill, and a small round badge with a check stands in the field's top corner, as on the navigation bar: the card background with the chip shadow, so it shows on light and dark colors alike. It lies inside the field, so it takes no space and a scrolling row cuts nothing off.
           out.push(at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { --mdc-icon-size: 0px !important; background: " + (pic ? "center / cover no-repeat url(" + JSON.stringify(pic) + ")" : String(opt.field).replace(/[;{}]/g, "")) + " !important; }");
-          if (stack && active.includes(n)) out.push(at(n) + ":not(#org-none) { background: var(--tile-chip-background) !important; box-shadow: none !important; }");
+          if (stack && active.includes(n)) out.push(
+            at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden) { position: relative; }",
+            at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden)::before { content: ''; position: absolute; top: var(--ha-space-2); inset-inline-end: var(--ha-space-2); width: var(--ha-space-5); height: var(--ha-space-5); border-radius: 50%; background: var(--ha-card-background); box-shadow: var(--tile-chip-shadow); }",
+            at(n) + ":not(#org-none) .bubble-sub-button-icon:not(.hidden)::after { content: ''; position: absolute; top: calc(var(--ha-space-2) + 3px); inset-inline-end: calc(var(--ha-space-2) + 3px); width: 14px; height: 14px; background: var(--primary-text-color); -webkit-mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E\") center / contain no-repeat; mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E\") center / contain no-repeat; }"
+          );
         }
         // In a box, the line under the name stands closer than the box's gap, so its letters are 10 px below the name's, closer than the name to the field
         if (org.has(opt.label)) out.push(at(n) + "::after { content: " + org.str(opt.label) + "; position: static; max-width: 100%; margin-top: " + (stack ? "calc(2px - var(--ha-space-2))" : "var(--ha-space-1)") + "; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ha-font-size-s); font-weight: var(--ha-font-weight-medium); color: var(--secondary-text-color); opacity: var(--org-btn-opacity); }");
@@ -547,7 +551,7 @@ origami_button:
       opacity: 1 !important;
       ${card._orgB.toggle && !card._orgB.chips ? "" : "font-weight: var(--ha-font-weight-bold) !important;"}
     }
-    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip. A field with a picture or colors keeps them, and the box takes the color of a key on a gray fill instead, without a shadow. */
+    ${card._orgB.bg && !card._orgB.toggle && !card._orgB.seg ? `/* A lit box keeps its fill and tints its field in its own color, as a lit tile tints its icon's chip. A field with a picture or colors keeps them, and a badge with a check in its corner marks it instead. */
     ${card._orgB.on(":is(.content-icon-top, .content-icon-bottom)")} {
       background: var(--org-value-chip, var(--org-btn-bg)) !important;
     }
