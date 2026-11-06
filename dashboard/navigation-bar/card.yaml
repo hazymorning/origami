@@ -404,7 +404,7 @@ styles: |-
   .media-player-carousel.mobile {
     width: auto !important;
     align-self: stretch !important;
-    margin: 0 var(--view-bleed) !important;
+    margin: 0 var(--view-bleed) 0 var(--view-bleed) !important;
   }
 
   /* With music and the TV, the cards stand in a carousel, whose frame cuts off their shadows. The frame has the shadow instead. */

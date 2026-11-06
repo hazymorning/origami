@@ -93,7 +93,7 @@ css: |-
     background: var(--bubble-backdrop-background-color);
   }
   .sheet {
-    padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px);
+    padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px) var(--ha-space-5);
     gap: var(--ha-space-5);
     background: var(--popup-background);
     box-shadow: var(--shadow-elevated);

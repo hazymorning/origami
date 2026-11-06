@@ -320,7 +320,7 @@ button_containers:
     background: true
     button_background_color: var(--tile-chip-background)
     button_blurred_background: true
-    button_padding: 6px 10px
+    button_padding: 6px 10px 6px 10px
     button_gap: 4px
     button_icon_size: 10px
     button_text_size: 12px

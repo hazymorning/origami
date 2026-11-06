@@ -69,7 +69,7 @@ origami_popup:
             columns: 1
             align: center
             icon_size: var(--icon-size-xs)
-            padding: 0 0 var(--ha-space-2)
+            padding: 0 0 var(--ha-space-2) 0
           sub_button:
             main: []
             bottom:
@@ -556,7 +556,7 @@ cards:
           background: false
           align: center
           icon_size: var(--icon-size-s)
-          padding: var(--ha-space-3) 0 0
+          padding: var(--ha-space-3) 0 0 0
         sub_button:
           main: []
           bottom:

@@ -43,7 +43,7 @@ origami_popup:
         origami_button:
           segmented: true
           label_size: normal
-          padding: var(--ha-space-2) 0 0
+          padding: var(--ha-space-2) 0 0 0
         sub_button:
           main: []
           bottom:
@@ -211,7 +211,7 @@ cards:
         origami_button:
           segmented: true
           icon_size: var(--icon-size-m)
-          padding: var(--ha-space-2) 0
+          padding: var(--ha-space-2) 0 var(--ha-space-2) 0
         sub_button:
           main: []
           bottom:

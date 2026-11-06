@@ -247,7 +247,7 @@ cards:
           columns: 2
           active_style: toggle
           icon_size: var(--icon-size-s)
-          padding: 0 0 var(--ha-space-2)
+          padding: 0 0 var(--ha-space-2) 0
           active: "${states('vacuum.robot') === 'cleaning' ? states('sensor.robot_current_room') : ''}"
         sub_button:
           main: []

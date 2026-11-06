@@ -79,7 +79,7 @@ cards:
         origami_button:
           segmented: true
           icon_size: var(--icon-size-m)
-          padding: var(--ha-space-2) 0
+          padding: var(--ha-space-2) 0 var(--ha-space-2) 0
         sub_button:
           main: []
           bottom:
@@ -243,7 +243,7 @@ cards:
           background: false
           align: center
           icon_size: var(--icon-size-l)
-          padding: var(--ha-space-2) 0 0
+          padding: var(--ha-space-2) 0 0 0
         # The styles place the buttons by their css_class, draw the round pad and set the button sizes. They exist only on this card.
         styles: |-
           ha-card .bubble-sub-button-bottom-container {
