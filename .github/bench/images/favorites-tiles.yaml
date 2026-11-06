@@ -1,0 +1,6 @@
+# The favorites as a grid of tiles, the second version of the part, at the same moments as the row
+kind: panel
+cards:
+  - {file: favorites/header.yaml}
+  - {file: favorites/tiles.yaml}
+trim: 16
