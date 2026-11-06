@@ -3,7 +3,7 @@ weather_entity: weather.home
 color_mode: theme
 card_height: 185px
 card_padding: 16px
-card_offset: 20px 0px 12px 0px
+card_offset: 20px 0px 0px 0px
 card_tap_action:
   action: more-info
 sun_moon_size: 40

@@ -8,8 +8,6 @@ modules:
   - origami_button
 origami_button:
   scroll: true
-  # A little space below the row, before the next heading
-  padding: 0 0 var(--ha-space-2)
 grid_options:
   columns: full
   rows: auto

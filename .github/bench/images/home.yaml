@@ -6,7 +6,7 @@
 home:
   - {file: greeting/card.yaml}
   # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
-  - {type: placeholder, height: 185px, margin: 20px 0 12px}
+  - {type: placeholder, height: 185px, margin: 20px 0 0}
   - {file: favorites/header.yaml}
   - {file: favorites/row.yaml}
   - {file: rooms/header.yaml}
