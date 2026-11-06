@@ -1145,7 +1145,7 @@ The header sets its own height, so it needs no `grid_options`, and Popup's `gap`
 
 ### Tiles
 
-The Tiles module turns a sub-buttons card into a grid of tiles or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
+The Tiles module turns a sub-buttons card into a grid of tiles, a row of tiles that scrolls sideways or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
 
 <img width="800" alt="A grid of tiles with the oven and the vacuum sorted to the front, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-tiles.webp">
 
@@ -1154,7 +1154,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles or a list, each w
 
 <br>
 
-On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default. A list has the card options `slim`, `dividers`, `sign`, `pending` and `background`, described below. All other keys go under each tile's own `origami_tiles` key.
+On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default, or with `scroll: true` one row that scrolls sideways to the screen's edge, with each tile twice as wide as it is tall. A list has the card options `slim`, `dividers`, `sign`, `pending` and `background`, described below. All other keys go under each tile's own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -1571,7 +1571,7 @@ The theme sets the pop-up background, so Bubble Card's `bg_color`, `bg_opacity` 
 
 A module adds only what Bubble Card lacks, and Bubble Card handles the layout, the actions and the editor. [Bubble Card's module documentation](https://github.com/Clooos/Bubble-Card#modules) explains how modules work. Good examples are Climate, which writes the state line, Media, which also writes the name line, and Tiles, which turns a sub-buttons card into a grid.
 
-Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, 13.4 for `pending()`, and 13.5 for the fill and the shadow of a key in `--org-key-bg` and `--org-key-shadow`. These are the helpers:
+Base puts its helpers on `card._org` for the modules that run after it. A module checks `card._org?.hass === hass && card._org.version >= 12` to know that Base 12 or later ran first in the same render. Newer parts need a higher version: 12.5 for `shows()` and `unframe()`, 12.6 for `backdrop()`, 12.8 for the card padding in `--org-pad`, 12.9 for the width of a three-key tray in `--org-end-col` and the color of an unlit icon in `--org-chip-rest`, 13 for `env`, `ctx`, `classed()`, `each()`, `fade()` and `pen()`, 13.1 for `layout()` and `later()`, 13.2 for `dropdown()`, `menu()` and `picker()`, 13.4 for `pending()`, 13.5 for the fill and the shadow of a key in `--org-key-bg` and `--org-key-shadow`, and 13.6 for `scroller()`. These are the helpers:
 
 | Helper | Description |
 | --- | --- |
@@ -1598,6 +1598,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `pending(on, wait)` | Shows a tapped bottom sub-button with the look it is about to get until its look changes or 10 seconds pass, as Button's and Tiles' `pending` options do. `on` lists the numbers of the sub-buttons that look on now, and `wait` those that wait after a tap. The module styles the classes `org-pending-on` and `org-pending-off`. |
 | `later(key, work)` | Runs `work` in the next frame, once per card and `key` however many style passes ask for it, with the `work` of the last pass. Bubble Card runs several passes for one change, about seven while a pop-up opens, so work that reads the layout, such as measuring a name, is done once. |
 | `fade(selector, start)` and `pen(element, pseudo)` | `fade()` returns the rules that fade a scrolling row out at both ends, in both directions of writing, from `start` to 48 px before the end. `pen()` measures texts in the font of an element's `::before`, or of `pseudo`, and returns the computed style as `cs` and a `width(text)` function. |
+| `scroller()` | The rules that turn the bottom sub-buttons of a sub-buttons card into one row that scrolls sideways to the screen's edge, as Button's and Tiles' `scroll` options do. Only the sub-buttons take taps, and the row reaches past the card above and below only by `--org-key-room`. |
 | `shows(item)` and `unframe(pad)` | `shows()` tells whether a sub-button shows its name or a state. `unframe()` returns the rules that remove a sub-buttons card's frame, so the bottom sub-buttons fill it with `pad` around them, as in Button, Slider, Table and Tiles. |
 | `backdrop(selector, address, mix, blur, round, host)` | The rules that show a cover behind a card's content. `mix` is its share from 0 to 100, `blur` blurs it, and `round` rounds the corners. Media's cover background and Popup's art use it. With the element that holds the layer as `host`, the last cover stays until the next one has loaded. |
 

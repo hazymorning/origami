@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.12.0"
+  version: "13.13.0"
   is_global: true
   supported:
     - button
@@ -573,8 +573,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), and 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too.
-        version: 13.5,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too, and 13.6 added scroller().
+        version: 13.6,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -861,7 +861,7 @@ origami_base:
         chips: (scope) => {
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
           return scope + " { gap: var(--ha-space-2) !important; }\n"
-            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
+            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
             + card._org.each(chip, " .bubble-sub-button-icon:not(.hidden)") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
             + card._org.each(chip, " .bubble-sub-button-name-container:empty") + " { display: none !important; }";
         },
@@ -902,6 +902,14 @@ origami_base:
         each: (list, ...ends) => list.length ? list.flatMap((s) => ends.map((e) => s + e)).join(",\n    ") : ".org-none",
         // fade() returns the rules that fade a scrolling row out at both ends, in both directions of writing. The row starts to show after start and ends 48 px before its end.
         fade: (sel, start) => ["right", "left"].map((to, i) => "ha-card" + (i ? ":dir(rtl) " : " ") + sel + " { mask-image: linear-gradient(to " + to + ", transparent 0px, black " + start + ", black calc(100% - var(--ha-space-12, 48px)), transparent 100%); }").join("\n    "),
+        // scroller() returns the rules for the bottom sub-buttons of a sub-buttons card as one row that scrolls sideways. The row reaches past the card at its sides, so the sub-buttons scroll to the screen's edge. Above and below, it reaches only as far as a key's shadow needs, --org-key-room, which is nothing on the page and in a pop-up, where keys are flat. A row that reached further would make a pop-up that scrolls taller below its last card. The card takes no more space than its row, and only the sub-buttons take taps, so a tap beside them reaches the card next to the row, such as a slider. A swipe on a sub-button still scrolls the row.
+        scroller: () => {
+          const row = ".bubble-sub-button-bottom-container";
+          const room = "var(--org-key-room, 0px)";
+          const bleed = "var(--scroller-bleed)";
+          return "ha-card { pointer-events: none; }\n    ha-card " + row + " { width: auto !important; margin: calc(-1 * " + room + ") calc(-1 * " + bleed + ") calc(-1 * " + room + ") calc(-1 * " + bleed + ") !important; padding: " + room + " " + bleed + " " + room + " " + bleed + " !important; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; pointer-events: none !important; }\n    "
+            + card._org.fade(row, bleed) + "\n    ha-card " + row + " .bubble-sub-button { pointer-events: auto; }";
+        },
         // pen() measures texts in the font of an element's ::before, once the fonts and the layout are known, such as a name that may be wider than its column
         pen: (el, pseudo = "::before") => {
           const pen = globalThis.__origamiPen ?? (globalThis.__origamiPen = document.createElement("canvas").getContext("2d"));
@@ -1426,7 +1434,7 @@ origami_base:
     }
     ha-card .bubble-name-container {
       grid-area: name;
-      margin: var(--ha-space-5) 0 0 !important;
+      margin: var(--ha-space-5) 0 0 0 !important;
       line-height: var(--ha-line-height-normal);
     }` : ""}
     ` : ""}
@@ -1442,7 +1450,7 @@ origami_base:
     }
     .bubble-sub-button-bottom-container {
       width: calc(100% - 2 * var(--org-pad, var(--ha-space-4))) !important;
-      margin: 0 var(--org-pad, var(--ha-space-4)) var(--org-pad, var(--ha-space-4)) !important;
+      margin: 0 var(--org-pad, var(--ha-space-4)) var(--org-pad, var(--ha-space-4)) var(--org-pad, var(--ha-space-4)) !important;
     }
     ${this.config.sub_button?.bottom_layout === "rows" && (this.config.grid_options?.rows ?? this.config.rows) === "auto" ? `
     /* With rows and rows: auto, the card grows with its rows, which stand below the card's own row */
@@ -1502,7 +1510,7 @@ origami_base:
       gap: var(--ha-space-2) var(--ha-space-1) !important;
       width: auto !important;
       min-height: calc(var(--ha-font-size-s) * var(--ha-line-height-normal));
-      margin: var(--ha-space-2) 0 0 !important;
+      margin: var(--ha-space-2) 0 0 0 !important;
     }
     ha-card .bubble-sub-button-alignment-lane,
     ha-card .bubble-sub-button-group {
@@ -1563,7 +1571,7 @@ origami_base:
       width: auto !important;
       height: var(--org-key-h) !important;
       /* A low key keeps its icon in a square */
-      padding: 0 min(var(--ha-space-2), calc((var(--org-key-h) - var(--org-icon-size)) / 2)) !important;
+      padding: 0 min(var(--ha-space-2), calc((var(--org-key-h) - var(--org-icon-size)) / 2)) 0 min(var(--ha-space-2), calc((var(--org-key-h) - var(--org-icon-size)) / 2)) !important;
       border-radius: calc(var(--org-key-h) * var(--radius-ratio)) !important;
       background: none !important;
       box-shadow: none !important;
@@ -1602,7 +1610,7 @@ origami_base:
     ha-card .bubble-sub-button-container {
       height: var(--org-tile-size) !important;
       align-items: center;
-      padding: 0 var(--org-group-pad) !important;
+      padding: 0 var(--org-group-pad) 0 var(--org-group-pad) !important;
       gap: var(--org-group-gap) !important;
       background-color: var(--org-inset) !important;
       box-shadow: var(--org-inset-shadow);
@@ -1640,7 +1648,7 @@ origami_base:
       min-width: var(--org-group-key) !important;
       width: auto !important;
       height: var(--org-group-key) !important;
-      padding: 0 var(--ha-space-1) !important;
+      padding: 0 var(--ha-space-1) 0 var(--ha-space-1) !important;
       border-radius: calc(var(--org-tile-radius) - var(--org-group-pad)) !important;
     }
     ha-card .bubble-sub-button${card._org.key} .bubble-sub-button-icon {

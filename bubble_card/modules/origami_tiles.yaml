@@ -1,9 +1,9 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.8.1"
+  version: "3.9.0"
   supported:
     - sub-buttons
-  description: "Tiles turns a sub-buttons card into a grid of tiles or a list of rows with an icon, a name and a state. In a list, a sign at each row's end, such as a check, shows what a tap does, and rows can be slim with lines between them."
+  description: "Tiles turns a sub-buttons card into a grid of tiles, a scrolling row of tiles or a list of rows, each with an icon, a name and a state. A sign at a list row's end shows what a tap does, and rows can be slim or have dividers."
   editor:
     - name: layout
       label: "Layout"
@@ -25,6 +25,15 @@ origami_tiles:
           step: 1
           mode: box
       default: 2
+      visible:
+        - field: layout
+          operator: not_eq
+          value: list
+    - name: scroll
+      label: "One row that scrolls sideways, instead of columns (grid)"
+      selector:
+        boolean: {}
+      default: false
       visible:
         - field: layout
           operator: not_eq
@@ -93,13 +102,15 @@ origami_tiles:
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13.4)) throw new Error("origami_tiles needs origami_base 13.4 or later");
+      if (org?.hass !== hass || !(org.version >= 13.6)) throw new Error("origami_tiles needs origami_base 13.6 or later");
       const env = org.env;
       const cfg = this.config.origami_tiles ?? {};
       const list = cfg.layout === "list";
+      // A grid can be one row that scrolls sideways, and then it has no columns
+      const scroll = !list && org.yes(cfg.scroll);
       // A slim list has low rows with plain icons and the state at the row's end, and dividers draw a line between the rows of any list
       // Base's sub_button_height sets the height of a list's rows
-      const t = card._orgTi = { list, cols: list ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers), panel: !list || cfg.background === undefined || org.yes(cfg.background), row: list ? org.opts?.sub ?? "" : "" };
+      const t = card._orgTi = { list, scroll, cols: list || scroll ? 1 : Math.max(1, Math.min(6, parseInt(cfg.columns ?? 2, 10) || 2)), slim: list && org.yes(cfg.slim), lines: list && org.yes(cfg.dividers), panel: !list || cfg.background === undefined || org.yes(cfg.background), row: list ? org.opts?.sub ?? "" : "" };
       const signKeys = ["open", "run", "switch", "check", "add", "none"];
       // In the list, the sign at a row's end says what a tap does. It follows from the tap action, and the sign key can set it.
       const signs = { open: [], run: [], running: [], stop: [], switch: [], on: [], check: [], checked: [], add: [], added: [] };
@@ -201,6 +212,11 @@ origami_tiles:
       return "";
     })()}
     ${card._org.unframe()}
+    ${card._orgTi.scroll ? card._org.scroller() + `
+    .bubble-sub-button-alignment-lane {
+      flex: 0 0 auto !important;
+      width: max-content !important;
+    }` : ""}
     ${card._orgTi.slim && !card._orgTi.panel ? `/* A slim list without a panel stands on the card or the mini pop-up around it like text, so its first and last names keep the same space to the edge as the text around them. Only a pressed row's fill reaches into that space. */
     ha-card .bubble-container {
       margin-block: calc((var(--icon-size-s) - ${card._orgTi.row || "var(--control-height-list)"}) / 2) !important;
@@ -211,9 +227,14 @@ origami_tiles:
       /* A tile and a list's panel are gray fills, so an icon on them has the card background and the chip shadow. A list without a panel stands on the card around it, so its icons are flat fills there. */
       --org-tile-chip-bg: ${card._orgTi.panel ? "var(--tile-chip-background)" : "var(--fill-subtle)"};
       display: grid !important;
-      grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
+      ${card._orgTi.scroll ? `/* In a row that scrolls, every tile is twice as wide as it is tall, and the row starts at the card's start */
+      grid-auto-flow: column;
+      grid-auto-columns: calc(2 * var(--org-row-min));
+      flex: 0 0 auto !important;
+      justify-content: start !important;
+      width: max-content !important;` : `grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
+      width: 100%;`}
       gap: ${card._orgTi.list ? "0" : "var(--ha-space-3)"} !important;
-      width: 100%;
       ${card._orgTi.list ? `--org-sign-col: ${card._orgTi.slim ? "var(--icon-size-s)" : "var(--tile-size)"};
       --org-sign-size: ${card._orgTi.slim ? "var(--icon-size-s)" : "var(--icon-size-m)"};
       --org-sign-gap: ${card._orgTi.slim ? "var(--ha-space-3)" : "var(--ha-space-2)"};
@@ -239,7 +260,7 @@ origami_tiles:
       min-width: 0 !important;
       height: auto !important;
       min-height: var(--org-row-min) !important;
-      padding: ${card._orgTi.list ? "var(--ha-space-2) var(--org-list-pad)" : "var(--ha-space-4)"} !important;
+      padding: ${card._orgTi.list ? "var(--ha-space-2) var(--org-list-pad) var(--ha-space-2) var(--org-list-pad)" : "var(--ha-space-4)"} !important;
       border-radius: ${!card._orgTi.list ? "var(--ha-card-border-radius)" : card._orgTi.panel ? "calc(var(--ha-card-border-radius) - var(--ha-space-2))" : "calc(var(--org-row-min) * var(--radius-ratio))"} !important;
       background-color: ${card._orgTi.list ? "transparent" : "var(--tile-background)"} !important;
       color: var(--primary-text-color) !important;

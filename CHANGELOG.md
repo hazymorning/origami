@@ -130,6 +130,7 @@ These changes are in the `next` branch and come with the next release.
 - `sign: add` puts a plus in the icon's place of a row that isn't chosen, and a check once it is, such as for the speakers that can join a group.
 - A list without a panel stands on the card around it, so its icons are flat fills there.
 - Tiles show `state_content` and `attribute` in Home Assistant's words, show times as relative times such as 3 days ago, and dim tiles whose entity is unavailable.
+- `scroll` puts a grid's tiles in one row that scrolls sideways, which takes less space on a phone.
 
 #### Table
 
