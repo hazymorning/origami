@@ -1,6 +1,6 @@
 # Greeting and notifications
 
-<img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/greeting.webp">
+<img width="800" alt="The greeting with the next event above it and the notifications beside it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/greeting.webp">
 
 A greeting for the time of day and the next event, with notifications, repairs and updates right beside it. Everything in the notifications only shows up while it matters, like a timer while it runs.
 

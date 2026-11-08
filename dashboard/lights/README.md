@@ -1,6 +1,6 @@
 # Lights pop-up
 
-<img width="800" alt="The lights pop-up with how many lamps are on, the slider for all lamps and the scenes with their colors and brightness, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with how many lamps are on, the slider for all lamps and the scenes with their colors and brightness, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
 The home's main light control. Its power key turns on the scene for the time of day while all lamps are off, and turns off every light in the home while one is on. Below it, all lamps at once or each one on its own, and the scenes.
 

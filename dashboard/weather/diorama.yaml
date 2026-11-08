@@ -16,8 +16,8 @@ shadow_color: var(--tile-chip-shadow)
 cloud_effects: false
 # One picture for each kind of weather, named after it, such as partlycloudy.webp, from the diorama folder of this repository
 background_mode: images
-weather_image_path: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/
-weather_image_path_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/
+weather_image_path: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/
+weather_image_path_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/
 grid_options:
   columns: full
   rows: auto
@@ -37,36 +37,36 @@ css: |
      so the sun, the moon and the stars show only in the open sky and set behind the hills, the trees and the clouds. */
   #card-root { --paper: #e2e5e7; --sky: none; }
   #card-root.scheme-dark { --paper: #1b1e20; }
-  #card-root.weather-sunny { --paper: #eee5d7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/sunny.webp"); }
-  #card-root.scheme-dark.weather-sunny { --paper: #261d13; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/sunny.webp"); }
-  #card-root.weather-partlycloudy { --paper: #dee9ef; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/partlycloudy.webp"); }
-  #card-root.scheme-dark.weather-partlycloudy { --paper: #182227; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/partlycloudy.webp"); }
-  #card-root.weather-cloudy { --paper: #e2e5e7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/cloudy.webp"); }
-  #card-root.scheme-dark.weather-cloudy { --paper: #1b1e20; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/cloudy.webp"); }
-  #card-root.weather-fog { --paper: #e8e7e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/fog.webp"); }
-  #card-root.scheme-dark.weather-fog { --paper: #222120; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/fog.webp"); }
-  #card-root.weather-rainy { --paper: #d9e1ea; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/rainy.webp"); }
-  #card-root.scheme-dark.weather-rainy { --paper: #171e26; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/rainy.webp"); }
-  #card-root.weather-pouring { --paper: #d7dde4; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/pouring.webp"); }
-  #card-root.scheme-dark.weather-pouring { --paper: #151b21; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/pouring.webp"); }
-  #card-root.weather-lightning { --paper: #e5dfe8; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/lightning.webp"); }
-  #card-root.scheme-dark.weather-lightning { --paper: #221d25; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/lightning.webp"); }
-  #card-root.weather-lightning-rainy { --paper: #dfdbe2; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/lightning-rainy.webp"); }
-  #card-root.scheme-dark.weather-lightning-rainy { --paper: #1d1920; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/lightning-rainy.webp"); }
-  #card-root.weather-hail { --paper: #d3dfdf; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/hail.webp"); }
-  #card-root.scheme-dark.weather-hail { --paper: #121c1c; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/hail.webp"); }
-  #card-root.weather-snowy { --paper: #e5eaec; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/snowy.webp"); }
-  #card-root.scheme-dark.weather-snowy { --paper: #1c2426; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/snowy.webp"); }
-  #card-root.weather-snowy-rainy { --paper: #dde2e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/snowy-rainy.webp"); }
-  #card-root.scheme-dark.weather-snowy-rainy { --paper: #1e2124; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/snowy-rainy.webp"); }
-  #card-root.weather-windy { --paper: #dce6e3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/windy.webp"); }
-  #card-root.scheme-dark.weather-windy { --paper: #182220; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/windy.webp"); }
-  #card-root.weather-windy-variant { --paper: #dae1de; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/windy-variant.webp"); }
-  #card-root.scheme-dark.weather-windy-variant { --paper: #171d1b; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/windy-variant.webp"); }
-  #card-root.weather-clear-night { --paper: #e0e3ed; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/clear-night.webp"); }
-  #card-root.scheme-dark.weather-clear-night { --paper: #161924; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/clear-night.webp"); }
-  #card-root.weather-exceptional { --paper: #eadad3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/light/exceptional.webp"); }
-  #card-root.scheme-dark.weather-exceptional { --paper: #271a15; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/diorama/dark/exceptional.webp"); }
+  #card-root.weather-sunny { --paper: #eee5d7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/sunny.webp"); }
+  #card-root.scheme-dark.weather-sunny { --paper: #261d13; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/sunny.webp"); }
+  #card-root.weather-partlycloudy { --paper: #dee9ef; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/partlycloudy.webp"); }
+  #card-root.scheme-dark.weather-partlycloudy { --paper: #182227; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/partlycloudy.webp"); }
+  #card-root.weather-cloudy { --paper: #e2e5e7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/cloudy.webp"); }
+  #card-root.scheme-dark.weather-cloudy { --paper: #1b1e20; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/cloudy.webp"); }
+  #card-root.weather-fog { --paper: #e8e7e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/fog.webp"); }
+  #card-root.scheme-dark.weather-fog { --paper: #222120; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/fog.webp"); }
+  #card-root.weather-rainy { --paper: #d9e1ea; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/rainy.webp"); }
+  #card-root.scheme-dark.weather-rainy { --paper: #171e26; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/rainy.webp"); }
+  #card-root.weather-pouring { --paper: #d7dde4; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/pouring.webp"); }
+  #card-root.scheme-dark.weather-pouring { --paper: #151b21; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/pouring.webp"); }
+  #card-root.weather-lightning { --paper: #e5dfe8; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/lightning.webp"); }
+  #card-root.scheme-dark.weather-lightning { --paper: #221d25; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/lightning.webp"); }
+  #card-root.weather-lightning-rainy { --paper: #dfdbe2; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/lightning-rainy.webp"); }
+  #card-root.scheme-dark.weather-lightning-rainy { --paper: #1d1920; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/lightning-rainy.webp"); }
+  #card-root.weather-hail { --paper: #d3dfdf; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/hail.webp"); }
+  #card-root.scheme-dark.weather-hail { --paper: #121c1c; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/hail.webp"); }
+  #card-root.weather-snowy { --paper: #e5eaec; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/snowy.webp"); }
+  #card-root.scheme-dark.weather-snowy { --paper: #1c2426; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/snowy.webp"); }
+  #card-root.weather-snowy-rainy { --paper: #dde2e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/snowy-rainy.webp"); }
+  #card-root.scheme-dark.weather-snowy-rainy { --paper: #1e2124; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/snowy-rainy.webp"); }
+  #card-root.weather-windy { --paper: #dce6e3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/windy.webp"); }
+  #card-root.scheme-dark.weather-windy { --paper: #182220; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/windy.webp"); }
+  #card-root.weather-windy-variant { --paper: #dae1de; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/windy-variant.webp"); }
+  #card-root.scheme-dark.weather-windy-variant { --paper: #171d1b; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/windy-variant.webp"); }
+  #card-root.weather-clear-night { --paper: #e0e3ed; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/clear-night.webp"); }
+  #card-root.scheme-dark.weather-clear-night { --paper: #161924; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/clear-night.webp"); }
+  #card-root.weather-exceptional { --paper: #eadad3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/exceptional.webp"); }
+  #card-root.scheme-dark.weather-exceptional { --paper: #271a15; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/exceptional.webp"); }
   #card-root.scheme-light, #card-root.scheme-dark { background-color: var(--paper); }
   /* The landscape stands at the bottom left, however wide the card is */
   #weather-bg > img { object-position: left bottom; }

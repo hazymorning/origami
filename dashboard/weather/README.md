@@ -13,7 +13,7 @@ All three cards keep the weather calm, and the house and the comparison card lea
 
 ### Diorama
 
-<img width="800" alt="The diorama card, a paper landscape for each kind of weather: a partly cloudy midday with the sun above the hills, and a snowy night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
+<img width="800" alt="The diorama card, a paper landscape for each kind of weather: a partly cloudy midday with the sun above the hills, and a snowy night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
 
 A little paper landscape for each kind of weather, the one layout made for Origami. The sun and the moon cross the sky and set behind the hills, and it's the card on the home view. [`diorama.yaml`](diorama.yaml)
 
@@ -28,7 +28,7 @@ The diorama is a set of pictures, one for each kind of weather in light and dark
 
 ### House
 
-<img width="800" alt="The house card, a house whose rooms light up and show how warm they are: a gray midday with the living room lit, and a rainy night with three rooms lit, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-house.webp">
+<img width="800" alt="The house card, a house whose rooms light up and show how warm they are: a gray midday with the living room lit, and a rainy night with three rooms lit, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather-house.webp">
 
 A house whose rooms light up with the home's lights and show how warm they are, with the day's weather, low and high on a chip below the temperature. [`house.yaml`](house.yaml)
 
@@ -43,7 +43,7 @@ The house is a drawing, with one more picture for each room's light, and the car
 
 ### Comparison
 
-<img width="800" alt="The comparison card, whose color follows the weather, with the next days on tiles: a rainy midday and a clear night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-comparison.webp">
+<img width="800" alt="The comparison card, whose color follows the weather, with the next days on tiles: a rainy midday and a clear night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather-comparison.webp">
 
 Origami Weather's Comparison layout in calm colors, with the next days on tiles, the temperature on a bar and the chance of rain. Only the color changes with the weather. [`comparison.yaml`](comparison.yaml)
 

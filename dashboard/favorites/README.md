@@ -1,8 +1,8 @@
 # Favorites
 
-<img width="800" alt="Favorites as tiles in one row that scrolls sideways, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites.webp">
+<img width="800" alt="Favorites as tiles in one row that scrolls sideways, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites.webp">
 
-<img width="800" alt="Favorites as a grid of tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/favorites-grid.webp">
+<img width="800" alt="Favorites as a grid of tiles, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/favorites-grid.webp">
 
 Favorites for whatever matters right now, like a running vacuum or tonight's dinner. Most of them only show up when they're needed. The tiles stand in one row that scrolls sideways, which takes little room on a phone, or in a grid that shows them all at once, which suits a larger screen, such as a tablet on the wall.
 

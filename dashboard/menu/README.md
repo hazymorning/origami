@@ -1,6 +1,6 @@
 # Menu
 
-<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
+<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
 Hides Home Assistant's header for good, without a flash while a dashboard loads, and adds a menu that slides down, if wanted, with shortcuts for the admin and a small card for the server.
 

@@ -162,16 +162,16 @@ button_containers:
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house.svg
-    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-dark.svg
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-dark.svg
   # A room's windows light up while its light is on
   - position: custom
     position_anchor: top-right
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-living-room.svg
-    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-living-room-dark.svg
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-living-room.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-living-room-dark.svg
     visibility:
       - condition: state
         entity: light.living_room
@@ -181,8 +181,8 @@ button_containers:
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-kitchen.svg
-    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-kitchen-dark.svg
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-kitchen.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-kitchen-dark.svg
     visibility:
       - condition: state
         entity: light.kitchen
@@ -192,8 +192,8 @@ button_containers:
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-bedroom.svg
-    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-bedroom-dark.svg
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-bedroom.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-bedroom-dark.svg
     visibility:
       - condition: state
         entity: light.bedroom
@@ -203,8 +203,8 @@ button_containers:
     position_x: 4px
     position_y: 4px
     custom_width: 170px
-    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-office.svg
-    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@next/dashboard/weather/house/house-office-dark.svg
+    image: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-office.svg
+    image_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/house/house-office-dark.svg
     visibility:
       - condition: state
         entity: light.office

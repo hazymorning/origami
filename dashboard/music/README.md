@@ -1,8 +1,8 @@
 # Music pop-up
 
-<img width="800" alt="The music pop-up with the cover, the play row and the volume, and with its group open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up.webp">
+<img width="800" alt="The music pop-up with the cover, the play row and the volume, and with its group open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
-<img width="800" alt="The music pop-up's speaker dropdown open, and the volume of each speaker in a group, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-speakers.webp">
+<img width="800" alt="The music pop-up's speaker dropdown open, and the volume of each speaker in a group, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-speakers.webp">
 
 Music on any speaker at home, picked in the title. The cover, the keys and the volume follow the speaker, and speakers that can play together get a group. The pop-up stays light on purpose, so it opens fast: one music card, with the rest in small pop-ups on top.
 

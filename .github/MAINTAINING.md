@@ -104,7 +104,7 @@ The repository never names an assistant, a model or a tool. Where an agent has t
 
 - Branches that an agent creates are named `<word>/<topic>`, with the word in lowercase ASCII, such as `papierflieger/readme`, `karton/weather` or `dina4/tv-remote`. Umlauts become ae, oe and ue.
 - Session titles use the same words, such as "Falz: README fixes".
-- Releases: `Origami <version> · <name>`. 2.0 is The Unfolding. Ideas for later ones: Valley Fold, Mountain Fold, Squash Fold, Petal Fold, Crane, Waterbomb, Kite Base, Washi.
+- Releases: `Origami <version> · <name>`. 2.0 is The Unfolding, and 3.0 is The Final Fold.
 - Scratch files can use the same words. Anything a screenshot shows, like a demo entity's name, stays plain.
 
 Commit messages, PR titles and the README stay plain.

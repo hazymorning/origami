@@ -1,8 +1,6 @@
 # Changelog
 
-## Next release
-
-These changes are in the `next` branch and come with the next release.
+## 3.0 · The Final Fold
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
