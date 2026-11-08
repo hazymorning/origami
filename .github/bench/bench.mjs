@@ -8,6 +8,8 @@
 //     and load other cards with resources, a list of their files next to the scenario. click lists elements to tap before the shots.
 //     preview shows other cards as in the card editor, and admin makes the user an admin. seed makes Math.random repeat the
 //     same numbers, so a card that places things at random, such as the weather card's clouds, looks the same in every shot.
+//     With a seed, advance lets the animations run for that many seconds before the shot, frame by frame and the same in every
+//     shot, such as birds that cross the weather card's sky.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
 //     Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree.
 //
@@ -310,13 +312,28 @@ try {
     await p.waitForFunction(() => window.__ready === true, null, { timeout: 30000 })
       .catch((e) => { throw new Error('The page did not finish: ' + (errors.join(' | ') || e.message)); });
     if (shot) {
-      // With a seed, animations that count time in frames stand still once the page is ready, so what the seed placed stays in place
-      if (scenario.seed !== undefined) await p.evaluate(() => {
-        const now = performance.now();
-        performance.now = () => now;
+      // With a seed, animations that count time in frames stand still once the page is ready, so what the seed placed stays in place.
+      // advance first runs them for that many seconds, one frame of 1/60 s after the other, so a bird that appears after a few seconds is in the shot.
+      if (scenario.seed !== undefined) await p.evaluate(async (advance) => {
+        const realNow = performance.now.bind(performance);
         const raf = window.requestAnimationFrame.bind(window);
+        let queue = [];
+        if (advance > 0) {
+          window.requestAnimationFrame = (cb) => { queue.push(cb); return queue.length; };
+          // The frames asked for before this run once more in the browser and then wait in the queue
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        let now = realNow();
+        performance.now = () => now;
+        for (let f = 0; f < advance * 60; f++) {
+          now += 1000 / 60;
+          const due = queue;
+          queue = [];
+          for (const cb of due) { try { cb(now); } catch (e) { /* a card's own error shows in the page's errors */ } }
+        }
         window.requestAnimationFrame = (cb) => raf(() => cb(now));
-      });
+        for (const cb of queue) raf(() => cb(now));
+      }, Number(scenario.advance) || 0);
       // Taps that a scenario makes before the shots, such as on a key that opens a mini pop-up
       for (const sel of scenario.click || []) { await p.click(sel); await p.waitForTimeout(900); }
       fs.mkdirSync(outDir, { recursive: true });

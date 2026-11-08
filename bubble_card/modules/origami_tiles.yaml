@@ -1,6 +1,6 @@
 origami_tiles:
   name: "Origami • Tiles"
-  version: "3.9.1"
+  version: "3.9.0"
   supported:
     - sub-buttons
   description: "Tiles turns a sub-buttons card into a grid of tiles, a scrolling row of tiles or a list of rows, each with an icon, a name and a state. A sign at a list row's end shows what a tap does, and rows can be slim or have dividers."
@@ -227,9 +227,9 @@ origami_tiles:
       /* A tile and a list's panel are gray fills, so an icon on them has the card background and the chip shadow. A list without a panel stands on the card around it, so its icons are flat fills there. */
       --org-tile-chip-bg: ${card._orgTi.panel ? "var(--tile-chip-background)" : "var(--fill-subtle)"};
       display: grid !important;
-      ${card._orgTi.scroll ? `/* In a row that scrolls, the tiles are as wide as the widest one, from twice to three times as wide as they are tall, so a name such as Vacuum fits. The row starts at the card's start. */
+      ${card._orgTi.scroll ? `/* In a row that scrolls, every tile is twice as wide as it is tall, and the row starts at the card's start */
       grid-auto-flow: column;
-      grid-auto-columns: minmax(calc(2 * var(--org-row-min)), 1fr);
+      grid-auto-columns: calc(2 * var(--org-row-min));
       flex: 0 0 auto !important;
       justify-content: start !important;
       width: max-content !important;` : `grid-template-columns: repeat(${card._orgTi.cols}, minmax(0, 1fr));
@@ -258,7 +258,6 @@ origami_tiles:
       justify-content: flex-start !important;
       width: auto !important;
       min-width: 0 !important;
-      ${card._orgTi.scroll ? "max-width: calc(3 * var(--org-row-min)) !important;" : ""}
       height: auto !important;
       min-height: var(--org-row-min) !important;
       padding: ${card._orgTi.list ? "var(--ha-space-2) var(--org-list-pad) var(--ha-space-2) var(--org-list-pad)" : "var(--ha-space-4)"} !important;

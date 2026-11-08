@@ -93,20 +93,20 @@ sub_button:
         navigation_path: '#popup_kitchen'
       hold_action:
         action: more-info
-    # Vacuum. While it cleans, the progress replaces the name.
-    - name: Vacuum
+    # The robot vacuum. While it cleans, the progress replaces its name.
+    - name: Robot
       entity: vacuum.robot
       icon: mdi:robot-vacuum
       force_icon: true
       origami_tiles:
         name: >-
-          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
+          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Robot'
           : Number.isNaN(p) ? '' : p < 0 ? 'Error'
           : num(p, 0, '%'))(Math.round(states('sensor.robot_cleaning_progress')))}
         state:
           docked: ${word('off')}
           idle: ${word('off')}
-          cleaning: Vacuum
+          cleaning: Robot
         order:
           cleaning: -1
       tap_action:

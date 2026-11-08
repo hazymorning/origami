@@ -1,7 +1,10 @@
-# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows the favorites
-# at a partly cloudy midday, dark those of the late evening, the weather in the notifications and the climate table open.
+# The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows a gray midday
+# with birds over the lake and the vacuum cleaning in the notifications, dark a clear night with a bath running in the
+# notifications and the climate table open. In each, the first favorite is on and the others wait for a tap, and the vacuum never shows twice.
 # The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
 seed: 27
+# The animations run for a few seconds before the shot, so birds fly across the weather card by day
+advance: 9
 kind: phone
 states:
   light.kitchen:
@@ -155,7 +158,7 @@ dark:
       attributes:
         friendly_name: Bedroom
         hvac_action: heating
-        temperature: 19.5
+        temperature: 20
         current_temperature: 19.2
     climate.office:
       state: heat
@@ -164,16 +167,6 @@ dark:
         hvac_action: idle
         temperature: 18
         current_temperature: 18.9
-    timer.bath:
-      state: idle
-      attributes:
-        friendly_name: Bath
-        icon: mdi:bathtub-outline
-        duration: '0:25:00'
-    input_boolean.bath_time:
-      state: 'off'
-      attributes:
-        friendly_name: Bath time
     calendar.household:
       state: 'off'
       attributes:
@@ -185,7 +178,7 @@ dark:
         description: ''
         location: ''
     weather.home:
-      state: cloudy
+      state: clear-night
       attributes:
         friendly_name: Home
         temperature: 3
@@ -223,10 +216,13 @@ dark:
       - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
-  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
-  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
+    only:
+    - Music
+    - Robot
+    - Printer
   - file: rooms/header.yaml
   - file: climate-table/card.yaml
     with:
@@ -252,12 +248,17 @@ dark:
         mdi:sofa: mdi:desk
   - file: navigation-bar/card.yaml
 light:
+  states:
+    switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
   cards:
   - file: greeting/card.yaml
-  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
-  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
+    only:
+    - Oven
+    - Bath
+    - Printer
   - file: rooms/header.yaml
   - type: grid
     columns: 2

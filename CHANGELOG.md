@@ -157,7 +157,7 @@ These changes are in the `next` branch and come with the next release.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 - The favorites are tiles in one row that scrolls sideways, or in a grid for a larger screen. The README shows both.
 - The lights pop-up shows how many lamps are on and since when. Each scene shows its colors in a rounded square, with the theme's corners, and its brightness under its name, and a small dot before its brightness marks the active scene.
-- The weather card shows the forecast for the week and a two-story house whose rooms light up and show their temperature. Rain and snow fall in front of the house, and its images load from the repository, so a home needs no files of its own.
+- The weather part has three cards: a paper diorama with a picture for each kind of weather, which the home view shows, a two-story house whose rooms light up and show their temperature beside the forecast for the week, and Origami Weather's own sky. The pictures load from the repository, so a home needs no files of its own.
 
 ### Bug fixes
 

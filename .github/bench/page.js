@@ -34,7 +34,7 @@
     states, entities: sc.entities || {}, devices: {}, areas: {},
     user: { id: 'u', name: 'Test', is_admin: !!sc.admin, is_owner: false },
     language: lang, selectedLanguage: lang,
-    locale: { language: lang, number_format: 'language', time_format: 'language', date_format: 'language', first_weekday: 'language', time_zone: 'local' },
+    locale: { language: lang, number_format: 'language', time_format: '24', date_format: 'language', first_weekday: 'language', time_zone: 'local' },
     config: { time_zone: 'UTC', unit_system: { temperature: '°C', length: 'km' }, components: [], version: '2026.10.0' },
     themes: { darkMode: window.__DARK, theme: 'Origami', default_theme: 'Origami', themes: { Origami: {} } },
     translationMetadata: { translations: { [lang]: { nativeName: lang, isRTL: document.documentElement.dir === 'rtl' } } },

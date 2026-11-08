@@ -1,0 +1,20 @@
+# The sky card on its own. Light shows a sunny day with the sun on the right and two birds on their way to it,
+# and dark a clear night with the moon and the stars. The card stands on its own here, so it has no offset above it.
+kind: panel
+seed: 27
+advance: 6
+cards:
+  - file: weather/sky.yaml
+    with:
+      card_offset: 0px 0px 0px 0px
+light:
+  states:
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 38}}
+    weather.home:
+      state: sunny
+      attributes: {friendly_name: Home, temperature: 16.2, temperature_unit: °C, humidity: 54, wind_speed: 8, wind_speed_unit: km/h, pressure: 1022, supported_features: 3}
+dark:
+  states:
+    weather.home:
+      state: clear-night
+      attributes: {friendly_name: Home, temperature: 6.8, temperature_unit: °C, humidity: 84, wind_speed: 4, wind_speed_unit: km/h, pressure: 1021, supported_features: 3}

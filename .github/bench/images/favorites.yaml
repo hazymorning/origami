@@ -11,5 +11,5 @@ dark:
   cards:
     - {file: favorites/header.yaml}
     - file: favorites/tiles.yaml
-      only: [Music, Vacuum, Printer]
+      only: [Music, Robot, Printer]
 trim: 16

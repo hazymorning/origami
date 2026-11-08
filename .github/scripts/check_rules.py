@@ -213,11 +213,12 @@ for name in READMES:
             alt = re.search(r'alt="([^"]*)"', tag)
             shots.setdefault(src.group(2), alt.group(1) if alt else "")
 # A card's own images, such as the weather card's house, load from the repository through jsDelivr. Each one exists,
-# and like the README images, they point to next while a release is built. With --release, such an image fails.
+# or each folder of them, which ends with a slash, such as the weather pictures. Like the README images, they point to next
+# while a release is built. With --release, such an image fails.
 for path in sorted((ROOT / "dashboard").glob("**/*.yaml")):
     for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         for ref, file in re.findall(r"https://cdn\.jsdelivr\.net/gh/hazymorning/origami@([^/\s]+)/([^\s'\"]+)", line):
-            if not (ROOT / file).is_file():
+            if not ((ROOT / file).is_dir() if file.endswith("/") else (ROOT / file).is_file()):
                 fail(f"{path.relative_to(ROOT)}:{n}", f"loads {file}, which doesn't exist")
             if RELEASE and ref != "main":
                 fail(f"{path.relative_to(ROOT)}:{n}", f"loads {file} from {ref} instead of main")

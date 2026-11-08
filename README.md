@@ -106,7 +106,7 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 The start page, from the greeting down to the navigation bar:
 
 - **[Greeting and notifications](dashboard/greeting/).** The next event and what needs attention. Needs the Origami Notifications card.
-- **[Weather](dashboard/weather/).** The week's weather, beside a house whose rooms light up with the home's lights. Needs the Origami Weather card.
+- **[Weather](dashboard/weather/).** A little paper landscape for each kind of weather, and two more ways to show it. Needs the Origami Weather card.
 - **[Favorites](dashboard/favorites/).** Shortcuts that come and go with what's happening, as a row for a phone or a grid for a larger screen.
 - **[Rooms](dashboard/rooms/).** Each room's climate and lights at a glance.
 - **[Climate table](dashboard/climate-table/).** Every room's climate in one table.

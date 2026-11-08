@@ -1,31 +1,20 @@
-# The weather card on its own. Light is a partly cloudy midday with two windows open, and dark a rainy night with three rooms lit.
-# The card is being redone, so for now a placeholder stands in its place. The card stands on its own here, so the placeholder has no margins.
+# The diorama card on its own. Light shows a partly cloudy midday with the sun above the hills and birds on their way,
+# and dark a snowy night. The card stands on its own here, so it has no offset above it.
 kind: panel
+seed: 27
+advance: 9
 cards:
-  - {type: placeholder, height: 185px}
-states:
-  light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
-  light.office: {state: 'off', attributes: {friendly_name: Office}}
-  sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
-  binary_sensor.kitchen_window: {state: 'off', attributes: {friendly_name: Kitchen window, device_class: window}}
+  - file: weather/diorama.yaml
+    with:
+      card_offset: 0px 0px 0px 0px
 light:
   states:
-    binary_sensor.office_window: {state: 'on', attributes: {friendly_name: Office window, device_class: window}}
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 42}}
+    weather.home:
+      state: partlycloudy
+      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
 dark:
   states:
     weather.home:
-      state: rainy
-      attributes: {friendly_name: Home, temperature: 6.8, temperature_unit: °C, humidity: 92, wind_speed: 9, wind_speed_unit: km/h, pressure: 1008, supported_features: 3}
-    light.living_room: {state: 'on', attributes: {friendly_name: Living room}}
-    sensor.kitchen_temperature: {state: '19.7', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
-  messages:
-    weather/subscribe_forecast:
-      type: daily
-      forecast:
-        - {datetime: '2026-11-04T11:00:00+00:00', condition: rainy, temperature: 12, templow: 6, precipitation_probability: 80}
-        - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}
-        - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 4, precipitation_probability: 10}
-        - {datetime: '2026-11-07T11:00:00+00:00', condition: sunny, temperature: 13, templow: 5, precipitation_probability: 0}
-        - {datetime: '2026-11-08T11:00:00+00:00', condition: rainy, temperature: 10, templow: 6, precipitation_probability: 70}
-        - {datetime: '2026-11-09T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 4, precipitation_probability: 20}
-        - {datetime: '2026-11-10T11:00:00+00:00', condition: partlycloudy, temperature: 11, templow: 3, precipitation_probability: 10}
+      state: snowy
+      attributes: {friendly_name: Home, temperature: -2, temperature_unit: °C, humidity: 93, wind_speed: 6, wind_speed_unit: km/h, pressure: 1011, supported_features: 3}

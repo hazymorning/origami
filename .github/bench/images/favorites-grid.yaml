@@ -7,7 +7,7 @@ light:
   cards:
     - {file: favorites/header.yaml}
     - file: favorites/tiles.yaml
-      only: [Oven, Vacuum, Bath, Printer]
+      only: [Oven, Robot, Bath, Printer]
       with:
         origami_tiles: null
 dark:
@@ -16,7 +16,7 @@ dark:
   cards:
     - {file: favorites/header.yaml}
     - file: favorites/tiles.yaml
-      only: [Music, Vacuum, Bath, Printer]
+      only: [Music, Robot, Bath, Printer]
       with:
         origami_tiles: null
 trim: 16

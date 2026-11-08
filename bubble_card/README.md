@@ -1154,7 +1154,7 @@ The Tiles module turns a sub-buttons card into a grid of tiles, a row of tiles t
 
 <br>
 
-On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default, or with `scroll: true` one row that scrolls sideways to the screen's edge, with the tiles as wide as the widest one, from twice to three times their height. A list has the card options `slim`, `dividers`, `sign`, `pending` and `background`, described below. All other keys go under each tile's own `origami_tiles` key.
+On the card, `origami_tiles: layout` is `grid` (the default) or `list`. A grid has 1 to 6 `columns`, 2 by default, or with `scroll: true` one row that scrolls sideways to the screen's edge, with each tile twice as wide as it is tall. A list has the card options `slim`, `dividers`, `sign`, `pending` and `background`, described below. All other keys go under each tile's own `origami_tiles` key.
 
 | Key | Default | Description |
 | --- | --- | --- |

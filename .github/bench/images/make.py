@@ -20,7 +20,7 @@ side by side, and has:
   open: the hash of the pop-up to open
   states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
   time: the clock, and clock: the time in the status bar
-  click, preview, admin, scale, seed: passed to the bench, as bench.mjs describes
+  click, preview, admin, scale, seed, advance: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top
@@ -167,7 +167,7 @@ def make(name):
             'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
             'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards}],
         }
-        for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed'):
+        for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
             if k in keys:
                 scenario[k] = keys[k]
         path = os.path.join(work, f'scenario-{mode}.yaml')

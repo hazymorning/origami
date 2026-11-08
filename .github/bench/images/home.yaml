@@ -5,8 +5,7 @@
 # The home view, behind every pop-up
 home:
   - {file: greeting/card.yaml}
-  # The weather card is being redone, so a placeholder stands in its place, with the card's height and its card_offset as margins
-  - {type: placeholder, height: 185px, margin: 20px 0 0 0}
+  - {file: weather/diorama.yaml}
   - {file: favorites/header.yaml}
   - {file: favorites/tiles.yaml}
   - {file: rooms/header.yaml}
@@ -71,15 +70,15 @@ words:
   rainy: Rainy
   sunny: Sunny
   returning: Returning
-# The light images: midday under a partly cloudy sky, with lunch in the oven, the printer at work and the vacuum cleaning
+# The light images: a gray midday, with lunch in the oven, the printer at work and the vacuum cleaning
 light:
   time: '2026-11-04T12:40:00'
   clock: '12:40'
   states:
     sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 21}}
     weather.home:
-      state: partlycloudy
-      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
+      state: cloudy
+      attributes: {friendly_name: Home, temperature: 12.4, temperature_unit: °C, humidity: 74, wind_speed: 9, wind_speed_unit: km/h, pressure: 1014, supported_features: 3}
     timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
     input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
     sensor.oven: {state: 180 °C, attributes: {friendly_name: Oven}}

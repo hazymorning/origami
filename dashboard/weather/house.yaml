@@ -1,3 +1,5 @@
+# A two-story house whose rooms light up with the home's lights and show how warm they are, beside the forecast
+# for the week. The house loads from the house folder of this repository.
 type: custom:origami-weather
 weather_entity: weather.home
 color_mode: theme
