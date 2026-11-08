@@ -4,7 +4,7 @@ type: custom:origami-weather
 weather_entity: weather.home
 color_mode: theme
 card_height: 150px
-card_padding: '0'
+card_padding: 0px 0px 0px 0px
 card_offset: 20px 0px 0px 0px
 card_tap_action:
   action: more-info
@@ -91,12 +91,12 @@ css: |
   /* Rain, snow, birds and planes in calmer colors */
   #weather-effects { filter: saturate(.6); }
   /* On a wide screen, the heading above the card sets the space */
-  @media (min-width: 768px) { :host { margin: 0 !important; } }
+  @media (min-width: 768px) { :host { margin: 0px 0px 0px 0px !important; } }
 button_containers:
   # The next sunset by day, and the next sunrise by night
   - position: custom
     position_anchor: top-left
-    padding: 16px
+    padding: 16px 16px 16px 16px
     button_gap: 6px
     buttons:
       - entity: sun.sun
@@ -136,7 +136,7 @@ button_containers:
       - entity: weather.home
         style: vertical
         inner_gap: 6px
-        padding: '0'
+        padding: 0px 0px 0px 0px
         elements:
           - type: text
             attribute: temperature

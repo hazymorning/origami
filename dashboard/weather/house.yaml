@@ -1,10 +1,10 @@
-# A two-story house whose rooms light up with the home's lights and show how warm they are, beside the forecast
-# for the week. The house loads from the house folder of this repository.
+# A house whose rooms light up with the home's lights and show how warm they are, with the day's weather, low and high
+# below the temperature. The pictures load from the house folder of this repository.
 type: custom:origami-weather
 weather_entity: weather.home
 color_mode: theme
 card_height: 185px
-card_padding: 16px
+card_padding: 16px 16px 16px 16px
 card_offset: 20px 0px 0px 0px
 card_tap_action:
   action: more-info
@@ -81,15 +81,10 @@ css: |
     --origami-bottom-bg-radius: calc((1em + 12px) * var(--radius-ratio));
   }
 
-  /* The house lies behind the rain and snow, and the chips and the forecast lie in front */
+  /* The house lies behind the rain and snow, and the chips and the day's weather lie in front */
   #free-layer { z-index: auto; }
   #free-layer > .buttons-group { z-index: 6; }
   #free-layer > .has-image { z-index: 2; }
-
-  /* Each day of the forecast is a column 2em wide, so the days keep one rhythm.
-     The icons line up under the temperature, and after a swipe a day stops just past the fade. */
-  .row-horizontal-scroll { margin-inline-start: calc((var(--icon-size-xs) - 2em) / 2); scroll-padding-inline-start: var(--origami-scroll-fade-size); }
-  .row-horizontal-scroll > .button { min-width: 2em; }
 
   /* A room's light fades in, and the card's color changes softly with the weather */
   @media (prefers-reduced-motion: no-preference) {
@@ -102,16 +97,16 @@ css: |
   #weather-effects { filter: saturate(.6); }
 
   /* On a wide screen, the heading above the card sets the space */
-  @media (min-width: 768px) { :host { margin: 0 !important; } }
+  @media (min-width: 768px) { :host { margin: 0px 0px 0px 0px !important; } }
 button_containers:
   # The weather and the temperature
-  - padding: 4px
+  - padding: 4px 4px 4px 4px
     buttons:
       - entity: weather.home
         style: vertical
         align: start
         inner_gap: 6px
-        padding: '0'
+        padding: 0px 0px 0px 0px
         elements:
           - type: text
             size: 13px
@@ -124,135 +119,34 @@ button_containers:
             size: 40px
             weight: '700'
             color: var(--primary-text-color)
-  # The forecast for the week, which scrolls
+  # The day's weather, its low and its high
   - position: custom
     position_anchor: bottom-left
     position_x: 0px
     position_y: 0px
-    custom_width: 100px
-    padding: 4px
-    gap: 12px
-    layout: horizontal-scroll
-    scroll_fade: true
-    scroll_fade_size: var(--ha-space-4)
-    align: center
-    button_style: vertical
-    button_gap: 4px
-    button_text_size: 12px
+    padding: 4px 4px 4px 4px
+    button_gap: 6px
     button_icon_size: var(--icon-size-xs)
+    button_text_size: 13px
     buttons:
       - entity: weather.home
         forecast: daily
+        background: false
+        padding: 0px 0px 0px 0px
         elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
           - type: icon
             icon: weather
             color: var(--primary-text-color)
           - type: text
-            attribute: temperature
+            attribute: templow
             precision: 0
             format: °
             weight: '700'
             color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 1
-        elements:
           - type: text
-            attribute: datetime
+            text: /
             weight: '500'
             color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
-          - type: text
-            attribute: temperature
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 2
-        elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
-          - type: text
-            attribute: temperature
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 3
-        elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
-          - type: text
-            attribute: temperature
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 4
-        elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
-          - type: text
-            attribute: temperature
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 5
-        elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
-          - type: text
-            attribute: temperature
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: weather.home
-        forecast: daily
-        forecast_offset: 6
-        elements:
-          - type: text
-            attribute: datetime
-            weight: '500'
-            color: var(--secondary-text-color)
-          - type: icon
-            icon: weather
-            color: var(--primary-text-color)
           - type: text
             attribute: temperature
             precision: 0
@@ -312,7 +206,7 @@ button_containers:
       - condition: state
         entity: light.office
         state: 'on'
-  # The temperature of the living room and the kitchen, and of the bedroom and the office while a window is open.
+  # The temperature of the office and the kitchen, and of the bathroom and the bedroom while a window is open.
   # Each chip shows while its sensor has a value, so a room without a sensor has no chip.
   - position: custom
     position_anchor: top-right
@@ -327,41 +221,15 @@ button_containers:
     button_icon_size: 10px
     button_text_size: 12px
     buttons:
-      - entity: sensor.living_room_temperature
+      - entity: sensor.bathroom_temperature
         position: custom
-        position_x: 23px
-        position_y: 128px
+        position_x: 33px
+        position_y: 15px
         visibility:
           - condition: numeric_state
-            entity: sensor.living_room_temperature
-        elements:
-          - type: text
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: sensor.kitchen_temperature
-        position: custom
-        position_x: 101px
-        position_y: 132px
-        visibility:
-          - condition: numeric_state
-            entity: sensor.kitchen_temperature
-        elements:
-          - type: text
-            precision: 0
-            format: °
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: sensor.bedroom_temperature
-        position: custom
-        position_x: 22px
-        position_y: 47px
-        visibility:
-          - condition: numeric_state
-            entity: sensor.bedroom_temperature
+            entity: sensor.bathroom_temperature
           - condition: state
-            entity: binary_sensor.bedroom_window
+            entity: binary_sensor.bathroom_window
             state: 'on'
         elements:
           - type: text
@@ -374,13 +242,39 @@ button_containers:
             color: var(--state-binary_sensor-window-on-color)
       - entity: sensor.office_temperature
         position: custom
-        position_x: 83px
-        position_y: 59px
+        position_x: 91px
+        position_y: 29px
         visibility:
           - condition: numeric_state
             entity: sensor.office_temperature
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: sensor.kitchen_temperature
+        position: custom
+        position_x: 6px
+        position_y: 101px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.kitchen_temperature
+        elements:
+          - type: text
+            precision: 0
+            format: °
+            weight: '700'
+            color: var(--primary-text-color)
+      - entity: sensor.bedroom_temperature
+        position: custom
+        position_x: 125px
+        position_y: 71px
+        visibility:
+          - condition: numeric_state
+            entity: sensor.bedroom_temperature
           - condition: state
-            entity: binary_sensor.office_window
+            entity: binary_sensor.bedroom_window
             state: 'on'
         elements:
           - type: text

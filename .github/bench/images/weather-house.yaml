@@ -1,39 +1,45 @@
-# The house card on its own. Light shows a partly cloudy midday with every chip on the house, two of them for open windows,
-# and dark a rainy night with three rooms lit and the rain in front of the house. The card stands on its own here,
+# The house card on its own. Light shows a gray midday with the living room lit and the bedroom's window open, and dark
+# a rainy night with three rooms lit and the bathroom's window open after the bath. The card stands on its own here,
 # so it has no offset above it.
 kind: panel
 seed: 27
-advance: 9
+advance: 18
 cards:
   - file: weather/house.yaml
     with:
       card_offset: 0px 0px 0px 0px
 states:
-  light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen}}
   light.office: {state: 'off', attributes: {friendly_name: Office}}
-  sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
-  binary_sensor.kitchen_window: {state: 'off', attributes: {friendly_name: Kitchen window, device_class: window}}
+  light.kitchen: {state: 'off', attributes: {friendly_name: Kitchen}}
+  sensor.office_temperature: {state: '21.2', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Office temperature}}
+  sensor.kitchen_temperature: {state: '20.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
+  sensor.bathroom_temperature: {state: '22.6', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
+  binary_sensor.bathroom_window: {state: 'off', attributes: {friendly_name: Bathroom window, device_class: window}}
 light:
   states:
-    binary_sensor.office_window: {state: 'on', attributes: {friendly_name: Office window, device_class: window}}
     weather.home:
-      state: partlycloudy
-      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
+      state: cloudy
+      attributes: {friendly_name: Home, temperature: 11.6, temperature_unit: °C, humidity: 74, wind_speed: 10, wind_speed_unit: km/h, pressure: 1014, supported_features: 3}
+  messages:
+    weather/subscribe_forecast:
+      type: daily
+      forecast:
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: cloudy, temperature: 14, templow: 7, precipitation_probability: 20}
+        - {datetime: '2026-11-05T11:00:00+00:00', condition: rainy, temperature: 11, templow: 6, precipitation_probability: 70}
+        - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 4, precipitation_probability: 10}
 dark:
   states:
     weather.home:
       state: rainy
       attributes: {friendly_name: Home, temperature: 6.8, temperature_unit: °C, humidity: 92, wind_speed: 9, wind_speed_unit: km/h, pressure: 1008, supported_features: 3}
     light.living_room: {state: 'on', attributes: {friendly_name: Living room}}
-    sensor.kitchen_temperature: {state: '19.7', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
+    light.office: {state: 'on', attributes: {friendly_name: Office}}
+    sensor.bathroom_temperature: {state: '24.1', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
+    binary_sensor.bathroom_window: {state: 'on', attributes: {friendly_name: Bathroom window, device_class: window}}
   messages:
     weather/subscribe_forecast:
       type: daily
       forecast:
-        - {datetime: '2026-11-04T11:00:00+00:00', condition: rainy, temperature: 12, templow: 6, precipitation_probability: 80}
+        - {datetime: '2026-11-04T11:00:00+00:00', condition: rainy, temperature: 11, templow: 6, precipitation_probability: 80}
         - {datetime: '2026-11-05T11:00:00+00:00', condition: cloudy, temperature: 11, templow: 5, precipitation_probability: 30}
         - {datetime: '2026-11-06T11:00:00+00:00', condition: partlycloudy, temperature: 12, templow: 4, precipitation_probability: 10}
-        - {datetime: '2026-11-07T11:00:00+00:00', condition: sunny, temperature: 13, templow: 5, precipitation_probability: 0}
-        - {datetime: '2026-11-08T11:00:00+00:00', condition: rainy, temperature: 10, templow: 6, precipitation_probability: 70}
-        - {datetime: '2026-11-09T11:00:00+00:00', condition: cloudy, temperature: 9, templow: 4, precipitation_probability: 20}
-        - {datetime: '2026-11-10T11:00:00+00:00', condition: partlycloudy, temperature: 11, templow: 3, precipitation_probability: 10}
