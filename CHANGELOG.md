@@ -144,6 +144,7 @@ These changes are in the `next` branch and come with the next release.
 - Open doors are cyan, as open windows are.
 - In light mode, the page is a lighter `#F6F4F1`, and gray fills such as tiles are a little lighter with a `fill-contrast` of 7 %.
 - The `scroller-mask` token is gone, because the modules fade scrolling rows themselves.
+- In a sections view, cards and sections stand 12 px apart, as in stacks and grids, and the page keeps 16 px above and below them.
 - The theme leaves out 83 variables that nothing reads anymore or that only repeat what Home Assistant sets itself, such as the Paper Buttons Row colors and old names for fills and tints. Its comments are short, and every card looks the same.
 
 #### Dashboard

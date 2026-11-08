@@ -100,15 +100,17 @@ Origami:
   scroller-bleed: 'var(--view-bleed)'
   scroller-padding: 'var(--scroller-bleed) var(--scroller-bleed) var(--ha-space-10, 40px)'
 
-  # Layout
-  row-gap: '0px'
+  # Layout. In a sections view, cards and sections stand 12 px apart, as in stacks and grids. The sections view also puts row-gap
+  # above the first section and below the last one, so the page's own padding is 4 px, 16 px in all.
+  row-gap: 'var(--ha-space-3)'
   column-gap: 'var(--ha-space-6, 24px)'
   header-height: 'var(--ha-space-15, 60px)'
-  view-container-padding-top: 'var(--ha-space-4, 16px)'
-  view-container-padding-bottom: 'var(--ha-space-4, 16px)'
+  view-container-padding-top: 'var(--ha-space-1)'
+  view-container-padding-bottom: 'var(--ha-space-1)'
   ha-view-sections-column-gap: 'var(--column-gap)'
   ha-view-sections-narrow-column-gap: 'var(--column-gap)'
   ha-view-sections-row-gap: 'var(--row-gap)'
+  ha-section-grid-row-gap: 'var(--ha-space-3)'
   grid-card-gap: 'var(--ha-space-3)'
   horizontal-stack-card-gap: 'var(--ha-space-3)'
   vertical-stack-card-gap: 'var(--ha-space-3)'
