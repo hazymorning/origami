@@ -18,7 +18,6 @@ sub_button:
       icon: mdi:speaker
       force_icon: true
       origami_tiles:
-        state: Bedroom
         color: var(--state-media_player-active-color)
       visibility:
         - condition: time

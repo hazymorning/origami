@@ -103,7 +103,7 @@ dark:
     climate.office: {state: heat, attributes: {friendly_name: Office, hvac_action: idle, temperature: 18, current_temperature: 18.9}}
     binary_sensor.bathroom_window: {state: 'on', attributes: {device_class: window}}
     climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, temperature: 19, current_temperature: 20.6}}
-    climate.bedroom: {state: heat, attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 19.5, current_temperature: 19.2}}
+    climate.bedroom: {state: heat, attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 20, current_temperature: 19.2}}
     climate.kids_room: {state: heat, attributes: {friendly_name: Kids room, hvac_action: idle, temperature: 19, current_temperature: 19.6}}
     climate.bathroom: {state: heat, attributes: {friendly_name: Bathroom, hvac_action: heating, temperature: 24, current_temperature: 24.1}}
     sensor.living_room_humidity: {state: '49', attributes: {unit_of_measurement: '%', device_class: humidity}}
