@@ -120,7 +120,8 @@ button_containers:
     button_padding: 16px 8px 16px 8px
     button_icon_size: 26px
     button_icon_padding: 0px 0px 8px 0px
-    button_background_color: var(--tile-chip-background)
+    # The tiles are a faint white, so the weather's color shows through them
+    button_background_color: color-mix(in srgb, var(--tile-chip-background) 45%, transparent)
     button_blurred_background: true
     buttons:
       - entity: weather.home

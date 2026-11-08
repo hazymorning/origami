@@ -1,5 +1,5 @@
 # A house whose rooms light up with the home's lights and show how warm they are, with the day's weather, low and high
-# below the temperature. The pictures load from the house folder of this repository.
+# on a chip below the temperature. The pictures load from the house folder of this repository.
 type: custom:origami-weather
 weather_entity: weather.home
 color_mode: theme
@@ -119,20 +119,23 @@ button_containers:
             size: 40px
             weight: '700'
             color: var(--primary-text-color)
-  # The day's weather, its low and its high
+  # The day's weather, its low and its high, on one chip like the ones on the house
   - position: custom
     position_anchor: bottom-left
     position_x: 0px
     position_y: 0px
-    padding: 4px 4px 4px 4px
+    padding: 0px 0px 0px 0px
+    background: true
+    grouped: true
+    background_color: var(--tile-chip-background)
+    blurred_background: true
+    button_padding: 6px 10px 6px 10px
     button_gap: 6px
-    button_icon_size: var(--icon-size-xs)
-    button_text_size: 13px
+    button_icon_size: var(--icon-size-2xs)
+    button_text_size: 12px
     buttons:
       - entity: weather.home
         forecast: daily
-        background: false
-        padding: 0px 0px 0px 0px
         elements:
           - type: icon
             icon: weather

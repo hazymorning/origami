@@ -157,7 +157,7 @@ These changes are in the `next` branch and come with the next release.
 - The navbar follows the rules of the Bubble cards. A line along the bottom of the now playing card shows how far the track has played.
 - The favorites are tiles in one row that scrolls sideways, or in a grid for a larger screen. The README shows both.
 - The lights pop-up shows how many lamps are on and since when. Each scene shows its colors in a rounded square, with the theme's corners, and its brightness under its name, and a small dot before its brightness marks the active scene.
-- The weather part has three cards: a paper diorama with a picture for each kind of weather, which the home view shows, a house whose rooms light up and show their temperature, with the day's low and high, and Origami Weather's Comparison layout in calm colors that follow the weather. The pictures load from the repository, so a home needs no files of its own.
+- The weather part has three cards: a paper diorama with a picture for each kind of weather, which the home view shows, a house whose rooms light up and show their temperature, with the day's weather, low and high on a chip, and Origami Weather's Comparison layout in calm colors that follow the weather. The pictures load from the repository, so a home needs no files of its own.
 - In the room pop-ups, the light card's arrow to the lamps stands beside its slider, as in the lights pop-up, and the bathroom has the same light card as the living room, with its two lamps and its scenes. Only the living room's lights header opens the lights pop-up. The bathroom's opens the light group's dialog, which lists each lamp.
 
 ### Bug fixes
