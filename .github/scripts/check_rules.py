@@ -3,8 +3,8 @@
 The checks look for AI attribution in the files and commit messages, check
 each module's basics, keep entity IDs out of the modules, keep card-mod out of
 the dashboard and check the writing rules in the docs that follow them. They
-also list the screenshots that are still placeholders. They run in about a
-second.
+also check that the README's release badge names the newest release and list
+the screenshots that are still placeholders. They run in about a second.
 
     python3 .github/scripts/check_rules.py [--release] [git range]
 
@@ -148,6 +148,12 @@ start = changelog.find("## Next release")
 if start >= 0:
     end = changelog.find("\n## ", start + 1)
     check_writing("CHANGELOG.md", changelog[start:end if end > 0 else None], changelog[:start].count("\n") + 1)
+# The README's release badge is static, because a badge that asks GitHub for the latest release often doesn't load.
+# It names the changelog's newest release, so a release that forgets the badge fails here.
+newest = re.search(r"^## (\d+(?:\.\d+)*)", changelog, flags=re.M)
+badge = re.search(r"img\.shields\.io/badge/Release-V([\d.]+)-", (ROOT / "README.md").read_text(encoding="utf-8"))
+if newest and not (badge and badge.group(1) == newest.group(1)):
+    fail("README.md", f"the release badge names {'V' + badge.group(1) if badge else 'no version'} instead of V{newest.group(1)}, the changelog's newest release")
 for path in modules:
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     check_writing(f"{path.relative_to(ROOT)} description", str(next(iter(doc.values())).get("description", "")))
