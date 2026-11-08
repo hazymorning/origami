@@ -13,6 +13,7 @@ side by side, and has:
   kind: panel for a card, or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
+  drop: the files of cards to leave out, such as the climate table that another file's cards have
     only: [names] keeps only the bottom sub-buttons with these names, such as two of the favorites
     copy: {entity: [entities]} repeats every list entry whose entity is the entity once for each of the others, right after it,
     as a part's README says to add more of something, such as the rows of a speaker for more speakers
@@ -28,6 +29,10 @@ side by side, and has:
   cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
+
+hero.yaml makes images/v3/hero-light.webp and hero-dark.webp, the README's first image. Each of its phones takes another
+image's file with from and changes its keys in the same way, and hero.mjs puts the screens on phones in 3D beside the
+headline and the line. three.js is downloaded once into .github/bench/.cache too.
 """
 import json, os, random, re, shutil, subprocess, sys, urllib.request
 import yaml
@@ -51,6 +56,14 @@ CARDS = {
 }
 # Parts of a card that the card loads itself
 CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js'}
+# three.js, which draws the hero's phones
+THREE_JS = 'https://raw.githubusercontent.com/mrdoob/three.js/r170/'
+THREE = {
+    'three/three.module.js': 'build/three.module.js',
+    'three/addons/environments/RoomEnvironment.js': 'examples/jsm/environments/RoomEnvironment.js',
+    'three/addons/geometries/RoundedBoxGeometry.js': 'examples/jsm/geometries/RoundedBoxGeometry.js',
+    'three/addons/utils/BufferGeometryUtils.js': 'examples/jsm/utils/BufferGeometryUtils.js',
+}
 # A phone's screen below the status bar, which frame.mjs draws
 PHONE = {'width': 412, 'height': 915 - 52}
 
@@ -61,10 +74,10 @@ def load(path):
 
 
 def fetch():
-    os.makedirs(CACHE, exist_ok=True)
-    for name, url in CARDS.items():
+    for name, url in [*CARDS.items(), *((n, THREE_JS + p) for n, p in THREE.items())]:
         path = os.path.join(CACHE, name)
         if not os.path.exists(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             urllib.request.urlretrieve(url, path)
 
 
@@ -111,10 +124,10 @@ def copies(node, copy):
 DICTS = ('states', 'entities', 'words', 'messages')
 
 
-def layer(home, spec, mode):
-    """The keys for one mode: home.yaml, then its mode, then the image's file, then its mode"""
+def layer(mode, *files):
+    """The keys for one mode: home.yaml, then its mode, then the image's file, then its mode, and so on for each file"""
     out = {}
-    for src in (home, home.get(mode) or {}, spec, spec.get(mode) or {}):
+    for src in (s for f in files for s in (f, f.get(mode) or {})):
         for k, v in src.items():
             if k in ('light', 'dark', 'home'):
                 continue
@@ -159,50 +172,92 @@ def frame(spec, work):
     return Image.open(spec['out'])
 
 
-def make(name):
-    spec = load(os.path.join(HERE, name + '.yaml'))
-    home = load(os.path.join(HERE, 'home.yaml'))
-    work = os.path.join(CACHE, 'images', name)
+def folder(work):
+    """A fresh folder for a scenario, from which the bench serves the cards and the pictures"""
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(work)
-    font = os.path.join(CACHE, 'status-font.woff2')
-    phone = spec['kind'] == 'phone'
-    phone_page = phone or 'bottom' in spec
-    # The bench serves the cards and the pictures from the scenario's folder
     for n in CARDS:
         os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
     for n in os.listdir(os.path.join(HERE, 'files')):
         os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))
+
+
+def shoot(mode, home, files, work, phone_page):
+    """Takes the bench's shot of one mode, with the keys of home.yaml and then of each file, and returns the keys and the shot"""
+    keys = layer(mode, home, *files)
+    drop = keys.get('drop') or []
+    cards = [card(c) for c in keys.get('cards', []) if not (isinstance(c, dict) and c.get('file') in drop)]
+    if any(f.get('home') for f in files):
+        cards = [card(c) for c in home['home']] + cards
+    scenario = {
+        'time': keys['time'],
+        **{k: keys.get(k, {}) for k in DICTS},
+        'templates': keys.get('templates', []),
+        'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
+        'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
+        # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
+        'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
+    }
+    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
+        if k in keys:
+            scenario[k] = keys[k]
+    path = os.path.join(work, f'scenario-{mode}.yaml')
+    with open(path, 'w') as f:
+        yaml.safe_dump(scenario, f, allow_unicode=True, sort_keys=False, width=1000)
+    subprocess.run(['node', os.path.join(HERE, '../bench.mjs'), 'shot', path, work, '--modes', mode], check=True)
+    return keys, os.path.join(work, f'{"page" if phone_page else "shot"}-{mode}.png')
+
+
+def screen(im, out):
+    """A phone's status bar has the color of the screen's top edge, and the top row, such as a menu's edge, sits behind it"""
+    out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
+    im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
+
+
+def hero(name, spec):
+    """Each phone's screen in both modes, then hero.mjs puts them on phones in 3D beside the headline"""
+    home = load(os.path.join(HERE, 'home.yaml'))
+    work = os.path.join(CACHE, 'images', name)
+    screens = {'light': [], 'dark': []}
+    for i, p in enumerate(spec['phones']):
+        files = [load(os.path.join(HERE, p['from'] + '.yaml')), p]
+        phone_work = os.path.join(work, str(i))
+        folder(phone_work)
+        for mode in screens:
+            keys, shot = shoot(mode, home, files, phone_work, True)
+            im = Image.open(shot).convert('RGB')
+            out = {'kind': 'screen', 'mode': mode, 'shot': shot, 'font': os.path.join(CACHE, 'status-font.woff2'), 'out': os.path.join(phone_work, f'screen-{mode}.png')}
+            screen(im, out)
+            im.save(shot)
+            out.update(status(f'{name}-{p["from"]}', mode, p, keys))
+            frame(out, phone_work)
+            screens[mode].append(out['out'])
+    for mode in screens:
+        job = {'mode': mode, 'screens': screens[mode], 'headline': spec['headline'], 'line': spec['line'],
+               'three': os.path.join(CACHE, 'three'), 'fonts': os.path.join(REPO, 'www/fonts'), 'out': os.path.join(work, f'{name}-{mode}.png')}
+        with open(os.path.join(work, f'{name}-{mode}.json'), 'w') as f:
+            json.dump(job, f)
+        subprocess.run(['node', os.path.join(HERE, 'hero.mjs'), os.path.join(work, f'{name}-{mode}.json')], check=True)
+        save(Image.open(job['out']), os.path.join(OUT, f'{name}-{mode}.webp'), False)
+
+
+def make(name):
+    spec = load(os.path.join(HERE, name + '.yaml'))
+    if spec['kind'] == 'hero':
+        return hero(name, spec)
+    home = load(os.path.join(HERE, 'home.yaml'))
+    work = os.path.join(CACHE, 'images', name)
+    folder(work)
+    font = os.path.join(CACHE, 'status-font.woff2')
+    phone = spec['kind'] == 'phone'
+    phone_page = phone or 'bottom' in spec
     framed = {}
     for mode in ('light', 'dark'):
-        keys = layer(home, spec, mode)
-        cards = [card(c) for c in keys.get('cards', [])]
-        if keys.get('home') or spec.get('home'):
-            cards = [card(c) for c in home['home']] + cards
-        scenario = {
-            'time': keys['time'],
-            **{k: keys.get(k, {}) for k in DICTS},
-            'templates': keys.get('templates', []),
-            'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
-            'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
-            # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
-            'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
-        }
-        for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
-            if k in keys:
-                scenario[k] = keys[k]
-        path = os.path.join(work, f'scenario-{mode}.yaml')
-        with open(path, 'w') as f:
-            yaml.safe_dump(scenario, f, allow_unicode=True, sort_keys=False, width=1000)
-        subprocess.run(['node', os.path.join(HERE, '../bench.mjs'), 'shot', path, work, '--modes', mode], check=True)
-
-        shot = os.path.join(work, f'{"page" if phone_page else "shot"}-{mode}.png')
+        keys, shot = shoot(mode, home, [spec], work, phone_page)
         im = Image.open(shot).convert('RGB')
         out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
         if phone:
-            # The status bar has the color of the screen's top edge, and the top row, such as a menu's edge, sits behind it
-            out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
-            im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
+            screen(im, out)
             out.update(status(name, mode, spec, keys))
             for k in ('cut', 'bottom'):
                 if k in keys:

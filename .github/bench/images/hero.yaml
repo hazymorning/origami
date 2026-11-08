@@ -1,0 +1,56 @@
+# The README's first image: the home view, the music pop-up and the TV remote on three phones, turned toward the headline
+# beside them. Each phone takes another image's file and changes a few of its keys. By day, the home view's player plays the
+# song that the music pop-up shows. At night, the rooms stay cards with the climate table closed, and the speaker group stays closed.
+kind: hero
+headline:
+  - A chill dashboard
+  - for Home Assistant.
+line:
+  - Soft and simple, built the Home Assistant
+  - way and refined over years of daily use.
+phones:
+  - from: home-view
+    light:
+      states:
+        media_player.living_room:
+          state: playing
+          attributes:
+            friendly_name: Living room
+            media_title: Daybreak
+            media_artist: Lumen Fields
+            entity_picture: /local/cover-1.jpg
+            group_members:
+              - media_player.living_room
+              - media_player.bedroom
+            volume_level: 0.32
+            media_duration: 214
+            media_position: 71
+            media_position_updated_at: '2026-11-04T12:39:00+00:00'
+            supported_features: 152463
+        media_player.bedroom:
+          state: playing
+          attributes:
+            friendly_name: Bedroom
+            media_title: Daybreak
+            media_artist: Lumen Fields
+            entity_picture: /local/cover-1.jpg
+            group_members:
+              - media_player.living_room
+              - media_player.bedroom
+    dark:
+      drop:
+        - climate-table/card.yaml
+      states:
+        input_boolean.climate_table: {state: 'off', attributes: {friendly_name: Climate table}}
+  - from: music-pop-up
+    light:
+      states:
+        media_player.living_room:
+          state: playing
+          attributes: {friendly_name: Living room, volume_level: 0.26, is_volume_muted: false, media_title: Daybreak, media_artist: Lumen Fields, media_album_name: Daylight, entity_picture: /local/cover-1.jpg, media_duration: 241, media_position: 96, media_position_updated_at: '2026-11-04T12:40:00+00:00', shuffle: false, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth, Optical In], group_members: [media_player.living_room, media_player.kitchen], supported_features: 4127295}
+        media_player.kitchen:
+          state: playing
+          attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Daybreak, media_artist: Lumen Fields, entity_picture: /local/cover-1.jpg, group_members: [media_player.living_room, media_player.kitchen]}
+    dark:
+      click: []
+  - from: tv-pop-up

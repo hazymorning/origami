@@ -5,6 +5,7 @@
 //     mode, shot, font, time, battery, wifi (1 to 3), cell (1 to 4), bg, and cut to show only its top or bottom to show only
 //     its bottom, flush with the image's edge.
 //   panel: a card on its page, as in 2.0. shot and width.
+//   screen: a phone's screen alone with its status bar, for the hero's phones. The same keys as a phone, without cut and bottom.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -77,6 +78,13 @@ if (spec.kind === 'panel') {
 html, body { margin: 0; background: transparent; }
 img { display: block; width: ${width}px; border-radius: ${RADIUS}px; }
 </style></head><body><img class="canvas" src="${data(spec.shot, 'image/png')}"></body></html>`;
+} else if (spec.kind === 'screen') {
+  // The hero's phones round the screen's corners themselves
+  width = W;
+  height = H;
+  html = `<!doctype html><html><head><style>${phoneStyle}
+.canvas, .phone { border-radius: 0; box-shadow: none; }
+</style></head><body><div class="canvas" style="width:${W}px;height:${H}px">${phone(spec.mode, spec, false)}</div></body></html>`;
 } else {
   const SIDE = 100, TOP = 100;
   width = W + 2 * SIDE;
