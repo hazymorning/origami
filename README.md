@@ -10,7 +10,7 @@
 
 Origami is a dashboard for Home Assistant. It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
 
-The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. A small digital version of a home is something people look at and use every day, so it should feel pleasant. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
+The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
@@ -111,7 +111,7 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 The start page, from the greeting down to the navigation bar:
 
 - **[Greeting and notifications](dashboard/greeting/).** Greeting and info on the left, and a notification island on the right.
-- **[Weather](dashboard/weather/).** The weather at a glance, as a little paper landscape or in one of two other looks.
+- **[Weather](dashboard/weather/).** The weather at a glance, for example as a cute little paper landscape.
 - **[Favorites](dashboard/favorites/).** Quick access to favorites, and to whatever is running right now.
 - **[Rooms](dashboard/rooms/).** How each room is doing, and the way into its pop-up.
 - **[Climate table](dashboard/climate-table/).** All rooms side by side, to see at once where it's too warm, too cold or a window is open.
@@ -121,7 +121,7 @@ The start page, from the greeting down to the navigation bar:
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Truly hides Home Assistant's header and, if wanted, adds a menu that slides down with shortcuts for the admin. It uses the Origami Header card, because Home Assistant still has no proper way to hide its header. [More](dashboard/menu/)
+Truly hides Home Assistant's header and, if wanted, adds a menu that slides down. It uses the Origami Header card, because Home Assistant still has no proper way to hide its header. [More](dashboard/menu/)
 
 ## Pop-ups
 
@@ -147,7 +147,7 @@ Music in every room from one place, with speakers grouped as needed. [More](dash
 
 <img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
 
-The TV's remote on the phone, with its apps one tap away. [More](dashboard/tv/)
+The TV's remote on the phone. [More](dashboard/tv/)
 
 ### Fan
 
