@@ -1,0 +1,20 @@
+# The diorama card on its own. Light shows a partly cloudy midday with the sun above the hills and birds on their way,
+# and dark a snowy night. The card stands on its own here, so it has no offset above it.
+kind: panel
+seed: 27
+advance: 9
+cards:
+  - file: weather/diorama.yaml
+    with:
+      card_offset: 0px 0px 0px 0px
+light:
+  states:
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 42}}
+    weather.home:
+      state: partlycloudy
+      attributes: {friendly_name: Home, temperature: 13.6, temperature_unit: °C, humidity: 61, wind_speed: 8, wind_speed_unit: km/h, pressure: 1019, supported_features: 3}
+dark:
+  states:
+    weather.home:
+      state: snowy
+      attributes: {friendly_name: Home, temperature: -2, temperature_unit: °C, humidity: 93, wind_speed: 6, wind_speed_unit: km/h, pressure: 1011, supported_features: 3}

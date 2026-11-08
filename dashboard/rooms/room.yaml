@@ -1,0 +1,48 @@
+# One room. A tap opens the room's pop-up, and a hold opens its lights.
+type: custom:bubble-card
+card_type: button
+button_type: name
+entity: light.living_room
+name: Living room
+icon: mdi:sofa
+modules:
+  - origami_base
+origami_base:
+  tile: true
+  vertical: true
+grid_options:
+  columns: 6
+  rows: auto
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#popup_living_room'
+  hold_action:
+    action: more-info
+sub_button:
+  main:
+    - icon: mdi:chevron-right
+  bottom:
+    # The dot's color goes from blue at 12° over green to red above 32°
+    - entity: sensor.living_room_temperature
+      icon: mdi:circle
+      origami_base:
+        color: >-
+          ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+          [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
+          [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
+          [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
+          .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+    # The window shows only while it is open
+    - entity: binary_sensor.living_room_window
+      icon: mdi:window-open-variant
+      origami_base:
+        hidden: ${state !== 'on'}
+    - entity: sensor.living_room_temperature
+      show_icon: false
+      origami_base:
+        name: ${num(state, 0)}° |
+    - entity: sensor.living_room_humidity
+      show_icon: false
+      origami_base:
+        name: ${num(state, 0, '%')}

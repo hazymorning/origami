@@ -1,0 +1,128 @@
+type: custom:origami-header-card
+mode: menu
+position: top
+layout: grid
+all_users: true
+buttons:
+  # The File editor app. Change or delete this button if it isn't installed.
+  - name: Files
+    icon: mdi:folder-outline
+    tap_action:
+      action: navigate
+      navigation_path: /app/core_configurator
+  - name: Autom.
+    icon: mdi:robot-outline
+    tap_action:
+      action: navigate
+      navigation_path: /config/automation/dashboard
+  - name: Menu
+    icon: mdi:menu
+    special: sidebar
+  - name: Edit
+    icon: mdi:pencil-outline
+    special: edit
+cards:
+  # The server card. Its name gives the most urgent problem, and the line below it gives the uptime.
+  # A tap on CPU or RAM opens its history, and a tap anywhere else opens the server pop-up.
+  type: custom:bubble-card
+  card_type: button
+  button_type: state
+  entity: sensor.system_monitor_uptime
+  icon: mdi:server
+  name: >-
+    {%- set c = states('sensor.system_monitor_processor_use') | float(-1) -%}
+    {%- set r = states('sensor.system_monitor_memory_usage') | float(-1) -%}
+    {%- set s = states('sensor.system_monitor_disk_usage') | float(-1) -%}
+    {%- set b = as_timestamp(states('sensor.backup_last_successful_automatic_backup'), default=none) -%}
+    {%- set a = (now().timestamp() - b) if b is not none else 0 -%}
+    {%- set u = states.update | selectattr('state', 'eq', 'on') | list | count -%}
+    {%- if s > 90 -%}Disk almost full
+    {%- elif r > 95 -%}Memory low
+    {%- elif c > 95 -%}CPU high
+    {%- elif a > 259200 -%}Backup due
+    {%- elif s > 80 -%}Disk almost full
+    {%- elif r > 85 -%}Memory low
+    {%- elif c > 80 -%}CPU high
+    {%- elif c < 0 and r < 0 and s < 0 -%}No data
+    {%- elif u > 0 -%}{{ u }} {{ 'update' if u == 1 else 'updates' }}
+    {%- else -%}All good
+    {%- endif -%}
+  state_content: >-
+    {%- set n = as_timestamp(states('sensor.system_monitor_uptime'), default=none) -%}
+    {%- set d = [(now().timestamp() - n) | int, 0] | max if n is not none else -1 -%}
+    {%- if d < 0 -%}Uptime unknown
+    {%- elif d >= 86400 -%}Up {{ d // 86400 }} {{ 'day' if d < 172800 else 'days' }}
+    {%- elif d >= 3600 -%}Up {{ d // 3600 }} {{ 'hour' if d < 7200 else 'hours' }}
+    {%- else -%}Up {{ [d // 60, 1] | max }} {{ 'minute' if d < 120 else 'minutes' }}
+    {%- endif -%}
+  scrolling_effect: false
+  modules:
+    - origami_base
+  tap_action:
+    action: navigate
+    navigation_path: '#popup_server'
+  button_action:
+    tap_action:
+      action: navigate
+      navigation_path: '#popup_server'
+  sub_button:
+    main:
+      - entity: sensor.system_monitor_processor_use
+        show_name: true
+        show_icon: false
+        show_background: false
+        origami_base:
+          name: ${num(state, 0, '%') || '–'}
+          label: CPU
+        tap_action:
+          action: more-info
+      - entity: sensor.system_monitor_memory_usage
+        show_name: true
+        show_icon: false
+        show_background: false
+        origami_base:
+          name: ${num(state, 0, '%') || '–'}
+          label: RAM
+        tap_action:
+          action: more-info
+css: |-
+  /* The menu looks like a pop-up: the same backdrop, background and shadow */
+  .scrim {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: var(--bubble-backdrop-background-color);
+  }
+  .sheet {
+    padding: calc(var(--ha-space-5) + var(--safe-area-inset-top, 0px)) var(--ha-space-5) var(--ha-space-6, 24px) var(--ha-space-5);
+    gap: var(--ha-space-5);
+    background: var(--popup-background);
+    box-shadow: var(--shadow-elevated);
+  }
+  .buttons {
+    gap: var(--ha-space-3);
+  }
+  .button {
+    background: none;
+    box-shadow: none;
+    padding: 0 !important;
+    gap: 12px !important;
+  }
+  .button ha-ripple {
+    display: none;
+  }
+  .sheet .buttons .button ha-icon {
+    width: 100%;
+    height: 72px;
+    border-radius: var(--radius-inner);
+    color: var(--color, var(--primary-text-color));
+    background: var(--fill-subtle);
+  }
+  .button:active ha-icon {
+    transform: scale(var(--press-scale));
+  }
+  .name {
+    display: block;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+

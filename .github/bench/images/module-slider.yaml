@@ -1,0 +1,38 @@
+# A subwoofer level slider and a fan speed slider
+kind: panel
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    button_type: slider
+    entity: number.subwoofer_level
+    name: Subwoofer ·
+    show_name: true
+    show_state: false
+    show_icon: false
+    slider_value_position: right
+    tap_action: {action: none}
+    modules: [origami_base, origami_slider]
+    rows: 1
+  - type: custom:bubble-card
+    card_type: button
+    button_type: slider
+    entity: fan.bedroom
+    name: Fan ·
+    show_name: true
+    show_state: false
+    show_icon: false
+    slider_value_position: right
+    tap_action: {action: none}
+    modules: [origami_base, origami_slider]
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: fan.toggle, target: {entity_id: fan.bedroom}}}
+    rows: 1
+states:
+  number.subwoofer_level: {state: '2', attributes: {friendly_name: Subwoofer level, min: -6, max: 6, step: 1, mode: slider}}
+  fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33}}
+# In the evening, the subwoofer is turned down and the fan runs slower
+dark:
+  states:
+    number.subwoofer_level: {state: '-2', attributes: {friendly_name: Subwoofer level, min: -6, max: 6, step: 1, mode: slider}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33}}

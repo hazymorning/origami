@@ -2,54 +2,89 @@
 
 These rules are for work on Origami itself: its modules, theme, dashboard and docs in the hazymorning/origami repository. They hold what the code alone does not show, and coding agents follow them too.
 
+## Handing files to the user
+
+The user tests every change on a phone, in their own Home Assistant. Every round that changes a file the user has to paste, such as a module, a card, a pop-up or a script, ends the same way:
+
+- All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
+- The user keeps their own setup in step with the repository. A file counts as changed when its text differs from the version the user has, also after a cleanup that changes nothing they see. A file whose text is the same stays off the page.
+- Each file on the page says in one line what changed in it, such as a cleanup that looks and works the same, so the user knows why it is there.
+- The same page is updated for every round, so its link stays the same, and the reply gives that link.
+- Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
+- Replies put the important parts, such as a cause, a change the user has to make or the link to the page, in large headings, so the user sees them at once on the phone.
+
 ## The idea
 
 Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
 
 - Prefer a clean solution with what Home Assistant and Bubble Card offer over a workaround.
 - Every part works on its own and says what it needs.
+- Less is more. A feature never adds a new sensor, helper or script while Bubble Card, the modules or a template in the card itself can do it, even with a few more sub-buttons or a little JavaScript in the card. A tap that needs a value from a template becomes one sub-button for each value, each with its own fixed action, shown or hidden by `hidden`. Only when there is no other way does an existing sensor or script grow, and a new one comes last.
 
 ## For everyone
 
 This rule comes first. Origami is for every home, and every home has other entities, devices and integrations. The user's own dashboard is where everything is built and tested, and almost all of it is general: a greeting, a weather card or a pop-up that lists favorites fits any home. What differs from home to home are the details, such as the entities, the favorites in a list or the words of a greeting. Only two parts of the user's setup are personal as a whole, the taxi and tent pop-ups, and they stay out.
 
 - Separate what makes a feature work from one home's details. The repository has the general part, with plain defaults where the user's setup has personal details, such as English greetings instead of the user's own words.
+- The real setup is the starting point, not the spec. Each part is checked for what can be simpler, sturdier or more general, and the better version goes into the repository and is offered back to the real setup.
 - Modules stay general. They contain no entity names, special cases or logic for one home. Where homes differ, an option covers it.
 - Every feature stands on its own, so people take only what they use. A feature is a card or a pop-up and the few parts it needs. Nothing bundles several features into one install, and nothing puts parts into a home that it does not use.
 - Entities appear only in a feature's card YAML, where people replace them with their own. Scripts take entities as fields from the card, so they work without edits. Logic that a card can compute in its `${ }` templates stays in the card instead of a template sensor.
-- A feature's helpers, scripts and automations go into one small package file next to its card, and only when the feature cannot work without them. Each one stays short and easy to read, change and debug. A script full of one home's edge cases does not belong there.
+- A feature's folder holds plain files, and each one goes into one place in Home Assistant's UI: the card or pop-up YAML into the dashboard, a script into the script editor and an automation into the automation editor. Helpers are created under Settings, Helpers, and the README part says the type, name and options of each one, so its entity ID matches the card. Nothing comes as a package, because a package hides what it creates and can't know a home's entities. Each script stays short and easy to read, change and debug, and a script full of one home's edge cases does not belong there.
 
 ## Repository layout from 3.0
 
 - The theme, the font and the modules are the core that every user installs.
-- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML and, only if needed, its package file.
+- Each feature has its own folder under `dashboard/`, such as `dashboard/vacuum/`, with its card or pop-up YAML, one file for each script or automation it needs, and a README with its steps.
 - There is no file with the whole dashboard, because it cannot work anywhere without replacing every entity and installing every feature's parts. A short section shows how the features are arranged on the page.
 
 ## README from 3.0
 
-The README is the main documentation and shows the finished result. People scroll through it and pick the parts they want, so it has to be easy to scan.
+The README is the main documentation, and in the end it is what people get from Origami, so its standard is the highest in the repository. Most readers are beginners who scroll through it and pick the parts they like. It holds only what they need to get a part working, in the simplest form that works: a short step instead of an explanation, and a list instead of a paragraph. It has to feel light, explain each thing once and read smoothly: honest and reduced to what's needed, never like marketing or a manual. Text that doesn't meet this standard doesn't go in.
 
-- It is a series of short sections in the order of the dashboard, one per part. Each section starts with its image, and the images show what the part does.
-- Below each image, one or two sentences say what the part is. Everything else, such as setup steps, YAML, options and the entities to replace, sits in collapsed `<details>` blocks. There are no walls of text.
-- The core setup comes first: the theme, the font and the modules, which give every part the Origami look.
-- Each part says clearly what it needs. First what it needs to work, such as other cards, integrations, helpers and scripts, with links to its files. Then what it needs for the Origami look, which is the theme and the modules it uses.
-- No section depends on another one, except the core setup.
+- It's light. The main README is a gallery: each part is its name, its image and one short line about it, which ends with a **More** link to the part's folder. The home view is one image of the page on a phone, with its parts as a list below it, where each part's name is the link to its folder, and the menu and every pop-up get an image of their own. The name itself is plain text. The line says what the part is for, the way someone would describe it, not what its code shows. It leaves out layout details and the cards a part needs, because the part's README has them, unless a card is the reason the part exists, as for the menu. The line isn't a copy of the first sentence in the part's README. The README in that folder has the part's steps, next to its files. Anything else in the main README, such as troubleshooting, sits in one folded `<details>` block, so people open what they want on purpose.
+- Origami's idea is said once, in the intro of the main README, which may sound personal: it tells where Origami comes from. The parts, the other sections and the module reference don't repeat it. The intro follows the maintainer's draft and changes only when the maintainer asks.
+- Badges have a label in the dark theme's background color, `#181715`, and a value in the light theme's, `#F6F4F1`, so they never compete with the images. The Origami Suite badge with the Origami logo, ◪, marks every repository of the suite, such as Origami Weather, and links to all of them. The badges stand at the very top of the README, in a `div`, which has no margin, so no gap opens between them and the hero. The hero's `picture` stands on its own below them, because GitHub turns an image inside a paragraph into a link, and then the `picture` no longer switches to dark. The release badge is static and names the newest release, such as V2.0, because a badge that asks GitHub for it often fails to load.
+- A step never assumes a fresh install. Many people already have HACS, Bubble Card or a themes folder, so a step says what to check or update instead, and Bubble Card and the community cards get credit where they come up.
+- Every part's README has the same sections in the same order: its name, an image for each example and what it's for, then Requirements, Setup, Optional if the part has optional pieces, and Entities. Requirements lists only what has to be installed or exist already, such as modules, integrations, cards and devices. Setup has numbered steps for what the part needs and nothing else. Each optional piece gets one entry under Optional, with what it adds, the helper or script it needs and what to delete without it. Entities says what each example entity is used for. `check_rules.py` checks the sections, that nothing optional stands under Requirements or Setup, and that the modules match the files.
+- A part whose Setup has long steps, such as a helper with a template, puts each step in a folded block whose title says what to do, such as **Create the speaker helper**, so the steps first read as a short list. Titles in a row of folded blocks share one form, with numbers on all of them or on none.
+- A part's files work with only the steps under Setup, so a piece that is left out never hides or breaks the part.
+- A part's README is written for the reader's home, not for the example's. Every step that only matters with a certain device or feature, such as a thermostat's script, a light group or window contacts, belongs to that piece's entry under Optional, which starts with its condition, such as "For a room with a thermostat". Setup holds only the steps that every home needs. A part made of blocks, such as the room pop-up, gives each block an entry with what it's for and what it needs.
+- Each step, explanation and term lives in one place, and other places link there. Setting up the theme, the font and Bubble Card, adding a module and adding a card or pop-up are explained once, under Get started in the main README.
+- It's said in plain, natural words. A part's line says what the part is for, checked against its files, not how it's built. Steps are short commands, such as "Open Settings", and the text never talks to the reader as "you". A technical term only shows up where the reader has to type or find it.
+- No step needs access to the `/config` folder when Home Assistant's UI can do it. A module is added in Bubble Card's editor and the font as a resource, and copying files is only mentioned for people who already work that way.
+- A sentence stays only if a beginner would miss it. The image already shows what a part does, so the text doesn't describe it again, and it never says how something moves. History and reasons stay out, and how a module works inside belongs in the module reference.
+- It's written for someone who runs Home Assistant but has never edited a dashboard in YAML. Each step is one action and says where to find it in Home Assistant. A term is explained the first time it comes up, or linked to Home Assistant's docs, and it keeps the same name everywhere.
+- Each part's README says what it needs to work, such as cards, integrations, modules, helpers and scripts, with links to its files. No part depends on another one, except Get started.
+- A setting that many people would want but few would look for gets a GitHub tip (`> [!TIP]`) of one or two sentences in the README of the part where it matters, or in the module reference, and never in the main README. The core setup under Get started has no folder of its own, so such a hint stands there as a quote that starts with a bold word, because GitHub doesn't show tips inside a folded block. Base's `words` for the long words of German or French is such a tip in the room pop-up's README. The repository's cards don't use such words themselves, because they belong to one language.
+- A part's README is written from its files, never from its file names. Before writing, read what each card, script and helper does. The README says which pieces are optional and how to leave them out, why a script is there when Home Assistant seems to have an action for it, and what a home will most likely change, such as the buttons of a row. A part works with any device of its kind, so a brand or an integration in its files is named as the example's, not as a requirement.
+
+The README is done when the rule checks pass and every claim matches the files. Then the maintainer reads it from top to bottom, and someone who doesn't know Origami sets up the core and one part with nothing but the README.
 
 ## Building
 
 A new custom card is often the easiest path for an agent, but it is rarely the right one here. Home Assistant and Bubble Card should do as much as possible.
 
 - Build with Bubble Card's card types and the Origami modules, the other cards that the dashboard already uses and Home Assistant's own features, such as template sensors and scripts. If Bubble cards need a new look or behavior, write or extend a module, even when a custom card would be faster.
+- All modules follow one design logic. The theme's tokens and Base's sizes set every radius, gap, line and shadow, and `themes/origami.yaml` explains the corner rule. A module uses those instead of its own values, without fallbacks, because the modules need the theme, and the design checks measure the result.
+- Padding, margins and offsets that people read, in YAML and in CSS, have all four values, such as `0 0 8px 0`, never the short forms with one value missing.
+- Spacing follows the room pop-ups, which the maintainer set by hand. Cards stand 12 to 14 px apart. Above a heading, the space from the card before it to the heading's capitals is about 43 px, and below it, the space from the heading's baseline to its content is about 27 px, so the space above is 1.6 times the space below and the heading belongs to its content. The header card makes the space above a heading, so a card adds no space below itself, or the gap grows twice. Inside a box, the space around text is never smaller than the space inside it, and the eye reads text from its small letters, not its capitals. Measure every gap in the bench before showing an image, and compare it with these numbers.
+- Sliders are never colored, not even for a light. Their fill and the mark at its end stay neutral in every mode, because a state color belongs to the icon. The bench checks it, and Base's neutral colors win over any module.
+- Depth follows one rule: the card background casts a shadow, and a gray fill never does. On a card and on the page, a control is a flat fill. On a gray fill, such as a tile, a tray or a track, it has the card background and the chip shadow, so the keys in a tray on a tile are flat again. A control that turns on changes only its color. A module takes a control's fill and shadow from `--org-key-bg`, `--org-key-shadow` and the theme's tokens, never a shadow of its own, and the bench checks it.
+- Shared code lives in Base, and no module repeats what Base or another module already does. Less code keeps the dashboard fast.
+- An option that no part of the dashboard uses is not dead code. Every home and every taste is different, which is why the modules are this flexible, so such an option stays unless the maintainer drops it. Dead code is code that nothing can reach, such as a variable that nothing reads.
+- Grouping speakers always uses the link icon, `mdi:link-variant`, as the badge of a group member does. Speaker icons stand for choosing a speaker, so a control that groups never uses one.
 - Custom cards like Origami Weather and Origami Notifications exist only for specific gaps that nothing else can fill. Before building a new one, explain to the user why the existing cards cannot do the job. Never use card-mod.
-- Before changing a part, read its README section, the Techniques section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
+- Before changing a part, read its README section and, for Bubble cards, `bubble_card/README.md`. Do not guess options or entity IDs.
 
 ## Checks
 
 Two checks keep the rules that a script can measure. Run them before each commit. CI runs them too and fails when a rule breaks.
 
-- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod and the writing rules. It takes a second.
+- `python3 .github/scripts/check_rules.py` checks for attribution, each module's basics, entity IDs in modules, card-mod, the writing rules, the links in the READMEs and the release badge against the changelog, and lists the placeholder images. It takes a second.
 - `node .github/bench/bench.mjs` renders example cards with the modules and the theme in Chromium and measures the design rules, such as corners, row ends, the end column and line widths. It takes a few seconds. Run `npm ci` and `npx playwright install chromium` in `.github/bench` once before.
 - `node .github/bench/bench.mjs shot <scenario.yaml> <folder>` takes screenshots of any cards, such as the user's own, which stay outside the repository.
+- `node .github/bench/compare.mjs [--ref <commit>] <scenario.yaml ...>` renders scenarios with the modules of a commit and with the working tree, and compares every element's style and the pixels. A change that should look the same, such as a cleanup, is done only when every render is the same. `python3 .github/bench/options.py <folder>` writes scenarios with every module option alone and in the pairs that interact, and the user's own cards belong in the comparison too.
 
 A failing check means that the change breaks a rule. Fix the change, not the check. A check changes only with its rule, and a new design rule gets a check in `.github/bench/checks.js` and an example card in `.github/bench/sheet.yaml`.
 
@@ -59,6 +94,7 @@ An update must keep every dashboard working that worked with the release before,
 
 - Before modules go to the user or to `next`, take screenshots of the user's own unchanged cards with the bench's `shot` mode and check them, not only the cards that were converted for the new version.
 - A change that needs new YAML on existing cards needs a fallback in the modules. If no fallback is possible, it waits for a major release, and the changelog's upgrade steps describe it.
+- HACS updates the theme on its own, before the new modules and cards are copied. So the theme keeps every variable that the last release's cards and modules read, and they go only in the major release after. `compare.mjs` with the last release as `--ref`, run in a worktree that has the last release's modules and the new theme, shows what a HACS update alone changes.
 - Base is a global module (`is_global: true`), because every other module needs it. Bubble Card runs it first on every card, so no card has to list it. Base must stay global, and it must keep doing nothing on cards without an Origami module.
 - A module that needs Base checks `card._org.version` and fails with a clear message. Such a failure is a bug in the update, not something to fix in the user's cards.
 
@@ -68,22 +104,41 @@ The repository never names an assistant, a model or a tool. Where an agent has t
 
 - Branches that an agent creates are named `<word>/<topic>`, with the word in lowercase ASCII, such as `papierflieger/readme`, `karton/weather` or `dina4/tv-remote`. Umlauts become ae, oe and ue.
 - Session titles use the same words, such as "Falz: README fixes".
-- Releases: `Origami <version> · <name>`. 2.0 is The Unfolding. Ideas for later ones: Valley Fold, Mountain Fold, Squash Fold, Petal Fold, Crane, Waterbomb, Kite Base, Washi.
+- Releases: `Origami <version> · <name>`. 2.0 is The Unfolding, and 3.0 is The Final Fold.
 - Scratch files can use the same words. Anything a screenshot shows, like a demo entity's name, stays plain.
 
 Commit messages, PR titles and the README stay plain.
 
 ## Writing
 
-All text is short, plain English, the way a person would write it. This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
+All text is written for people: short, plain English that sounds like a person wrote it. The docs that people read are smooth and honest, say only what's needed, give steps as short commands and never talk to the reader as "you". This applies to the README, the changelog, the module reference, module descriptions, the pull request and code comments.
 
 - Say what something does or what changed, then stop. One line per change is usually enough.
+- Use everyday words and short sentences. Contractions like doesn't are fine. Read the text as if out loud, and rewrite anything that sounds stiff or that nobody would say.
+- Write the way someone tells a friend about their own project: plainly, and a little modest, such as "now finally feels somewhat finished". Name real things, such as one music card for multiple speakers, instead of praise, and say a goal as a goal, not as a claim that it's reached. No lines crafted for effect, such as "until one day it did" or "written down for other homes".
+- A draft from the maintainer sets the voice and what to say. Keep both and make it shorter and smoother: merge sentences, leave out what's vague or already clear, and fix the facts. A draft is never used word for word, and never turned into another voice. Notes that only give context explain the background and don't turn into text.
+- Say a message once. The same point in several places, such as Origami's idea or that a part works on its own, makes text sound generated.
+- Vary how sentences start. Descriptions that all begin with the same verb, such as Shows or Sets, read like a machine wrote them, and a short phrase often says more, such as "Scenes, all lamps at once, or each lamp on its own." Use "such as" sparingly, and "like" where it sounds more natural.
+- No text about the text, such as `this section explains` or `the first three are`. Headings already say what follows.
+- No buzzwords, tech slang, filler or metaphors, such as `seamless`, `under the hood`, `swap`, `squash a bug` or `simply`. `check_rules.py` has the full list.
 - Leave out test logs, earlier attempts and measurements, unless the reader needs the number.
 - When a text changes, rewrite it instead of adding to it.
-- Short list items and colons are fine. Avoid dashes, semicolons and exclamation marks.
-- No first person, buzzwords, marketing words, idioms or metaphors, such as seamless, powerful, under the hood or out of the box.
+- Short list items and colons are fine. Avoid dashes, semicolons, exclamation marks and the first person.
 - A module's description has 50 words at most. It says what the module does, and the module reference in `bubble_card/README.md` holds the options and the details.
-- Check every claim against the YAML before writing it. The entities are examples from one home, so say what is optional.
+- Check every claim against the files before writing it. The entities are examples from one home, so say what is optional.
+
+| Instead of | Write |
+| --- | --- |
+| Origami is a Home Assistant dashboard that took years to get right. It changed with daily use more often than anyone would care to count and never quite felt done, until one day it did. | Origami is a dashboard for Home Assistant. It has changed with daily use for many years and now finally feels somewhat finished. |
+| Origami builds on what Home Assistant and Bubble Card already do well and adds as few parts as possible. | Most of the dashboard is plain Bubble Card. Origami adds the look and the few things Bubble Card can't do. |
+| The card is not installed, or the browser is still using an old version of the page. | The card isn't installed, or the browser still shows an old version of the page. |
+| A menu that slides in from the top of the screen, in place of Home Assistant's header. | Replaces Home Assistant's header with a menu that slides down from the top. |
+| Temperature, humidity, windows and heating for every room in one table. | Every room's climate in one table. |
+| Your favorite scenes, devices and pop-ups in one list, and each row shows what a tap does. | Quick access to favorites: other pop-ups, devices, anything really. |
+| Shows the temperature, humidity, windows and heating of every room in one table. | Every room in one table, with its temperature, humidity, windows and heating. |
+| The heart rests on speakers that aren't Music Assistant players. | The heart is grayed out on speakers that aren't Music Assistant players. |
+| Most parts are Bubble cards, and those also need Bubble Card. | Most parts are built with Bubble Card, and each one lists the modules it uses. |
+| The room's climate sensor writes `temp_rank`, and the Table module gives every cell in its column this icon. | The warmest and the coldest room get an arrow. |
 
 ## Commits and pull requests
 
@@ -95,16 +150,21 @@ All text is short, plain English, the way a person would write it. This applies 
 
 ## Images
 
-- Screenshots come from a real Home Assistant with the real theme, font and cards.
+- All images follow one standard, so the gallery looks like one piece. Each image shows a part's light and dark mode side by side, with rounded corners and a transparent gap between them. The two halves show different things that are useful to see, such as an open mini pop-up in dark, another moment of the example home or other devices, never the same view twice. A card stands on its own, as in 2.0. The home view, the menu and each pop-up stand on a phone that faces the camera, always at a real phone's size, so the home view shows what fits on its screen, on a plain background a little lighter than the light page or a little darker than the dark one. The pictures in the demos, such as covers, are photos under CC0 or in the public domain: forests by day and the sea by night. Never a diagonal division.
+- The images show each part at its best and show off what it can do, because they are what people see first, such as birds over a weather card by day and snow falling at night. Lists are full, such as six speakers or six rooms, added as the part's README says, and every row of a table has all its cells. A phone is whole, except for a part at one edge of the screen, such as the menu at the top or the lights and fan pop-ups at the bottom: there the image ends a little past the part, and the phone meets the image's edge without a margin. A menu or a mini pop-up stands where it opens on a real phone, and each image's status bar has its own time, battery and signal, as on a real phone during a day. The weather on the home view is gray by day, so the weather card adds little color to the page, and `seed` keeps the weather card's sky the same in every shot. A sunny sky without a cloud is a weather card's plainest look, so the weather images show clouds, rain, snow or the night, and in each mode the three cards show three kinds of weather.
+- An image never shows the same thing twice, such as a cleaning vacuum in the notifications and in the favorites. The favorites are quick access first, so only the first favorite is on and the others wait for a tap. Values stay short and even, such as 20° instead of 19.5° for a thermostat and Playing instead of Bedroom as a state, and no name is cut off. Each image's scenario picks its favorites and states for this, and a change to a part keeps them.
+- The hero is the README's first image and gets more care than any other. Three simple phones in 3D, white by day and nearly black at night, with no black border around the screen, show the home view with its room cards, the music pop-up and the TV remote. They turn toward the logo, the headline and the line, with plenty of room between them. The hero comes in a light and a dark version, and the README shows the one that matches GitHub's theme.
+- Screenshots show the real theme, font, modules and cards. `python3 .github/bench/images/make.py` makes every image with the bench from the example home's states in `.github/bench/images` and frames them, and `hero.mjs` there puts the hero's screens on its phones.
 - Before using a screenshot, look at it at full size and check the spacing against the rest of the dashboard. Measure gaps in the browser instead of guessing.
-- Phone mockups use the 3D phone with the camera at eye level. The phones stand upright, and the screens are never tilted away.
-- README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones.
+- README images use absolute `raw.githubusercontent.com/hazymorning/origami/main/...` URLs, because HACS doesn't rewrite relative ones. While a release is built, they point to `next` instead, so the READMEs on `next` show the new images, and the last step before the merge points them back to `main`. `check_rules.py --release` fails while one still points to `next`.
+- A card loads its own images, such as the weather card's house, from its part's folder through `cdn.jsdelivr.net/gh/hazymorning/origami@main/...`, so a home needs no files of its own. They point to `next` and back to `main` the same way. `check_rules.py` checks that each one exists, and the bench loads them from the working tree.
+- Until the last pass, each image in the README already has its final file name under `images/v3/` and an `alt` text that says what it will show. An image whose file doesn't exist yet is a placeholder. `check_rules.py` lists every placeholder, so the list is the shot list, and `check_rules.py --release` fails while one is left.
 
 ## README cards
 
-The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, the README shows only one, because more copies add nothing but noise.
+The dashboard is a starting point, and every home is different. Where a part repeats the same card, such as the room cards, its folder has only one, because more copies add nothing but noise. A part that comes in variants, such as the room pop-ups, gets two examples at most, which differ in what they show. The weather part has three, because its card can look like nearly anything, and the three show how different it can be.
 
-The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After any change to the dashboard, run `python3 .github/scripts/fold_cards.py` to copy them again. A comment above each code block names its card, and the Fold cards workflow fails while a copy is out of date.
+The READMEs hold no copies of a part's YAML. A part's README links to the files in its folder, so each file exists once.
 
 ## Branches and releases
 
@@ -114,7 +174,7 @@ The README's YAML sections repeat cards from `dashboard/dashboard.yaml`. After a
 - One draft pull request from `next` into `main` tracks the release, and it is the only pull request for it. Its title is the version, such as "Origami 3.0". Its description is the plan: the order of the work and a short checklist of what is done and what is left, in the repository and in the user's own setup. Check every line against the repo and what the user reports, update it with every change, and keep side topics out of it.
 - During a release, the modules and the theme are built in the repository. Cards, pop-ups and their scripts are built and tested in the user's own setup, and they stay there while they keep changing.
 - A module change also updates the module reference in `bubble_card/README.md`, the module's description and a line in the changelog's "Next release" section.
-- When everything works, the last step of the release builds the feature folders from the user's final setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`. Then the README and the screenshots are rewritten around them, following "README from 3.0". Until then, only `fold_cards.py` and the comments above its copies change the README.
+- The README for the release is written on `next` while the dashboard is still fine-tuned, one part after another in the order of the dashboard. Each part gets its feature folder from the user's setup, following "For everyone" and "Repository layout from 3.0", with the example home's entities, such as `light.living_room`, and its README is written in that folder, following "README from 3.0", with its entry in the main README's gallery. A later change to a documented part updates its folder and its README in the same round. The screenshots come last, in one pass, once nothing changes.
 - Every change is tested in the user's own Home Assistant before the release.
-- A fix for the current release goes into `main` through a small pull request, with its own section in the changelog and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
-- For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, and the release gets a tag such as `V3.0`.
+- A fix for the current release goes into `main` through a small pull request, with its own section in the changelog, its version on the README's release badge and a tag such as `V2.0.1`, because HACS installs the releases. Then merge `main` into `next`.
+- For the release, mark the draft pull request as ready for review and merge `next` into `main` with a merge commit, never as a squash merge. The changelog's "Next release" section becomes the release's own section, the README's release badge names the release, and the release gets a tag such as `V3.0`.

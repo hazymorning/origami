@@ -1,0 +1,286 @@
+"""Makes the README images in images/v3 with the bench, from the example home's states.
+
+  python3 .github/bench/images/make.py [<name> ...]
+
+Without names, it makes every image that has a file here. It needs Python with PyYAML and Pillow,
+and the bench set up as .github/bench/bench.mjs says. The other cards and the status bar's font are
+downloaded once into .github/bench/.cache.
+
+home.yaml has the example home: its states, the answers to templates and messages, and the home view,
+which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp, with its light and dark mode
+side by side, and has:
+
+  kind: panel for a card, or phone for a pop-up or the menu on a phone
+  cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
+    where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
+  drop: the files of cards to leave out, such as the climate table that another file's cards have
+    only: [names] keeps only the bottom sub-buttons with these names, such as two of the favorites
+    copy: {entity: [entities]} repeats every list entry whose entity is the entity once for each of the others, right after it,
+    as a part's README says to add more of something, such as the rows of a speaker for more speakers
+  home: true puts the home view behind the cards
+  open: the hash of the pop-up to open
+  states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
+  time: the clock, and clock: the time in the status bar. Each image's status bar moves home.yaml's clock by a few minutes and
+    has its own battery, Wi-Fi and signal, so no two look the same. An image's own clock, battery, wifi (1 to 3) or cell (1 to 4)
+    sets one exactly.
+  click, preview, admin, scale, seed, advance: passed to the bench, as bench.mjs describes
+  width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
+  bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
+  cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
+  light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
+    home.yaml has them too, for the whole home.
+
+hero.yaml makes images/v3/hero-light.webp and hero-dark.webp, the README's first image. Each of its phones takes another
+image's file with from and changes its keys in the same way, and hero.mjs puts the screens on phones in 3D beside the
+headline and the line. three.js is downloaded once into .github/bench/.cache too.
+"""
+import json, os, random, re, shutil, subprocess, sys, urllib.request
+import yaml
+from PIL import Image
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.abspath(os.path.join(HERE, '../../..'))
+CACHE = os.path.join(HERE, '../.cache')
+OUT = os.path.join(REPO, 'images/v3')
+# The other cards that the parts use, in the versions the dashboard was built with
+CARDS = {
+    'origami-weather.js': 'https://raw.githubusercontent.com/hazymorning/origami_weather/V1.6.1/dist/origami-weather.js',
+    'origami-notifications.js': 'https://raw.githubusercontent.com/hazymorning/origami_notifications/v1.6.0/dist/origami-notifications.js',
+    'origami-header.js': 'https://raw.githubusercontent.com/hazymorning/origami_header/v0.4.3/origami-header.js',
+    'navbar-card.js': 'https://github.com/joseluis9595/lovelace-navbar-card/releases/download/v1.8.0/navbar-card.js',
+    'plotly-graph-card.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-graph-card.js',
+    'card-BgJGmfH_.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/card-BgJGmfH_.js',
+    'rolldown-runtime-B0Z9INg1.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/rolldown-runtime-B0Z9INg1.js',
+    'plotly-DHew52Zl.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-DHew52Zl.js',
+    'status-font.woff2': 'https://fonts.gstatic.com/s/googlesans/v76/4UasrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RPjIUvQ.woff2',
+}
+# Parts of a card that the card loads itself
+CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js'}
+# three.js, which draws the hero's phones
+THREE_JS = 'https://raw.githubusercontent.com/mrdoob/three.js/r170/'
+THREE = {
+    'three/three.module.js': 'build/three.module.js',
+    'three/addons/environments/RoomEnvironment.js': 'examples/jsm/environments/RoomEnvironment.js',
+    'three/addons/geometries/RoundedBoxGeometry.js': 'examples/jsm/geometries/RoundedBoxGeometry.js',
+    'three/addons/utils/BufferGeometryUtils.js': 'examples/jsm/utils/BufferGeometryUtils.js',
+}
+# A phone's screen below the status bar, which frame.mjs draws
+PHONE = {'width': 412, 'height': 915 - 52}
+
+
+def load(path):
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+
+def fetch():
+    for name, url in [*CARDS.items(), *((n, THREE_JS + p) for n, p in THREE.items())]:
+        path = os.path.join(CACHE, name)
+        if not os.path.exists(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            urllib.request.urlretrieve(url, path)
+
+
+def card(c):
+    if isinstance(c, dict) and 'file' in c:
+        with open(os.path.join(REPO, 'dashboard', c['file'])) as f:
+            text = f.read()
+        for a, b in (c.get('replace') or {}).items():
+            text = text.replace(a, b)
+        out = yaml.safe_load(text)
+        if 'copy' in c:
+            out = copies(out, c['copy'])
+        if 'only' in c:
+            # Keep only the bottom sub-buttons with these names, such as two of the favorites
+            out['sub_button']['bottom'] = [b for b in out['sub_button']['bottom'] if b.get('name') in c['only']]
+        for k, v in (c.get('with') or {}).items():
+            if v is None:
+                out.pop(k, None)
+            else:
+                out[k] = v
+        return out
+    if isinstance(c, dict):
+        # Cards inside a stack, a grid or a conditional card can come from files too
+        return {k: ([card(x) for x in v] if k == 'cards' and isinstance(v, list) else card(v) if k == 'card' else v) for k, v in c.items()}
+    return c
+
+
+def copies(node, copy):
+    """Repeats each list entry whose entity is in copy once for each of its other entities, such as a speaker's row"""
+    if isinstance(node, dict):
+        return {k: copies(v, copy) for k, v in node.items()}
+    if isinstance(node, list):
+        out = []
+        for item in node:
+            out.append(copies(item, copy))
+            if isinstance(item, dict) and item.get('entity') in copy:
+                src = item['entity']
+                text = yaml.safe_dump(item, allow_unicode=True, sort_keys=False, width=1000)
+                out += [yaml.safe_load(re.sub(re.escape(src) + r'\b', dst, text)) for dst in copy[src]]
+        return out
+    return node
+
+
+DICTS = ('states', 'entities', 'words', 'messages')
+
+
+def layer(mode, *files):
+    """The keys for one mode: home.yaml, then its mode, then the image's file, then its mode, and so on for each file"""
+    out = {}
+    for src in (s for f in files for s in (f, f.get(mode) or {})):
+        for k, v in src.items():
+            if k in ('light', 'dark', 'home'):
+                continue
+            if k in DICTS:
+                out[k] = {**out.get(k, {}), **(v or {})}
+            elif k == 'templates':
+                out[k] = (v or []) + out.get(k, [])
+            else:
+                out[k] = v
+    return out
+
+
+def save(im, dest, rgb):
+    os.makedirs(OUT, exist_ok=True)
+    (im.convert('RGB') if rgb else im).save(dest, 'WEBP', quality=86 if rgb else 90, method=6)
+    print(f'{os.path.basename(dest)}: {im.width} × {im.height}, {os.path.getsize(dest) // 1024} KB')
+
+
+def status(name, mode, spec, keys):
+    """The status bar of one image in one mode: the example home's clock a few minutes off, and a battery and a signal of its own"""
+    own = {**spec, **(spec.get(mode) or {})}
+    r = random.Random(f'{name}-{mode}')
+    h, m = map(int, keys.get('clock', '19:30').split(':'))
+    t = (h * 60 + m + r.randint(-24, 24)) % 1440
+    out = {
+        'time': f'{t // 60}:{t % 60:02d}',
+        'battery': r.randint(46, 97) if mode == 'light' else r.randint(17, 64),
+        'wifi': r.choice([3, 3, 2, 2, 1]),
+        'cell': r.choice([4, 3, 3, 2]),
+    }
+    if 'clock' in own:
+        out['time'] = own['clock']
+    out.update({k: own[k] for k in ('battery', 'wifi', 'cell') if k in own})
+    return out
+
+
+def frame(spec, work):
+    with open(os.path.join(work, 'frame.json'), 'w') as f:
+        json.dump(spec, f)
+    subprocess.run(['node', os.path.join(HERE, 'frame.mjs'), os.path.join(work, 'frame.json')], check=True)
+    # Corners outside the rounded canvas stay transparent
+    return Image.open(spec['out'])
+
+
+def folder(work):
+    """A fresh folder for a scenario, from which the bench serves the cards and the pictures"""
+    shutil.rmtree(work, ignore_errors=True)
+    os.makedirs(work)
+    for n in CARDS:
+        os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
+    for n in os.listdir(os.path.join(HERE, 'files')):
+        os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))
+
+
+def shoot(mode, home, files, work, phone_page):
+    """Takes the bench's shot of one mode, with the keys of home.yaml and then of each file, and returns the keys and the shot"""
+    keys = layer(mode, home, *files)
+    drop = keys.get('drop') or []
+    cards = [card(c) for c in keys.get('cards', []) if not (isinstance(c, dict) and c.get('file') in drop)]
+    if any(f.get('home') for f in files):
+        cards = [card(c) for c in home['home']] + cards
+    scenario = {
+        'time': keys['time'],
+        **{k: keys.get(k, {}) for k in DICTS},
+        'templates': keys.get('templates', []),
+        'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
+        'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
+        # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
+        'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
+    }
+    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
+        if k in keys:
+            scenario[k] = keys[k]
+    path = os.path.join(work, f'scenario-{mode}.yaml')
+    with open(path, 'w') as f:
+        yaml.safe_dump(scenario, f, allow_unicode=True, sort_keys=False, width=1000)
+    subprocess.run(['node', os.path.join(HERE, '../bench.mjs'), 'shot', path, work, '--modes', mode], check=True)
+    return keys, os.path.join(work, f'{"page" if phone_page else "shot"}-{mode}.png')
+
+
+def screen(im, out):
+    """A phone's status bar has the color of the screen's top edge, and the top row, such as a menu's edge, sits behind it"""
+    out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
+    im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
+
+
+def hero(name, spec):
+    """Each phone's screen in both modes, then hero.mjs puts them on phones in 3D beside the headline"""
+    home = load(os.path.join(HERE, 'home.yaml'))
+    work = os.path.join(CACHE, 'images', name)
+    screens = {'light': [], 'dark': []}
+    for i, p in enumerate(spec['phones']):
+        files = [load(os.path.join(HERE, p['from'] + '.yaml')), p]
+        phone_work = os.path.join(work, str(i))
+        folder(phone_work)
+        for mode in screens:
+            keys, shot = shoot(mode, home, files, phone_work, True)
+            im = Image.open(shot).convert('RGB')
+            out = {'kind': 'screen', 'mode': mode, 'shot': shot, 'font': os.path.join(CACHE, 'status-font.woff2'), 'out': os.path.join(phone_work, f'screen-{mode}.png')}
+            screen(im, out)
+            im.save(shot)
+            out.update(status(f'{name}-{p["from"]}', mode, p, keys))
+            frame(out, phone_work)
+            screens[mode].append(out['out'])
+    for mode in screens:
+        job = {'mode': mode, 'screens': screens[mode], 'headline': spec['headline'], 'line': spec['line'],
+               'three': os.path.join(CACHE, 'three'), 'fonts': os.path.join(REPO, 'www/fonts'), 'out': os.path.join(work, f'{name}-{mode}.png')}
+        with open(os.path.join(work, f'{name}-{mode}.json'), 'w') as f:
+            json.dump(job, f)
+        subprocess.run(['node', os.path.join(HERE, 'hero.mjs'), os.path.join(work, f'{name}-{mode}.json')], check=True)
+        save(Image.open(job['out']), os.path.join(OUT, f'{name}-{mode}.webp'), False)
+
+
+def make(name):
+    spec = load(os.path.join(HERE, name + '.yaml'))
+    if spec['kind'] == 'hero':
+        return hero(name, spec)
+    home = load(os.path.join(HERE, 'home.yaml'))
+    work = os.path.join(CACHE, 'images', name)
+    folder(work)
+    font = os.path.join(CACHE, 'status-font.woff2')
+    phone = spec['kind'] == 'phone'
+    phone_page = phone or 'bottom' in spec
+    framed = {}
+    for mode in ('light', 'dark'):
+        keys, shot = shoot(mode, home, [spec], work, phone_page)
+        im = Image.open(shot).convert('RGB')
+        out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
+        if phone:
+            screen(im, out)
+            out.update(status(name, mode, spec, keys))
+            for k in ('cut', 'bottom'):
+                if k in keys:
+                    out[k] = keys[k]
+        else:
+            if 'bottom' in keys:
+                im = im.crop((0, im.height - keys['bottom'] * 2, im.width, im.height))
+            if 'trim' in keys:
+                im = im.crop((0, keys['trim'] * 2, im.width, im.height))
+            out['width'] = PHONE['width'] if 'bottom' in keys else keys.get('width', 396)
+        im.save(shot)
+        framed[mode] = frame(out, work).convert('RGBA')
+    # Light and dark side by side, with a transparent gap between them
+    gap = 40
+    light, dark = framed['light'], framed['dark']
+    both = Image.new('RGBA', (light.width + gap + dark.width, max(light.height, dark.height)), (0, 0, 0, 0))
+    both.paste(light, (0, 0))
+    both.paste(dark, (light.width + gap, 0))
+    save(both, os.path.join(OUT, f'{name}.webp'), False)
+
+
+if __name__ == '__main__':
+    fetch()
+    names = sys.argv[1:] or sorted(f[:-5] for f in os.listdir(HERE) if f.endswith('.yaml') and f != 'home.yaml')
+    for n in names:
+        make(n)

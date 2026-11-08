@@ -1,0 +1,258 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_lights'
+name: Lights
+show_header: true
+popup_mode: adaptive-dialog
+close_by_clicking_outside: true
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 80px
+margin_top_desktop: 0px
+width_desktop: 500px
+button_type: name
+show_icon: false
+with_bottom_offset: true
+modules:
+  - origami_base
+  - origami_popup
+origami_popup:
+  gap: var(--ha-space-5)
+  mini_popups:
+    lamps:
+      # A row for each lamp. Moving a slider to the start turns the lamp off.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_slider
+        sub_button:
+          main: []
+          bottom:
+            - entity: light.living_room_floor_lamp
+              name: Floor lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_string_lights
+              name: String lights
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_tv
+              name: TV light
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_table_lamp
+              name: Table lamp
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.living_room_ceiling
+              name: Ceiling
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+sub_button:
+  main: []
+  bottom: []
+cards:
+  - type: vertical-stack
+    cards:
+      # How many of the lamps are on as the title, since when below it, a power key and a slider for all lamps.
+      # The key after the slider opens a row for each lamp.
+      - type: custom:bubble-card
+        card_type: button
+        button_type: state
+        entity: light.living_room
+        name: >-
+          {%- set lamps = expand('light.living_room') -%}
+          {%- set n = lamps | selectattr('state', 'eq', 'on') | list | count -%}
+          {{ 'Lights off' if n == 0 else n ~ ' of ' ~ lamps | count ~ ' on' }}
+        show_icon: false
+        state_content: >-
+          {%- set t = states.light.living_room.last_changed | as_local -%}
+          {{ 'since ' ~ t.strftime('%H:%M' if t.date() == now().date() else '%b %-d') }}
+        modules:
+          - origami_base
+        origami_base:
+          large: true
+        button_action:
+          tap_action:
+            action: none
+        rows: auto
+        sub_button:
+          bottom_layout: rows
+          # While a lamp is on, the power key turns off every light in the home. While all are off, it turns on the scene
+          # for the time of day, the one the scenes below start with. Each is a key of its own, and only one of them shows.
+          main:
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') !== 'on'}
+              tap_action:
+                action: perform-action
+                perform_action: light.turn_off
+                target:
+                  entity_id: all
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h >= 5 && h < 23)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_night
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 5 || h >= 17)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_morning
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 17 || h >= 19)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_dinner
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 19 || h >= 21)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_evening
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 21 || h >= 23)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_late
+          bottom:
+            - name: All lamps
+              group:
+                - sub_button_type: slider
+                  always_visible: true
+                - icon: mdi:chevron-down
+                  fill_width: false
+                  show_background: true
+                  tap_action:
+                    action: fire-dom-event
+                    mini_popup: lamps
+      # The scenes, without a card around them. Each scene is a box with its colors, its name and its brightness.
+      # While a lamp is on, the scene turned on last is highlighted. A scene's state is the time it was last
+      # turned on, and the list has the same scenes as the buttons below.
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_base:
+          frameless: true
+        origami_button:
+          scroll: true
+          active: >-
+            ${states('light.living_room') !== 'on' ? '' : ['scene.living_room_night', 'scene.living_room_morning',
+            'scene.living_room_dinner', 'scene.living_room_evening', 'scene.living_room_movie',
+            'scene.living_room_late'].reduce((last, id) => (Date.parse(states(id)) || 0) >
+            (Date.parse(states(last)) || 0) ? id : last, '')}
+          # The row starts with the scene for the time of day, named by its css_class
+          start: >-
+            ${(h => h < 5 || h >= 23 ? 'night' : h < 17 ? 'morning' : h < 19 ? 'dinner' : h < 21 ?
+            'evening' : 'late')(new Date().getHours())}
+        sub_button:
+          main: []
+          bottom:
+            - name: Scenes
+              group:
+                - name: Night
+                  icon: mdi:weather-night
+                  css_class: night
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #353a4e, #606883 55%, #8f6a55)'
+                    label: 10 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_night
+                - name: Morning
+                  icon: mdi:weather-sunset-up
+                  css_class: morning
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #f3e6cc, #e6c68a 50%, #a9c0cc)'
+                    label: 80 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_morning
+                - name: Dinner
+                  icon: mdi:silverware-fork-knife
+                  css_class: dinner
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #e6c68a, #c48f55 50%, #ae6e55)'
+                    label: 60 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_dinner
+                - name: Evening
+                  icon: mdi:weather-sunset-down
+                  css_class: evening
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #e6c68a, #c08470 50%, #8c7185)'
+                    label: 45 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_evening
+                - name: Movie
+                  icon: mdi:movie-open-outline
+                  css_class: movie
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #3a3448, #766481 50%, #a75050)'
+                    label: 20 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_movie
+                - name: Late
+                  icon: mdi:weather-night-partly-cloudy
+                  css_class: late
+                  show_name: true
+                  content_layout: icon-top
+                  origami_button:
+                    field: 'linear-gradient(135deg, #b27c43, #a3747c 50%, #5e4f67)'
+                    label: 30 %
+                  tap_action:
+                    action: perform-action
+                    perform_action: scene.turn_on
+                    target:
+                      entity_id: scene.living_room_late

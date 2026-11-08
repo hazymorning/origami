@@ -1,0 +1,634 @@
+// The design checks. Each one measures the cards on the sheet and returns what it found.
+window.__check = async () => {
+  const doc = getComputedStyle(document.documentElement);
+  const ratio = parseFloat(doc.getPropertyValue('--radius-ratio')) || 0.35;
+  const cardRadius = parseFloat(doc.getPropertyValue('--ha-card-border-radius')) || 22;
+  const near = (a, b, t = 0.6) => Math.abs(a - b) <= t;
+  const r1 = (n) => Math.round(n * 10) / 10;
+  const visible = (el) => el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && el.getBoundingClientRect().width > 0;
+  const draws = (cs) => !/^(transparent|rgba\(.*,\s*0\))$/.test(cs.backgroundColor) || cs.backgroundImage !== 'none' || parseFloat(cs.borderTopWidth) > 0 || cs.boxShadow !== 'none';
+  const label = (el) => el.tagName.toLowerCase() + [...el.classList].slice(0, 2).map((c) => '.' + c).join('');
+  const cards = (window.__cards.sheet || []).map((el, i) => {
+    const cfg = window.__configs.sheet[i];
+    return { el, i, cfg, root: el.shadowRoot, haCard: el.shadowRoot?.querySelector('ha-card'), origami: (cfg.modules || []).some((m) => String(m).startsWith('origami_')) };
+  });
+  const results = [];
+  const report = (name, fails, pass) => results.push({ name, ok: fails.length === 0, text: fails.length ? fails.join('\n      ') : pass });
+
+  // The width of a CSS length in a card's own scope, such as var(--org-end-col)
+  const length = (card, value) => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;width:' + value;
+    card.haCard.appendChild(probe);
+    const w = probe.getBoundingClientRect().width;
+    probe.remove();
+    return w;
+  };
+  // The controls in a card's own row: those whose middle lies between the top and bottom of the card's icon
+  const mainRow = (card) => {
+    const icon = card.root.querySelector('.bubble-main-icon-container');
+    if (!icon) return [];
+    const band = icon.getBoundingClientRect();
+    return [...card.root.querySelectorAll('.bubble-sub-button-container, .bubble-sub-button-slider, .bubble-sub-button')].filter((el) => {
+      const b = el.getBoundingClientRect();
+      return visible(el) && b.top + b.height / 2 > band.top && b.top + b.height / 2 < band.bottom;
+    });
+  };
+  // A pop-up has no card of its own to measure while it is closed, and the mini pop-up check below opens and measures it
+  const origami = cards.filter((c) => c.origami && c.root && c.cfg.card_type !== 'pop-up');
+
+  // Neutral sliders: no slider is ever colored, also not for a light, because the state color belongs to the icon. Every fill has the theme's fill-loud and every mark the text color.
+  {
+    const fails = [];
+    let count = 0;
+    // resolve() gives the color that a value has next to an element, in the element's own scope
+    const resolve = (el, value) => {
+      const probe = document.createElement('div');
+      probe.style.cssText = 'display:none;color:' + value;
+      el.parentNode.appendChild(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    };
+    for (const el of document.querySelectorAll('.shot bubble-card')) {
+      if (!(el.config?.modules || []).some((m) => String(m).startsWith('origami_'))) continue;
+      for (const fill of el.shadowRoot?.querySelectorAll('.bubble-range-fill') ?? []) {
+        if (fill.closest('.is-color-slider') || !visible(fill)) continue;
+        count++;
+        const name = el.config.entity ?? el.config.card_type;
+        const fillColor = getComputedStyle(fill).backgroundColor, neutral = resolve(fill, 'var(--fill-loud)');
+        if (fillColor !== neutral) fails.push(`${name}: the fill is ${fillColor}, expected the neutral ${neutral}`);
+        const mark = getComputedStyle(fill, '::after'), text = resolve(fill, 'var(--primary-text-color)');
+        if (mark.display !== 'none' && mark.content !== 'none' && mark.backgroundColor !== text) fails.push(`${name}: the mark is ${mark.backgroundColor}, expected the text color ${text}`);
+      }
+    }
+    if (!count) fails.push('no slider found on the sheet');
+    report('neutral sliders', fails, `${count} sliders have a neutral fill and mark, also for lights`);
+  }
+
+  // Depth: the card background casts a shadow, and a gray fill never does. What lies on a card or on the page is a flat fill, and what lies on a gray fill, such as a tile, a tray or a track, has the chip shadow. A filled control keeps the shadow of its place, and so does the active part of a segmented bar.
+  {
+    const fails = [];
+    let raised = 0, flat = 0;
+    // alpha() reads the opacity of a computed color, which Chromium writes as rgb(), rgba() or color(srgb ...)
+    const alpha = (c) => c === 'transparent' ? 0 : (c.match(/^rgba\(.*,\s*([\d.]+)\)$/) || c.match(/\/\s*([\d.]+)\)$/) || [0, 1])[1] * 1;
+    // scoped() gives a value in an element's scope. The probe goes beside the element, or into a card, so it renders even where a shadow root has no slot for it.
+    const scoped = (el, prop, value) => {
+      const probe = document.createElement('div');
+      probe.style.cssText = 'display:none;' + prop + ':' + value;
+      (el.tagName === 'HA-CARD' ? el : el.parentNode).appendChild(probe);
+      const v = getComputedStyle(probe)[prop === 'box-shadow' ? 'boxShadow' : 'backgroundColor'];
+      probe.remove();
+      return v;
+    };
+    // outer() keeps the parts of a shadow that fall outside the shape and draw something, so a line drawn inside, such as the theme's ring, and an empty shadow do not count
+    const outer = (s) => {
+      if (!s || s === 'none') return '';
+      const parts = [];
+      let depth = 0, cur = '';
+      for (const ch of s + ',') {
+        if (ch === '(') depth++;
+        if (ch === ')') depth--;
+        if (ch === ',' && !depth) { parts.push(cur.trim()); cur = ''; } else cur += ch;
+      }
+      return parts.filter((p) => !/\binset\b/.test(p) && alpha((p.match(/(rgba?|color)\([^)]*\)/) ?? ['transparent'])[0]) > 0
+        && (p.replace(/(rgba?|color)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).some((g) => parseFloat(g) !== 0)).join(', ');
+    };
+    // place() tells what a control lies on: the nearest shape behind it with a fill, or else the card's own surface, which Base draws on a layer behind the content
+    const place = (el, haCard) => {
+      for (let p = el.parentElement; p && p !== haCard; p = p.parentElement) {
+        const a = alpha(getComputedStyle(p).backgroundColor);
+        if (a > 0) return a < 1 ? 'gray' : 'card';
+      }
+      const a = alpha(scoped(haCard, 'background-color', 'var(--org-surface, transparent)'));
+      return a === 0 ? 'page' : a < 1 ? 'gray' : 'card';
+    };
+    const judge = (el, cs, where, name) => {
+      if (!(alpha(cs.backgroundColor) > 0) || !(parseFloat(cs.opacity) > 0)) return;
+      const shadow = outer(cs.boxShadow);
+      if (where === 'gray') {
+        raised++;
+        const chip = outer(scoped(el, 'box-shadow', 'var(--tile-chip-shadow)'));
+        if (shadow !== chip) fails.push(`${name} lies on a gray fill, so it needs the chip shadow, and it has ${shadow || 'none'}`);
+      } else {
+        flat++;
+        if (shadow) fails.push(`${name} lies on ${where === 'page' ? 'the page' : 'the card background'}, so it is a flat fill, and it casts ${shadow}`);
+      }
+    };
+    for (const el of document.querySelectorAll('.shot bubble-card')) {
+      if (!(el.config?.modules || []).some((m) => String(m).startsWith('origami_')) || el.config.card_type === 'pop-up') continue;
+      const haCard = el.shadowRoot?.querySelector('ha-card');
+      if (!haCard) continue;
+      const card = el.config.entity ?? el.config.name ?? el.config.card_type;
+      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"]')) {
+        if (!visible(c)) continue;
+        judge(c, getComputedStyle(c), place(c, haCard), `${card} ${label(c)}`);
+        // A segmented bar draws its active part on the segment's ::before, which lies on the segment's own fill. A line drawn there, such as a list's divider, is no control.
+        const before = getComputedStyle(c, '::before');
+        if (c.matches('.bubble-sub-button') && before.content !== 'none' && Math.min(parseFloat(before.width), parseFloat(before.height)) >= 8) {
+          const own = alpha(getComputedStyle(c).backgroundColor);
+          judge(c, before, own > 0 ? (own < 1 ? 'gray' : 'card') : place(c, haCard), `${card} ${label(c)}::before`);
+        }
+      }
+    }
+    if (!raised || !flat) fails.push(`the sheet needs controls on a gray fill and on a card, and it has ${raised} and ${flat}`);
+    report('depth', fails, `${raised} controls on a gray fill cast the chip shadow, and ${flat} on a card or the page are flat`);
+  }
+
+  // Corners: a shape's radius is its height times the ratio, at most a card's radius. A shape inside another one takes the outer radius less the space between them. Only switches and dots are round.
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami) {
+      const toggle = card.cfg.origami_base?.toggle === true;
+      for (const el of card.root.querySelectorAll('*')) {
+        if (['HA-CARD', 'STYLE'].includes(el.tagName)) continue;
+        const cs = getComputedStyle(el);
+        const b = el.getBoundingClientRect();
+        const h = Math.min(b.width, b.height);
+        const r = cs.borderTopLeftRadius.endsWith('%') ? parseFloat(cs.borderTopLeftRadius) * h / 100 : parseFloat(cs.borderTopLeftRadius);
+        if (!(r > 0) || !draws(cs) || !visible(el)) continue;
+        let nested = null, clipped = false;
+        for (let p = el.parentElement; p; p = p.parentElement) {
+          const ps = getComputedStyle(p);
+          const pr = parseFloat(ps.borderTopLeftRadius);
+          if (!(pr > 0) || !(draws(ps) || ps.overflow !== 'visible')) continue;
+          const pb = p.getBoundingClientRect();
+          const inset = Math.min(b.left - pb.left, b.top - pb.top, pb.right - b.right, pb.bottom - b.bottom);
+          clipped = inset < 0.5 && ps.overflow !== 'visible';
+          nested = Math.max(0, pr - inset);
+          break;
+        }
+        if (clipped) continue;
+        count++;
+        // The card itself keeps a card's radius at any height, except a standalone slider, whose card is its track and follows the rule for its height
+        const cb = card.haCard.getBoundingClientRect();
+        const own = near(b.width, cb.width, 1) && near(b.height, cb.height, 1) && !card.haCard.hasAttribute('data-org-track') ? cardRadius : Math.min(h * ratio, cardRadius);
+        const round = r >= h / 2 - 0.5;
+        const allowedRound = (toggle && el.closest('.bubble-sub-button')) || h <= 16;
+        if (!(near(r, own) || (nested !== null && near(r, nested)) || (round && allowedRound))) {
+          fails.push(`card ${card.i} ${label(el)} ${r1(b.width)}x${r1(b.height)}: radius ${r1(r)}, expected ${r1(own)}${nested !== null ? ' or ' + r1(nested) + ' inside its parent' : ''}`);
+        }
+      }
+    }
+    report('corners', fails, `${count} shapes follow the corner rule`);
+  }
+
+  // Row ends: the last control in a card's own row ends at the card's padding, as far from the edge as the icon
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami) {
+      const row = mainRow(card);
+      if (!row.length) continue;
+      const right = card.haCard.getBoundingClientRect().right;
+      const set = parseFloat(getComputedStyle(card.haCard).getPropertyValue('--org-pad'));
+      const pad = Number.isFinite(set) ? set : 16;
+      const end = Math.max(...row.map((el) => el.getBoundingClientRect().right));
+      count++;
+      if (!near(right - end, pad)) fails.push(`card ${card.i}: its row ends ${r1(right - end)} px from the edge, expected ${pad}`);
+    }
+    report('row ends', fails, `${count} rows end at the card's padding`);
+  }
+
+  // End column: a tray with three keys and a compact card's side slider are as wide as --org-end-col
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami) {
+      const want = length(card, 'var(--org-end-col)');
+      for (const el of mainRow(card)) {
+        const keys = el.matches('.bubble-sub-button-container') ? [...el.querySelectorAll('.bubble-sub-button')].filter(visible).length : 0;
+        const side = el.matches('.bubble-sub-button-slider') && card.cfg.origami_base?.compact === true;
+        if (keys !== 3 && !side) continue;
+        count++;
+        const w = el.getBoundingClientRect().width;
+        if (!near(w, want)) fails.push(`card ${card.i} ${label(el)}: ${r1(w)} px wide, expected ${r1(want)}`);
+      }
+    }
+    report('end column', fails, `${count} trays and side sliders are as wide as the end column`);
+  }
+
+  // Icon beside a name: on a key of a card that Base frames, an icon next to a name is 20 px and stands 8 px from the name, on the side where the name is
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => ['button', 'media-player', 'climate', 'cover', 'select', 'calendar'].includes(c.cfg.card_type))) {
+      const size = length(card, 'var(--icon-size-s)'), gap = length(card, 'var(--ha-space-2)');
+      for (const el of card.root.querySelectorAll('.bubble-sub-button:not([class*="bubble-sub-button-slider-"]):not(.content-icon-top):not(.content-icon-bottom)')) {
+        if (el.closest('ha-card[data-org-fill="bottom"] .bubble-sub-button-bottom-container')) continue;
+        const icon = el.querySelector('.bubble-sub-button-icon.icon-with-state'), name = el.querySelector('.bubble-sub-button-name-container');
+        if (!icon || !name || !visible(icon) || !visible(name)) continue;
+        const a = icon.getBoundingClientRect(), b = name.getBoundingClientRect();
+        const space = a.left < b.left ? b.left - a.right : a.left - b.right;
+        count++;
+        if (!near(a.width, size) || !near(space, gap)) fails.push(`card ${card.i} ${label(el)}: icon ${r1(a.width)} px, ${r1(space)} px from the name, expected ${r1(size)} and ${r1(gap)}`);
+      }
+    }
+    report('icon beside a name', fails, `${count} icons beside a name are a step smaller and 8 px from it`);
+  }
+
+  // Icon only: a Button button that shows only its icon is square
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button'))) {
+      const items = card.cfg.sub_button?.bottom ?? [];
+      items.forEach((item, n) => {
+        if (item.show_name !== false && item.name) return;
+        const el = card.root.querySelector('.bubble-sub-button-' + (n + 1));
+        if (!el || !visible(el)) return;
+        const shape = draws(getComputedStyle(el)) ? el : el.querySelector('.bubble-sub-button-icon');
+        const b = shape.getBoundingClientRect();
+        count++;
+        if (!near(b.width, b.height)) fails.push(`card ${card.i} button ${n + 1}: ${r1(b.width)}x${r1(b.height)}, expected a square`);
+      });
+    }
+    report('icon only', fails, `${count} buttons with only an icon are square`);
+  }
+
+  // Grid cells: the buttons of a group in a Button grid are cells of the grid, each as wide as a column
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => (c.cfg.modules || []).includes('origami_button') && c.cfg.origami_button?.columns > 1 && !c.cfg.origami_button?.segmented && (c.cfg.sub_button?.bottom ?? []).some((x) => x.group))) {
+      const cols = Number(card.cfg.origami_button.columns);
+      const box = card.root.querySelector('.bubble-sub-button-bottom-container')?.getBoundingClientRect();
+      for (const group of card.root.querySelectorAll('.bubble-sub-button-group')) {
+        const keys = [...group.children].filter(visible);
+        if (keys.length <= cols || !box) continue;
+        count++;
+        const tops = new Set(keys.map((k) => Math.round(k.getBoundingClientRect().top)));
+        if (tops.size < Math.ceil(keys.length / cols)) fails.push(`card ${card.i}: a group of ${keys.length} buttons in ${cols} columns takes ${tops.size} row${tops.size === 1 ? '' : 's'}`);
+        for (const k of keys) if (k.getBoundingClientRect().width < box.width / cols * 0.8) fails.push(`card ${card.i} ${label(k)}: ${r1(k.getBoundingClientRect().width)} px wide in a grid of ${cols} columns that is ${r1(box.width)} px wide`);
+      }
+    }
+    if (!count) fails.push('no Button grid with a group of cells found on the sheet');
+    report('grid cells', fails, `${count} group in a Button grid keeps its buttons as cells`);
+  }
+
+  // Lines: a list's dividers are as thick as --org-line-width, and each one is a straight line across the row's content
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => c.cfg.origami_tiles?.dividers)) {
+      const want = length(card, 'var(--org-line-width)');
+      for (const el of card.root.querySelectorAll('.bubble-sub-button')) {
+        // A divider is the row's ::before, a line at its top
+        const line = getComputedStyle(el, '::before');
+        if (line.content === 'none' || line.position !== 'absolute') continue;
+        count++;
+        if (!near(parseFloat(line.height), want, 0.1)) fails.push(`card ${card.i} ${label(el)}: line ${line.height}, expected ${want}px`);
+        // It starts where the row's content starts, at the icon or the plus, and ends as far from the row's other end, and nothing clips it, so the row's round corners never bend it
+        const pad = parseFloat(getComputedStyle(el).getPropertyValue('--org-list-pad'));
+        if (!near(parseFloat(line.left), pad, 0.5) || !near(parseFloat(line.right), pad, 0.5) || !near(parseFloat(line.top), 0, 0.1)) fails.push(`card ${card.i} ${label(el)}: line at ${line.left} and ${line.right} from the row's ends and ${line.top} from its top, expected ${pad}px and 0px`);
+        if (getComputedStyle(el).overflow !== 'visible') fails.push(`card ${card.i} ${label(el)}: the row clips its line with overflow ${getComputedStyle(el).overflow}`);
+      }
+    }
+    if (!count) fails.push('no divider found on the sheet');
+    report('lines', fails, `the dividers are as thick as the line width and run straight across their rows' content (${count} checked)`);
+  }
+
+  // Plus: in a list with sign add, a plus or a check stands in the icon's place at the icon's size, so the names start where they start beside an icon, and a chosen row's sign differs from the others'
+  {
+    const fails = [];
+    let count = 0;
+    const lists = origami.filter((c) => c.cfg.origami_tiles?.layout === 'list' && c.cfg.origami_tiles?.slim);
+    // nameAt() measures where a row's name starts, from the start of the row's content
+    const nameAt = (row) => row.querySelector('.bubble-sub-button-name-container').getBoundingClientRect().left - row.getBoundingClientRect().left - parseFloat(getComputedStyle(row).getPropertyValue('--org-list-pad'));
+    const ref = lists.find((c) => c.cfg.origami_tiles.sign !== 'add')?.root.querySelector('.bubble-sub-button .bubble-sub-button-icon:not(.hidden)')?.closest('.bubble-sub-button');
+    for (const card of lists.filter((c) => c.cfg.origami_tiles.sign === 'add')) {
+      const size = length(card, 'var(--icon-size-s)');
+      const masks = new Set();
+      for (const row of card.root.querySelectorAll('.bubble-sub-button')) {
+        if (!visible(row)) continue;
+        count++;
+        const sign = getComputedStyle(row, '::after');
+        const pad = parseFloat(getComputedStyle(row).getPropertyValue('--org-list-pad'));
+        masks.add(sign.maskImage || sign.webkitMaskImage);
+        if (sign.content === 'none' || !near(parseFloat(sign.width), size) || !near(parseFloat(sign.left), pad)) fails.push(`card ${card.i} ${label(row)}: sign ${sign.width} wide at ${sign.left}, expected the icon's ${size}px at ${pad}px`);
+        if (row.querySelector('.bubble-sub-button-icon:not(.hidden)') && visible(row.querySelector('.bubble-sub-button-icon'))) fails.push(`card ${card.i} ${label(row)}: the row shows its icon beside the plus`);
+        if (ref && !near(nameAt(row), nameAt(ref))) fails.push(`card ${card.i} ${label(row)}: the name starts ${r1(nameAt(row))} px into the row, expected ${r1(nameAt(ref))} px as beside an icon`);
+      }
+      if (masks.size < 2) fails.push(`card ${card.i}: a chosen row and the others show the same sign`);
+    }
+    if (!count) fails.push('no list with a plus found on the sheet');
+    if (!ref) fails.push('no slim list with icons to compare the names with');
+    report('plus', fails, `${count} rows show a plus or a check in the icon's place, and their names start where they start beside an icon`);
+  }
+
+  // Frameless: a frameless card draws no background, shadow or border, and its content reaches its edges
+  {
+    const fails = [];
+    const frameless = origami.filter((c) => c.cfg.origami_base?.frameless === true);
+    for (const card of frameless) {
+      const cb = card.haCard.getBoundingClientRect();
+      for (const el of [card.haCard, ...card.root.querySelectorAll('.bubble-container, .bubble-background, .card-content')]) {
+        const cs = getComputedStyle(el);
+        if (!/^(transparent|rgba\(.*,\s*0\))$/.test(cs.backgroundColor) || parseFloat(cs.borderTopWidth) > 0 || !['none', 'rgba(0, 0, 0, 0) 0px 0px 0px 0px'].includes(cs.boxShadow)) fails.push(`card ${card.i} ${label(el)}: draws a background, a border or a shadow`);
+      }
+      const icon = card.root.querySelector('.bubble-main-icon-container');
+      const subs = card.root.querySelector('.bubble-sub-button-container');
+      if (icon && visible(icon) && !near(icon.getBoundingClientRect().left, cb.left)) fails.push(`card ${card.i}: the icon starts ${r1(icon.getBoundingClientRect().left - cb.left)} px from the edge, expected 0`);
+      if (subs && visible(subs) && !near(subs.getBoundingClientRect().right, cb.right)) fails.push(`card ${card.i}: the sub-buttons end ${r1(cb.right - subs.getBoundingClientRect().right)} px from the edge, expected 0`);
+      // The rows have one gap between them: between a cover above the name and the name, and between the card's own row and the rows below
+      const gap = length(card, 'var(--org-gap)');
+      const name = card.root.querySelector('.bubble-name-container')?.getBoundingClientRect();
+      const rows = card.root.querySelector('.bubble-sub-button-bottom-container');
+      if (name && icon && near(icon.getBoundingClientRect().width, cb.width, 1) && !near(name.top - icon.getBoundingClientRect().bottom, gap)) fails.push(`card ${card.i}: ${r1(name.top - icon.getBoundingClientRect().bottom)} px between the cover and the name, expected ${r1(gap)}`);
+      if (name && rows && visible(rows) && !near(rows.getBoundingClientRect().top - name.bottom, gap)) fails.push(`card ${card.i}: ${r1(rows.getBoundingClientRect().top - name.bottom)} px between the card's own row and the rows below, expected ${r1(gap)}`);
+    }
+    if (!frameless.length) fails.push('the sheet has no frameless card');
+    report('frameless', fails, `${frameless.length} frameless card draws nothing behind its content, which reaches its edges, with one gap between its rows`);
+  }
+
+  // Slider keys: on a standalone slider, the keys stand after the track, as tall as it and with its background, and the name stands before the value
+  {
+    const fails = [];
+    const sliders = origami.filter((c) => c.cfg.button_type === 'slider' && (c.cfg.modules || []).includes('origami_slider') && c.cfg.sub_button?.main?.length);
+    for (const card of sliders) {
+      const cb = card.haCard.getBoundingClientRect();
+      const track = card.root.querySelector('.bubble-range-slider');
+      const keys = [...card.root.querySelectorAll('.bubble-sub-button-container .bubble-sub-button')].filter(visible);
+      if (!track || !keys.length) { fails.push(`card ${card.i}: no track or no key`); continue; }
+      const t = track.getBoundingClientRect();
+      const gap = length(card, 'var(--ha-space-2)');
+      if (!near(t.left, cb.left)) fails.push(`card ${card.i}: the track starts ${r1(t.left - cb.left)} px from the edge, expected 0`);
+      if (!near(keys[0].getBoundingClientRect().left - t.right, gap)) fails.push(`card ${card.i}: ${r1(keys[0].getBoundingClientRect().left - t.right)} px between the track and its key, expected ${r1(gap)}`);
+      if (!near(keys.at(-1).getBoundingClientRect().right, cb.right)) fails.push(`card ${card.i}: the last key ends ${r1(cb.right - keys.at(-1).getBoundingClientRect().right)} px from the edge, expected 0`);
+      for (const key of keys) {
+        const k = key.getBoundingClientRect();
+        if (!near(k.height, t.height) || !near(k.width, t.height)) fails.push(`card ${card.i}: a key is ${r1(k.width)} × ${r1(k.height)} px, expected ${r1(t.height)} px square like the track`);
+        if (getComputedStyle(key).backgroundColor !== getComputedStyle(track).backgroundColor) fails.push(`card ${card.i}: a key's background ${getComputedStyle(key).backgroundColor} differs from the track's ${getComputedStyle(track).backgroundColor}`);
+      }
+      const before = getComputedStyle(card.root.querySelector('.bubble-range-value'), '::before').content;
+      if (card.cfg.show_name === true && card.cfg.name && !before.includes(card.cfg.name)) fails.push(`card ${card.i}: the value does not start with the name ${card.cfg.name}`);
+    }
+    if (!sliders.length) fails.push('the sheet has no standalone slider with a key');
+    report('slider keys', fails, `${sliders.length} standalone slider has its keys after the track, as tall as it and with its background`);
+  }
+
+  // Scroll taps: a scrolling row reaches past its card, and only its buttons take taps there, so the card above keeps the taps on its own edge
+  {
+    const fails = [];
+    const rows = origami.filter((c) => c.cfg.card_type === 'sub-buttons' && c.cfg.origami_button?.scroll === true);
+    // The card that a tap at a point reaches, through every shadow root
+    const cardAt = (x, y) => {
+      let el = document.elementFromPoint(x, y);
+      while (el?.shadowRoot?.elementFromPoint(x, y) && el.shadowRoot.elementFromPoint(x, y) !== el) el = el.shadowRoot.elementFromPoint(x, y);
+      let n = el;
+      while (n && n.getRootNode().host && n.getRootNode().host.tagName !== 'BUBBLE-CARD') n = n.getRootNode().host;
+      return n?.getRootNode()?.host ?? null;
+    };
+    for (const card of rows) {
+      const tile = [...card.root.querySelectorAll('.bubble-sub-button-bottom-container .bubble-sub-button')].find(visible);
+      if (!tile) { fails.push(`card ${card.i}: no button in the row`); continue; }
+      const t = tile.getBoundingClientRect();
+      const x = t.left + t.width / 2;
+      if (cardAt(x, t.top - 4) === card.el) fails.push(`card ${card.i}: a tap 4 px above its buttons reaches this card instead of the one above`);
+      if (cardAt(x, t.top + t.height / 2) !== card.el) fails.push(`card ${card.i}: a tap on a button does not reach the card`);
+    }
+    if (!rows.length) fails.push('the sheet has no scrolling row');
+    report('scroll taps', fails, `${rows.length} scrolling row takes taps only on its buttons`);
+  }
+
+  // Players: a player in players gives the music before the speaker, also when a template in its list names it. On the sheet, such a speaker's player is its entity ID with _ma.
+  {
+    const fails = [];
+    const speakers = origami.filter((c) => c.cfg.card_type === 'media-player' && Array.isArray(c.cfg.origami_media?.players));
+    for (const card of speakers) {
+      const want = (card.el._hass ?? card.el.hass)?.states?.[card.cfg.entity + '_ma']?.attributes?.media_title;
+      const got = card.root.querySelector('.bubble-name')?.textContent;
+      if (got !== want) fails.push(`card ${card.i}: shows ${JSON.stringify(got)}, expected the player's song ${JSON.stringify(want)}`);
+    }
+    if (!speakers.length) fails.push('the sheet has no speaker with a list of players');
+    report('players', fails, `${speakers.length} speaker shows the song of its player`);
+  }
+
+  // Play key: beside a large cover above the name, the play key's fill is one step up from the 40 px keys beside it, and beside a small cover one step smaller. Its ring runs around it one step larger again.
+  {
+    const fails = [];
+    const keys = origami.map((card) => ({ card, key: card.root.querySelector('.bubble-sub-button.play') })).filter((k) => k.key && visible(k.key));
+    for (const { card, key } of keys) {
+      const above = [].concat(card.cfg.origami_media?.cover ?? []).includes('above');
+      const want = above ? ['var(--control-height-lg)', 'var(--tile-size-lg)'] : ['var(--control-height-sm)', 'var(--control-height-lg)'];
+      const fill = parseFloat(getComputedStyle(key, '::before').width), ring = key.getBoundingClientRect().width;
+      if (!near(fill, length(card, want[0])) || !near(ring, length(card, want[1]))) fails.push(`card ${card.i}: the play key's fill is ${r1(fill)} px and its ring ${r1(ring)} px, expected ${r1(length(card, want[0]))} and ${r1(length(card, want[1]))} with the cover ${above ? 'above' : 'in the icon'}`);
+    }
+    if (!keys.some((k) => [].concat(k.card.cfg.origami_media?.cover ?? []).includes('above')) || !keys.some((k) => ![].concat(k.card.cfg.origami_media?.cover ?? []).includes('above'))) fails.push('the sheet needs a play key beside a large cover and one beside a small cover');
+    report('play key', fails, `${keys.length} play keys are as large as their cover's place asks`);
+  }
+
+  // Cover only: the card is its cover with the card's padding on every side, and its name, keys and rows are hidden
+  {
+    const fails = [];
+    const only = origami.filter((c) => c.cfg.origami_media?.cover === 'only');
+    for (const card of only) {
+      const box = card.root.querySelector('.bubble-container').getBoundingClientRect();
+      const cover = card.root.querySelector('.bubble-main-icon-container').getBoundingClientRect();
+      const pad = length(card, 'var(--org-pad)');
+      const sides = [cover.top - box.top, box.right - cover.right, box.bottom - cover.bottom, cover.left - box.left];
+      if (sides.some((s) => !near(s, pad, 1))) fails.push(`card ${card.i}: the cover is ${sides.map(r1).join(' / ')} px from the card's edges, expected ${r1(pad)} on every side`);
+      if (!near(cover.width, cover.height, 1)) fails.push(`card ${card.i}: the cover is ${r1(cover.width)}x${r1(cover.height)}, expected a square`);
+      const shown = [...card.root.querySelectorAll('.bubble-name-container, .bubble-sub-button')].filter(visible);
+      if (shown.length) fails.push(`card ${card.i}: ${shown.map(label).join(', ')} still show`);
+    }
+    if (!only.length) fails.push('the sheet has no card that shows only its cover');
+    report('cover only', fails, `${only.length} card shows only its cover, with the card's padding around it`);
+  }
+
+  // Dropdown ring: an open dropdown shows its menu without Bubble Card's ring in the accent color, also a key with an icon and no name. Bubble Card shows the ring through the element's own style while the menu is open, so the check does the same.
+  {
+    const fails = [];
+    const rings = origami.flatMap((card) => [...card.root.querySelectorAll('.bubble-dropdown-inner-border')].map((ring) => ({ card, ring })));
+    for (const { card, ring } of rings) {
+      ring.style.display = 'block';
+      if (getComputedStyle(ring).display !== 'none') fails.push(`card ${card.i} ${label(ring.closest('.bubble-sub-button') || ring)}: the ring shows while the menu is open`);
+      ring.style.display = 'none';
+    }
+    if (!rings.some(({ ring }) => !ring.closest('.bubble-sub-button')?.querySelector('.bubble-sub-button-name-container:not(:empty)'))) fails.push('the sheet has no dropdown with an icon and no name');
+    report('dropdown ring', fails, `${rings.length} dropdowns show no ring while open`);
+  }
+
+  // Joined cards: cards in a vertical stack with Base's join option meet without a gap, and only the outer corners of their shared background are round
+  {
+    const fails = [];
+    let count = 0;
+    for (const stack of cards.filter((c) => c.cfg.type === 'vertical-stack')) {
+      const joined = [...stack.el.querySelectorAll('bubble-card')].filter((el) => el.config?.origami_base?.join);
+      joined.forEach((el, k) => {
+        count++;
+        const pos = el.config.origami_base.join;
+        const box = el.shadowRoot.querySelector('.bubble-container');
+        const cs = getComputedStyle(box);
+        const got = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(parseFloat);
+        const want = { first: [cardRadius, cardRadius, 0, 0], middle: [0, 0, 0, 0], last: [0, 0, cardRadius, cardRadius] }[pos];
+        if (!want) fails.push(`card ${stack.i}.${k}: join is ${JSON.stringify(pos)}, expected first, middle or last`);
+        else if (got.some((r, n) => !near(r, want[n]))) fails.push(`card ${stack.i}.${k} (${pos}): corners ${got.map(r1).join(' ')}, expected ${want.join(' ')}`);
+        if (k > 0) {
+          const gap = box.getBoundingClientRect().top - joined[k - 1].shadowRoot.querySelector('.bubble-container').getBoundingClientRect().bottom;
+          if (!near(gap, 0)) fails.push(`card ${stack.i}.${k}: ${r1(gap)} px from the card above, expected 0`);
+        }
+        // A joined row holds its controls and the 8 px gap above them, the first row the card's padding instead, and the last row the padding below them too. So the rows' controls stand closer to each other than to the list's edge.
+        const scope = { haCard: el.shadowRoot.querySelector('ha-card') };
+        const pad = length(scope, 'var(--org-pad)'), gap = length(scope, 'var(--ha-space-2)');
+        const row = length(scope, el.config.origami_base.compact ? 'var(--control-height-mini)' : 'var(--tile-size)') + (pos === 'first' ? pad : gap) + (pos === 'last' ? pad : 0);
+        const b = box.getBoundingClientRect();
+        if (want && !near(b.height, row)) fails.push(`card ${stack.i}.${k} (${pos}): ${r1(b.height)} px tall, expected ${r1(row)}`);
+        if (!(gap < pad)) fails.push(`card ${stack.i}.${k}: the gap between rows is ${r1(gap)} px and the padding ${r1(pad)} px, expected a gap smaller than the padding`);
+        // The background fills the row, so no line shows where two rows meet
+        const bg = el.shadowRoot.querySelector('.bubble-background')?.getBoundingClientRect();
+        if (bg && (!near(bg.top, b.top) || !near(bg.bottom, b.bottom))) fails.push(`card ${stack.i}.${k}: the background runs from ${r1(bg.top - b.top)} to ${r1(bg.bottom - b.bottom)} px past the row's edges, expected 0`);
+      });
+    }
+    if (!count) fails.push('the sheet has no joined cards');
+    report('joined cards', fails, `${count} joined cards share one background, with the card's padding at its ends and smaller gaps between their rows`);
+  }
+
+  // Plain cards: Base does nothing on a card without an Origami module
+  {
+    const fails = [];
+    const plain = cards.filter((c) => !c.origami && c.root);
+    for (const card of plain) {
+      if (card.el.card?._org || getComputedStyle(card.haCard).getPropertyValue('--org-pad').trim()) fails.push(`card ${card.i}: Base styled a card without an Origami module`);
+    }
+    if (!plain.length) fails.push('the sheet has no card without an Origami module');
+    report('plain cards', fails, `Base leaves ${plain.length} card without an Origami module alone`);
+  }
+
+  // Hidden cards: a card whose hidden is true hides itself as Home Assistant lets a card do, so its stack gives it no space and no gap, and it stays on the page to see the state that shows it again
+  {
+    const fails = [];
+    const stacks = cards.filter((c) => c.cfg.type === 'vertical-stack' && (c.cfg.cards || []).some((x) => x.origami_base?.hidden !== undefined));
+    if (!stacks.length) fails.push('the sheet has no stack with a hidden card');
+    for (const s of stacks) {
+      const col = s.el.firstElementChild;
+      const kids = [...col.children];
+      s.cfg.cards.forEach((cc, i) => {
+        if (cc.origami_base?.hidden === undefined) return;
+        if (getComputedStyle(kids[i]).display !== 'none') fails.push(`card ${i + 1} of the stack takes space while it is hidden`);
+        if (!kids[i].querySelector('bubble-card')?.isConnected) fails.push(`card ${i + 1} of the stack left the page while it is hidden`);
+      });
+      const shown = kids.filter((k) => getComputedStyle(k).display !== 'none');
+      const want = shown.reduce((a, k) => a + k.getBoundingClientRect().height, 0) + parseFloat(getComputedStyle(col).rowGap) * (shown.length - 1);
+      if (!near(col.getBoundingClientRect().height, want)) fails.push(`the stack is ${r1(col.getBoundingClientRect().height)} px tall, expected ${r1(want)} px for the cards that show`);
+    }
+    report('hidden cards', fails, 'a hidden card takes no space and no gap in its stack, and stays on the page');
+  }
+
+  // Mini pop-ups: a key in a pop-up opens one above the key where it fits, or else below it, as wide as the pop-up's cards, with a card's corners, 16 px of padding and a Header at its top without space above its title. A tap beside it closes only the mini pop-up. This check runs last, because it opens the sheet's pop-up and closes it again.
+  {
+    const fails = [];
+    const until = async (f, ms = 5000) => {
+      for (const t = performance.now(); !f(); await new Promise((r) => setTimeout(r, 50))) if (performance.now() - t > ms) return false;
+      return true;
+    };
+    const deep = (root, sel) => {
+      const hit = root.querySelector(sel);
+      if (hit) return hit;
+      for (const el of root.querySelectorAll('*')) {
+        const inner = el.shadowRoot && deep(el.shadowRoot, sel);
+        if (inner) return inner;
+      }
+      return null;
+    };
+    const host = cards.find((c) => c.cfg.card_type === 'pop-up' && c.cfg.origami_popup?.mini_popups);
+    const go = (hash) => {
+      history.pushState(null, '', location.pathname + location.search + hash);
+      window.dispatchEvent(new Event('location-changed'));
+    };
+    if (!host) fails.push('the sheet has no pop-up with a mini pop-up');
+    else {
+      go(host.cfg.hash);
+      const shell = () => host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened:not(.is-opening)');
+      const keyAt = (n) => shell() && deep(shell(), 'bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button-' + n);
+      if (!(await until(() => keyAt(1)))) fails.push('the pop-up did not open with its key');
+      else {
+        await new Promise((r) => setTimeout(r, 400));
+        const mini = () => shell()?.querySelector('.org-mini.open');
+        // open() taps a key as Bubble Card sends the tap, and returns the mini pop-up once it has grown to its size
+        const open = async (k) => {
+          const tap = new Event('hass-action', { bubbles: true, composed: true });
+          tap.detail = { config: { tap_action: JSON.parse(k.dataset.tapAction) }, action: 'tap' };
+          k.dispatchEvent(tap);
+          if (!(await until(() => mini(), 2000))) return null;
+          await until(() => mini() && mini().getAnimations().length === 0, 3000);
+          return mini();
+        };
+        const pad = parseFloat(doc.getPropertyValue('--ha-space-4'));
+        const gap = parseFloat(doc.getPropertyValue('--ha-space-2'));
+        const k = keyAt(1);
+        const m = await open(k);
+        if (!m) fails.push('the key did not open the mini pop-up');
+        else {
+          const b = m.getBoundingClientRect(), kb = k.getBoundingClientRect();
+          const col = shell().querySelector('.bubble-cards-container').getBoundingClientRect();
+          const cs = getComputedStyle(m);
+          // Its cards sit in a box with its padding
+          const bs = getComputedStyle(m.querySelector('.org-mini-box') ?? m);
+          if (!near(b.left, col.left) || !near(b.width, col.width)) fails.push(`it spans ${r1(b.left)} to ${r1(b.right)} px, expected the pop-up's cards from ${r1(col.left)} to ${r1(col.right)} px`);
+          if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`it covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`it opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
+          if (b.top < 0 || b.bottom > innerHeight) fails.push(`it runs off the screen: ${r1(b.top)} to ${r1(b.bottom)} px`);
+          if (!near(parseFloat(cs.borderTopLeftRadius), cardRadius)) fails.push(`its corners are ${cs.borderTopLeftRadius}, expected a card's ${cardRadius}px`);
+          // It lies above the pop-up as a menu does, with the card background, so it stands out from the dimmed pop-up behind it
+          const paper = getComputedStyle(document.querySelector('.shot')).getPropertyValue('--ha-card-background').trim();
+          const probe = document.body.appendChild(Object.assign(document.createElement('div'), { style: 'display:none;background-color:' + paper }));
+          if (cs.backgroundColor !== getComputedStyle(probe).backgroundColor) fails.push(`its panel is ${cs.backgroundColor}, expected the card background ${getComputedStyle(probe).backgroundColor}`);
+          probe.remove();
+          if (!near(parseFloat(bs.paddingTop), pad) || !near(parseFloat(bs.paddingLeft), pad)) fails.push(`its padding is ${bs.padding}, expected ${pad}px`);
+          const title = deep(m, 'bubble-card')?.shadowRoot?.querySelector('.bubble-container');
+          if (!title || !near(title.getBoundingClientRect().top, b.top + pad)) fails.push(`its title starts ${title ? r1(title.getBoundingClientRect().top - b.top) : '?'} px from its top, expected the padding of ${pad}px`);
+          // A tap beside it lands on the dim
+          const dim = shell().querySelector('.org-mini-dim.open');
+          if (!dim) fails.push('no dim covers the pop-up behind it');
+          else dim.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, clientX: 2, clientY: 2 }));
+          if (!(await until(() => !mini(), 3000))) fails.push('a tap beside it left it open');
+          if (!shell()) fails.push('a tap beside it closed the pop-up too');
+        }
+        // A mini pop-up with a width of its own lines up with its key, and one with a max_height scrolls inside it
+        const k2 = keyAt(2);
+        const n = k2 && await open(k2);
+        if (!n) fails.push('the second key did not open its narrow mini pop-up');
+        else {
+          const b = n.getBoundingClientRect(), kb = k2.getBoundingClientRect();
+          const box = n.querySelector('.org-mini-box');
+          if (!near(b.width, 200)) fails.push(`the narrow one is ${r1(b.width)} px wide, expected its width of 200px`);
+          if (!near(b.right, kb.right)) fails.push(`the narrow one ends at ${r1(b.right)} px, expected the end of its key at ${r1(kb.right)} px`);
+          if (b.height > 160.5) fails.push(`the narrow one is ${r1(b.height)} px tall, more than its max_height of 160px`);
+          if (!box || box.scrollHeight <= box.clientHeight + 1) fails.push('the narrow one does not scroll, though its cards are taller than its max_height');
+          if (!(b.top >= kb.bottom - 0.5 || b.bottom <= kb.top + 0.5)) fails.push(`the narrow one covers its key: ${r1(b.top)} to ${r1(b.bottom)} px, the key ${r1(kb.top)} to ${r1(kb.bottom)} px`);
+          if (b.top >= kb.bottom - 0.5 && kb.top - 2 * gap >= b.height) fails.push(`the narrow one opens below its key, though its ${r1(b.height)} px fit in the ${r1(kb.top - 2 * gap)} px above it`);
+          // Frameless, it has no panel, its cards start at its edge, and no edge cuts the shadow of its first button
+          const ns = getComputedStyle(n);
+          if (!/rgba\(0, 0, 0, 0\)|transparent/.test(ns.backgroundColor) || ns.boxShadow !== 'none') fails.push(`the frameless one has a panel: ${ns.backgroundColor}, shadow ${ns.boxShadow}`);
+          const first = box?.firstElementChild?.getBoundingClientRect();
+          if (first && !(near(first.top, b.top) && near(first.left, b.left))) fails.push(`the frameless one's cards start ${r1(first.left - b.left)} px and ${r1(first.top - b.top)} px from its edge, expected 0`);
+          const button = box?.firstElementChild?.querySelector('bubble-card')?.shadowRoot?.querySelector('.bubble-sub-button');
+          if (box && button) {
+            // reach() tells how far a shadow draws past its shape on each side
+            const reach = { top: 0, right: 0, bottom: 0, left: 0 };
+            for (const part of getComputedStyle(button).boxShadow.split(/,(?![^(]*\))/)) {
+              if (/inset/.test(part)) continue;
+              const [x = 0, y = 0, blur = 0, spread = 0] = (part.replace(/(rgba?|color)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat);
+              reach.top = Math.max(reach.top, blur + spread - y); reach.bottom = Math.max(reach.bottom, blur + spread + y);
+              reach.left = Math.max(reach.left, blur + spread - x); reach.right = Math.max(reach.right, blur + spread + x);
+            }
+            const r = button.getBoundingClientRect();
+            const clip = box.getBoundingClientRect();
+            const room = { top: r.top - Math.max(clip.top, ns.overflow === 'visible' ? -Infinity : b.top), left: r.left - Math.max(clip.left, ns.overflow === 'visible' ? -Infinity : b.left), right: Math.min(clip.right, ns.overflow === 'visible' ? Infinity : b.right) - r.right };
+            const cut = ['top', 'left', 'right'].filter((side) => room[side] < reach[side] - 0.5);
+            if (!reach.bottom) fails.push('the frameless one\'s buttons cast no shadow, though they lie on the dim');
+            else if (cut.length) fails.push(`the frameless one cuts its first button's shadow at the ${cut.join(' and ')}: ${cut.map((s) => r1(room[s]) + ' px of room for ' + r1(reach[s])).join(', ')}`);
+          }
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+          if (!(await until(() => !mini(), 3000))) fails.push('Esc left the narrow one open');
+        }
+      }
+      go('');
+      await until(() => !host.el.shadowRoot?.querySelector('.bubble-pop-up.is-popup-opened'), 2000);
+    }
+    report('mini pop-ups', fails, 'a key opens a mini pop-up next to it, as wide as the pop-up\'s cards or its own width at its key, with a card\'s corners and 16 px of padding or frameless without them, a list taller than its max_height scrolls, and a tap beside it or Esc closes only the mini pop-up');
+  }
+  return results;
+};

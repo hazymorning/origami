@@ -1,0 +1,15 @@
+# The favorites in one row, at the moments of the home view. In each, the first favorite is on and the others wait for a tap.
+kind: panel
+light:
+  states:
+    switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+  cards:
+    - {file: favorites/header.yaml}
+    - file: favorites/tiles.yaml
+      only: [Oven, Bath, Printer]
+dark:
+  cards:
+    - {file: favorites/header.yaml}
+    - file: favorites/tiles.yaml
+      only: [Music, Robot, Printer]
+trim: 16

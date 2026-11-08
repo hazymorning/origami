@@ -1,0 +1,362 @@
+// Renders Bubble cards with the Origami modules and the theme in Chromium.
+//
+//   node .github/bench/bench.mjs
+//     Renders sheet.yaml and checks the design rules. It takes a few seconds.
+//   node .github/bench/bench.mjs shot <scenario.yaml> <folder> [--modes light,dark] [--rtl]
+//     Takes a screenshot of each section of a scenario, such as cards from a real home, which stay outside the repository.
+//     A scenario can set the page's size and scale with viewport and scale, the clock with time, such as 2026-11-04T19:30,
+//     and load other cards with resources, a list of their files next to the scenario. click lists elements to tap before the shots.
+//     preview shows other cards as in the card editor, and admin makes the user an admin. seed makes Math.random repeat the
+//     same numbers, so a card that places things at random, such as the weather card's clouds, looks the same in every shot.
+//     With a seed, advance lets the animations run for that many seconds before the shot, frame by frame and the same in every
+//     shot, such as birds that cross the weather card's sky.
+//     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
+//     Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree.
+//
+// It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
+// Bubble Card's version below is downloaded once into .cache. Raise it when the dashboard moves to a newer Bubble Card.
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
+const BUBBLE_CARD = '3.4.3';
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repo = path.resolve(here, '../..');
+const require = createRequire(import.meta.url);
+const yaml = require('js-yaml');
+const { chromium } = require('playwright');
+
+const argv = process.argv.slice(2);
+const shot = argv[0] === 'shot';
+const option = (name, fallback) => { const i = argv.indexOf('--' + name); return i >= 0 ? argv[i + 1] : fallback; };
+const scenarioPath = shot ? argv[1] : path.join(here, 'sheet.yaml');
+const outDir = shot ? argv[2] : null;
+if (shot && (!scenarioPath || !outDir)) { console.error('usage: node bench.mjs shot <scenario.yaml> <folder>'); process.exit(2); }
+const modes = shot ? option('modes', 'light,dark').split(',') : ['light'];
+const scenario = yaml.load(fs.readFileSync(scenarioPath, 'utf8'));
+
+// Bubble Card and the icons, downloaded or built once
+const cache = path.join(here, '.cache');
+fs.mkdirSync(cache, { recursive: true });
+const bubbleCard = path.join(cache, `bubble-card-${BUBBLE_CARD}.js`);
+if (!fs.existsSync(bubbleCard)) {
+  execFileSync('curl', ['-sSfL', '-o', bubbleCard, `https://raw.githubusercontent.com/Clooos/Bubble-Card/v${BUBBLE_CARD}/dist/bubble-card.js`]);
+}
+const icons = path.join(cache, 'mdi.js');
+if (!fs.existsSync(icons)) {
+  const map = {};
+  for (const m of fs.readFileSync(require.resolve('@mdi/js/mdi.js'), 'utf8').matchAll(/export var mdi(\w+) = "([^"]+)"/g)) {
+    map[m[1].replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/([a-zA-Z])(\d)/g, '$1-$2').toLowerCase()] = m[2];
+  }
+  fs.writeFileSync(icons, 'window.__MDI = ' + JSON.stringify(map) + ';');
+}
+
+// The modules in one YAML document, where Bubble Card looks for them, and the theme's tokens for each mode
+const modDir = path.join(repo, 'bubble_card/modules');
+const modules = fs.readdirSync(modDir).filter((f) => f.endsWith('.yaml')).sort()
+  .map((f) => fs.readFileSync(path.join(modDir, f), 'utf8').replace(/\s*$/, '\n')).join('\n');
+const { modes: themeModes, ...theme } = yaml.load(fs.readFileSync(path.join(repo, 'themes/origami.yaml'), 'utf8')).Origami;
+// Home Assistant's own defaults that the theme does not set
+const defaults = {
+  'state-climate-heat-color': 'var(--deep-orange-color)', 'state-climate-cool-color': 'var(--blue-color)',
+  'state-fan-active-color': 'var(--cyan-color)', 'state-media_player-active-color': 'var(--light-blue-color)',
+  'state-inactive-color': 'var(--grey-color)', 'ha-font-size-2xl': '24px', 'ha-font-size-3xl': '28px',
+  'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%', 'state-light-active-color': 'var(--amber-color)',
+  'mdc-theme-primary': 'var(--primary-color)', 'mdc-theme-text-primary-on-background': 'var(--primary-text-color)',
+  // Home Assistant's spacing scale, 4 px a step
+  ...Object.fromEntries(Array.from({ length: 21 }, (_, i) => ['ha-space-' + i, i * 4 + 'px']))
+};
+const vars = (o) => Object.entries(o).map(([k, v]) => `--${k}: ${v};`).join('\n');
+// Home Assistant adds rgb-<name> as r, g, b for each hex color of a theme that has no rgb-<name> of its own
+const rgb = (o) => Object.fromEntries(Object.entries(o).filter(([k, v]) => /^#[0-9a-f]{6}$/i.test(String(v)) && !(('rgb-' + k) in o))
+  .map(([k, v]) => ['rgb-' + k, [1, 3, 5].map((i) => parseInt(String(v).slice(i, i + 2), 16)).join(', ')]));
+
+// Stand-ins for the Home Assistant elements that Bubble Card uses
+const standIns = `
+customElements.define('ha-card', class extends HTMLElement {
+  // Home Assistant's own look for a card, which cards that don't set their own use
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block;position:relative;box-sizing:border-box;background:var(--ha-card-background,var(--card-background-color,#fff));box-shadow:var(--ha-card-box-shadow,none);border-radius:var(--ha-card-border-radius,12px);border:var(--ha-card-border-width,1px) solid var(--ha-card-border-color,var(--divider-color,#e0e0e0));color:var(--primary-text-color)}</style><slot></slot>'; }
+});
+// Home Assistant's dashboard root, which some cards wait for before they register
+customElements.define('hui-root', class extends HTMLElement { requestUpdate() {} });
+customElements.define('ha-ripple', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:none}</style>'; }
+  startPress() {} endPress() {}
+});
+customElements.define('ha-icon', class extends HTMLElement {
+  static get observedAttributes() { return ['icon']; }
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>.i{display:var(--ha-icon-display,inline-flex);align-items:center;justify-content:center;position:relative;vertical-align:middle;fill:var(--icon-primary-color,currentcolor);width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;display:block}</style><span class="i"><svg viewBox="0 0 24 24"><path></path></svg></span>';
+  }
+  get icon() { return this.getAttribute('icon') ?? ''; }
+  set icon(v) { if (v != null && this.getAttribute('icon') !== String(v)) this.setAttribute('icon', String(v)); }
+  attributeChangedCallback() { this.connectedCallback(); }
+  connectedCallback() { this.shadowRoot.querySelector('path').setAttribute('d', window.__MDI[this.icon.replace(/^mdi:/, '')] || ''); }
+});
+// Home Assistant's default icons for the domains the parts show without an icon of their own
+const weatherIcons = { 'clear-night': 'weather-night', cloudy: 'weather-cloudy', exceptional: 'alert-circle-outline', fog: 'weather-fog',
+  hail: 'weather-hail', lightning: 'weather-lightning', 'lightning-rainy': 'weather-lightning-rainy', partlycloudy: 'weather-partly-cloudy',
+  pouring: 'weather-pouring', rainy: 'weather-rainy', snowy: 'weather-snowy', 'snowy-rainy': 'weather-snowy-rainy', sunny: 'weather-sunny',
+  windy: 'weather-windy', 'windy-variant': 'weather-windy-variant' };
+const domainIcons = { vacuum: 'robot-vacuum', timer: 'timer-outline', calendar: 'calendar', update: 'package-up', person: 'account',
+  counter: 'counter', sun: 'white-balance-sunny', fan: 'fan', light: 'lightbulb', media_player: 'cast', climate: 'thermostat' };
+const stateIcon = (s) => {
+  const domain = s.entity_id.split('.')[0];
+  return 'mdi:' + ((domain === 'weather' && weatherIcons[s.state]) || domainIcons[domain] || 'circle-outline');
+};
+customElements.define('ha-state-icon', class extends HTMLElement {
+  set stateObj(v) { this._s = v; this.draw(); }
+  get stateObj() { return this._s; }
+  set icon(v) { this._i = v; this.draw(); }
+  get icon() { return this._i; }
+  set hass(v) {}
+  connectedCallback() { this.draw(); }
+  draw() {
+    if (!this._s || !this.isConnected) return;
+    let i = this.querySelector('ha-icon');
+    if (!i) { i = document.createElement('ha-icon'); this.appendChild(i); }
+    i.setAttribute('icon', this._i || this._s.attributes?.icon || stateIcon(this._s));
+  }
+});
+// Home Assistant's dropdown: a tap opens its menu next to it, above everything else, as the top layer does on the phone
+customElements.define('ha-dropdown', class extends HTMLElement {
+  constructor() {
+    super();
+    this.distance = 0;
+    // The menu is a popover in the top layer, as Home Assistant's is, so a pop-up's transform doesn't move it
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>[part=menu]{display:none;position:fixed;inset:auto;margin:0;padding:0;border:0;overflow:visible;flex-direction:column;box-sizing:border-box;width:max-content;color:inherit;background:var(--wa-color-surface-raised,var(--card-background-color));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--shadow-elevated,0 4px 16px rgba(0,0,0,.2))}[part=menu]:popover-open{display:flex}</style><div part="menu" popover="manual"><slot></slot></div>';
+  }
+  // Bubble Card opens it with open, and the menu then stands below its dropdown, the ha-select around it. As Home Assistant's
+  // menus do, it follows the dropdown while it is open, such as while a pop-up still slides up.
+  get open() { return this.hasAttribute('open'); }
+  set open(v) {
+    this.toggleAttribute('open', !!v);
+    const menu = this.shadowRoot.querySelector('[part=menu]');
+    if (v && !menu.matches(':popover-open')) menu.showPopover();
+    if (!v && menu.matches(':popover-open')) menu.hidePopover();
+    const place = () => {
+      if (!this.open) return;
+      const r = (this.getRootNode().host || this).getBoundingClientRect(), menu = this.shadowRoot.querySelector('[part=menu]');
+      menu.style.top = r.bottom + (Number(this.distance) || 0) + 'px';
+      menu.style.left = r.left + 'px';
+      requestAnimationFrame(place);
+    };
+    if (v) place();
+  }
+});
+customElements.define('ha-select', class extends HTMLElement {
+  constructor() {
+    super();
+    this.updateComplete = Promise.resolve(true);
+    this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:block}</style><ha-dropdown><slot></slot></ha-dropdown>';
+  }
+});
+customElements.define('ha-dropdown-item', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<style>:host{display:flex;align-items:center;gap:8px;white-space:nowrap}:host([selected]){background:var(--ha-color-fill-primary-quiet-resting)}</style><slot name="icon"></slot><slot></slot>'; }
+});
+// Home Assistant's hui-card builds the cards of a stack or a pop-up. This one knows stacks, grids, conditional and picture entity cards and Bubble cards that hide themselves, and draws an empty box for other cards.
+const met = (c, h) => c.condition === 'or' ? (c.conditions || []).some((x) => met(x, h))
+  : c.condition === 'and' ? (c.conditions || []).every((x) => met(x, h))
+  : c.condition && c.condition !== 'state' ? true
+  : ((v) => (c.state === undefined || [].concat(c.state).map(String).includes(v))
+    && (c.state_not === undefined || ![].concat(c.state_not).map(String).includes(v)))(
+    String(c.attribute ? h?.states?.[c.entity]?.attributes?.[c.attribute] : h?.states?.[c.entity]?.state));
+customElements.define('hui-card', class extends HTMLElement {
+  load() { this.build(); }
+  set config(c) { this._c = c; if (this.isConnected) this.build(); }
+  get config() { return this._c; }
+  set hass(h) { this._h = h; (this._kids || []).forEach((k) => { k.hass = h; }); this._check?.(); }
+  get hass() { return this._h; }
+  connectedCallback() { this.build(); }
+  build() {
+    const c = this._c;
+    if (!c || this._built === c) return;
+    this._built = c;
+    this.replaceChildren();
+    this._kids = []; this._check = null;
+    this.style.display = 'block';
+    if (c.type === 'vertical-stack') {
+      const col = document.createElement('div');
+      col.style.cssText = 'display:flex;flex-direction:column;gap:var(--vertical-stack-card-gap,8px)';
+      for (const cc of c.cards || []) { const k = document.createElement('hui-card'); k.hass = this._h; k.config = cc; col.appendChild(k); this._kids.push(k); }
+      this.appendChild(col);
+    } else if (c.type === 'conditional') {
+      const k = document.createElement('hui-card');
+      k.hass = this._h; k.config = c.card; this._kids.push(k); this.appendChild(k);
+      this._check = () => { this.style.display = (c.conditions || []).every((x) => met(x, this._h)) ? 'block' : 'none'; };
+      this._check();
+    } else if (c.type === 'custom:bubble-card') {
+      const el = document.createElement('bubble-card');
+      el.setConfig(c); this.appendChild(el); el.hass = this._h; this._kids.push(el);
+      // A card may hide itself, as Home Assistant's hui-card allows: it sets hidden and says so with card-visibility-changed, and with connectedWhileHidden it stays on the page
+      const vis = () => {
+        const hide = !!el.hidden;
+        this.style.display = hide ? 'none' : 'block';
+        if (hide && el.connectedWhileHidden !== true && el.parentElement) this.removeChild(el);
+        else if (!el.parentElement && (!hide || el.connectedWhileHidden === true)) this.appendChild(el);
+      };
+      el.addEventListener('card-visibility-changed', (e) => { e.stopPropagation(); vis(); });
+      vis();
+    } else if (c.type === 'grid') {
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:grid;gap:var(--grid-card-gap,8px);grid-template-columns:repeat(' + (c.columns || 2) + ',minmax(0,1fr))';
+      for (const cc of c.cards || []) { const k = document.createElement('hui-card'); k.hass = this._h; k.config = cc; grid.appendChild(k); this._kids.push(k); }
+      this.appendChild(grid);
+    } else if (c.type === 'picture-entity') {
+      // Home Assistant's picture entity card with the entity's picture, such as a vacuum's map, without a name or state
+      const card = document.createElement('ha-card');
+      card.style.overflow = 'hidden';
+      const img = document.createElement('img');
+      img.style.cssText = 'display:block;width:100%';
+      card.appendChild(img); this.appendChild(card);
+      this._check = () => { const src = this._h?.states?.[c.entity]?.attributes?.entity_picture; if (src && img.getAttribute('src') !== src) img.src = src; };
+      this._check();
+    } else if (String(c.type).startsWith('custom:') && customElements.get(c.type.slice(7))) {
+      // Another custom card that the scenario loads with resources
+      const el = document.createElement(c.type.slice(7));
+      el.setConfig(c); el.hass = this._h; this.appendChild(el); this._kids.push(el);
+      // As in the card editor, where a card such as a menu shows itself in place
+      if (window.__PREVIEW) el.preview = true;
+    } else if (c.type === 'placeholder') {
+      // A card that is not ready yet, as a plain card of its height and margins with a question mark, such as for the images
+      const box = document.createElement('div');
+      box.textContent = '?';
+      box.style.cssText = 'height:' + (c.height ?? '120px') + ';margin:' + (c.margin ?? '0') + ';display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:var(--ha-card-border-radius);background:var(--ha-card-background);box-shadow:var(--ha-card-box-shadow, none);font:var(--ha-font-weight-medium) 48px var(--ha-font-family-body);color:var(--secondary-text-color)';
+      this.appendChild(box);
+    } else {
+      const box = document.createElement('div');
+      box.textContent = c.type;
+      box.style.cssText = 'height:120px;display:flex;align-items:center;justify-content:center;border:2px dashed var(--fill-strong);border-radius:22px;font:500 12px var(--ha-font-family-body);color:var(--secondary-text-color)';
+      this.appendChild(box);
+    }
+  }
+});`;
+
+const page = (mode) => `<!doctype html>
+<html lang="en"${argv.includes('--rtl') ? ' dir="rtl"' : ''}><head><meta charset="utf-8">
+<link rel="stylesheet" href="/local/fonts/montserrat.css">
+<style>
+:root {
+${vars(defaults)}
+${vars(theme)}
+${vars(themeModes[mode])}
+${vars(rgb({ ...theme, ...themeModes[mode] }))}
+}
+html, body { margin: 0; background: var(--dashboard-background); color: var(--primary-text-color); font-family: var(--ha-font-family-body); }
+.shot { box-sizing: border-box; padding: 16px; background: var(--dashboard-background); }
+.shot.popup { background: var(--popup-background); }
+/* A phone page is a sections view on a narrow screen. Home Assistant pads its top and bottom with the view's padding and the row gap,
+   and its sides with the narrow column gap, which the theme sets to 24 px, so the cards line up with the navigation bar's player. */
+.shot.phone { padding: calc(var(--view-container-padding-top, 0px) + var(--ha-view-sections-row-gap, 24px)) var(--ha-view-sections-narrow-column-gap, 8px) calc(var(--view-container-padding-bottom, 0px) + var(--ha-view-sections-row-gap, 24px)) var(--ha-view-sections-narrow-column-gap, 8px); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+</style>
+<script src="/mdi.js"></script>
+<script>${standIns}
+window.__DARK = ${mode === 'dark'};
+window.__PREVIEW = ${!!scenario.preview};
+</script>
+</head><body>
+<script src="/bubble-card.js"></script>
+<script src="/page.js"></script>
+${shot ? '' : '<script src="/checks.js"></script>'}
+</body></html>`;
+
+const types = { '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.yaml': 'text/yaml', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url, 'http://x');
+  const send = (body, type) => { res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' }); res.end(body); };
+  const file = (p) => fs.existsSync(p) ? send(fs.readFileSync(p), types[path.extname(p)] || 'application/octet-stream') : (res.writeHead(404), res.end());
+  if (url.pathname === '/') return send(page(url.searchParams.get('mode') || 'light'), 'text/html');
+  if (url.pathname === '/scenario.json') return send(JSON.stringify(scenario), 'application/json');
+  if (url.pathname === '/local/bubble/bubble-modules.yaml') return send(modules, 'text/yaml');
+  if (url.pathname === '/bubble-card.js') return file(bubbleCard);
+  if (url.pathname === '/mdi.js') return file(icons);
+  if (['/page.js', '/checks.js'].includes(url.pathname)) return file(path.join(here, url.pathname.slice(1)));
+  if (url.pathname.startsWith('/local/fonts/')) return file(path.join(repo, 'www/fonts', path.basename(url.pathname)));
+  // Pictures that a scenario uses, such as a cover, from the folder next to the scenario
+  if (url.pathname.startsWith('/local/')) return file(path.join(path.dirname(path.resolve(scenarioPath)), path.basename(url.pathname)));
+  res.writeHead(404); res.end();
+});
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const port = server.address().port;
+
+const browser = await chromium.launch();
+const errors = [];
+let failed = false;
+try {
+  for (const mode of modes) {
+    const context = await browser.newContext({ deviceScaleFactor: shot ? scenario.scale || 2 : 1, viewport: shot && scenario.viewport || { width: 1200, height: 1600 }, colorScheme: mode, timezoneId: 'UTC' });
+    // A seeded Math.random, mulberry32, for cards that place things at random. Each script file draws from its own sequence,
+    // so a card gets the same numbers however the other cards' calls interleave with its own.
+    if (shot && scenario.seed !== undefined) await context.addInitScript((seed) => {
+      const streams = new Map();
+      const next = (s) => { s.a = (s.a + 0x6D2B79F5) | 0; let t = Math.imul(s.a ^ (s.a >>> 15), 1 | s.a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      Math.random = () => {
+        const file = (new Error().stack.split('\n')[2] || '').replace(/:\d+:\d+\)?$/, '').replace(/^.*\//, '');
+        if (!streams.has(file)) streams.set(file, { a: seed >>> 0 });
+        return next(streams.get(file));
+      };
+    }, scenario.seed);
+    // Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree
+    await context.route(/^https:\/\/cdn\.jsdelivr\.net\/gh\/hazymorning\/origami@[^/]+\/([^?#]+)/, (route) => {
+      const file = path.join(repo, decodeURIComponent(route.request().url().match(/@[^/]+\/([^?#]+)/)[1]));
+      if (!file.startsWith(repo + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404 });
+      return route.fulfill({ body: fs.readFileSync(file), contentType: types[path.extname(file)] || 'application/octet-stream' });
+    });
+    const p = await context.newPage();
+    if (shot && scenario.time) await p.clock.setFixedTime(new Date(scenario.time));
+    p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    p.on('pageerror', (e) => errors.push(e.message));
+    await p.goto(`http://127.0.0.1:${port}/?mode=${mode}`);
+    await p.waitForFunction(() => window.__ready === true, null, { timeout: 30000 })
+      .catch((e) => { throw new Error('The page did not finish: ' + (errors.join(' | ') || e.message)); });
+    if (shot) {
+      // With a seed, animations that count time in frames stand still once the page is ready, so what the seed placed stays in place.
+      // advance first runs them for that many seconds, one frame of 1/60 s after the other, so a bird that appears after a few seconds is in the shot.
+      if (scenario.seed !== undefined) await p.evaluate(async (advance) => {
+        const realNow = performance.now.bind(performance);
+        const raf = window.requestAnimationFrame.bind(window);
+        let queue = [];
+        if (advance > 0) {
+          window.requestAnimationFrame = (cb) => { queue.push(cb); return queue.length; };
+          // The frames asked for before this run once more in the browser and then wait in the queue
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        let now = realNow();
+        performance.now = () => now;
+        for (let f = 0; f < advance * 60; f++) {
+          now += 1000 / 60;
+          const due = queue;
+          queue = [];
+          for (const cb of due) { try { cb(now); } catch (e) { /* a card's own error shows in the page's errors */ } }
+        }
+        window.requestAnimationFrame = (cb) => raf(() => cb(now));
+        for (const cb of queue) raf(() => cb(now));
+      }, Number(scenario.advance) || 0);
+      // Taps that a scenario makes before the shots, such as on a key that opens a mini pop-up
+      for (const sel of scenario.click || []) { await p.click(sel); await p.waitForTimeout(900); }
+      fs.mkdirSync(outDir, { recursive: true });
+      for (const [i, s] of (await p.$$('.shot')).entries()) await s.screenshot({ path: path.join(outDir, `${(await s.getAttribute('data-id')) || i}-${mode}.png`) });
+      if (scenario.open || scenario.viewport) await p.screenshot({ path: path.join(outDir, `page-${mode}.png`) });
+      continue;
+    }
+    for (const r of await p.evaluate(() => window.__check())) {
+      console.log(`${r.ok ? 'ok  ' : 'FAIL'}  ${r.name}: ${r.text}`);
+      failed ||= !r.ok;
+    }
+    await context.close();
+  }
+} finally {
+  await browser.close();
+  server.close();
+}
+if (shot) {
+  console.log(`Screenshots are in ${outDir}.` + (errors.length ? ` The page reported:\n${errors.join('\n')}` : ''));
+} else {
+  console.log(`${errors.length ? 'FAIL' : 'ok  '}  errors: ${errors.length ? errors.join(' | ') : 'the page reported none'}`);
+  if (failed || errors.length) process.exit(1);
+}

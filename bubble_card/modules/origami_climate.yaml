@@ -1,61 +1,43 @@
 origami_climate:
-  name: Origami • Climate
-  version: "2.0.2"
+  name: "Origami • Climate"
+  version: "3.1.0"
   supported:
     - button
-  description: "The Climate module styles thermostat cards together with Base. A card counts as on only while hvac_action shows that the thermostat is working. A selected mode alone does not count. An idle thermostat shows Auto, and a thermostat that is off shows Off. The icon and state line follow what the thermostat is doing, and Base sets the color. Set state_content to an empty list so that the module controls the state line."
+  description: "Climate shows what a thermostat does. The state line names the action, such as heating, and a sub-button with css_class readout shows the target temperature. The icons option sets an icon for an action or a state."
+  editor:
+    - name: icons
+      label: "Icons (a map from an action or a state to an icon)"
+      selector:
+        object: {}
   code: |-
     ${(() => {
-      card._orgStateClaim = hass;
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 12)) throw new Error("origami_climate needs origami_base 12 or later");
+      // The thermostat's plus and minus buttons stay neutral while it works
+      if (card.dataset.orgFill !== "own") card.dataset.orgFill = "own";
       const st = hass.states[entity];
-      const a = st?.attributes ?? {};
-      const mode = st?.state ?? "unknown";
-      const act = String(a.hvac_action ?? "").toLowerCase();
-      const dead = ["unavailable", "unknown"].includes(mode);
-      const off = mode === "off" || act === "off";
-      const busy = ["heating", "preheating", "cooling", "drying", "fan", "defrosting"];
-      card._orgCl = { st, a, mode, act, dead, off, active: !off && !dead && busy.includes(act) };
+      const look = org.me;
+      const act = look.action ?? "";
+      // Without an icon of the card's own, the icon shows what the thermostat does, with Home Assistant's icons for the actions. The Icons option replaces any of them.
+      const builtin = this.config.icon ? {} : { heating: "mdi:fire", preheating: "mdi:heat-wave", cooling: "mdi:snowflake", drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt" };
+      const working = look.on && act !== "";
+      const off = look.available && (st.state === "off" || act === "off");
+      const key = !look.available ? "unavailable" : working ? act : off ? "off" : act || st.state;
+      card._orgCl = { off };
+      org.icon(icon, org.pick(this.config.origami_climate?.icons, key, true) ?? builtin[key] ?? null);
+      // Bubble Card hands the state line to a module whose code contains this exact assignment, and it skips a write that repeats the line's text
+      const line = !look.available || off || !act ? org.word(hass, st) : org.word(hass, st, "hvac_action");
+      card.querySelector('.bubble-state').textContent = line;
+      // Each readout shows the target of its own thermostat, or the range of one with a low and a high target. The range stays in this order in right-to-left languages.
+      org.readouts(hass, this.config, entity, (t) => {
+        const a = t?.attributes ?? {};
+        const low = a.target_temp_low, high = a.target_temp_high;
+        return a.temperature != null ? org.num(hass, a.temperature) + "°"
+          : low != null && high != null ? "\u2066" + org.num(hass, low) + "–" + org.num(hass, high) + "°\u2069" : "–";
+      });
       return "";
     })()}
     ha-card .bubble-icon-container.bubble-main-icon-container .bubble-icon,
     ha-card .bubble-icon-container.bubble-main-icon-container .bubble-main-icon {
       opacity: ${card._orgCl.off ? "var(--opacity-muted)" : "1"} !important;
     }
-    ${(() => {
-      const c = card._orgCl;
-      const map = {
-        heating: "mdi:radiator", preheating: "mdi:radiator", cooling: "mdi:snowflake",
-        drying: "mdi:water-percent", fan: "mdi:fan", defrosting: "mdi:snowflake-melt"
-      };
-      const next = c.dead ? "mdi:radiator-off"
-        : c.off ? "mdi:radiator-off"
-        : map[c.act] ?? "mdi:thermostat";
-      if (icon && icon.getAttribute("icon") !== next) icon.setAttribute("icon", next);
-      return "";
-    })()}
-    ${(() => {
-      const el = card.querySelector(".bubble-state");
-      if (!el) return "";
-      const c = card._orgCl;
-      const de = String(hass.locale?.language ?? hass.language ?? "").startsWith("de");
-      const words = de ? {
-        heating: "Heizt", preheating: "Heizt vor", cooling: "Kühlt",
-        drying: "Trocknet", fan: "Lüftet", defrosting: "Taut ab"
-      } : {
-        heating: "Heating", preheating: "Preheating", cooling: "Cooling",
-        drying: "Drying", fan: "Fan", defrosting: "Defrosting"
-      };
-      const next = c.dead ? (de ? "Fehler" : "Error")
-        : c.off ? (de ? "Aus" : "Off")
-        : words[c.act] ?? "Auto";
-      if (el.innerText !== next) card.querySelector('.bubble-state').innerText = next;
-      return "";
-    })()}
-    ${(() => {
-      const el = card.querySelector(".readout .bubble-sub-button-name-container");
-      const t = card._orgCl.a.temperature;
-      if (!el || t == null) return "";
-      const next = Math.round(Number(t)) + "°";
-      if (el.innerText !== next) el.innerText = next;
-      return "";
-    })()}

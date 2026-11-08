@@ -1,0 +1,68 @@
+# Six speakers, as the README says to add them. Midday: the living room and the kitchen play together, and the office plays
+# on its own, so its chip shows beside the title. Late evening: the bedroom, the office and the kids room play together,
+# with the group open from the link key.
+kind: phone
+home: true
+open: '#popup_music'
+cards:
+  - file: music/pop-up.yaml
+    copy: {media_player.office: [media_player.kitchen, media_player.bathroom, media_player.kids_room]}
+entities:
+  media_player.living_room: {entity_id: media_player.living_room, device_id: d_living_room, platform: music_assistant}
+  button.living_room_favorite_now_playing: {entity_id: button.living_room_favorite_now_playing, device_id: d_living_room, platform: music_assistant, translation_key: favorite_now_playing}
+  media_player.bedroom: {entity_id: media_player.bedroom, device_id: d_bedroom, platform: music_assistant}
+  button.bedroom_favorite_now_playing: {entity_id: button.bedroom_favorite_now_playing, device_id: d_bedroom, platform: music_assistant, translation_key: favorite_now_playing}
+  media_player.office: {entity_id: media_player.office, device_id: d_office, platform: music_assistant}
+  media_player.kitchen: {entity_id: media_player.kitchen, device_id: d_kitchen, platform: music_assistant}
+  media_player.bathroom: {entity_id: media_player.bathroom, device_id: d_bathroom, platform: music_assistant}
+  media_player.kids_room: {entity_id: media_player.kids_room, device_id: d_kids_room, platform: music_assistant}
+states:
+  button.living_room_favorite_now_playing: {state: '2026-11-03T21:04:00+00:00', attributes: {friendly_name: Favorite current song}}
+  button.bedroom_favorite_now_playing: {state: '2026-11-02T22:30:00+00:00', attributes: {friendly_name: Favorite current song}}
+  script.group_speakers: {state: 'off', attributes: {friendly_name: Group speakers}}
+  light.living_room_display: {state: 'on', attributes: {friendly_name: Display}}
+  input_select.selected_speaker:
+    state: media_player.living_room
+    attributes: {friendly_name: Selected speaker, options: [media_player.living_room, media_player.bedroom, media_player.office, media_player.kitchen, media_player.bathroom, media_player.kids_room]}
+light:
+  states:
+    media_player.living_room:
+      state: playing
+      attributes: {friendly_name: Living room, volume_level: 0.26, is_volume_muted: false, media_title: Paper Boats, media_artist: Lumen Fields, media_album_name: Daylight, entity_picture: /local/cover-1.jpg, media_duration: 241, media_position: 96, media_position_updated_at: '2026-11-04T12:40:00+00:00', shuffle: false, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth, Optical In], group_members: [media_player.living_room, media_player.kitchen], supported_features: 4127295}
+    media_player.kitchen:
+      state: playing
+      attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Paper Boats, media_artist: Lumen Fields, entity_picture: /local/cover-1.jpg, group_members: [media_player.living_room, media_player.kitchen]}
+    media_player.office:
+      state: playing
+      attributes: {friendly_name: Office, volume_level: 0.18, media_title: Morning Notes, media_artist: The Desk Podcast, group_members: [media_player.office]}
+    media_player.bedroom: {state: idle, attributes: {friendly_name: Bedroom, volume_level: 0.12, group_members: [media_player.bedroom]}}
+    media_player.bathroom: {state: idle, attributes: {friendly_name: Bathroom, volume_level: 0.15, group_members: [media_player.bathroom]}}
+    media_player.kids_room: {state: idle, attributes: {friendly_name: Kids room, volume_level: 0.1, group_members: [media_player.kids_room]}}
+    number.group_volume: {state: '23', attributes: {friendly_name: Group volume, unit_of_measurement: '%', min: 0, max: 100, step: 1, mode: slider}}
+dark:
+  # The volume rows show for the speakers in the group
+  templates:
+    - {match: "'media_player.bedroom' in", result: 'True'}
+    - {match: "'media_player.office' in", result: 'True'}
+    - {match: "'media_player.kids_room' in", result: 'True'}
+    - {match: "'media_player.living_room' in", result: 'False'}
+    - {match: "'media_player.kitchen' in", result: 'False'}
+    - {match: "'media_player.bathroom' in", result: 'False'}
+  states:
+    input_select.selected_speaker:
+      state: media_player.bedroom
+      attributes: {friendly_name: Selected speaker, options: [media_player.living_room, media_player.bedroom, media_player.office, media_player.kitchen, media_player.bathroom, media_player.kids_room]}
+    media_player.bedroom:
+      state: playing
+      attributes: {friendly_name: Bedroom, volume_level: 0.15, is_volume_muted: false, media_title: Low Tide, media_artist: Quiet Harbour, media_album_name: Night Swim, entity_picture: /local/cover-2.jpg, media_duration: 312, media_position: 204, media_position_updated_at: '2026-11-04T22:40:00+00:00', shuffle: true, repeat: 'off', source: Music Assistant, source_list: [Music Assistant, Bluetooth], group_members: [media_player.bedroom, media_player.office, media_player.kids_room], supported_features: 4127295}
+    media_player.office:
+      state: playing
+      attributes: {friendly_name: Office, volume_level: 0.18, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg, group_members: [media_player.bedroom, media_player.office, media_player.kids_room]}
+    media_player.kids_room:
+      state: playing
+      attributes: {friendly_name: Kids room, volume_level: 0.12, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg, group_members: [media_player.bedroom, media_player.office, media_player.kids_room]}
+    media_player.living_room: {state: idle, attributes: {friendly_name: Living room, volume_level: 0.26, source_list: [Music Assistant, Bluetooth, Optical In], group_members: [media_player.living_room]}}
+    media_player.kitchen: {state: idle, attributes: {friendly_name: Kitchen, volume_level: 0.2, group_members: [media_player.kitchen]}}
+    media_player.bathroom: {state: idle, attributes: {friendly_name: Bathroom, volume_level: 0.15, group_members: [media_player.bathroom]}}
+    number.group_volume: {state: '15', attributes: {friendly_name: Group volume, unit_of_measurement: '%', min: 0, max: 100, step: 1, mode: slider}}
+  click: ['ha-icon[icon="mdi:link-variant"] >> nth=0']

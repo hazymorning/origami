@@ -1,0 +1,24 @@
+alias: Thermostat step
+description: Moves a thermostat's target temperature up or down, within its range.
+mode: queued
+fields:
+  thermostat:
+    description: The thermostat
+    example: climate.living_room
+    selector:
+      entity:
+        domain: climate
+  step:
+    description: How far, in degrees
+    example: -0.5
+sequence:
+  # Only a single target moves. Some thermostats have none while they are off or keep a range.
+  - condition: template
+    value_template: "{{ state_attr(thermostat, 'temperature') is number }}"
+  - action: climate.set_temperature
+    target:
+      entity_id: "{{ thermostat }}"
+    data:
+      temperature: >
+        {% set t = state_attr(thermostat, 'temperature') + step | float(0) %}
+        {{ [[t, state_attr(thermostat, 'min_temp') | float(t)] | max, state_attr(thermostat, 'max_temp') | float(t)] | min }}

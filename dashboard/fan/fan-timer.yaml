@@ -1,0 +1,13 @@
+alias: Fan timer
+description: Turns the fan off when its timer finishes.
+mode: single
+triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bedroom_fan
+conditions: []
+actions:
+  - action: fan.turn_off
+    target:
+      entity_id: fan.bedroom

@@ -1,0 +1,67 @@
+# A speaker with a volume slider, a TV in TV mode and a compact speaker
+kind: panel
+cards:
+  - type: custom:bubble-card
+    card_type: media-player
+    button_type: state
+    entity: media_player.living_room
+    name: Living room
+    icon: mdi:speaker
+    modules: [origami_base, origami_media]
+    origami_base: {group: true}
+    hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+    sub_button:
+      main:
+        - {icon: mdi:pause, show_background: true, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.living_room}}}
+        - {icon: mdi:skip-next, show_background: false, tap_action: {action: perform-action, perform_action: media_player.media_next_track, target: {entity_id: media_player.living_room}}}
+      bottom:
+        - {entity: media_player.living_room, sub_button_type: slider, always_visible: true}
+    rows: '2.2'
+  - type: custom:bubble-card
+    card_type: media-player
+    button_type: state
+    entity: media_player.living_room_tv
+    name: TV
+    icon: mdi:television
+    modules: [origami_base, origami_media]
+    origami_media: {layout: tv}
+    hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+    sub_button:
+      main:
+        - {icon: mdi:power, show_background: true, tap_action: {action: perform-action, perform_action: media_player.toggle, target: {entity_id: media_player.living_room_tv}}}
+    rows: 1.375
+  - type: custom:bubble-card
+    card_type: media-player
+    button_type: state
+    entity: media_player.kitchen
+    name: Kitchen
+    icon: mdi:speaker
+    modules: [origami_base, origami_media]
+    origami_base: {tile: true, compact: true}
+    hide: {power_button: true, previous_button: true, next_button: true, volume_button: true, play_pause_button: true}
+    sub_button:
+      main:
+        - {icon: mdi:play, show_background: true, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.kitchen}}}
+    rows: 1
+states:
+  media_player.living_room:
+    state: playing
+    attributes: {friendly_name: Living room, volume_level: 0.32, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.living_room], source: Network, source_list: [Network, Bluetooth, Optical In]}
+  media_player.living_room_tv:
+    state: 'on'
+    attributes: {friendly_name: TV, app_name: YouTube, source: YouTube, source_list: [YouTube, Netflix, Live TV]}
+  media_player.kitchen:
+    state: paused
+    attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Harbour Lights, media_artist: The Folds, entity_picture: /local/cover-2.jpg, group_members: [media_player.kitchen]}
+# In the evening, another song plays, the TV shows Netflix and the kitchen plays another album
+dark:
+  states:
+    media_player.living_room:
+      state: playing
+      attributes: {friendly_name: Living room, volume_level: 0.18, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg, group_members: [media_player.living_room], source: Network, source_list: [Network, Bluetooth, Optical In]}
+    media_player.living_room_tv:
+      state: 'on'
+      attributes: {friendly_name: TV, app_name: Netflix, source: Netflix, source_list: [YouTube, Netflix, Live TV]}
+    media_player.kitchen:
+      state: paused
+      attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.kitchen]}

@@ -1,0 +1,55 @@
+alias: Playback
+description: Plays, pauses, skips or shuffles on the selected speaker, or saves its song as a favorite in Music Assistant. In a group, the group's leader gets the command.
+mode: queued
+fields:
+  speaker:
+    description: The dropdown helper that selects the speaker, or a speaker
+    example: input_select.selected_speaker
+    selector:
+      entity:
+        domain:
+          - input_select
+          - media_player
+  command:
+    description: What to do. Shuffle turns shuffle on or off, and favorite saves the song in Music Assistant.
+    example: play_pause
+    selector:
+      select:
+        options:
+          - play_pause
+          - previous_track
+          - next_track
+          - shuffle
+          - favorite
+sequence:
+  - variables:
+      selected: "{{ states(speaker) if speaker.startswith('input_select.') else speaker }}"
+      leader: "{{ (state_attr(selected, 'group_members') or [selected])[0] }}"
+  - choose:
+      - alias: Shuffle
+        conditions: "{{ command == 'shuffle' }}"
+        sequence:
+          - action: media_player.shuffle_set
+            target:
+              entity_id: "{{ leader }}"
+            data:
+              shuffle: "{{ not state_attr(leader, 'shuffle') }}"
+      # Music Assistant has one button for each player, which saves the song that plays as a favorite
+      - alias: Favorite
+        conditions: "{{ command == 'favorite' }}"
+        sequence:
+          - variables:
+              device: "{{ device_id(selected) }}"
+              button: >-
+                {{ (integration_entities('music_assistant') | select('match', 'button\\.')
+                | select('in', device_entities(device) if device else []) | list + [''])[0] }}
+          - condition: template
+            value_template: "{{ button != '' }}"
+          - action: button.press
+            target:
+              entity_id: "{{ button }}"
+    default:
+      # media_player.media_play_pause, media_player.media_previous_track or media_player.media_next_track
+      - action: "media_player.media_{{ command }}"
+        target:
+          entity_id: "{{ leader }}"

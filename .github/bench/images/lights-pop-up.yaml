@@ -1,0 +1,41 @@
+# Midday: the Morning scene left on one lamp. Late evening: the Late scene on three dimmed lamps.
+kind: phone
+# The pop-up rises from the bottom, so the image starts a little above it, flush with the phone's cut
+bottom: 590
+home: true
+open: '#popup_lights'
+cards:
+  - {file: lights/pop-up.yaml}
+states:
+  light.living_room_ceiling: {state: 'off', attributes: {friendly_name: Ceiling, supported_color_modes: [brightness]}}
+  light.living_room_tv: {state: 'off', attributes: {friendly_name: TV light, supported_color_modes: [brightness]}}
+  scene.living_room_evening: {state: '2026-11-03T18:00:30+00:00', attributes: {friendly_name: Evening}}
+  scene.living_room_night: {state: '2026-11-03T23:10:00+00:00', attributes: {friendly_name: Night}}
+  scene.living_room_dinner: {state: '2026-11-02T19:00:00+00:00', attributes: {friendly_name: Dinner}}
+  scene.living_room_movie: {state: '2026-11-01T20:30:00+00:00', attributes: {friendly_name: Movie}}
+light:
+  templates:
+    - {match: "' of '", result: '1 of 5 on'}
+    - {match: "since", result: 'since 07:05'}
+  states:
+    light.living_room:
+      state: 'on'
+      attributes: {friendly_name: Living room, brightness: 115, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.living_room_floor_lamp, light.living_room_string_lights, light.living_room_tv, light.living_room_table_lamp, light.living_room_ceiling]}
+    light.living_room_floor_lamp: {state: 'off', attributes: {friendly_name: Floor lamp, supported_color_modes: [brightness]}}
+    light.living_room_string_lights: {state: 'off', attributes: {friendly_name: String lights, supported_color_modes: [brightness]}}
+    light.living_room_table_lamp: {state: 'on', attributes: {friendly_name: Table lamp, brightness: 115, supported_color_modes: [brightness], color_mode: brightness}}
+    scene.living_room_morning: {state: '2026-11-04T07:05:00+00:00', attributes: {friendly_name: Morning}}
+    scene.living_room_late: {state: '2026-11-03T21:40:00+00:00', attributes: {friendly_name: Late}}
+dark:
+  templates:
+    - {match: "' of '", result: '3 of 5 on'}
+    - {match: "since", result: 'since 18:12'}
+  states:
+    light.living_room:
+      state: 'on'
+      attributes: {friendly_name: Living room, brightness: 82, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.living_room_floor_lamp, light.living_room_string_lights, light.living_room_tv, light.living_room_table_lamp, light.living_room_ceiling]}
+    light.living_room_floor_lamp: {state: 'on', attributes: {friendly_name: Floor lamp, brightness: 90, supported_color_modes: [brightness], color_mode: brightness}}
+    light.living_room_string_lights: {state: 'on', attributes: {friendly_name: String lights, brightness: 70, supported_color_modes: [brightness], color_mode: brightness}}
+    light.living_room_table_lamp: {state: 'on', attributes: {friendly_name: Table lamp, brightness: 85, supported_color_modes: [brightness], color_mode: brightness}}
+    scene.living_room_morning: {state: '2026-11-04T07:05:00+00:00', attributes: {friendly_name: Morning}}
+    scene.living_room_late: {state: '2026-11-04T22:10:00+00:00', attributes: {friendly_name: Late}}
