@@ -4,7 +4,70 @@
 
 These changes are in the `next` branch and come with the next release.
 
-### New
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
+  <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
+</picture>
+
+Origami 3.0 finishes what 2.0 started. Paper Buttons Row is gone, and most of the dashboard is plain Bubble Card with the Origami modules on top. Every part has its own folder with its files and a short README, so a home takes only the parts it wants, without a package or one large dashboard file.
+
+New are the pop-ups for the lights, music, favorites, the server and the vacuum, small pop-ups that open right at their key, and three weather cards. It took a long time, and now it finally feels somewhat finished.
+
+### Upgrading
+
+A 2.0 dashboard keeps working after the first four steps, so the new parts can take its place one at a time. Anyone who stays on 2.0 finds its package, dashboard and README in the [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0).
+
+1. Update Bubble Card to 3.4 or later and Navbar Card to 1.8.0 or later.
+2. Update Origami in HACS and run `frontend.reload_themes`, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` and `shadow-sheet` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
+3. Update the modules. In the editor of any Bubble card, open **Modules**, then **My Modules**, and paste each module's new version from [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) over its old one. Delete Light and Speaker Select there, because 3.0 has no such modules. For modules in `/config/bubble_card/modules`, copy the folder again and delete `origami_light.yaml` and `origami_speaker.yaml`.
+4. Take `origami_light` and `origami_speaker` out of the cards. Give light cards `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`, because no module writes their state line anymore.
+
+<details>
+<summary><b>Changes on existing cards</b></summary>
+
+<br>
+
+Every module changed, and some options were renamed or work differently. Most cards look right without edits, and the [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) lists every option.
+
+- Base is a global module. Bubble Card runs it first on every card with an Origami module, so no card has to list it. A card that uses Base's options without another Origami module keeps `origami_base` in its list.
+- A card with only Base shows a state line only with `state_content`. Add `state_content: state` where a card should show its state.
+- `animate` moved from `origami_button` to `origami_base`. The old place still works.
+- Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. Such a card with Base alone looks like a plain Bubble card.
+- The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`.
+- On media cards, `art_entity` and `app_entity` still work. New cards use `layout: tv` with both entities in `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` from `origami_base` to `origami_media`. The old places still work.
+- Media keeps the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
+- Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.
+- Media takes groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`.
+- Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
+- Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
+- In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.
+- In Popup, `subtitle_style` is now `value_style`, and the old name still works. Pop-ups with `performance_mode: performance` or their own `backdrop_blur` no longer blur the backdrop.
+- Tile pictures fill their icon. To zoom in as before, add `image_size: 230%` to the tile.
+- Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. To keep the color on a tile with a number or a temperature, give it a `color` under its `origami_tiles` key.
+
+</details>
+
+<details>
+<summary><b>Moving to the new parts</b></summary>
+
+<br>
+
+Each part in the README takes the place of its 2.0 cards on its own, and the old cards keep working until then.
+
+- The room cards come from [Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms) and the climate table from [Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table).
+- The TV pop-up comes from [TV](https://github.com/hazymorning/origami/tree/main/dashboard/tv). Bubble Card can't repeat an action, so holding an arrow button sends its command only once.
+- The menu's `.sheet` rule in its `css` and its server card come from [Menu](https://github.com/hazymorning/origami/tree/main/dashboard/menu).
+- For speaker rows, the [music pop-up](https://github.com/hazymorning/origami/tree/main/dashboard/music) picks a speaker with a dropdown and groups speakers in a list.
+- The new parts need no package. Once no card uses the 2.0 package's helpers and sensors, its file can go.
+
+</details>
+
+<details>
+<summary><b>Every change</b></summary>
+
+<br>
+
+#### New
 
 #### All modules
 
@@ -161,7 +224,7 @@ These changes are in the `next` branch and come with the next release.
 - The favorites list ends with slim rows for the calendar, the shopping list, the map and the server, each with a value at its end, such as the next event.
 - In the room pop-ups, the light card's arrow to the lamps stands beside its slider, as in the lights pop-up, and the bathroom has the same light card as the living room, with its two lamps and its scenes. Only the living room's lights header opens the lights pop-up. The bathroom's opens the light group's dialog, which lists each lamp.
 
-### Bug fixes
+#### Bug fixes
 
 - An open dropdown with an icon and no name, such as a key that picks a source, no longer shows Bubble Card's ring in the accent color.
 - The icons in a dropdown's menu are as large as in a slim list, and the space around them is even.
@@ -205,44 +268,7 @@ These changes are in the `next` branch and come with the next release.
 - Button cards follow Base's `sub_button_height` and `sub_button_text_size`.
 - A button that shows only its icon is a square in every Button style.
 
-### Upgrading
-
-A 2.0 dashboard keeps working after the first four steps, so the new parts can take its place one at a time. Anyone who stays on 2.0 finds its package, dashboard and README in the [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0).
-
-1. Update Bubble Card to 3.4 or later and Navbar Card to 1.8.0 or later.
-2. Update Origami in HACS and run `frontend.reload_themes`, so cards and icons get their new shadows. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` and `shadow-sheet` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
-3. Update the modules. In the editor of any Bubble card, open **Modules**, then **My Modules**, and paste each module's new version from [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) over its old one. Delete Light and Speaker Select there, because 3.0 has no such modules. For modules in `/config/bubble_card/modules`, copy the folder again and delete `origami_light.yaml` and `origami_speaker.yaml`.
-4. Take `origami_light` and `origami_speaker` out of the cards. Give light cards `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`, because no module writes their state line anymore.
-
-#### Changes on existing cards
-
-Every module changed, and some options were renamed or work differently. Most cards look right without edits, and the [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) lists every option.
-
-- Base is a global module. Bubble Card runs it first on every card with an Origami module, so no card has to list it. A card that uses Base's options without another Origami module keeps `origami_base` in its list.
-- A card with only Base shows a state line only with `state_content`. Add `state_content: state` where a card should show its state.
-- `animate` moved from `origami_button` to `origami_base`. The old place still works.
-- Base no longer styles the sub-buttons of separator and sub-buttons cards, because Header, Tiles and Button draw those cards. Such a card with Base alone looks like a plain Bubble card.
-- The cards show Home Assistant's words, so some words change, such as Nicht verfügbar instead of Fehler on a German thermostat. To keep a word, add it to Base's `words` option on that card, such as `idle: Auto`.
-- On media cards, `art_entity` and `app_entity` still work. New cards use `layout: tv` with both entities in `players`. `compact` moved from `origami_media` to `origami_base`, and `solid_controls` from `origami_base` to `origami_media`. The old places still work.
-- Media keeps the card's own icon, or Home Assistant's icon for the state, unless `icons` sets one. For the old icons, add `icons` with `'off': mdi:speaker-off`, `playing: mdi:speaker-pause`, `bluetooth: mdi:speaker-bluetooth` and `tv: mdi:television-speaker`. A tap on a Media card's icon opens the more-info dialog. To turn that off, give the card `tap_action` with `action: none`.
-- Media no longer shortens speaker names. The title line shows the card's `name`, or the speaker's name in Home Assistant. A TV input shows the source's own name, such as Optical In, and `words` can rename it.
-- Media takes groups from `group_members` and covers from the speaker's own picture instead of the LinkPlay sensors. For groups that `group_members` does not report, set `leader` to a template that returns the leader's entity ID while the speaker is in a group. For covers that the speaker does not report, set `art` to a template that returns the cover's address. A Music Assistant player that belongs to a speaker goes into `players`.
-- Fan speed buttons no longer depend on their position. Each one needs a `percentage` in its tap action's data, as before.
-- Climate shows Home Assistant's icons for the actions on cards without an icon of their own. For radiators, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
-- In Header, `color` now colors only the icon. Add `name_color` with the same value where the text should keep that color. The default `icon_size` is now `var(--icon-size-xs)`. For the old size, add `icon_size: var(--dot-size)` to every header without its own `icon_size`.
-- In Popup, `subtitle_style` is now `value_style`, and the old name still works. Pop-ups with `performance_mode: performance` or their own `backdrop_blur` no longer blur the backdrop.
-- Tile pictures fill their icon. To zoom in as before, add `image_size: 230%` to the tile.
-- Tiles take a state color only while their entity is on and its domain has a state color in Home Assistant. To keep the color on a tile with a number or a temperature, give it a `color` under its `origami_tiles` key.
-
-#### Moving to the new parts
-
-Each part in the README takes the place of its 2.0 cards on its own, and the old cards keep working until then.
-
-- The room cards come from [Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms) and the climate table from [Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table).
-- The TV pop-up comes from [TV](https://github.com/hazymorning/origami/tree/main/dashboard/tv). Bubble Card can't repeat an action, so holding an arrow button sends its command only once.
-- The menu's `.sheet` rule in its `css` and its server card come from [Menu](https://github.com/hazymorning/origami/tree/main/dashboard/menu).
-- For speaker rows, the [music pop-up](https://github.com/hazymorning/origami/tree/main/dashboard/music) picks a speaker with a dropdown and groups speakers in a list.
-- The new parts need no package. Once no card uses the 2.0 package's helpers and sensors, its file can go.
+</details>
 
 ## 2.0 · The Unfolding
 
