@@ -176,6 +176,15 @@ Cleaning for the whole home or just one room. [More](dashboard/vacuum/)
 ## More
 
 <details>
+<summary><b>Coming from 2.0</b></summary>
+
+<br>
+
+A 2.0 dashboard keeps working with 3.0 after four short steps, so the new parts can take its place one at a time. The [changelog](CHANGELOG.md#upgrading) has the steps and what changed on existing cards.
+
+</details>
+
+<details>
 <summary><b>Change the colors</b></summary>
 
 <br>

@@ -94,6 +94,7 @@ An update must keep every dashboard working that worked with the release before,
 
 - Before modules go to the user or to `next`, take screenshots of the user's own unchanged cards with the bench's `shot` mode and check them, not only the cards that were converted for the new version.
 - A change that needs new YAML on existing cards needs a fallback in the modules. If no fallback is possible, it waits for a major release, and the changelog's upgrade steps describe it.
+- HACS updates the theme on its own, before the new modules and cards are copied. So the theme keeps every variable that the last release's cards and modules read, and they go only in the major release after. `compare.mjs` with the last release as `--ref`, run in a worktree that has the last release's modules and the new theme, shows what a HACS update alone changes.
 - Base is a global module (`is_global: true`), because every other module needs it. Bubble Card runs it first on every card, so no card has to list it. Base must stay global, and it must keep doing nothing on cards without an Origami module.
 - A module that needs Base checks `card._org.version` and fails with a clear message. Such a failure is a bug in the update, not something to fix in the user's cards.
 

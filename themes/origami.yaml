@@ -236,6 +236,15 @@ Origami:
   # The chosen option in a dropdown's menu has a quiet fill
   bubble-select-list-item-accent-color: 'var(--fill-subtle)'
 
+  # Kept for cards and modules from 2.0, because HACS updates the theme before the modules and cards are copied again.
+  # Nothing in 3.0 reads them, and they can go in 4.0.
+  card-padding: 'var(--ha-space-3, 12px)'
+  control-padding-x: 'var(--ha-space-4, 16px)'
+  font-size-headline: 'var(--ha-font-size-3xl, 28px)'
+  font-size-compact: 'var(--ha-font-size-s)'
+  lamp-tint: 'color-mix(in srgb, var(--lamp-color) var(--tint-strength), var(--ha-card-background))'
+  scroller-mask: 'linear-gradient(to right, transparent 0px, black var(--scroller-bleed), black calc(100% - var(--ha-space-12, 48px)), transparent 100%)'
+
   modes:
 
     light:

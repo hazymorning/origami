@@ -43,7 +43,7 @@ const defaults = {
   'state-climate-heat-color': 'var(--deep-orange-color)', 'state-climate-cool-color': 'var(--blue-color)',
   'state-fan-active-color': 'var(--cyan-color)', 'state-media_player-active-color': 'var(--light-blue-color)',
   'state-inactive-color': 'var(--grey-color)', 'ha-font-size-2xl': '24px', 'ha-font-size-3xl': '28px',
-  'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%'
+  'ha-border-radius-pill': '9999px', 'ha-border-radius-circle': '50%', 'state-light-active-color': 'var(--amber-color)'
 };
 const vars = (o) => Object.entries(o).map(([k, v]) => `--${k}: ${v};`).join('\n');
 
