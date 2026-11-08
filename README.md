@@ -122,7 +122,7 @@ Not really needed, but nice to have: a menu that slides down from the top and tr
 
 ### Room
 
-<img width="800" alt="The living room pop-up with the speaker or the TV, the lights and the climate, and with its scenes open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room.webp">
+<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up.webp">
 
 Everything for one room in one place. [More](dashboard/room/)
 

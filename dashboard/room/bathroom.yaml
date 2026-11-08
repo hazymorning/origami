@@ -11,6 +11,75 @@ margin_top_desktop: 30%
 modules:
   - origami_base
   - origami_popup
+origami_popup:
+  mini_popups:
+    # The arrow beside All's slider opens a row for each lamp. Moving a slider to the start turns the lamp off.
+    lamps:
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_slider
+        sub_button:
+          main: []
+          bottom:
+            - entity: light.bathroom_mirror
+              name: Mirror
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+            - entity: light.bathroom_night_light
+              name: Night light
+              sub_button_type: slider
+              always_visible: true
+              allow_light_slider_to_0: true
+    # The palette on All opens the scenes. The one turned on last is highlighted until the lamps are turned off.
+    scenes:
+      width: fit-content
+      frameless: true
+      cards:
+        - type: custom:bubble-card
+          card_type: sub-buttons
+          modules:
+            - origami_base
+            - origami_button
+          origami_button:
+            columns: 1
+            icon_size: var(--icon-size-xs)
+            active: >-
+              ${(() => {
+                const lamps = hass.states['light.bathroom'];
+                const since = lamps?.state === 'on' ? Date.parse(lamps.last_changed) - 10000 : Infinity;
+                return ['scene.bathroom_bright', 'scene.bathroom_bath', 'scene.bathroom_night']
+                  .filter((id) => Date.parse(states(id)) >= since)
+                  .sort((a, b) => Date.parse(states(b)) - Date.parse(states(a)))[0] ?? '';
+              })()}
+          sub_button:
+            main: []
+            bottom:
+              - name: Bright
+                icon: mdi:white-balance-sunny
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.bathroom_bright
+              - name: Bath
+                icon: mdi:bathtub-outline
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.bathroom_bath
+              - name: Night
+                icon: mdi:weather-night
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: scene.turn_on
+                  target:
+                    entity_id: scene.bathroom_night
 cards:
   - type: vertical-stack
     cards:
@@ -75,7 +144,7 @@ cards:
               always_visible: true
         rows: '2.2'
 
-      # Lights: with only a few lamps, each one has its own row and no group is needed
+      # Lights: the header counts the lamps of the group that are on, and All switches them together
       - type: vertical-stack
         cards:
           - type: custom:bubble-card
@@ -89,52 +158,54 @@ cards:
               icon_size: var(--icon-size-s)
             sub_button:
               main:
-                # Counts the lamps in the list that are on
-                - icon: mdi:chevron-right
+                - entity: light.bathroom
+                  icon: mdi:chevron-right
                   show_name: true
                   content_layout: icon-right
                   show_background: false
                   origami_header:
                     name: >-
                       ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
-                      states(id) === 'on').length))(['light.bathroom_mirror', 'light.bathroom_night_light'])}
+                      states(id) === 'on').length))(attr.entity_id ?? [])}
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_lights'
+          # All has keys for the scenes and the power, and a slider for the brightness with the arrow to the lamps beside it, as in the lights pop-up
           - type: custom:bubble-card
             card_type: button
             button_type: switch
-            entity: light.bathroom_mirror
-            name: Mirror
-            icon: mdi:mirror-rectangle
+            entity: light.bathroom
+            name: All
+            icon: mdi:lightbulb-multiple
             modules:
               - origami_base
-            origami_base:
-              compact: true
-              tile: true
+            button_action:
+              tap_action:
+                action: more-info
             sub_button:
+              bottom_layout: rows
               main:
-                - sub_button_type: slider
-                  always_visible: true
-                  allow_light_slider_to_0: true
-            rows: 1
-          - type: custom:bubble-card
-            card_type: button
-            button_type: switch
-            entity: light.bathroom_night_light
-            name: Night light
-            icon: mdi:lightbulb-night-outline
-            modules:
-              - origami_base
-            origami_base:
-              compact: true
-              tile: true
-            sub_button:
-              main:
-                - sub_button_type: slider
-                  always_visible: true
-                  allow_light_slider_to_0: true
-            rows: 1
+                - icon: mdi:palette-outline
+                  tap_action:
+                    action: fire-dom-event
+                    mini_popup: scenes
+                - icon: mdi:power
+                  show_background: true
+                  tap_action:
+                    action: toggle
+              bottom:
+                - name: All lamps
+                  group:
+                    - sub_button_type: slider
+                      always_visible: true
+                    - icon: mdi:chevron-down
+                      fill_width: false
+                      show_background: true
+                      tap_action:
+                        action: fire-dom-event
+                        mini_popup: lamps
+            state_content: state
+            rows: auto
           # Bath time is a Toggle helper for an automation, such as one that dims the lamps. Only the switch turns it on or off.
           - type: custom:bubble-card
             card_type: button
@@ -252,5 +323,4 @@ cards:
                 perform_action: homeassistant.turn_off
                 target:
                   entity_id:
-                    - light.bathroom_mirror
-                    - light.bathroom_night_light
+                    - light.bathroom

@@ -13,7 +13,7 @@ modules:
   - origami_popup
 origami_popup:
   mini_popups:
-    # The arrow on All opens a row for each lamp. Moving a slider to the start turns the lamp off.
+    # The arrow beside All's slider opens a row for each lamp. Moving a slider to the start turns the lamp off.
     lamps:
       - type: custom:bubble-card
         card_type: sub-buttons
@@ -261,7 +261,7 @@ cards:
                   tap_action:
                     action: navigate
                     navigation_path: '#popup_lights'
-          # All has a slider for the brightness at the bottom, as the speaker card has, and keys for the scenes and the lamps
+          # All has keys for the scenes and the power, and a slider for the brightness with the arrow to the lamps beside it, as in the lights pop-up
           - type: custom:bubble-card
             card_type: button
             button_type: switch
@@ -274,24 +274,29 @@ cards:
               tap_action:
                 action: more-info
             sub_button:
+              bottom_layout: rows
               main:
                 - icon: mdi:palette-outline
                   tap_action:
                     action: fire-dom-event
                     mini_popup: scenes
-                - icon: mdi:chevron-down
-                  tap_action:
-                    action: fire-dom-event
-                    mini_popup: lamps
                 - icon: mdi:power
                   show_background: true
                   tap_action:
                     action: toggle
               bottom:
-                - sub_button_type: slider
-                  always_visible: true
+                - name: All lamps
+                  group:
+                    - sub_button_type: slider
+                      always_visible: true
+                    - icon: mdi:chevron-down
+                      fill_width: false
+                      show_background: true
+                      tap_action:
+                        action: fire-dom-event
+                        mini_popup: lamps
             state_content: state
-            rows: '2.2'
+            rows: auto
 
       # Climate: the header shows the temperature and the humidity, with a dot in a color for the temperature
       - type: vertical-stack
