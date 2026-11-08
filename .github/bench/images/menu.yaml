@@ -1,4 +1,6 @@
 kind: phone
+# The menu opens at the top, so the image ends a little below it, flush with the phone's cut
+cut: 400
 home: true
 preview: true
 admin: true

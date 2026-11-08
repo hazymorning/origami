@@ -92,7 +92,7 @@
   (sc.sections || []).forEach((sec, si) => {
     const id = sec.id || 's' + si;
     const wrap = document.createElement('div');
-    wrap.className = 'shot ' + (sec.bg || 'dashboard');
+    wrap.className = 'shot ' + (sec.bg || 'dashboard') + (sec.phone ? ' phone' : '');
     wrap.dataset.id = id;
     wrap.style.width = (sec.width || sc.width || 396) + 'px';
     const stack = document.createElement('div');

@@ -2,7 +2,8 @@
 //   node frame.mjs <frame.json>
 // frame.json has kind and out, and:
 //   phone: a phone for a pop-up or the menu, on a plain background a little lighter than the light page or darker than the dark one.
-//     mode, shot, font, time, bg, and cut to show only its top.
+//     mode, shot, font, time, battery, wifi (1 to 3), cell (1 to 4), bg, and cut to show only its top or bottom to show only
+//     its bottom, flush with the image's edge.
 //   panel: a card on its page, as in 2.0. shot and width.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,6 +21,9 @@ const data = (f, type) => `data:${type};base64,` + fs.readFileSync(f).toString('
 const W = 412, H = 915, BAR = 52, RADIUS = 22;
 const wifi = 'M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z';
 
+// A signal's parts that it doesn't reach are faint, as on a phone
+const part = (on) => on ? '' : ' class="off"';
+const wifiParts = wifi.split('M').filter(Boolean).map((d) => 'M' + d);
 const phone = (mode, p, cut) => `
   <div class="phone ${mode}" style="--bg:${p.bg || (mode === 'dark' ? '#181715' : '#f6f4f1')}">
     <div class="screen">
@@ -27,9 +31,9 @@ const phone = (mode, p, cut) => `
         <span class="time">${p.time || '19:30'}</span>
         <span class="cam"></span>
         <span class="sys">
-          <svg viewBox="0 0 24 24" class="wifi"><path d="${wifi}"/></svg>
-          <svg viewBox="0 0 16 12" class="cell"><rect x="0" y="8" width="2.6" height="4" rx=".8"/><rect x="4.4" y="5.5" width="2.6" height="6.5" rx=".8"/><rect x="8.8" y="3" width="2.6" height="9" rx=".8"/><rect x="13.2" y="0" width="2.6" height="12" rx=".8"/></svg>
-          <span class="battery"><span class="level">74</span><span class="tip"></span></span>
+          <svg viewBox="0 0 24 24" class="wifi"><path d="${wifiParts[0]}"/><path${part((p.wifi ?? 3) >= 3)} d="${wifiParts[1]}"/><path${part((p.wifi ?? 3) >= 2)} d="${wifiParts[2]}"/></svg>
+          <svg viewBox="0 0 16 12" class="cell"><rect x="0" y="8" width="2.6" height="4" rx=".8"/><rect${part((p.cell ?? 4) >= 2)} x="4.4" y="5.5" width="2.6" height="6.5" rx=".8"/><rect${part((p.cell ?? 4) >= 3)} x="8.8" y="3" width="2.6" height="9" rx=".8"/><rect${part((p.cell ?? 4) >= 4)} x="13.2" y="0" width="2.6" height="12" rx=".8"/></svg>
+          <span class="battery"><span class="level">${p.battery ?? 74}</span><span class="tip"></span></span>
         </span>
       </div>
       <img class="shot" src="${data(p.shot, 'image/png')}">
@@ -54,6 +58,7 @@ html, body { margin: 0; background: transparent; }
 .cam { position: absolute; left: 50%; top: 15px; width: 19px; height: 19px; margin-left: -9.5px; border-radius: 50%; background: #0b0b0b; box-shadow: inset 0 0 0 1.5px #1c1c1c; }
 .sys { position: absolute; right: 38px; top: 18px; display: flex; align-items: center; gap: 6px; }
 .sys svg { fill: currentColor; display: block; }
+.sys .off { opacity: .3; }
 .wifi { width: 17px; height: 17px; }
 .cell { width: 15px; height: 12px; }
 .battery { position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 13px; margin-right: 2px; border-radius: 4px; background: currentColor; }
@@ -75,10 +80,12 @@ img { display: block; width: ${width}px; border-radius: ${RADIUS}px; }
 } else {
   const SIDE = 100, TOP = 100;
   width = W + 2 * SIDE;
-  height = spec.cut ? TOP + spec.cut : TOP + H + TOP;
+  // A phone cut at its bottom or its top meets the image's edge there, without the margin
+  height = spec.cut ? TOP + spec.cut : spec.bottom ? spec.bottom + TOP : TOP + H + TOP;
+  const top = spec.bottom ? spec.bottom - H : TOP;
   html = `<!doctype html><html><head><style>${phoneStyle}</style></head><body>
 <div class="canvas" style="width:${width}px;height:${height}px;background:${ground[spec.mode]}">
-<div class="row" style="top:${TOP}px">${phone(spec.mode, spec, spec.cut)}</div></div></body></html>`;
+<div class="row" style="top:${top}px">${phone(spec.mode, spec, spec.cut)}</div></div></body></html>`;
 }
 
 const browser = await chromium.launch();

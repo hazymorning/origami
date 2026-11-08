@@ -1,6 +1,6 @@
 # The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows a gray midday
 # with birds over the lake and the vacuum cleaning in the notifications, dark a clear night with a bath running in the
-# notifications and the climate table open. In each, the first favorite is on and the others wait for a tap, and the vacuum never shows twice.
+# notifications and the climate table open with all six rooms. In each, the first favorite is on and the others wait for a tap, and the vacuum never shows twice.
 # The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
 seed: 27
 # The animations run for a few seconds before the shot, so birds fly across the weather card by day
@@ -78,8 +78,32 @@ states:
     state: 'on'
     attributes:
       friendly_name: String lights
+  # The climate table's three more rooms, as in its own image, so the rooms' header counts all six in both modes
+  climate.hallway: {state: heat, attributes: {friendly_name: Hall, hvac_action: idle, temperature: 19, current_temperature: 19.8}}
+  climate.kids_room: {state: heat, attributes: {friendly_name: Kids room, hvac_action: idle, temperature: 20, current_temperature: 20.3}}
+  climate.bathroom: {state: heat, attributes: {friendly_name: Bathroom, hvac_action: heating, temperature: 23, current_temperature: 22.6}}
+  sensor.hallway_temperature: {state: '19.8', attributes: {unit_of_measurement: °C, device_class: temperature}}
+  sensor.hallway_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity}}
+  sensor.kids_room_temperature: {state: '20.3', attributes: {unit_of_measurement: °C, device_class: temperature}}
+  sensor.kids_room_humidity: {state: '51', attributes: {unit_of_measurement: '%', device_class: humidity}}
+  sensor.bathroom_temperature: {state: '22.6', attributes: {unit_of_measurement: °C, device_class: temperature}}
+  sensor.bathroom_humidity: {state: '64', attributes: {unit_of_measurement: '%', device_class: humidity}}
+  binary_sensor.hallway_window: {state: 'off', attributes: {device_class: window}}
+  binary_sensor.kids_room_window: {state: 'off', attributes: {device_class: window}}
+  binary_sensor.bathroom_window: {state: 'off', attributes: {device_class: window}}
 dark:
   states:
+    # The night of the climate table's own image: the bath runs, so the bathroom is warm and its window open against the steam
+    climate.hallway: {state: heat, attributes: {friendly_name: Hall, hvac_action: idle, temperature: 18, current_temperature: 19.4}}
+    climate.kids_room: {state: heat, attributes: {friendly_name: Kids room, hvac_action: idle, temperature: 19, current_temperature: 19.6}}
+    climate.bathroom: {state: heat, attributes: {friendly_name: Bathroom, hvac_action: heating, temperature: 24, current_temperature: 24.1}}
+    sensor.hallway_temperature: {state: '19.4', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.hallway_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.kids_room_temperature: {state: '19.6', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.kids_room_humidity: {state: '53', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    sensor.bathroom_temperature: {state: '24.1', attributes: {unit_of_measurement: °C, device_class: temperature}}
+    sensor.bathroom_humidity: {state: '78', attributes: {unit_of_measurement: '%', device_class: humidity}}
+    binary_sensor.bathroom_window: {state: 'on', attributes: {device_class: window}}
     light.kitchen:
       state: 'off'
       attributes:
@@ -224,7 +248,16 @@ dark:
     - Robot
     - Printer
   - file: rooms/header.yaml
+    replace:
+      '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'
+      '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
   - file: climate-table/card.yaml
+    replace:
+      '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
+      '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'']': '[''sensor.living_room_humidity'', ''sensor.bedroom_humidity'', ''sensor.office_humidity'', ''sensor.hallway_humidity'', ''sensor.kids_room_humidity'', ''sensor.bathroom_humidity'']'
+      ? "        - entity: sensor.office_humidity\n          css_class: humidity\n"
+      : "        - entity: sensor.office_humidity\n          css_class: humidity\n    - name: Hall\n      group:\n        - entity: sensor.hallway_temperature\n          name: Hall\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.hallway_window\n          css_class: window\n        - entity: climate.hallway\n          css_class: thermostat\n        - entity: sensor.hallway_temperature\n          css_class: temperature\n        - entity: sensor.hallway_humidity\n          css_class: humidity\n    - name: Kids\n      group:\n        - entity: sensor.kids_room_temperature\n          name: Kids\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.kids_room_window\n          css_class: window\n        - entity: climate.kids_room\n          css_class: thermostat\n        - entity: sensor.kids_room_temperature\n          css_class: temperature\n        - entity: sensor.kids_room_humidity\n          css_class: humidity\n    - name:\
+        \ Bath\n      group:\n        - entity: sensor.bathroom_temperature\n          name: Bath\n          show_name: true\n          css_class: room\n        - entity: binary_sensor.bathroom_window\n          css_class: window\n        - entity: climate.bathroom\n          css_class: thermostat\n        - entity: sensor.bathroom_temperature\n          css_class: temperature\n        - entity: sensor.bathroom_humidity\n          css_class: humidity\n"
     with:
       styles: null
   - type: grid
@@ -260,6 +293,9 @@ light:
     - Bath
     - Printer
   - file: rooms/header.yaml
+    replace:
+      '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'
+      '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'']': '[''sensor.living_room_temperature'', ''sensor.bedroom_temperature'', ''sensor.office_temperature'', ''sensor.hallway_temperature'', ''sensor.kids_room_temperature'', ''sensor.bathroom_temperature'']'
   - type: grid
     columns: 2
     cards:

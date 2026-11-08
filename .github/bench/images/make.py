@@ -19,15 +19,17 @@ side by side, and has:
   home: true puts the home view behind the cards
   open: the hash of the pop-up to open
   states, entities, templates, messages, words: added to those of home.yaml, as in a bench scenario
-  time: the clock, and clock: the time in the status bar
+  time: the clock, and clock: the time in the status bar. Each image's status bar moves home.yaml's clock by a few minutes and
+    has its own battery, Wi-Fi and signal, so no two look the same. An image's own clock, battery, wifi (1 to 3) or cell (1 to 4)
+    sets one exactly.
   click, preview, admin, scale, seed, advance: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
-  cut: a phone shows only this many px from its top
+  cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
 """
-import json, os, re, shutil, subprocess, sys, urllib.request
+import json, os, random, re, shutil, subprocess, sys, urllib.request
 import yaml
 from PIL import Image
 
@@ -131,6 +133,24 @@ def save(im, dest, rgb):
     print(f'{os.path.basename(dest)}: {im.width} × {im.height}, {os.path.getsize(dest) // 1024} KB')
 
 
+def status(name, mode, spec, keys):
+    """The status bar of one image in one mode: the example home's clock a few minutes off, and a battery and a signal of its own"""
+    own = {**spec, **(spec.get(mode) or {})}
+    r = random.Random(f'{name}-{mode}')
+    h, m = map(int, keys.get('clock', '19:30').split(':'))
+    t = (h * 60 + m + r.randint(-24, 24)) % 1440
+    out = {
+        'time': f'{t // 60}:{t % 60:02d}',
+        'battery': r.randint(46, 97) if mode == 'light' else r.randint(17, 64),
+        'wifi': r.choice([3, 3, 2, 2, 1]),
+        'cell': r.choice([4, 3, 3, 2]),
+    }
+    if 'clock' in own:
+        out['time'] = own['clock']
+    out.update({k: own[k] for k in ('battery', 'wifi', 'cell') if k in own})
+    return out
+
+
 def frame(spec, work):
     with open(os.path.join(work, 'frame.json'), 'w') as f:
         json.dump(spec, f)
@@ -165,7 +185,8 @@ def make(name):
             'templates': keys.get('templates', []),
             'resources': [n for n in CARDS if n.endswith('.js') and n not in CHUNKS],
             'viewport': PHONE if phone_page else {'width': 1200, 'height': 2400},
-            'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards}],
+            # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
+            'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
         }
         for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
             if k in keys:
@@ -182,9 +203,10 @@ def make(name):
             # The status bar has the color of the screen's top edge, and the top row, such as a menu's edge, sits behind it
             out['bg'] = '#%02x%02x%02x' % im.getpixel((20, 2))
             im.paste(im.crop((0, 2, im.width, 3)).resize((im.width, 2)), (0, 0))
-            out['time'] = keys.get('clock', '19:30')
-            if 'cut' in keys:
-                out['cut'] = keys['cut']
+            out.update(status(name, mode, spec, keys))
+            for k in ('cut', 'bottom'):
+                if k in keys:
+                    out[k] = keys[k]
         else:
             if 'bottom' in keys:
                 im = im.crop((0, im.height - keys['bottom'] * 2, im.width, im.height))

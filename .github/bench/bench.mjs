@@ -249,6 +249,9 @@ ${vars(rgb({ ...theme, ...themeModes[mode] }))}
 html, body { margin: 0; background: var(--dashboard-background); color: var(--primary-text-color); font-family: var(--ha-font-family-body); }
 .shot { box-sizing: border-box; padding: 16px; background: var(--dashboard-background); }
 .shot.popup { background: var(--popup-background); }
+/* A phone page is a sections view on a narrow screen. Home Assistant pads its top and bottom with the view's padding and the row gap,
+   and its sides with the narrow column gap, which the theme sets to 24 px, so the cards line up with the navigation bar's player. */
+.shot.phone { padding: calc(var(--view-container-padding-top, 0px) + var(--ha-view-sections-row-gap, 24px)) var(--ha-view-sections-narrow-column-gap, 8px) calc(var(--view-container-padding-bottom, 0px) + var(--ha-view-sections-row-gap, 24px)) var(--ha-view-sections-narrow-column-gap, 8px); }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 </style>
 <script src="/mdi.js"></script>

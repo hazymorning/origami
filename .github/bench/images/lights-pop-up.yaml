@@ -1,5 +1,7 @@
 # Midday: the Morning scene left on one lamp. Late evening: the Late scene on three dimmed lamps.
 kind: phone
+# The pop-up rises from the bottom, so the image starts a little above it, flush with the phone's cut
+bottom: 590
 home: true
 open: '#popup_lights'
 cards:
