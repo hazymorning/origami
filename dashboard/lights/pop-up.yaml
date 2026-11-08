@@ -60,7 +60,7 @@ sub_button:
 cards:
   - type: vertical-stack
     cards:
-      # How many of the lamps are on as the title, since when below it, a power button and a slider for all lamps.
+      # How many of the lamps are on as the title, since when below it, a power key and a slider for all lamps.
       # The key after the slider opens a row for each lamp.
       - type: custom:bubble-card
         card_type: button
@@ -84,11 +84,63 @@ cards:
         rows: auto
         sub_button:
           bottom_layout: rows
+          # While a lamp is on, the power key turns off every light in the home. While all are off, it turns on the scene
+          # for the time of day, the one the scenes below start with. Each is a key of its own, and only one of them shows.
           main:
             - icon: mdi:power
               show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') !== 'on'}
               tap_action:
-                action: toggle
+                action: perform-action
+                perform_action: light.turn_off
+                target:
+                  entity_id: all
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h >= 5 && h < 23)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_night
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 5 || h >= 17)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_morning
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 17 || h >= 19)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_dinner
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 19 || h >= 21)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_evening
+            - icon: mdi:power
+              show_background: true
+              origami_base:
+                hidden: ${states('light.living_room') === 'on' || (h => h < 21 || h >= 23)(new Date().getHours())}
+              tap_action:
+                action: perform-action
+                perform_action: scene.turn_on
+                target:
+                  entity_id: scene.living_room_late
           bottom:
             - name: All lamps
               group:

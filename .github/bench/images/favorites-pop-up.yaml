@@ -5,11 +5,15 @@ cards:
   - {file: favorites-list/pop-up.yaml}
 states:
   media_player.living_room_tv: {state: 'off', attributes: {friendly_name: TV, source_list: [Netflix, YouTube, HDMI 1]}}
+  todo.shopping_list: {state: '3', attributes: {friendly_name: Shopping list}}
+  zone.home: {state: '1', attributes: {friendly_name: Home}}
 light:
   states:
     vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, icon: 'mdi:robot-vacuum', battery_level: 64}}
 dark:
   states:
+    todo.shopping_list: {state: '1', attributes: {friendly_name: Shopping list}}
+    zone.home: {state: '2', attributes: {friendly_name: Home}}
     media_player.living_room_tv: {state: 'on', attributes: {friendly_name: TV, source: Netflix, source_list: [Netflix, YouTube, HDMI 1]}}
     fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: false, preset_mode: Nature, preset_modes: [Nature, Normal]}}
     sensor.robot_cleaning_progress: {state: '100', attributes: {unit_of_measurement: '%'}}

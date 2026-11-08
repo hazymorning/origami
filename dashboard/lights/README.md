@@ -2,7 +2,7 @@
 
 <img width="800" alt="The lights pop-up with how many lamps are on, the slider for all lamps and the scenes with their colors and brightness, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
-All lamps of a room at once or each one on its own, and the room's scenes.
+The home's main light control. Its power key turns on the scene for the time of day while all lamps are off, and turns off every light in the home while one is on. Below it, all lamps at once or each one on its own, and the scenes.
 
 ## Requirements
 
@@ -17,7 +17,7 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 
 ## Optional
 
-- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small dot before its brightness marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active`. Without scenes, delete the card with the scenes.
+- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small dot before its brightness marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active` and in the power keys. Without scenes, delete the card with the scenes and every power key but the first, and give that one `tap_action: action: toggle` instead of its `hidden` and its tap action.
 
 > [!TIP]
 > A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45 %`, written as the slider writes it. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.
@@ -28,4 +28,4 @@ All lamps of a room at once or each one on its own, and the room's scenes.
 | --- | --- |
 | `light.living_room` | The light group: how many lamps are on and since when, the power button and the slider for all lamps |
 | `light.living_room_floor_lamp`, `light.living_room_string_lights`, `light.living_room_tv`, `light.living_room_table_lamp`, `light.living_room_ceiling` | A row for each lamp |
-| `scene.living_room_night`, `scene.living_room_morning`, `scene.living_room_dinner`, `scene.living_room_evening`, `scene.living_room_movie`, `scene.living_room_late` | The scene buttons |
+| `scene.living_room_night`, `scene.living_room_morning`, `scene.living_room_dinner`, `scene.living_room_evening`, `scene.living_room_movie`, `scene.living_room_late` | The scene buttons, and the scene for the time of day that the power key turns on |

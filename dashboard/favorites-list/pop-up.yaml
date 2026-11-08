@@ -10,7 +10,7 @@ popup_mode: adaptive-dialog
 scrolling_effect: false
 with_bottom_offset: true
 margin: 7px
-margin_top_mobile: 174px
+margin_top_mobile: 22px
 margin_top_desktop: 30%
 width_desktop: ''
 modules:
@@ -103,6 +103,8 @@ cards:
         modules:
           - origami_base
           - origami_header
+      # Other places, in slim rows with a value at their end, as in the server pop-up: the next event, the open items
+      # of the shopping list and who is home come from Home Assistant's own calendar, to-do list and home zone
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
@@ -110,9 +112,35 @@ cards:
           - origami_tiles
         origami_tiles:
           layout: list
-          sign: open
+          slim: true
+          dividers: true
         sub_button:
           bottom:
+            - entity: calendar.household
+              name: Calendar
+              icon: mdi:calendar-month-outline
+              origami_tiles:
+                state: ${attr.message ?? ''}
+              tap_action:
+                action: navigate
+                navigation_path: /calendar
+            - entity: todo.shopping_list
+              name: Shopping list
+              icon: mdi:cart-outline
+              origami_tiles:
+                state: >-
+                  ${state === '1' ? '1 item' : state + ' items'}
+              tap_action:
+                action: navigate
+                navigation_path: /todo?entity_id=todo.shopping_list
+            - entity: zone.home
+              name: Map
+              icon: mdi:map-outline
+              origami_tiles:
+                state: ${state} at home
+              tap_action:
+                action: navigate
+                navigation_path: /map
             - name: Server
               icon: mdi:server
               origami_tiles:

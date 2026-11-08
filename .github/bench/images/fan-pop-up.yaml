@@ -1,6 +1,8 @@
-# Midday: medium speed and the Normal preset. Late evening: low speed, the Breeze preset and oscillation, with the timer
-# mini pop-up open from the timer key in the title.
+# Midday: medium speed and the Normal preset. Late evening: low speed, the Nature preset and oscillation, with the timer
+# running, so its key in the title stands out.
 kind: phone
+# The pop-up rises from the bottom, so the image starts a little above it, flush with the phone's cut
+bottom: 500
 home: true
 open: '#popup_fan'
 cards:
@@ -16,4 +18,3 @@ dark:
   templates:
     - {match: "'Low' if p", result: Low}
     - {match: "state_attr(entity, 'percentage')", result: 33%}
-  click: ['ha-icon[icon="mdi:timer-outline"] >> nth=0']

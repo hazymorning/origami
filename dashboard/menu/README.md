@@ -2,10 +2,10 @@
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
-A menu in place of Home Assistant's header, with shortcuts and a small card for the server. Unlike other ways of hiding the header, it doesn't flash up while the page loads.
+Hides Home Assistant's header for good, without a flash while a dashboard loads, and adds a menu that slides down, if wanted, with shortcuts for the admin and a small card for the server.
 
 > [!NOTE]
-> Home Assistant still has no proper way to hide its header, and other ways let it show up for a moment each time a dashboard opens. The Origami Header card avoids that by hooking into the dashboard's own code, so it's a bit experimental, and a Home Assistant update can break it until the card is updated.
+> Home Assistant still has no proper way to hide its header. Kiosk mode and similar ways lay CSS over it, so the header flashes up each time a dashboard opens. The Origami Header card came out of years of frustration with that flash. It isn't the official way, but it works inside the dashboard itself, and no other way hides the header this cleanly.
 
 ## Requirements
 

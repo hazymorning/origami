@@ -105,7 +105,7 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 The start page, from the greeting down to the navigation bar:
 
-- **[Greeting and notifications](dashboard/greeting/).** Greeting and info on the left, and a notification island on the right for everything happening now.
+- **[Greeting and notifications](dashboard/greeting/).** Greeting and info on the left, and a notification island on the right.
 - **[Weather](dashboard/weather/).** The weather at a glance, as a little paper landscape or in one of two other looks.
 - **[Favorites](dashboard/favorites/).** Quick access to favorites, and to whatever is running right now.
 - **[Rooms](dashboard/rooms/).** How each room is doing, and the way into its pop-up.
@@ -116,7 +116,7 @@ The start page, from the greeting down to the navigation bar:
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
-Not really needed, but nice to have: a menu in place of Home Assistant's header, with the server's health and the tools for changing the dashboard. [More](dashboard/menu/)
+Truly hides Home Assistant's header and, if wanted, adds a menu that slides down with shortcuts for the admin. It uses the Origami Header card, because Home Assistant still has no proper way to hide its header. [More](dashboard/menu/)
 
 ## Pop-ups
 
@@ -130,7 +130,7 @@ Everything for one room in one place. [More](dashboard/room/)
 
 <img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
-Every light in the home, from a scene for all of them down to a single lamp. [More](dashboard/lights/)
+The home's main light control: its power key turns on the scene for the time of day or turns off every light, and each lamp and scene is a tap away. [More](dashboard/lights/)
 
 ### Music
 
@@ -146,7 +146,7 @@ The TV's remote on the phone, with its apps one tap away. [More](dashboard/tv/)
 
 ### Fan
 
-<img width="800" alt="The fan pop-up, and with its timer open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
+<img width="800" alt="The fan pop-up at medium speed, and at low speed with the Nature preset, oscillation and its timer running, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
 A fan's controls, with a timer that turns it off later. [More](dashboard/fan/)
 
