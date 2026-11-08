@@ -235,7 +235,8 @@ cards:
                     action: toggle
             rows: 1
 
-      # Lights: the header counts the lamps of the group that are on, and All switches them together
+      # Lights: the header counts the lamps of the group that are on, and a tap opens the lights pop-up. Only the living room
+      # links there, and every other room opens its light group's dialog. All switches the lamps together
       - type: vertical-stack
         cards:
           - type: custom:bubble-card

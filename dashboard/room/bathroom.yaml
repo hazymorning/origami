@@ -144,7 +144,8 @@ cards:
               always_visible: true
         rows: '2.2'
 
-      # Lights: the header counts the lamps of the group that are on, and All switches them together
+      # Lights: the header counts the lamps of the group that are on, and a tap opens the group's dialog with each lamp.
+      # All switches them together
       - type: vertical-stack
         cards:
           - type: custom:bubble-card
@@ -159,17 +160,15 @@ cards:
             sub_button:
               main:
                 - entity: light.bathroom
-                  icon: mdi:chevron-right
+                  show_icon: false
                   show_name: true
-                  content_layout: icon-right
                   show_background: false
                   origami_header:
                     name: >-
                       ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
                       states(id) === 'on').length))(attr.entity_id ?? [])}
                   tap_action:
-                    action: navigate
-                    navigation_path: '#popup_lights'
+                    action: more-info
           # All has keys for the scenes and the power, and a slider for the brightness with the arrow to the lamps beside it, as in the lights pop-up
           - type: custom:bubble-card
             card_type: button

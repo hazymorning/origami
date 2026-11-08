@@ -105,18 +105,18 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 The start page, from the greeting down to the navigation bar:
 
-- **[Greeting and notifications](dashboard/greeting/).** The next event and what needs attention. Needs the Origami Notifications card.
-- **[Weather](dashboard/weather/).** A little paper landscape for each kind of weather, and two more ways to show it. Needs the Origami Weather card.
-- **[Favorites](dashboard/favorites/).** Shortcuts that come and go with what's happening, as a row for a phone or a grid for a larger screen.
-- **[Rooms](dashboard/rooms/).** Each room's climate and lights at a glance.
-- **[Climate table](dashboard/climate-table/).** Every room's climate in one table.
-- **[Navigation bar](dashboard/navigation-bar/).** The most used pop-ups within thumb's reach. Needs Navbar Card.
+- **[Greeting and notifications](dashboard/greeting/).** Greeting and info on the left, and a notification island on the right for everything happening now.
+- **[Weather](dashboard/weather/).** The weather at a glance, as a little paper landscape or in one of two other looks.
+- **[Favorites](dashboard/favorites/).** Quick access to favorites, and to whatever is running right now.
+- **[Rooms](dashboard/rooms/).** How each room is doing, and the way into its pop-up.
+- **[Climate table](dashboard/climate-table/).** All rooms side by side, to see at once where it's too warm, too cold or a window is open.
+- **[Navigation bar](dashboard/navigation-bar/).** The most used pop-ups within thumb's reach, with the music that's playing just above.
 
 ### Menu
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
-Not really needed, but nice to have: a menu that slides down from the top and truly hides Home Assistant's header, without it flashing up while the page loads. Needs the Origami Header card. [More](dashboard/menu/)
+Not really needed, but nice to have: a menu in place of Home Assistant's header, with the server's health and the tools for changing the dashboard. [More](dashboard/menu/)
 
 ## Pop-ups
 
@@ -130,25 +130,25 @@ Everything for one room in one place. [More](dashboard/room/)
 
 <img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
-All the lights, from scenes down to each lamp. [More](dashboard/lights/)
+Every light in the home, from a scene for all of them down to a single lamp. [More](dashboard/lights/)
 
 ### Music
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and with its group open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/music-pop-up.webp">
 
-Music, speaker groups and volume. [More](dashboard/music/)
+Music in every room from one place, with speakers grouped as needed. [More](dashboard/music/)
 
 ### TV
 
 <img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up.webp">
 
-Remote, apps and volume for the TV. [More](dashboard/tv/)
+The TV's remote on the phone, with its apps one tap away. [More](dashboard/tv/)
 
 ### Fan
 
 <img width="800" alt="The fan pop-up, and with its timer open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
-A fan's speed, mode and timer. [More](dashboard/fan/)
+A fan's controls, with a timer that turns it off later. [More](dashboard/fan/)
 
 ### Favorites list
 
@@ -160,13 +160,13 @@ Quick access to favorites: other pop-ups, devices, anything really. [More](dashb
 
 <img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
-The server's health, backups and updates. The graph needs Plotly Graph Card. [More](dashboard/server/)
+A look at the server's health, backups and updates. [More](dashboard/server/)
 
 ### Vacuum
 
 <img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
-The vacuum, for the whole home or room by room. [More](dashboard/vacuum/)
+Cleaning for the whole home or just one room. [More](dashboard/vacuum/)
 
 ## More
 
