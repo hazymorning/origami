@@ -26,6 +26,7 @@ A 2.0 dashboard keeps working with 3.0. It needs the new modules and a small cha
      - brightness
    ```
 
+<a name="moving-to-the-new-parts"></a>
 <details>
 <summary><b>Moving to the new parts</b></summary>
 
@@ -74,6 +75,7 @@ With the new modules, some 2.0 cards look a little different. This is what chang
 
 </details>
 
+<a name="every-change"></a>
 <details>
 <summary><b>Every change</b></summary>
 
