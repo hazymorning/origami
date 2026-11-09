@@ -22,7 +22,7 @@ A little paper landscape for each kind of weather, the one layout made for Origa
 
 <br>
 
-The diorama is a set of pictures, one for each kind of weather in light and dark mode, named after the weather, such as `rainy.webp`. Any other place works the same way, such as a beach, a city or a house. The card loads the pictures from [`diorama`](diorama) in this repository, so a home needs no files of its own. Pictures of one's own go into the `www` folder of Home Assistant's configuration, and `weather_image_path` and `weather_image_path_dark` then point to `/local/` followed by their folder.
+The diorama is a set of pictures, one for each kind of weather in light and dark mode, named after the weather, such as `rainy.webp`. Any other place works the same way, such as a beach, a city or a house. The card loads the pictures from [`diorama`](diorama) in this repository, so a home needs no files of its own. Pictures of one's own go into the `www` folder of Home Assistant's configuration, and `weather_image_path` and `weather_image_path_dark` then point to `/local/` followed by their folder, and so does each `--sky` address in `css`.
 
 </details>
 
@@ -37,7 +37,7 @@ A house whose rooms light up with the home's lights and show how warm they are, 
 
 <br>
 
-The house is a drawing, with one more picture for each room's light, and the card loads them from [`house`](house) in this repository. A drawing of the home's own house works the same way, and the [Origami Weather README](https://github.com/hazymorning/origami_weather#layouts) explains how to have one drawn. The pictures go into the `www` folder of Home Assistant's configuration, and the card loads them as `/local/` followed by their names.
+The house is a drawing, with one more picture for each room's light, and the card loads them from [`house`](house) in this repository. A drawing of the home's own house works the same way, and the [Origami Weather README](https://github.com/hazymorning/origami_weather#layouts) explains how to have one drawn. The pictures go into the `www` folder of Home Assistant's configuration. In [`house.yaml`](house.yaml), each `image` and `image_dark` then points to `/local/` followed by the file's name, and the temperature chips move with `position_x` and `position_y`.
 
 </details>
 
@@ -45,7 +45,7 @@ The house is a drawing, with one more picture for each room's light, and the car
 
 <img width="800" alt="The comparison card, whose color follows the weather, with the next days on tiles: a rainy midday and a clear night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather-comparison.webp">
 
-Origami Weather's Comparison layout in calm colors, with the next days on tiles, the temperature on a bar and the chance of rain. Only the color changes with the weather. [`comparison.yaml`](comparison.yaml)
+Origami Weather's Comparison layout in calm colors, with the next days on tiles, the temperature on a bar and the chance of rain. Only the color changes with the weather. In Fahrenheit, change `bar_min` and `bar_max` to `14` and `95`. [`comparison.yaml`](comparison.yaml)
 
 <details>
 <summary><b>With the sky behind it</b></summary>
@@ -78,7 +78,7 @@ At the top of its file, the card turns off the sun, the moon and every effect, a
 | Entity | Used for |
 | --- | --- |
 | `weather.home` | The weather and the temperature on every card, the day's low and high on the house card, and the next days and the chance of rain on the comparison card |
-| `sun.sun` | The next sunset or sunrise on the diorama card, and where the sun stands on the diorama and the house card. It comes with Home Assistant |
+| `sun.sun` | The next sunset or sunrise and where the sun stands on the diorama card, and whether the sun or the moon shows on the house card. It comes with Home Assistant |
 | `light.living_room`, `light.kitchen`, `light.bedroom`, `light.office` | Lit rooms: a room's windows light up while its light is on |
 | `sensor.office_temperature`, `sensor.kitchen_temperature`, `sensor.bathroom_temperature`, `sensor.bedroom_temperature` | Room temperatures: the temperature of each room on the house |
 | `binary_sensor.bathroom_window`, `binary_sensor.bedroom_window` | Room temperatures: the bathroom and the bedroom show their temperature while their window is open |

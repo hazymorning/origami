@@ -10,14 +10,14 @@ The home's main light control. Its power key turns on the scene for the time of 
 
 ## Setup
 
-1. Unless the room has a light group already, open [Helpers](https://my.home-assistant.io/redirect/helpers/) and select **Create helper**, then **Group** and **Light group**. Name it **Living room**, so its entity ID is `light.living_room`, choose the room's lamps as **Members** and select **Submit**.
+1. Unless the room whose lamps the pop-up shows, such as the living room, has a light group already, open [Helpers](https://my.home-assistant.io/redirect/helpers/) and select **Create helper**, then **Group** and **Light group**. Name it **Living room**, so its entity ID is `light.living_room`, choose the room's lamps as **Members** and select **Submit**.
 2. In [`pop-up.yaml`](pop-up.yaml), change the light group and the lamps under `mini_popups` to the room's own. The key after the slider opens a row for each of these lamps.
 3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_lights`.
 
 ## Optional
 
-- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small dot before its brightness marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active` and in the power keys. Without scenes, delete the card with the scenes and every power key but the first, and give that one `tap_action: action: toggle` instead of its `hidden` and its tap action.
+- **Scenes.** For a room with [scenes](https://www.home-assistant.io/docs/scene/): a box for each scene with its colors, its name and its brightness, starting with the scene for the time of day. While a lamp is on, a small dot before its brightness marks the scene turned on last. Change the buttons in the group **Scenes** to the room's scenes, and list the same scenes under `active` and in the power keys. Each power key's `hidden` holds the hours of its scene, and `start` the same hours. With fewer scenes, widen the hours of the keys that stay, so one shows at every hour. Without scenes, delete the card with the scenes and every power key but the first, and give that one `tap_action: action: toggle` instead of its `hidden` and its tap action.
 
 > [!TIP]
 > A scene's `field` is a gradient of its colors and its `label` its brightness, such as `45 %`, written as the slider writes it. `start` names a `css_class` for each time of day, so the row begins with the scene that fits. A scene without a `field` shows its icon.

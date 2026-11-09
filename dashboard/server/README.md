@@ -14,8 +14,9 @@ How the Home Assistant server is doing, with its backups and updates, and button
 
 1. Unless System Monitor is set up already, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=systemmonitor) as an integration.
 2. Turn on four of its sensors, which are off at first: **Processor use**, **Memory usage**, **Disk usage /** and **Uptime**. Open each one under the integration, select the gear icon, turn on **Enabled** and select **Update**.
-3. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
-4. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
+3. If an entity ID differs from the ones under [Entities](#entities), change it in [`pop-up.yaml`](pop-up.yaml).
+4. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
+5. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
 
 ## Optional
 

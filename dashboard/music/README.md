@@ -71,9 +71,9 @@ The volume slider shows this helper: the speaker's volume, or the average of its
 
 <br>
 
-Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip beside the title under `sub_button`, as a row in the group under `group:` and as a slider in the volume under `volume:`.
+Each speaker shows up in three parts of [`pop-up.yaml`](pop-up.yaml), each time with its entity ID on several lines: as a chip beside the title under `sub_button`, as a row in the group under `group` and as a slider in the volume under `volume`.
 
-1. Replace the example speakers with the home's own in all three places.
+1. In those three parts, replace every example entity ID with one of the home's speakers.
 2. For more speakers, copy all three parts of a speaker. For fewer, delete them.
 
 </details>
@@ -90,7 +90,7 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
 
 ## Optional
 
-- **Speaker groups.** For speakers that Home Assistant can group, such as [Sonos](https://www.home-assistant.io/integrations/sonos/), [LinkPlay](https://www.home-assistant.io/integrations/linkplay/) or the players of [Music Assistant](https://www.home-assistant.io/integrations/music_assistant/). The link key opens the group, and while speakers play together, the key after the volume slider opens the volume of each one. Add [`group-speakers.yaml`](group-speakers.yaml) as a script named **Group speakers**, the same way as the other scripts. Without groups, delete `group:` and the link key.
+- **Speaker groups.** For speakers that Home Assistant can group, such as [Sonos](https://www.home-assistant.io/integrations/sonos/), [LinkPlay](https://www.home-assistant.io/integrations/linkplay/) or the players of [Music Assistant](https://www.home-assistant.io/integrations/music_assistant/). The link key opens the group, and while speakers play together, the key after the volume slider opens the volume of each one. Add [`group-speakers.yaml`](group-speakers.yaml) as a script named **Group speakers**, the same way as the other scripts. Without groups, delete `group` under `mini_popups` and the link key.
 - **Shortcuts.** The dots open a short list, with room for more, like playlists or radio stations. Under `more:`, keep what fits and delete the rest, or delete `more:` and the dots key. The examples switch the living room speaker to Bluetooth or the TV while it's the selected speaker. For the TV, change `Optical In` to the name of the speaker's TV input, also under `words`.
 - **Open with a speaker.** For a home with several speakers. Another card, such as a room's speaker, opens the pop-up with its own speaker selected. A tap action can open the pop-up or select a speaker, but not both, so a script does both. Create a **Toggle** helper named **Music pop-up**, so its entity ID is `input_boolean.music_pop_up`, add [`open-music.yaml`](open-music.yaml) as a script named **Open music**, the same way as the other scripts, and add these lines to `pop-up.yaml`, so the pop-up opens when the helper turns on. It then opens on every screen that shows the dashboard at that moment.
 
@@ -107,7 +107,7 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
       entity_id: input_boolean.music_pop_up
   ```
 
-  The other card's tap action then runs the script with its speaker. Without `speaker`, the pop-up shows the speaker that plays, if only one does.
+  The other card's tap action then runs the script with its speaker. On a Bubble card, the `tap_action` under `button_action` gets the same lines. Without `speaker`, the pop-up shows the speaker that plays, if only one does.
 
   ```yaml
   tap_action:

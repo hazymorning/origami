@@ -13,7 +13,7 @@ A card for each room with its climate and lights, which opens the room's pop-up.
 1. In [`header.yaml`](header.yaml), replace the example temperature sensors with those of all rooms. The comments show where.
 2. Add [`header.yaml`](header.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 3. Below it, add [`room.yaml`](room.yaml) once for each room, with that room's name, icon and entities. Delete what a room doesn't have, such as a humidity sensor.
-4. In each room card, change `#popup_living_room` to the hash of the room's pop-up, or change the tap action, such as to **More info**.
+4. In each room card, change `#popup_living_room` to the hash of the room's [pop-up](../room/README.md), or change the tap action, such as to **More info**.
 
 ## Optional
 
