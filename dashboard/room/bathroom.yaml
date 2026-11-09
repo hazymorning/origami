@@ -95,6 +95,12 @@ cards:
           - origami_media
         origami_base:
           group: true
+        # The cover shows in the icon and tints the card
+        origami_media:
+          cover:
+            - background
+            - icon
+          cover_mix: 10
         hide:
           power_button: true
           previous_button: true
