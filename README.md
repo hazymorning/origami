@@ -10,7 +10,10 @@
 
 Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
 
-The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. Where it can, it uses what Home Assistant already offers and adds as little as possible on top, because less on top means less that can break. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
+The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard.
+
+> [!NOTE]
+> **Origami takes some setting up.** It builds on Bubble Card and on Home Assistant's own themes, helpers and scripts, and adds its own code only where nothing else fits. So a part is more than a card to paste, and its README lists what else it needs. In return, it all fits together and stays easy to change, with fewer parts that can break. [How Origami is built](#how-origami-is-built) explains the idea.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
