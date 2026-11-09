@@ -1605,4 +1605,4 @@ Bubble Card hands the state line to a module whose code contains `card.querySele
 
 Base keeps the card's options in `card._org.opts` and the look of its entity in `card._org.me`. With `data-org-fill="own"` on the card, Base fills only sub-buttons that set a value or have `css_class: accent`, for a module that fills its sub-buttons itself or keeps them neutral. With `data-org-bg="own"`, Base leaves the filter and opacity of a media card's background to the module.
 
-Anyone can share a module in the Module Store by posting it in the [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) category of Bubble Card's discussions. The Origami modules will move there later.
+Anyone can share a module in the Module Store by posting it in the [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) category of Bubble Card's discussions.

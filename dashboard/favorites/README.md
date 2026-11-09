@@ -13,7 +13,7 @@ Favorites for whatever matters right now, like a kitchen timer or the vacuum whi
 ## Setup
 
 1. In [`tiles.yaml`](tiles.yaml), keep the favorites that fit, delete the others and change their entities. A comment above each favorite says when it shows. To add one, copy a favorite and change its entity and its visibility conditions.
-2. For the grid, delete the two lines with `scroll`.
+2. For the grid, delete `origami_tiles:` and `scroll: true` below it.
 3. Add [`header.yaml`](header.yaml) and then `tiles.yaml` to the dashboard, as described under [Get started](../../README.md#get-started).
 
 ## Optional
@@ -28,7 +28,7 @@ All favorites are examples from one home.
 | --- | --- | --- |
 | Timer | `timer.kitchen` | While it runs or is paused, always first, with the minutes left |
 | Vacuum | `vacuum.robot`, `sensor.robot_cleaning_progress` | Always. While it cleans, it moves to the front and shows its progress. For a vacuum without such a sensor, delete its `name` under `origami_tiles`. |
-| Fan | `fan.bedroom`, `sensor.living_room_temperature`, `sensor.bedroom_temperature` | While the fan runs or a room is above 24° |
+| Fan | `fan.bedroom`, `sensor.living_room_temperature`, `sensor.bedroom_temperature` | While the fan runs or a room is above 24°. In Fahrenheit, change both `24` to `75`. |
 | Shopping | `todo.shopping_list` | While the list has items, and a tap opens it |
 | TV | `media_player.living_room_tv` | While the TV is on |
 | Music | `media_player.bedroom` | While the speaker plays, with the cover as its picture |

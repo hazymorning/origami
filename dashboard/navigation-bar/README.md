@@ -7,11 +7,11 @@ A bar at the bottom of the screen with buttons for the most used pop-ups and the
 ## Requirements
 
 - [Get started](../../README.md#get-started), for the theme and the font
-- [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) from HACS
+- [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) 1.8.0 or later from HACS
 
 ## Setup
 
-1. [Open Navbar Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) and select **Download**.
+1. [Open Navbar Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) and select **Download**, or update it if it's already there.
 2. In [`card.yaml`](card.yaml), change the entities to the home's own, as listed under [Entities](#entities). The speakers are in several lists, under the music button and in the first player under `media_player`, so change each list.
 3. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started). The bar stands at the bottom of the screen, wherever the card is in the view.
 
@@ -19,10 +19,11 @@ A bar at the bottom of the screen with buttons for the most used pop-ups and the
 
 - **Pop-ups.** The buttons open the music pop-up at `#popup_music`, the [TV pop-up](../tv/README.md), the [lights pop-up](../lights/README.md) and the [favorites list](../favorites-list/README.md), which have to be in the same view as the bar. Without one of them, delete its button under `routes`.
 - **[Menu](../menu/README.md).** Without it, delete the menu button.
+- **Scenes.** Holding **Lights** lists the living room's scenes. Change them to the home's own, or delete the entries from **Evening** to **Night** under `popup`.
 - **TV in the now playing card.** With [Google Cast](https://www.home-assistant.io/integrations/cast/), the card also shows what's cast to the TV. Without it, delete the second player under `media_player`.
 
 > [!TIP]
-> With [Open with a speaker](../music/README.md#optional) from the music pop-up, the music button's tap action can run **Open music** without a `speaker`, so the pop-up opens with the speaker that plays.
+> With [Open with a speaker](../music/README.md#optional) from the music pop-up, the music button's tap action can run **Open music** without a `speaker`, so the pop-up opens with the speaker that plays, if only one does.
 
 ## Entities
 

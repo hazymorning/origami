@@ -16,7 +16,7 @@ New are the pop-ups for the lights, music, favorites, the server and the vacuum,
 A 2.0 dashboard keeps working with 3.0. It needs the new modules and a small change on its light and fan cards, as the steps below say. After that, the new parts can take the place of the old cards one at a time. Each part is set up with the home's own entities, like any new part, so moving everything takes some time, but nothing has to move at once. Anyone who stays on 2.0 finds its package, dashboard and README in the [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0).
 
 1. Update Bubble Card to 3.4 or later and Navbar Card to 1.8.0 or later.
-2. Update Origami in HACS and run `frontend.reload_themes`. The 2.0 cards keep their look, apart from the new shadows and a slightly lighter page in light mode. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` and `shadow-sheet` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
+2. Update Origami in HACS and run `frontend.reload_themes`. The 2.0 cards keep their look, apart from the new shadows and a slightly lighter page in light mode. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens from the new theme: `shadow-edge`, `chip-shadow`, `shadow-elevated`, `shadow-sheet` and `tile-chip-background` in each mode, and `tile-chip-shadow: 'var(--chip-shadow)'` at the top.
 3. Update all modules together, because the new ones need the new Base. In the editor of any Bubble card, open **Modules**, then **My Modules**, and paste each module's new version from [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) over its old one. Delete Light and Speaker Select there, because 3.0 has no such modules. For modules in `/config/bubble_card/modules`, copy the folder again and delete `origami_light.yaml` and `origami_speaker.yaml`.
 4. Take `origami_light` and `origami_speaker` out of the cards. Light cards need `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`, because no module writes their state line anymore.
 
@@ -48,7 +48,7 @@ Each part is set up from its folder, as its README says, and takes the place of 
 | Speaker rows with Speaker Select | [Music](https://github.com/hazymorning/origami/tree/main/dashboard/music) |
 
 - Four entities of the 2.0 package already have the IDs that the parts use: `input_boolean.all_rooms` for Rooms, `input_select.selected_speaker` for Music, and `script.thermostat_step` and `script.volume` for Room and TV. The parts use them as they are, so they aren't created again. A second one with the same name would get `_2` at the end of its entity ID.
-- Once no card reads the package's helpers and sensors anymore, `/config/packages/origami.yaml` can go. After a restart, those four entities are created as the parts' READMEs describe.
+- Once no card reads the package's other helpers and sensors, `/config/packages/origami.yaml` can go. After a restart, create those four again as the parts' READMEs describe.
 - Paper Buttons Row can go once no card uses it.
 - The new TV remote sends an arrow's command once while it's held, because Bubble Card can't repeat an action.
 
@@ -69,7 +69,7 @@ With the new modules, some 2.0 cards look a little different. This is what chang
 - **Speaker groups and covers.** They come from `group_members` and the speaker's own picture instead of the LinkPlay sensors. For a speaker that reports neither, `leader` and `art` take templates that return the leader's entity ID and the cover's address. A Music Assistant player that belongs to a speaker goes into `players`.
 - **Thermostats.** Cards without their own icon show Home Assistant's icons for heating and the other actions. For a radiator's old icons, add `icons` under `origami_climate` with `heating: mdi:radiator`, `preheating: mdi:radiator` and `'off': mdi:radiator-off`.
 - **Headers.** `color` colors only the icon, so text that should keep the color needs `name_color` with the same value. The icons are a step smaller, and `icon_size: var(--dot-size)` brings back the old size on each header without its own `icon_size`.
-- **Pop-ups.** A pop-up with `performance_mode: performance` or its own `backdrop_blur` no longer blurs the page behind it.
+- **Pop-ups.** A pop-up with `performance_mode: performance` no longer blurs the page behind it, and one with its own `backdrop_blur` blurs it by that amount.
 - **Tiles.** Pictures fill the icon, and `image_size: 230%` zooms in as before. A tile takes a state color only while its entity is on, so a tile with a number or a temperature needs a `color` under its `origami_tiles` key to keep its color.
 
 </details>
