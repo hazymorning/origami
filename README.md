@@ -8,9 +8,9 @@
   <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
 </picture>
 
-Origami is a dashboard for Home Assistant. It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
+Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
 
-The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
+The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard. Where it can, it uses what Home Assistant already offers and adds as little as possible on top, because less on top means less that can break. It's not the easiest dashboard for beginners and covers quite a lot, but its approaches are a solid foundation that works for most homes and leaves room for endless customization.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
@@ -175,6 +175,24 @@ Cleaning for the whole home or just one room. [More](https://github.com/hazymorn
 
 ## More
 
+<a name="how-origami-is-built"></a>
+<details>
+<summary><b>How Origami is built</b></summary>
+
+<br>
+
+Bubble Card does the layout, the actions, the pop-ups and the editor, and Origami only adds what's missing. Each part uses the first of these that works:
+
+1. Bubble Card's own card types and options.
+2. An Origami module, where a Bubble card needs another look or behavior.
+3. A template in the card, for a value that the card can work out itself, instead of a template sensor.
+4. Home Assistant's own helpers and scripts, where a card can't do it alone, such as a timer for the fan or the steps of a thermostat. Scripts get their entities from the card, so they work in any home as they are.
+5. A card of its own, only for a gap that nothing else fills, as with Origami Weather, Origami Notifications and Origami Header.
+
+So the look stays in one place, and every part follows the theme.
+
+</details>
+
 <details>
 <summary><b>Coming from 2.0</b></summary>
 
@@ -221,7 +239,7 @@ Many details in Origami look like they could be done in an easier way, but most 
 
 - Give it the files of the part, not a link or a screenshot. It can only follow what it can read, and a screenshot doesn't show the options behind the look.
 - Ask it to read the part's README and the [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) before it writes anything. They say which options exist and why a part is built the way it is, so it doesn't make up options that the modules don't have.
-- Ask it to stick to Bubble Card's options and the modules first, then templates and scripts, and to build a new card only when nothing else works. That keeps the look in one place, so the part still fits the rest of the dashboard after an update. Never card-mod, because it writes over the same styles as the modules, and the two get in each other's way.
+- Ask it to build in the order under [How Origami is built](#how-origami-is-built), so the part still fits the rest of the dashboard after an update. Never card-mod, because it writes over the same styles as the modules, and the two get in each other's way.
 - Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get, and a part with a made-up ID doesn't work.
 - Keep a copy of the configuration before pasting anything, so a change that goes wrong is easy to undo.
 
