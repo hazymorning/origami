@@ -125,7 +125,7 @@ states:
   light.bedroom_ceiling: {state: 'off', attributes: {friendly_name: Ceiling, brightness: 0, supported_color_modes: [brightness], color_mode: brightness}}
   light.bedroom_bedside: {state: 'on', attributes: {friendly_name: Bedside lamp, brightness: 115, supported_color_modes: [brightness], color_mode: brightness}}
   climate.bedroom: {state: heat, attributes: {friendly_name: Thermostat, hvac_action: heating, hvac_modes: ['off', heat], temperature: 19.5, current_temperature: 18.6, min_temp: 7, max_temp: 30, target_temp_step: 0.5}}
-  fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, percentage_step: 33.33}}
+  fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, percentage_step: 33.33, supported_features: 63}}
   media_player.bedroom:
     state: playing
     attributes: {friendly_name: Speaker, volume_level: 0.24, media_title: Harbour Lights, media_artist: The Folds, entity_picture: /local/cover-2.jpg, group_members: [media_player.bedroom]}
@@ -136,7 +136,7 @@ light:
     light.bedroom_ceiling: {state: 'on', attributes: {friendly_name: Ceiling, brightness: 210, supported_color_modes: [brightness], color_mode: brightness}}
     light.bedroom_bedside: {state: 'off', attributes: {friendly_name: Bedside lamp, brightness: 0, supported_color_modes: [brightness], color_mode: brightness}}
     climate.bedroom: {state: heat, attributes: {friendly_name: Thermostat, hvac_action: idle, hvac_modes: ['off', heat], temperature: 19, current_temperature: 19.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5}}
-    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, supported_features: 63}}
     media_player.bedroom:
       state: playing
       attributes: {friendly_name: Speaker, volume_level: 0.3, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.bedroom]}

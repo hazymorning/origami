@@ -20,7 +20,6 @@ states:
   button.living_room_favorite_now_playing: {state: '2026-11-03T21:04:00+00:00', attributes: {friendly_name: Favorite current song}}
   button.bedroom_favorite_now_playing: {state: '2026-11-02T22:30:00+00:00', attributes: {friendly_name: Favorite current song}}
   script.group_speakers: {state: 'off', attributes: {friendly_name: Group speakers}}
-  light.living_room_display: {state: 'on', attributes: {friendly_name: Display}}
   input_select.selected_speaker:
     state: media_player.living_room
     attributes: {friendly_name: Selected speaker, options: [media_player.living_room, media_player.bedroom, media_player.office, media_player.kitchen, media_player.bathroom, media_player.kids_room]}

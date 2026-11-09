@@ -41,7 +41,7 @@ states:
   image.robot_map:
     state: '2026-11-04T12:38:00+00:00'
     attributes:
-      friendly_name: Robot map
+      friendly_name: Vacuum map
       entity_picture: /local/vacuum-map.png
 light:
   templates:
@@ -51,7 +51,7 @@ light:
     vacuum.robot:
       state: cleaning
       attributes:
-        friendly_name: Robot
+        friendly_name: Vacuum
         battery_level: 64
         fan_speed: balanced
         fan_speed_list:
@@ -67,11 +67,11 @@ light:
       attributes:
         unit_of_measurement: '%'
         device_class: battery
-        friendly_name: Robot battery
+        friendly_name: Vacuum battery
     sensor.robot_current_room:
       state: Kitchen
       attributes:
-        friendly_name: Robot current room
+        friendly_name: Vacuum current room
     counter.vacuum_bin:
       state: '2'
       attributes:
@@ -88,7 +88,7 @@ dark:
     vacuum.robot:
       state: docked
       attributes:
-        friendly_name: Robot
+        friendly_name: Vacuum
         battery_level: 100
         fan_speed: quiet
         fan_speed_list:
@@ -104,11 +104,11 @@ dark:
       attributes:
         unit_of_measurement: '%'
         device_class: battery
-        friendly_name: Robot battery
+        friendly_name: Vacuum battery
     sensor.robot_current_room:
       state: Bedroom
       attributes:
-        friendly_name: Robot current room
+        friendly_name: Vacuum current room
     counter.vacuum_bin:
       state: '3'
       attributes:
@@ -152,5 +152,5 @@ dark:
     image.robot_map:
       state: '2026-11-04T22:05:00+00:00'
       attributes:
-        friendly_name: Robot map
+        friendly_name: Vacuum map
         entity_picture: /local/vacuum-map.png

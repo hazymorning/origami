@@ -23,16 +23,17 @@ sub_button:
   main:
     - icon: mdi:chevron-right
   bottom:
-    # The dot's color goes from blue at 12° over green to red above 32°
+    # The dot's color goes from blue at 12° over green to red above 32°, or from 54° to 90° in Fahrenheit
     - entity: sensor.living_room_temperature
       icon: mdi:circle
       origami_base:
         color: >-
-          ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+          ${(t => [[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
           [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
           [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
           [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
-          .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+          .find(([top]) => t <= top)?.[1] ?? 'transparent')
+          (hass.config.unit_system.temperature === '°F' ? (state - 32) / 1.8 : parseFloat(state))}
     # The window shows only while it is open
     - entity: binary_sensor.living_room_window
       icon: mdi:window-open-variant

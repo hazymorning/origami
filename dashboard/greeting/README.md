@@ -21,4 +21,4 @@ A greeting for the time of day and the next event, with notifications, repairs a
 | --- | --- |
 | `calendar.household` | The event above the greeting. In the notifications, an event shows up one day before it starts. |
 | `weather.home` | Rain, snow and frost ahead, and the weather after the other entries |
-| `sensor.weather_warning_level`, `timer.bath`, `sensor.oven_ready_in`, `vacuum.robot`, `sensor.dinner` | Examples of entities in the notifications. The dinner entry has a button that opens the recipe. |
+| `sensor.weather_warning_level`, `timer.kitchen`, `sensor.washer_finish`, `vacuum.robot`, `binary_sensor.front_door` | Examples of entities in the notifications, such as the time until the washer is done or the front door while it's open |

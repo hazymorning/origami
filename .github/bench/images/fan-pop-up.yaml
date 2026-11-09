@@ -13,7 +13,7 @@ light:
     - {match: "state_attr(entity, 'percentage')", result: 66%}
 dark:
   states:
-    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: true, preset_mode: Nature, preset_modes: [Nature, Normal]}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: true, preset_mode: Nature, preset_modes: [Nature, Normal], supported_features: 63}}
     timer.bedroom_fan: {state: active, attributes: {friendly_name: Bedroom fan, duration: '1:00:00', remaining: '1:00:00', finishes_at: '2026-11-04T23:40:00+00:00'}}
   templates:
     - {match: "'Low' if p", result: Low}

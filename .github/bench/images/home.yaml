@@ -25,21 +25,18 @@ states:
     state: 'off'
     attributes: {friendly_name: Household, message: Book club, start_time: '2026-11-06 19:00:00', end_time: '2026-11-06 21:00:00', all_day: false, description: '', location: ''}
   sensor.weather_warning_level: {state: '0', attributes: {friendly_name: Weather warnings}}
-  timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T19:48:00+00:00'}}
-  sensor.oven_ready_in: {state: unknown, attributes: {friendly_name: Oven ready}}
-  sensor.dinner: {state: unknown, attributes: {friendly_name: Dinner}}
-  sensor.oven: {state: 200 °C, attributes: {friendly_name: Oven}}
-  vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, battery_level: 64}}
+  timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}
+  sensor.washer_finish: {state: unknown, attributes: {friendly_name: Washer, device_class: timestamp, icon: 'mdi:washing-machine'}}
+  todo.shopping_list: {state: '3', attributes: {friendly_name: Shopping list}}
+  media_player.living_room_tv: {state: 'off', attributes: {friendly_name: TV}}
+  binary_sensor.front_door: {state: 'off', attributes: {friendly_name: Front door, device_class: door}}
+  vacuum.robot: {state: cleaning, attributes: {friendly_name: Vacuum, battery_level: 64}}
   sensor.robot_cleaning_progress: {state: '42', attributes: {unit_of_measurement: '%', friendly_name: Cleaning progress}}
   media_player.bedroom: {state: idle, attributes: {friendly_name: Bedroom}}
   fan.bedroom:
     state: 'on'
-    attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33, oscillating: false, preset_mode: Normal, preset_modes: [Nature, Normal]}
+    attributes: {friendly_name: Bedroom fan, percentage: 66, percentage_step: 33.33, oscillating: false, preset_mode: Normal, preset_modes: [Nature, Normal], supported_features: 63}
   timer.bedroom_fan: {state: idle, attributes: {friendly_name: Bedroom fan, duration: '0:00:00'}}
-  input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
-  input_datetime.bath_time_end: {state: '2026-11-04 19:48:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true, timestamp: 1793821680}}
-  switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
-  input_datetime.printer_end: {state: '2026-11-04 20:00:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
   light.living_room: {state: 'on', attributes: {friendly_name: Living room, brightness: 180}}
   light.bedroom: {state: 'off', attributes: {friendly_name: Bedroom}}
   sensor.living_room_temperature: {state: '21.4', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Living room temperature}}
@@ -70,7 +67,7 @@ words:
   rainy: Rainy
   sunny: Sunny
   returning: Returning
-# The light images: a gray midday, with lunch in the oven, the printer at work and the vacuum cleaning
+# The light images: a gray midday, with the kitchen timer running, the washer on and the vacuum cleaning
 light:
   time: '2026-11-04T12:40:00'
   clock: '12:40'
@@ -79,11 +76,8 @@ light:
     weather.home:
       state: cloudy
       attributes: {friendly_name: Home, temperature: 12.4, temperature_unit: °C, humidity: 74, wind_speed: 9, wind_speed_unit: km/h, pressure: 1014, supported_features: 3}
-    timer.bath: {state: idle, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00'}}
-    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
-    sensor.oven: {state: 180 °C, attributes: {friendly_name: Oven}}
-    switch.printer: {state: 'on', attributes: {friendly_name: Printer}}
-    input_datetime.printer_end: {state: '2026-11-04 12:58:00', attributes: {friendly_name: Printer ends, has_date: true, has_time: true}}
+    timer.kitchen: {state: active, attributes: {friendly_name: Timer, duration: '0:20:00', remaining: '0:20:00', finishes_at: '2026-11-04T12:52:00+00:00'}}
+    sensor.washer_finish: {state: '2026-11-04T13:14:00+00:00', attributes: {friendly_name: Washer, device_class: timestamp, icon: 'mdi:washing-machine'}}
   messages:
     weather/subscribe_forecast:
       type: daily
@@ -95,7 +89,7 @@ light:
         - {datetime: '2026-11-08T11:00:00+00:00', condition: cloudy, temperature: 10, templow: 4, precipitation_probability: 0}
         - {datetime: '2026-11-09T11:00:00+00:00', condition: sunny, temperature: 12, templow: 3, precipitation_probability: 0}
         - {datetime: '2026-11-10T11:00:00+00:00', condition: partlycloudy, temperature: 13, templow: 5, precipitation_probability: 0}
-# The dark images: late in the evening, with music in the bedroom, a bath running and the vacuum back in its dock
+# The dark images: late in the evening, with music in the bedroom, the timer and the washer on and the vacuum back in its dock
 dark:
   time: '2026-11-04T22:40:00'
   clock: '22:40'
@@ -106,10 +100,10 @@ dark:
     calendar.household:
       state: 'off'
       attributes: {friendly_name: Household, message: Dentist, start_time: '2026-11-05 09:00:00', end_time: '2026-11-05 10:00:00', all_day: false, description: '', location: ''}
-    timer.bath: {state: active, attributes: {friendly_name: Bath, icon: 'mdi:bathtub-outline', duration: '0:25:00', remaining: '0:25:00', finishes_at: '2026-11-04T22:52:00+00:00'}}
-    input_datetime.bath_time_end: {state: '2026-11-04 22:52:00', attributes: {friendly_name: Bath ends, has_date: true, has_time: true}}
-    sensor.oven: {state: 'Off', attributes: {friendly_name: Oven}}
-    vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
+    todo.shopping_list: {state: '2', attributes: {friendly_name: Shopping list}}
+    sensor.washer_finish: {state: '2026-11-04T23:28:00+00:00', attributes: {friendly_name: Washer, device_class: timestamp, icon: 'mdi:washing-machine'}}
+    timer.kitchen: {state: active, attributes: {friendly_name: Timer, duration: '0:20:00', remaining: '0:20:00', finishes_at: '2026-11-04T22:52:00+00:00'}}
+    vacuum.robot: {state: docked, attributes: {friendly_name: Vacuum, battery_level: 100}}
     media_player.bedroom: {state: playing, attributes: {friendly_name: Bedroom, media_title: Low Tide, media_artist: Quiet Harbour, entity_picture: /local/cover-2.jpg}}
     light.living_room: {state: 'off', attributes: {friendly_name: Living room}}
     light.bedroom: {state: 'on', attributes: {friendly_name: Bedroom, brightness: 90}}

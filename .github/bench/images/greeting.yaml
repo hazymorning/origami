@@ -3,4 +3,5 @@ cards:
   - {file: greeting/card.yaml}
 light:
   states:
-    vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, icon: 'mdi:robot-vacuum', battery_level: 64}}
+    vacuum.robot: {state: cleaning, attributes: {friendly_name: Vacuum, icon: 'mdi:robot-vacuum', battery_level: 64}}
+    timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}

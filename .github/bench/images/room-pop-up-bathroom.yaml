@@ -16,7 +16,6 @@ light:
     light.bathroom_mirror: {state: 'on', attributes: {friendly_name: Mirror, brightness: 200, supported_color_modes: [brightness], color_mode: brightness}}
     light.bathroom: {state: 'on', attributes: {friendly_name: Bathroom, brightness: 200, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.bathroom_mirror, light.bathroom_night_light]}}
     light.bathroom_night_light: {state: 'off', attributes: {friendly_name: Night light, supported_color_modes: [brightness]}}
-    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
     sensor.bathroom_temperature: {state: '21.2', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
     sensor.bathroom_humidity: {state: '55', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
     climate.bathroom:
@@ -30,7 +29,6 @@ dark:
     light.bathroom_mirror: {state: 'off', attributes: {friendly_name: Mirror, supported_color_modes: [brightness]}}
     light.bathroom_night_light: {state: 'on', attributes: {friendly_name: Night light, brightness: 60, supported_color_modes: [brightness], color_mode: brightness}}
     light.bathroom: {state: 'on', attributes: {friendly_name: Bathroom, brightness: 60, supported_color_modes: [brightness], color_mode: brightness, entity_id: [light.bathroom_mirror, light.bathroom_night_light]}}
-    input_boolean.bath_time: {state: 'on', attributes: {friendly_name: Bath time}}
     sensor.bathroom_temperature: {state: '23.4', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bathroom temperature}}
     sensor.bathroom_humidity: {state: '71', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Bathroom humidity}}
     climate.bathroom:

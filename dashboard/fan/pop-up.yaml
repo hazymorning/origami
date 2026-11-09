@@ -157,8 +157,10 @@ cards:
             action: none
         sub_button:
           main:
-            # The arrows set the direction, which turns the head of a Xiaomi fan a step to the side
+            # The arrows set the direction and show only on a fan that has one. On some fans, such as Xiaomi's, it turns the head a step to the side.
             - icon: mdi:chevron-left
+              origami_base:
+                hidden: ${!(attr.supported_features & 4)}
               tap_action:
                 action: perform-action
                 perform_action: fan.set_direction
@@ -166,10 +168,10 @@ cards:
                   entity_id: fan.bedroom
                 data:
                   direction: reverse
-            # Oscillation has a key that turns it on and one that turns it off, and only one of them shows
+            # Oscillation has a key that turns it on and one that turns it off. Only one of them shows, and only on a fan that can oscillate.
             - icon: mdi:arrow-left-right
               origami_base:
-                hidden: ${attr.oscillating === true}
+                hidden: ${attr.oscillating === true || !(attr.supported_features & 2)}
               tap_action:
                 action: perform-action
                 perform_action: fan.oscillate
@@ -179,7 +181,7 @@ cards:
                   oscillating: true
             - icon: mdi:arrow-left-right
               origami_base:
-                hidden: ${attr.oscillating !== true}
+                hidden: ${attr.oscillating !== true || !(attr.supported_features & 2)}
                 'on': ${state === 'on'}
               tap_action:
                 action: perform-action
@@ -189,6 +191,8 @@ cards:
                 data:
                   oscillating: false
             - icon: mdi:chevron-right
+              origami_base:
+                hidden: ${!(attr.supported_features & 4)}
               tap_action:
                 action: perform-action
                 perform_action: fan.set_direction

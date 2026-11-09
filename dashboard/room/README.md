@@ -4,7 +4,7 @@
 
 <img width="800" alt="The bathroom pop-up with the speaker, the lamps and the climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up-bathroom.webp">
 
-A room's media, lights and climate in one pop-up, made of blocks for the room's devices. It comes as two examples: a living room with a TV, a fan and several lamps, and a bathroom with a speaker, two lamps and a switch for bath time.
+A room's media, lights and climate in one pop-up, made of blocks for the room's devices. It comes as two examples: a living room with a TV, a fan and several lamps, and a bathroom with a speaker and two lamps.
 
 ## Requirements
 
@@ -30,7 +30,6 @@ Each block is only for a room that has its device.
 - **Climate.** For a room with a temperature sensor. The header shows the temperature and the humidity, with a dot from blue for cold to red for hot. Without a humidity sensor, delete the `name` under the temperature, and the header shows the temperature alone.
 - **Fan.** For a room with a fan, as in the living room: its three speeds, and a tap opens the [fan pop-up](../fan/README.md). The card hides while the fan is unavailable. It needs the Fan module.
 - **Thermostat.** For a room with a thermostat. Its minus and plus move the target by half a degree through a script, since Home Assistant has no action that moves a target by a step. Open [Scripts](https://my.home-assistant.io/redirect/scripts/) and select **Create script**, then **Create new script**. In the three-dot menu, select **Edit in YAML**, paste [`thermostat-step.yaml`](thermostat-step.yaml) and save it with the name **Thermostat step**. It needs the Climate module.
-- **Bath time.** A switch for an automation that reacts to it, such as one that dims the lamps, as in the bathroom. It needs a **Toggle** helper named **Bath time**.
 
 > [!TIP]
 > The more-info dialog of a light group, which the bathroom's **Lights** header opens, lists each lamp with its own brightness and color. So each lamp of a room can be set on its own, such as a color for just one of them.
@@ -53,4 +52,3 @@ Each block is only for a room that has its device.
 | `fan.living_room` | The fan |
 | `climate.living_room`, `climate.bathroom` | The thermostat |
 | `script.thermostat_step` | The thermostat's minus and plus |
-| `input_boolean.bath_time` | Bath time |

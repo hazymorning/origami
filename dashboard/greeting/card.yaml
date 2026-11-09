@@ -32,17 +32,11 @@ cards:
       - sensor.weather_warning_level
       - entity: calendar.household
         before: "24:00:00"
-      - timer.bath
-      - entity: sensor.oven_ready_in
-        type: countdown
-        name: Oven
+      - timer.kitchen
+      - entity: sensor.washer_finish
+        name: Washer
       - vacuum.robot
-      - entity: sensor.dinner
-        actions:
-          - label: Open recipe
-            tap_action:
-              action: url
-              url_path: https://tandoor.dev
+      - binary_sensor.front_door
     css: |
       :host {
         --origami-pad: var(--ha-space-4);

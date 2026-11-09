@@ -9,11 +9,12 @@ states:
   zone.home: {state: '1', attributes: {friendly_name: Home}}
 light:
   states:
-    vacuum.robot: {state: cleaning, attributes: {friendly_name: Robot, icon: 'mdi:robot-vacuum', battery_level: 64}}
+    vacuum.robot: {state: cleaning, attributes: {friendly_name: Vacuum, icon: 'mdi:robot-vacuum', battery_level: 64}}
 dark:
   states:
     todo.shopping_list: {state: '1', attributes: {friendly_name: Shopping list}}
+    timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}
     zone.home: {state: '2', attributes: {friendly_name: Home}}
     media_player.living_room_tv: {state: 'on', attributes: {friendly_name: TV, source: Netflix, source_list: [Netflix, YouTube, HDMI 1]}}
-    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: false, preset_mode: Nature, preset_modes: [Nature, Normal]}}
+    fan.bedroom: {state: 'on', attributes: {friendly_name: Bedroom fan, percentage: 33, percentage_step: 33.33, oscillating: false, preset_mode: Nature, preset_modes: [Nature, Normal], supported_features: 63}}
     sensor.robot_cleaning_progress: {state: '100', attributes: {unit_of_measurement: '%'}}

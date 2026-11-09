@@ -12,17 +12,18 @@ grid_options:
   rows: auto
 sub_button:
   bottom:
-    # Music, from 22:00 to 4:00
+    # Music, while the speaker plays, with the cover as its picture
     - name: Music
       entity: media_player.bedroom
       icon: mdi:speaker
       force_icon: true
       origami_tiles:
         color: var(--state-media_player-active-color)
+        image: ${attr.entity_picture}
       visibility:
-        - condition: time
-          after: '22:00'
-          before: '03:59:59'
+        - condition: state
+          entity: media_player.bedroom
+          state: playing
       tap_action:
         action: navigate
         navigation_path: '#popup_music'
@@ -55,58 +56,53 @@ sub_button:
         navigation_path: '#popup_fan'
       hold_action:
         action: more-info
-    # Dinner, with the recipe photo as the icon
-    - name: Cooking
-      entity: sensor.dinner
-      icon: mdi:chef-hat
+    # Shopping list, while it has items, with their count as its name
+    - name: Shopping
+      entity: todo.shopping_list
+      icon: mdi:cart-outline
       origami_tiles:
-        state: Dinner
-        image: ${attr.recipe?.image}
-        image_size: 230%
+        name: "${num(state, 0)} ${Number(state) === 1 ? 'item' : 'items'}"
+        state: To buy
       visibility:
-        - condition: state
-          entity: sensor.dinner
-          state_not:
-            - unknown
-            - unavailable
-        - condition: time
-          after: '14:00'
-          before: '20:59:59'
-      tap_action:
-        action: url
-        url_path: https://tandoor.dev
-      hold_action:
-        action: more-info
-    # Oven, only while it is on, and always first
-    - name: Oven
-      entity: sensor.oven
-      icon: mdi:toaster-oven
-      origami_tiles:
-        color: var(--state-climate-heat-color)
-        order: -2
-      visibility:
-        - condition: state
-          entity: sensor.oven
-          state_not: 'Off'
+        - condition: numeric_state
+          entity: todo.shopping_list
+          above: 0
       tap_action:
         action: navigate
-        navigation_path: '#popup_kitchen'
+        navigation_path: /todo?entity_id=todo.shopping_list
+      hold_action:
+        action: more-info
+    # TV, while it's on
+    - name: TV
+      entity: media_player.living_room_tv
+      icon: mdi:television
+      visibility:
+        - condition: state
+          entity: media_player.living_room_tv
+          state_not:
+            - 'off'
+            - standby
+            - unavailable
+            - unknown
+      tap_action:
+        action: navigate
+        navigation_path: '#popup_tv'
       hold_action:
         action: more-info
     # The robot vacuum. While it cleans, the progress replaces its name.
-    - name: Robot
+    - name: Vacuum
       entity: vacuum.robot
       icon: mdi:robot-vacuum
       force_icon: true
       origami_tiles:
         name: >-
-          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Robot'
+          ${(p => ['docked', 'returning'].includes(state) || p >= 99 ? 'Vacuum'
           : Number.isNaN(p) ? '' : p < 0 ? 'Error'
           : num(p, 0, '%'))(Math.round(states('sensor.robot_cleaning_progress')))}
         state:
           docked: ${word('off')}
           idle: ${word('off')}
-          cleaning: Robot
+          cleaning: Vacuum
         order:
           cleaning: -1
       tap_action:
@@ -114,41 +110,18 @@ sub_button:
         navigation_path: '#popup_vacuum'
       hold_action:
         action: more-info
-    # Bath, with the remaining minutes while it runs
-    - name: Bath
-      entity: input_boolean.bath_time
-      icon: mdi:shower
+    # Kitchen timer, while it runs, with the minutes left, and always first
+    - name: Timer
+      entity: timer.kitchen
+      icon: mdi:timer-outline
       origami_tiles:
         name:
-          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
-        state:
-          'on': Running
-          'off': Ready
-        color:
-          'on': var(--blue-color)
+          active: ${num(minutesUntil('timer.kitchen'), 0, 'minute')}
+        color: var(--amber-color)
+        order: -2
       visibility:
-        - condition: or
-          conditions:
-            - condition: state
-              entity: input_boolean.bath_time
-              state: 'on'
-            - condition: time
-              after: '11:00'
-              before: '22:59:59'
+        - condition: state
+          entity: timer.kitchen
+          state_not: idle
       tap_action:
-        action: toggle
-      hold_action:
-        action: more-info
-    # Printer, with the remaining minutes while it prints
-    - name: Printer
-      entity: switch.printer
-      icon: mdi:printer-outline
-      origami_tiles:
-        name:
-          'on': ${num(minutesUntil('input_datetime.printer_end'), 0, 'minute')}
-        state:
-          'on': Running
-      tap_action:
-        action: toggle
-      hold_action:
         action: more-info

@@ -1,22 +1,25 @@
 # The favorites as a grid of tiles, without scroll. In each moment, the first favorite is on and the others wait for a tap.
+# A warm bedroom shows the fan while it's off.
 kind: panel
 light:
   states:
-    switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
-    vacuum.robot: {state: docked, attributes: {friendly_name: Robot, battery_level: 100}}
+    vacuum.robot: {state: docked, attributes: {friendly_name: Vacuum, battery_level: 100}}
+    fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, oscillating: false, supported_features: 63}}
+    sensor.bedroom_temperature: {state: '24.5', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bedroom temperature}}
   cards:
     - {file: favorites/header.yaml}
     - file: favorites/tiles.yaml
-      only: [Oven, Robot, Bath, Printer]
+      only: [Timer, Shopping, Vacuum, Fan]
       with:
         origami_tiles: null
 dark:
   states:
-    input_boolean.bath_time: {state: 'off', attributes: {friendly_name: Bath time}}
+    fan.bedroom: {state: 'off', attributes: {friendly_name: Bedroom fan, percentage: 0, oscillating: false, supported_features: 63}}
+    sensor.bedroom_temperature: {state: '24.5', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Bedroom temperature}}
   cards:
     - {file: favorites/header.yaml}
     - file: favorites/tiles.yaml
-      only: [Music, Robot, Bath, Printer]
+      only: [Music, Shopping, Vacuum, Fan]
       with:
         origami_tiles: null
 trim: 16

@@ -25,7 +25,7 @@ All rows are examples from one home.
 
 | Entity | Used for |
 | --- | --- |
-| `input_boolean.bath_time`, `input_datetime.bath_time_end` | The bath, with the minutes left while it runs. The end time comes from an automation of its own. |
+| `timer.kitchen` | A timer, with the minutes left while it runs |
 | `media_player.living_room_tv` | The TV. While it's off, a tap turns it on, and then the row opens the TV pop-up. |
 | `fan.bedroom` | The fan and its speed |
 | `vacuum.robot` | The vacuum and its state |

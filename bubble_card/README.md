@@ -115,12 +115,12 @@ The `origami_base`, `origami_header`, `origami_tiles`, `origami_table`, `origami
 ```yaml
 sub_button:
   bottom:
-    - name: Bath
-      entity: input_boolean.bath_time
+    - name: Timer
+      entity: timer.kitchen
       origami_tiles:
-        # While the bath runs, the tile counts the minutes until it ends. Otherwise, it shows Home Assistant's word for the state.
+        # While the timer runs, the tile counts the minutes until it ends. Otherwise, it shows Home Assistant's word for the state.
         state:
-          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')}
+          active: ${num(minutesUntil('timer.kitchen'), 0, 'minute')}
 ```
 
 </details>
@@ -1147,7 +1147,7 @@ The header sets its own height, so it needs no `grid_options`, and Popup's `gap`
 
 The Tiles module turns a sub-buttons card into a grid of tiles, a row of tiles that scrolls sideways or a list, each with an icon, a name and a state line. Bubble Card's visibility conditions decide when a tile shows.
 
-<img width="800" alt="A grid of tiles with the oven and the vacuum sorted to the front, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-tiles.webp">
+<img width="800" alt="A grid of tiles with the timer and the vacuum sorted to the front, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-tiles.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1196,17 +1196,16 @@ sub_button:
           cleaning: Vacuum
         order:
           cleaning: -1
-    - name: Cooking
-      entity: sensor.dinner
-      icon: mdi:chef-hat
+    - name: Music
+      entity: media_player.bedroom
+      icon: mdi:speaker
       origami_tiles:
-        state: Dinner
-        image: ${attr.recipe?.image}
-        image_size: 230%
+        # The cover in place of the icon, while the speaker plays
+        image: ${attr.entity_picture}
       visibility:
-        - condition: time
-          after: '14:00'
-          before: '20:59:59'
+        - condition: state
+          entity: media_player.bedroom
+          state: playing
 ```
 
 A tile whose entity is unavailable is dimmed. More tile examples are in the [favorites](../dashboard/favorites/tiles.yaml).
@@ -1245,16 +1244,16 @@ sub_button:
         perform_action: script.toggle
         target:
           entity_id: script.movie_night
-    - entity: input_boolean.bath_time
-      name: Bath
-      icon: mdi:bathtub-outline
+    - entity: timer.kitchen
+      name: Timer
+      icon: mdi:timer-outline
       origami_tiles:
         color:
-          'on': var(--water-color)
+          active: var(--amber-color)
         state:
-          'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')} left
+          active: ${num(minutesUntil('timer.kitchen'), 0, 'minute')} left
       tap_action:
-        action: toggle
+        action: more-info
     # While the TV is off, the row turns it on. Once it is on, the row opens the TV pop-up.
     - entity: media_player.living_room_tv
       name: TV
@@ -1427,7 +1426,7 @@ sub_button:
           css_class: temperature
 ```
 
-The office has no thermostat, so its temperature cell names its column. The climate table in the [dashboard](../dashboard/dashboard.yaml) has six columns and uses the other keys, such as arrows for the warmest and the coldest room.
+The office has no thermostat, so its temperature cell names its column. The [climate table](../dashboard/climate-table/card.yaml) has five columns and uses the other keys, such as arrows for the warmest and the coldest room.
 
 </details>
 
