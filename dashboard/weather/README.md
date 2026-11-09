@@ -1,6 +1,6 @@
 # Weather
 
-Origami Weather is the part that took the longest by far, many hundreds of hours in 2026. It grew into a small builder for weather cards, so nearly anything is possible, from a realistic sky to a classic forecast or something quite exotic. The three cards here are only a start and some inspiration. The one on the maintainer's own dashboard changes all the time, just because a new look now and then keeps it fun.
+Origami Weather is the part that took the longest by far, many hundreds of hours in 2026. It grew into a small builder for weather cards, so nearly anything is possible, from a realistic sky to a classic forecast or something quite exotic. The three cards here are only a start and some inspiration.
 
 <details>
 <summary><b>Calm on purpose</b></summary>
