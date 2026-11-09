@@ -7,7 +7,7 @@ Origami Weather is the part that took the longest by far, many hundreds of hours
 
 <br>
 
-All three cards keep the weather calm, and the house and the comparison card leave out most of its effects, such as the drifting clouds. That's only a matter of taste: after a year of looking at weather animations, the maintainer likes them toned down. Origami Weather can show much more, such as clouds, rain, snow and thunderstorms, stars with shooting stars, and birds, planes and balloons now and then. Each effect has an option of its own, and its [README](https://github.com/hazymorning/origami_weather#backgrounds) shows them all.
+All three cards keep the weather calm, and the house and the comparison card leave out most of its effects, such as the drifting clouds. That's only a matter of taste: after a year of looking at weather animations, the maintainer likes them toned down. Origami Weather can show much more, such as clouds, rain, snow and thunderstorms, stars with shooting stars, and birds, planes and balloons now and then. Its [README](https://github.com/hazymorning/origami_weather#backgrounds) shows how to turn them on and off.
 
 </details>
 
