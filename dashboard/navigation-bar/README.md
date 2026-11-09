@@ -21,6 +21,9 @@ A bar at the bottom of the screen with buttons for the most used pop-ups and the
 - **[Menu](../menu/README.md).** Without it, delete the menu button.
 - **TV in the now playing card.** With [Google Cast](https://www.home-assistant.io/integrations/cast/), the card also shows what's cast to the TV. Without it, delete the second player under `media_player`.
 
+> [!TIP]
+> With [Open with a speaker](../music/README.md#optional) from the music pop-up, the music button's tap action can run **Open music** without a `speaker`, so the pop-up opens with the speaker that plays.
+
 ## Entities
 
 | Entity | Used for |

@@ -1,0 +1,43 @@
+alias: Open music
+description: Opens the music pop-up from another card with a speaker selected, such as a room's speaker. A tap action can open the pop-up or select a speaker, but not both.
+mode: queued
+fields:
+  speaker:
+    description: The speaker the pop-up shows. Without it, the pop-up shows the speaker that plays, if only one does, and otherwise the speaker selected before.
+    example: media_player.living_room
+    selector:
+      entity:
+        domain: media_player
+  dropdown:
+    description: The dropdown helper that selects the speaker
+    example: input_select.selected_speaker
+    selector:
+      entity:
+        domain: input_select
+  pop_up:
+    description: The toggle helper that opens the pop-up when it turns on
+    example: input_boolean.music_pop_up
+    selector:
+      entity:
+        domain: input_boolean
+sequence:
+  - variables:
+      options: "{{ state_attr(dropdown, 'options') or [] }}"
+      # The speakers that play on their own or lead their group, so a group counts once
+      playing: >-
+        {% set ns = namespace(found=[]) %}
+        {% for s in options if is_state(s, 'playing') and (state_attr(s, 'group_members') or [s])[0] == s %}
+        {% set ns.found = ns.found + [s] %}
+        {% endfor %}
+        {{ ns.found }}
+      wanted: "{{ speaker if speaker is defined and speaker else (playing[0] if playing | count == 1 else '') }}"
+  - if: "{{ wanted in options }}"
+    then:
+      - action: input_select.select_option
+        target:
+          entity_id: "{{ dropdown }}"
+        data:
+          option: "{{ wanted }}"
+  - action: input_boolean.turn_on
+    target:
+      entity_id: "{{ pop_up }}"

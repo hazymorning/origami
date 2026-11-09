@@ -23,7 +23,7 @@ A room's media, lights and climate in one pop-up, made of blocks for the room's 
 
 Each block is only for a room that has its device.
 
-- **Speaker.** A tap opens the [music pop-up](../music/README.md), or change its tap action. It needs the Media module.
+- **Speaker.** A tap opens the [music pop-up](../music/README.md), or change its tap action. With [Open with a speaker](../music/README.md#optional), the card's `tap_action` and `button_action` run **Open music** with the room's speaker, so the pop-up opens with that speaker selected. It needs the Media module.
 - **TV.** For a TV whose sound plays through the room's speaker, as in the living room. The TV card takes the speaker's place while the speaker uses its TV input, so change `Optical In` to the name of that input. With [Google Cast](https://www.home-assistant.io/integrations/cast/), it also shows what's cast to the TV. A tap opens the [TV pop-up](../tv/README.md). It needs the Media module.
 - **Plug.** A device on a smart plug, as a row with a switch, such as the living room's console.
 - **Lamps.** For a room with lamps, as in both examples. **All** switches and dims them together, its palette opens the scenes, and the arrow beside its slider a row for each lamp. The header counts the lamps that are on. In the living room, a tap on it opens the [lights pop-up](../lights/README.md), and in every other room the light group's more-info dialog. Unless the room has a light group already, open [Helpers](https://my.home-assistant.io/redirect/helpers/) and select **Create helper**, then **Group** and **Light group**, and add the room's lamps. The lamps and the scenes are under `mini_popups`, and each scene is also listed under `active`. It needs the Slider module.
