@@ -198,7 +198,13 @@ So the look stays in one place, and every part follows the theme.
 
 <br>
 
-A 2.0 dashboard keeps working with 3.0. It needs the new modules and a small change on its light and fan cards, and the new parts can then take the place of the old cards one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) has the steps, which part replaces which card and what looks different on the old ones.
+Updating Origami in HACS only updates the theme. The Bubble Card modules were copied in by hand, so they're updated the same way.
+
+1. Update Origami and Bubble Card in HACS.
+2. Paste all the new modules over the old ones. The new parts need them.
+3. Make the small change that the [upgrade steps](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) list for a few cards.
+
+The 2.0 dashboard keeps working, and the new parts can take the place of the old cards one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) also has which part replaces which card and what looks different on the old ones.
 
 </details>
 
