@@ -8,7 +8,7 @@
   <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
 </picture>
 
-Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and at some point it just felt good. So here it is, the result of years of trial and error. Most of it was built by hand on a phone, which is why it's made for phones first.
+Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and most of it was built by hand on a phone, which is why it's made for phones first.
 
 The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard.
 
