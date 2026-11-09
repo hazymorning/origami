@@ -92,6 +92,32 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
 
 - **Speaker groups.** For speakers that Home Assistant can group, such as [Sonos](https://www.home-assistant.io/integrations/sonos/), [LinkPlay](https://www.home-assistant.io/integrations/linkplay/) or the players of [Music Assistant](https://www.home-assistant.io/integrations/music_assistant/). The link key opens the group, and while speakers play together, the key after the volume slider opens the volume of each one. Add [`group-speakers.yaml`](group-speakers.yaml) as a script named **Group speakers**, the same way as the other scripts. Without groups, delete `group:` and the link key.
 - **Shortcuts.** The dots open a short list, with room for more, like playlists or radio stations. Under `more:`, keep what fits and delete the rest, or delete `more:` and the dots key. The examples switch the living room speaker to Bluetooth or the TV while it's the selected speaker, and turn an amplifier's display on and off. For the TV, change `Optical In` to the name of the speaker's TV input, also under `words`.
+- **Open with a speaker.** For a home with several speakers. Another card, such as a room's speaker, opens the pop-up with its own speaker selected. A tap action can open the pop-up or select a speaker, but not both, so a script does both. Create a **Toggle** helper named **Music pop-up**, so its entity ID is `input_boolean.music_pop_up`, add [`open-music.yaml`](open-music.yaml) as a script named **Open music**, the same way as the other scripts, and add these lines to `pop-up.yaml`, so the pop-up opens when the helper turns on. It then opens on every screen that shows the dashboard at that moment.
+
+  ```yaml
+  trigger:
+    - condition: state
+      entity: input_boolean.music_pop_up
+      state: 'on'
+  trigger_close: false
+  open_action:
+    action: perform-action
+    perform_action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.music_pop_up
+  ```
+
+  The other card's tap action then runs the script with its speaker. Without `speaker`, the pop-up shows the speaker that plays, if only one does.
+
+  ```yaml
+  tap_action:
+    action: perform-action
+    perform_action: script.open_music
+    data:
+      speaker: media_player.living_room
+      dropdown: input_select.selected_speaker
+      pop_up: input_boolean.music_pop_up
+  ```
 
 ## Entities
 
@@ -103,4 +129,6 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
 | `script.playback` | The play row. The heart saves the song in Music Assistant and is grayed out on other speakers. |
 | `script.set_group_volume` | Sets the volume of the speaker and its group, and keeps the balance between the speakers |
 | `script.group_speakers` | Speaker groups: adds a speaker, takes it out, groups all free speakers or ends the group. A free speaker plays nothing and uses no input. |
+| `input_boolean.music_pop_up` | Open with a speaker: opens the pop-up when it turns on |
+| `script.open_music` | Open with a speaker: selects the speaker and opens the pop-up |
 | `light.living_room_display` | The amplifier's display, among the shortcuts |
