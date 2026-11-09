@@ -13,7 +13,46 @@ New are the pop-ups for the lights, music, favorites, the server and the vacuum,
 
 ### Upgrading
 
-A 2.0 dashboard can't be updated to 3.0. The parts were built again, so moving means setting them up like a new install, with the home's own entities. Until then, a 2.0 dashboard keeps working with the new theme. The README has the steps under [Coming from 2.0](https://github.com/hazymorning/origami#coming-from-2-0), and the [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0) keeps the 2.0 files and README.
+A 2.0 dashboard keeps working with 3.0. It needs the new modules and a small change on its light and fan cards, as the steps below say. After that, the new parts can take the place of the old cards one at a time. Each part is set up with the home's own entities, like any new part, so moving everything takes some time, but nothing has to move at once. Anyone who stays on 2.0 finds its package, dashboard and README in the [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0).
+
+1. Update Bubble Card to 3.4 or later and Navbar Card to 1.8.0 or later.
+2. Update Origami in HACS and run `frontend.reload_themes`. The 2.0 cards keep their look, apart from the new shadows and a slightly lighter page in light mode. A copy of the theme under another name keeps its old shadows until it gets the new shadow tokens, `tile-chip-background` and `shadow-sheet` in each mode and `shadow-elevated` with `var(--shadow-edge)` at its start.
+3. Update all modules together, because the new ones need the new Base. In the editor of any Bubble card, open **Modules**, then **My Modules**, and paste each module's new version from [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) over its old one. Delete Light and Speaker Select there, because 3.0 has no such modules. For modules in `/config/bubble_card/modules`, copy the folder again and delete `origami_light.yaml` and `origami_speaker.yaml`.
+4. Take `origami_light` and `origami_speaker` out of the cards. Light cards need `state_content` with `state` and `brightness`, and fan cards `state_content: percentage`, because no module writes their state line anymore.
+
+   ```yaml
+   state_content:
+     - state
+     - brightness
+   ```
+
+<details>
+<summary><b>Moving to the new parts</b></summary>
+
+<br>
+
+Each part is set up from its folder, as its README says, and takes the place of these 2.0 cards. The pop-ups for the lights, music, favorites, the server and the vacuum are new.
+
+| 2.0 | 3.0 |
+| --- | --- |
+| Greeting and notifications | [Greeting and notifications](https://github.com/hazymorning/origami/tree/main/dashboard/greeting) |
+| Menu with the server card | [Menu](https://github.com/hazymorning/origami/tree/main/dashboard/menu) |
+| Weather | [Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather) |
+| Favorites | [Favorites](https://github.com/hazymorning/origami/tree/main/dashboard/favorites) |
+| Room cards | [Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms) |
+| Climate table | [Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table) |
+| Navigation bar | [Navigation bar](https://github.com/hazymorning/origami/tree/main/dashboard/navigation-bar) |
+| Living room pop-up | [Room](https://github.com/hazymorning/origami/tree/main/dashboard/room) |
+| TV pop-up | [TV](https://github.com/hazymorning/origami/tree/main/dashboard/tv) |
+| Fan pop-up | [Fan](https://github.com/hazymorning/origami/tree/main/dashboard/fan) |
+| Speaker rows with Speaker Select | [Music](https://github.com/hazymorning/origami/tree/main/dashboard/music) |
+
+- Four entities of the 2.0 package already have the IDs that the parts use: `input_boolean.all_rooms` for Rooms, `input_select.selected_speaker` for Music, and `script.thermostat_step` and `script.volume` for Room and TV. The parts use them as they are, so they aren't created again. A second one with the same name would get `_2` at the end of its entity ID.
+- Once no card reads the package's helpers and sensors anymore, `/config/packages/origami.yaml` can go. After a restart, those four entities are created as the parts' READMEs describe.
+- Paper Buttons Row can go once no card uses it.
+- The new TV remote sends an arrow's command once while it's held, because Bubble Card can't repeat an action.
+
+</details>
 
 <a name="changes-on-2-0-cards"></a>
 <details>

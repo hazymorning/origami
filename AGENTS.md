@@ -6,7 +6,7 @@ These notes are for coding agents that work with this repository.
 
 Most people use Origami as a starting point for their own dashboard. Every home has other entities, devices and integrations, so help them take the parts they want and fit those to their home.
 
-- Someone who runs the 2.0 dashboard finds the steps under Coming from 2.0 in the README. A 2.0 dashboard can't be updated, so the new parts go into a new dashboard, and four entities of the 2.0 package already have the IDs that the parts use.
+- Someone who runs the 2.0 dashboard finds the upgrade steps in the changelog, linked under Coming from 2.0 in the README. Their dashboard keeps working after those steps, so its cards can be replaced with the new parts one at a time. Four entities of the 2.0 package already have the IDs that the parts use.
 - Before you write anything, read the README of the part they want, in its folder under `dashboard/`. For Bubble cards, also read the [module reference](bubble_card/README.md). Do not guess options.
 - Every part works on its own. Take only the parts they ask for, with the helpers and scripts that those parts need.
 - Build the way Origami does: Bubble Card's card types and the Origami modules first, then Home Assistant's own template sensors and scripts, and a new custom card only for a gap that nothing else can fill. Never use card-mod.
