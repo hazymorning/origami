@@ -175,12 +175,55 @@ Cleaning for the whole home or just one room. [More](dashboard/vacuum/)
 
 ## More
 
+<a name="coming-from-2-0"></a>
 <details>
 <summary><b>Coming from 2.0</b></summary>
 
 <br>
 
-A 2.0 dashboard keeps working with 3.0 after four short steps, so the new parts can take its place one at a time. The [changelog](CHANGELOG.md#upgrading) has the steps and what changed on existing cards.
+A 2.0 dashboard can't be updated to 3.0. The parts were built again, mostly with Bubble Card instead of Paper Buttons Row, and they need no package. Moving means setting them up like a new install, with the home's own entities.
+
+The 2.0 dashboard keeps working in the meantime. After the theme's update in HACS, the page is a little lighter in light mode and the shadows are new, and nothing else changes until the modules are updated. The [V2.0 release](https://github.com/hazymorning/origami/releases/tag/V2.0) keeps the 2.0 files and README.
+
+1. Update Origami and Bubble Card in HACS, and Bubble Card Tools, Navbar Card, Origami Weather, Origami Notifications and Origami Header where they're installed. Origami needs Bubble Card 3.4 or later. A copy of the theme under another name doesn't update, so copy the new theme again and carry the changes over.
+2. Update all modules at once, because every card shares them. Copy [`bubble_card/modules`](bubble_card/modules) to `/config/bubble_card/modules` again, delete `origami_light.yaml` and `origami_speaker.yaml` there and reload the page. For modules that were added in Bubble Card's editor, paste each new version over the old one under **Modules**, then **My Modules**, add Table, which is new, and delete Light and Speaker Select there.
+3. Fix the 2.0 cards, which now run on the new modules. Cards that had `origami_light` need these lines, and cards with `origami_fan` need `state_content: percentage`, or their state line stays empty. Speaker rows with `origami_speaker` lose their look, and the [music pop-up](dashboard/music/) takes their place. Both module names can go from the cards' module lists.
+
+   ```yaml
+   state_content:
+     - state
+     - brightness
+   ```
+
+4. Add a new dashboard under **Settings**, **Dashboards**, and set up the parts there one at a time, while the 2.0 dashboard stays in use. The table below says which part takes the place of which 2.0 card.
+5. Once the new dashboard is complete, pick it under **Dashboard** in the [user profile](https://my.home-assistant.io/redirect/profile/) and delete the 2.0 dashboard.
+6. Delete `/config/packages/origami.yaml` and restart Home Assistant. Then create the four entities below as the parts' READMEs describe, and remove Paper Buttons Row in HACS unless other cards use it.
+
+| 2.0 | 3.0 |
+| --- | --- |
+| Greeting and notifications | [Greeting and notifications](dashboard/greeting/) |
+| Menu and its server card | [Menu](dashboard/menu/) |
+| Weather | [Weather](dashboard/weather/) |
+| Favorites | [Favorites](dashboard/favorites/) |
+| Room cards | [Rooms](dashboard/rooms/) |
+| Climate table | [Climate table](dashboard/climate-table/) |
+| Navigation bar | [Navigation bar](dashboard/navigation-bar/) |
+| Living room pop-up | [Room](dashboard/room/) |
+| TV pop-up | [TV](dashboard/tv/) |
+| Fan pop-up | [Fan](dashboard/fan/) |
+
+The new TV remote sends an arrow's command once while it's held, because Bubble Card can't repeat an action.
+
+Four entities of the 2.0 package have the IDs that the parts use, so the parts work with them as they are. Skip them in the parts' setup until the package is gone, or the new ones get `_2` at the end of their entity IDs.
+
+| Entity | Part |
+| --- | --- |
+| `input_boolean.all_rooms` | [Rooms](dashboard/rooms/) |
+| `input_select.selected_speaker` | [Music](dashboard/music/) |
+| `script.thermostat_step` | [Room](dashboard/room/) |
+| `script.volume` | [TV](dashboard/tv/) |
+
+What else looks different on 2.0 cards after step 2, and how a card keeps its old look, is in the [changelog](CHANGELOG.md#changes-on-2-0-cards).
 
 </details>
 
