@@ -91,7 +91,7 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
 ## Optional
 
 - **Speaker groups.** For speakers that Home Assistant can group, such as [Sonos](https://www.home-assistant.io/integrations/sonos/), [LinkPlay](https://www.home-assistant.io/integrations/linkplay/) or the players of [Music Assistant](https://www.home-assistant.io/integrations/music_assistant/). The link key opens the group, and while speakers play together, the key after the volume slider opens the volume of each one. Add [`group-speakers.yaml`](group-speakers.yaml) as a script named **Group speakers**, the same way as the other scripts. Without groups, delete `group:` and the link key.
-- **Shortcuts.** The dots open a short list, with room for more, like playlists or radio stations. Under `more:`, keep what fits and delete the rest, or delete `more:` and the dots key. The examples switch the living room speaker to Bluetooth or the TV while it's the selected speaker, and turn an amplifier's display on and off. For the TV, change `Optical In` to the name of the speaker's TV input, also under `words`.
+- **Shortcuts.** The dots open a short list, with room for more, like playlists or radio stations. Under `more:`, keep what fits and delete the rest, or delete `more:` and the dots key. The examples switch the living room speaker to Bluetooth or the TV while it's the selected speaker. For the TV, change `Optical In` to the name of the speaker's TV input, also under `words`.
 - **Open with a speaker.** For a home with several speakers. Another card, such as a room's speaker, opens the pop-up with its own speaker selected. A tap action can open the pop-up or select a speaker, but not both, so a script does both. Create a **Toggle** helper named **Music pop-up**, so its entity ID is `input_boolean.music_pop_up`, add [`open-music.yaml`](open-music.yaml) as a script named **Open music**, the same way as the other scripts, and add these lines to `pop-up.yaml`, so the pop-up opens when the helper turns on. It then opens on every screen that shows the dashboard at that moment.
 
   ```yaml
@@ -131,4 +131,3 @@ Each speaker shows up three times in [`pop-up.yaml`](pop-up.yaml): as a chip bes
 | `script.group_speakers` | Speaker groups: adds a speaker, takes it out, groups all free speakers or ends the group. A free speaker plays nothing and uses no input. |
 | `input_boolean.music_pop_up` | Open with a speaker: opens the pop-up when it turns on |
 | `script.open_music` | Open with a speaker: selects the speaker and opens the pop-up |
-| `light.living_room_display` | The amplifier's display, among the shortcuts |

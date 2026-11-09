@@ -245,8 +245,8 @@ dark:
   - file: favorites/tiles.yaml
     only:
     - Music
-    - Robot
-    - Printer
+    - Shopping
+    - Vacuum
   - file: rooms/header.yaml
     replace:
       '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'
@@ -282,16 +282,17 @@ dark:
   - file: navigation-bar/card.yaml
 light:
   states:
-    switch.printer: {state: 'off', attributes: {friendly_name: Printer}}
+    vacuum.robot: {state: docked, attributes: {friendly_name: Vacuum, battery_level: 100}}
+    timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}
   cards:
   - file: greeting/card.yaml
   - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
     only:
-    - Oven
-    - Bath
-    - Printer
+    - Fan
+    - Shopping
+    - Vacuum
   - file: rooms/header.yaml
     replace:
       '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'']': '[''binary_sensor.living_room_window'', ''binary_sensor.bedroom_window'', ''binary_sensor.office_window'', ''binary_sensor.hallway_window'', ''binary_sensor.kids_room_window'', ''binary_sensor.bathroom_window'']'

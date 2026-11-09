@@ -265,13 +265,6 @@ origami_popup:
                     entity_id: media_player.living_room
                   data:
                     source: Optical In
-              # The display of the living room amplifier
-              - entity: light.living_room_display
-                name: Display
-                icon: mdi:monitor
-                show_name: true
-                tap_action:
-                  action: toggle
 sub_button:
   main:
     # The speaker that the pop-up shows

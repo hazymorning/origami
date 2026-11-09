@@ -185,10 +185,6 @@ dark:
         entity_id:
         - light.bathroom_mirror
         - light.bathroom_night_light
-    input_boolean.bath_time:
-      state: 'on'
-      attributes:
-        friendly_name: Bath time
     sensor.bathroom_temperature:
       state: '23.4'
       attributes:

@@ -290,9 +290,9 @@ Origami 2.0 turns the theme into a complete dashboard for your phone. Version 1.
 
 ### New in 2.0
 
-- The whole phone dashboard is one file, [`dashboard/dashboard.yaml`](https://github.com/hazymorning/origami/blob/main/dashboard/dashboard.yaml). It contains the greeting, notifications, menu, weather, favorites, rooms, climate table and navigation bar.
+- The whole phone dashboard is one file, [`dashboard/dashboard.yaml`](https://github.com/hazymorning/origami/blob/V2.0/dashboard/dashboard.yaml). It contains the greeting, notifications, menu, weather, favorites, rooms, climate table and navigation bar.
 - Three pop-ups open from the dashboard. The room pop-up controls a whole room, the TV pop-up is a remote control, and the fan pop-up has speeds, modes, oscillation and a timer.
-- The helpers come as a package, [`packages/origami.yaml`](https://github.com/hazymorning/origami/blob/main/packages/origami.yaml). It contains the template sensors and scripts for room climate, averages, counters, the greeting, the active speaker and the pop-ups.
+- The helpers come as a package, [`packages/origami.yaml`](https://github.com/hazymorning/origami/blob/V2.0/packages/origami.yaml). It contains the template sensors and scripts for room climate, averages, counters, the greeting, the active speaker and the pop-ups.
 - Eleven modules give Bubble cards the Origami look. They are still experimental.
 - The Montserrat font is included. It loads from your Home Assistant instead of from Google's servers.
 
@@ -304,7 +304,7 @@ Origami 2.0 turns the theme into a complete dashboard for your phone. Version 1.
 - Switches and other entities without a color of their own are now green when they are on, and open windows are cyan.
 - Shadows and fills are set for each mode, and the fills are mixed from a warm base color.
 - Spacing and text sizes use the same token names as Home Assistant, such as `ha-space-*` and `ha-font-size-*`.
-- The new [README](https://github.com/hazymorning/origami#readme) explains the setup step by step and lists the entities that each part uses.
+- The new [README](https://github.com/hazymorning/origami/blob/V2.0/README.md) explains the setup step by step and lists the entities that each part uses.
 
 ### Breaking changes
 

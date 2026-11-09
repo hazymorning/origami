@@ -30,16 +30,16 @@ cards:
           sign: open
         sub_button:
           bottom:
-            - entity: input_boolean.bath_time
-              name: Bath
-              icon: mdi:bathtub-outline
+            - entity: timer.kitchen
+              name: Timer
+              icon: mdi:timer-outline
               origami_tiles:
                 color:
-                  'on': var(--water-color)
+                  active: var(--amber-color)
                 state:
-                  'on': ${num(minutesUntil('input_datetime.bath_time_end'), 0, 'minute')} left
+                  active: ${num(minutesUntil('timer.kitchen'), 0, 'minute')} left
               tap_action:
-                action: toggle
+                action: more-info
             # While the TV is off, the row turns it on. Once it is on, the row opens the TV pop-up.
             - entity: media_player.living_room_tv
               name: TV

@@ -126,11 +126,12 @@ cards:
                 perform_action: media_player.media_next_track
                 target:
                   entity_id: media_player.bathroom
-            # Filled while the speaker uses Bluetooth, because the tap selects it
+            # Filled while the speaker uses Bluetooth, because the tap selects it. It shows only on a speaker with a Bluetooth source.
             - icon: mdi:bluetooth
               show_background: false
               origami_base:
                 icon: "${attr.source === 'Bluetooth' ? 'mdi:bluetooth-connect' : ''}"
+                hidden: ${!(attr.source_list ?? []).includes('Bluetooth')}
               tap_action:
                 action: perform-action
                 perform_action: media_player.select_source
@@ -205,29 +206,6 @@ cards:
                         mini_popup: lamps
             state_content: state
             rows: auto
-          # Bath time is a Toggle helper for an automation, such as one that dims the lamps. Only the switch turns it on or off.
-          - type: custom:bubble-card
-            card_type: button
-            button_type: switch
-            entity: input_boolean.bath_time
-            name: Bath time
-            icon: mdi:shower
-            modules:
-              - origami_base
-            origami_base:
-              compact: true
-              toggle: true
-              tile: true
-            button_action:
-              tap_action:
-                action: none
-            sub_button:
-              main:
-                - icon: mdi:circle
-                  show_background: true
-                  tap_action:
-                    action: toggle
-            rows: 1
 
       # Climate: the header shows the temperature and the humidity, with a dot in a color for the temperature
       - type: vertical-stack
@@ -250,13 +228,14 @@ cards:
                   show_background: false
                   origami_header:
                     name: ${num(state, 1)}° / ${num(states('sensor.bathroom_humidity'), 0, '%')}
-                    # Blue up to 17°, green up to 22°, then yellow and orange, and red above 30°
+                    # Blue up to 17°, green up to 22°, then yellow and orange, and red above 30°, in Celsius. Fahrenheit is converted first.
                     color: >-
-                      ${[[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
+                      ${(t => [[12, '#728FA8B3'], [15, '#7C97A9B3'], [17, '#8BA2A8B3'], [18.5, '#9AAEA3B3'],
                       [22, '#88A37EB3'], [24, '#99A677B3'], [25, '#AEA76FB3'], [26, '#BB9F68B3'],
                       [27, '#C0935FB3'], [28, '#BF8A5FB3'], [29, '#BB7E5DB3'], [30.5, '#B3735CB3'],
                       [32, '#AA6A5AB3'], [Infinity, '#9C6056B3']]
-                      .find(([top]) => parseFloat(state) <= top)?.[1] ?? 'transparent'}
+                      .find(([top]) => t <= top)?.[1] ?? 'transparent')
+                      (hass.config.unit_system.temperature === '°F' ? (state - 32) / 1.8 : parseFloat(state))}
           # Minus and plus move the target by half a degree, and a tap on the card opens the thermostat
           - type: custom:bubble-card
             card_type: button
