@@ -1,5 +1,9 @@
 # Changelog
 
+## Next release
+
+- The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
+
 ## 3.0 · The Final Fold
 
 <picture>
