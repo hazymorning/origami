@@ -1,5 +1,5 @@
 // Makes the hero for make.py: three phones in 3D with the screens that make.py renders, turned toward the headline beside
-// them, on the background of the other images.
+// them, on a plain background.
 //   node hero.mjs <hero.json>
 // hero.json has mode, screens (three screens of 412 × 915 at 2x from frame.mjs), headline and line (their lines), three
 // (the folder with three.js), fonts (the folder with Montserrat) and out.
@@ -20,8 +20,8 @@ const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const dark = spec.mode === 'dark';
 // The image is 1800 × 800 at 2x, with the text on the left and the phones on the right
 const W = 1800, H = 800, DPR = 2;
-// The background of the other images, a little lighter than the light page or a little darker than the dark one
-const ground = dark ? '#111010' : '#FBFAF8';
+// A little lighter than the light page by day, and the dark page itself at night, where a darker one hides the phones' shadows
+const ground = dark ? '#181715' : '#FBFAF8';
 const ink = dark ? '#E5E3DD' : '#4F4C49';
 
 // The phones are white with a soft sheen by day and nearly black by night. Their screens are 412 × 915 with rounded corners,
