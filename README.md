@@ -251,3 +251,17 @@ Many details in Origami look like they could be done in an easier way, but most 
 - Keep a copy of the configuration before pasting anything, so a change that goes wrong is easy to undo.
 
 </details>
+
+<details>
+<summary><b>Status and roadmap</b></summary>
+
+<br>
+
+Origami is one home's dashboard, written down so other homes can use it too. The READMEs explain every part as generally as possible, so it works in most homes. Still, it all grew out of that one setup and a lot of fussing over details, so quite a few things work the way that home needs and look the way one person likes. Most dashboards that people share are probably like that, but here at least every part can be changed to fit another home.
+
+- **Changes.** Origami changes along with the home it comes from, for a fix, for something that makes daily use nicer, or just for fun. An update can change how a part looks or works, and the [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) says what changed and what to update.
+- **Roadmap.** There's none. New things come from daily use and from what others share, so ideas and questions are welcome in the [Discussions](https://github.com/hazymorning/origami/discussions).
+
+> ⚠️ **Watch only the releases.** On the [repository's page](https://github.com/hazymorning/origami), select **Watch**, then **Custom**, check **Releases** and select **Apply**. Then an email comes with each release and its new modules, fixes and improvements. **All Activity** sends one for every issue and comment as well, which gets a lot very quickly.
+
+</details>
