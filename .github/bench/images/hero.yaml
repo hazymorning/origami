@@ -1,6 +1,6 @@
-# The README's first image, for GitHub's light and dark theme at once: the home view and the TV remote at night, and the
-# music pop-up by day between them, on three phones turned toward the headline beside them. Each phone takes another image's
-# file in its own mode and changes a few of its keys. At night it rains, and the rooms stay cards with the climate table closed.
+# The README's first image: the home view, the music pop-up and the TV remote on three phones, turned toward the headline
+# beside them. Each phone takes another image's file and changes a few of its keys. By day, the home view's player plays the
+# song that the music pop-up shows. At night it rains, the rooms stay cards with the climate table closed, and the speaker group stays closed.
 kind: hero
 headline:
   - A chill dashboard
@@ -10,7 +10,33 @@ line:
   - way and refined over years of daily use.
 phones:
   - from: home-view
-    mode: dark
+    light:
+      states:
+        media_player.living_room:
+          state: playing
+          attributes:
+            friendly_name: Living room
+            media_title: Daybreak
+            media_artist: Lumen Fields
+            entity_picture: /local/cover-1.jpg
+            group_members:
+              - media_player.living_room
+              - media_player.bedroom
+            volume_level: 0.32
+            media_duration: 214
+            media_position: 71
+            media_position_updated_at: '2026-11-04T12:39:00+00:00'
+            supported_features: 152463
+        media_player.bedroom:
+          state: playing
+          attributes:
+            friendly_name: Bedroom
+            media_title: Daybreak
+            media_artist: Lumen Fields
+            entity_picture: /local/cover-1.jpg
+            group_members:
+              - media_player.living_room
+              - media_player.bedroom
     dark:
       drop:
         - climate-table/card.yaml
@@ -18,7 +44,6 @@ phones:
         input_boolean.climate_table: {state: 'off', attributes: {friendly_name: Climate table}}
         weather.home: {state: rainy, attributes: {friendly_name: Home, temperature: 6, temperature_unit: °C, humidity: 94, wind_speed: 14, wind_speed_unit: km/h, pressure: 1004, supported_features: 3}}
   - from: music-pop-up
-    mode: light
     light:
       states:
         media_player.living_room:
@@ -27,5 +52,6 @@ phones:
         media_player.kitchen:
           state: playing
           attributes: {friendly_name: Kitchen, volume_level: 0.2, media_title: Daybreak, media_artist: Lumen Fields, entity_picture: /local/cover-1.jpg, group_members: [media_player.living_room, media_player.kitchen]}
+    dark:
+      click: []
   - from: tv-pop-up
-    mode: dark
