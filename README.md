@@ -4,8 +4,7 @@
 </div>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
-  <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
+  <img alt="Origami on three phones, with the home view and the TV remote at night and the music pop-up by day" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero.webp">
 </picture>
 
 Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and most of it was built by hand on a phone, which is why it's made for phones first.
