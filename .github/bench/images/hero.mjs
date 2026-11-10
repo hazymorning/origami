@@ -20,8 +20,8 @@ const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const dark = spec.mode === 'dark';
 // The image is 1800 × 800 at 2x, with the text on the left and the phones on the right
 const W = 1800, H = 800, DPR = 2;
-// A little lighter than the light page by day, and the dark page itself at night, where a darker one hides the phones' shadows
-const ground = dark ? '#181715' : '#FBFAF8';
+// A little lighter than the light page by day, and a dark gray at night that stands apart from GitHub's dark page
+const ground = dark ? '#242220' : '#FBFAF8';
 const ink = dark ? '#E5E3DD' : '#4F4C49';
 
 // The phones are white with a soft sheen by day and nearly black by night. Their screens are 412 × 915 with rounded corners,
@@ -30,7 +30,7 @@ const look = {
   W, H, DPR, frames: 128,
   screens: spec.screens.map((_, i) => `/screen-${i}.png`),
   radius: 48, bevel: 7, depth: 28, keys: [[250, 64], [100, 120]],
-  body: dark ? { color: '#2B2927', roughness: 0.4 } : { color: '#F4F2EE', roughness: 0.42 },
+  body: dark ? { color: '#1E1C1A', roughness: 0.4 } : { color: '#F4F2EE', roughness: 0.42 },
   env: dark ? 0.7 : 1,
   glass: { roughness: 0.12, env: 0.6 },
   turn: 20, spacing: 500, stagger: [-30, 30, -30],
