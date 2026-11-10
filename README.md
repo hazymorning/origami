@@ -8,9 +8,7 @@
   <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
 </picture>
 
-Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and most of it was built by hand on a phone, which is why it's made for phones first.
-
-The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard.
+Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and most of it was built by hand on a phone, which is why it's made for phones first. The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard.
 
 > [!NOTE]
 > **Origami takes some setting up.** It builds on Bubble Card and on Home Assistant's own themes, helpers and scripts, and adds its own code only where nothing else fits. So a part is more than a card to paste, and its README lists what else it needs. In return, it all fits together and stays easy to change, with fewer parts that can break. [How Origami is built](#how-origami-is-built) explains the idea.
@@ -251,5 +249,19 @@ Many details in Origami look like they could be done in an easier way, but most 
 - Ask it to build in the order under [How Origami is built](#how-origami-is-built), so the part still fits the rest of the dashboard after an update. Never card-mod, because it writes over the same styles as the modules, and the two get in each other's way.
 - Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get, and a part with a made-up ID doesn't work.
 - Keep a copy of the configuration before pasting anything, so a change that goes wrong is easy to undo.
+
+</details>
+
+<details>
+<summary><b>Status and roadmap</b></summary>
+
+<br>
+
+Origami is one home's dashboard, written down so other homes can use it too. The READMEs explain every part as generally as possible, so it works in most homes. Still, it all grew out of that one setup and a lot of fussing over details, so quite a few things work the way that home needs and look the way one person likes. Most dashboards that people share are probably like that, but here at least every part can be changed to fit another home.
+
+- **Changes.** Origami changes along with the home it comes from, for a fix, for something that makes daily use nicer, or just for fun. An update can change how a part looks or works, and the [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) says what changed and what to update.
+- **Roadmap.** There's none. New things come from daily use and from what others share, so ideas and questions are welcome in the [Discussions](https://github.com/hazymorning/origami/discussions).
+
+> ⚠️ **Watch only the releases.** On the [repository's page](https://github.com/hazymorning/origami), select **Watch**, then **Custom**, check **Releases** and select **Apply**. Then an email comes with each release and its new modules, fixes and improvements. **All Activity** sends one for every issue and comment as well, which gets a lot very quickly.
 
 </details>

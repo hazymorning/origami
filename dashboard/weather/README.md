@@ -1,13 +1,13 @@
 # Weather
 
-Origami Weather is the part that took the longest by far, many hundreds of hours in 2026. It grew into a small builder for weather cards, so nearly anything is possible, from a realistic sky to a classic forecast or something quite exotic. The three cards here are only a start and some inspiration.
+Origami Weather is a little passion project which started as "Atmospheric Weather Card" on a previous GitHub account. It grew into a small builder for weather cards, so nearly anything is possible, from a realistic sky to a classic forecast or something very creative. The three cards here are only a start and some inspiration.
 
 <details>
 <summary><b>Calm on purpose</b></summary>
 
 <br>
 
-All three cards keep the weather calm, and the house and the comparison card leave out most of its effects, such as the drifting clouds. That's only a matter of taste: after a year of looking at weather animations, the maintainer likes them toned down. Origami Weather can show much more, such as clouds, rain, snow and thunderstorms, stars with shooting stars, and birds, planes and balloons now and then. Its [README](https://github.com/hazymorning/origami_weather#backgrounds) shows how to turn them on and off.
+All three cards keep the weather calm, and the house and the comparison card leave out most of its effects, such as the drifting clouds. That's only a matter of taste though. Origami Weather can show much more. Its [README](https://github.com/hazymorning/origami_weather#backgrounds) shows more examples.
 
 </details>
 
@@ -33,11 +33,11 @@ The diorama is a set of pictures, one for each kind of weather in light and dark
 A house whose rooms light up with the home's lights and show how warm they are, with the day's weather, low and high on a chip below the temperature. [`house.yaml`](house.yaml)
 
 <details>
-<summary><b>The home's own house</b></summary>
+<summary><b>Creating an image for a home</b></summary>
 
 <br>
 
-The house is a drawing, with one more picture for each room's light, and the card loads them from [`house`](house) in this repository. A drawing of the home's own house works the same way, and the [Origami Weather README](https://github.com/hazymorning/origami_weather#layouts) explains how to have one drawn. The pictures go into the `www` folder of Home Assistant's configuration. In [`house.yaml`](house.yaml), each `image` and `image_dark` then points to `/local/` followed by the file's name, and the temperature chips move with `position_x` and `position_y`.
+The house is a drawing, with one more picture for each room's light, and the card loads them from [`house`](house) in this repository. The [Origami Weather README](https://github.com/hazymorning/origami_weather#layouts) explains how to create a custom image. The pictures go into the `www` folder of Home Assistant's configuration. In [`house.yaml`](house.yaml), each `image` and `image_dark` then points to `/local/` followed by the file's name, and the temperature chips move with `position_x` and `position_y`.
 
 </details>
 
