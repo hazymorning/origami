@@ -209,7 +209,7 @@ for readme in sorted((ROOT / "dashboard").glob("*/README.md")):
 # Screenshots: an image in a README or the module reference whose file doesn't exist yet is a placeholder.
 # The list is the shot list for the last pass before the release, and with --release, a placeholder fails.
 # While a release is built, the images point to next, so its READMEs show them. With --release, such an image fails.
-# A source tag counts too, such as an image's dark version that GitHub shows in its dark theme.
+# The hero's dark version stands in a source tag, which GitHub shows in its dark theme.
 shots = {}
 for name in READMES:
     for tag in re.findall(r"<(?:img|source)\b[^>]*>", (ROOT / name).read_text(encoding="utf-8")):

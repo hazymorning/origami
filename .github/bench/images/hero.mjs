@@ -1,8 +1,8 @@
 // Makes the hero for make.py: three phones in 3D with the screens that make.py renders, turned toward the headline beside
-// them, on a transparent background, so one image fits GitHub's light and dark theme.
+// them, on a transparent background.
 //   node hero.mjs <hero.json>
-// hero.json has screens (three screens of 412 × 915 at 2x from frame.mjs), modes (each phone's mode, light or dark),
-// headline and line (their lines), three (the folder with three.js), fonts (the folder with Montserrat) and out.
+// hero.json has mode, screens (three screens of 412 × 915 at 2x from frame.mjs), headline and line (their lines), three
+// (the folder with three.js), fonts (the folder with Montserrat) and out.
 // Each phone is a rounded body with real depth and two keys on its side, with its screen in front. A studio light and a soft
 // key light light them, and the key light's shadow falls on a wall close behind them. Every frame moves the camera by less
 // than a pixel and the key light within its area, and the average of all frames gives clean edges and soft shadows.
@@ -17,25 +17,27 @@ const require = createRequire(path.join(here, '../package.json'));
 const { chromium } = require('playwright');
 
 const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-// The image is 1800 × 840 at 2x, with the text at the left edge and the phones filling the right
+const dark = spec.mode === 'dark';
+// The image is 1800 × 840 at 2x, with the text at the left edge and the phones filling the right. Its background is
+// transparent, so GitHub's page shows through.
 const W = 1800, H = 840, DPR = 2;
-// A warm gray that reads on GitHub's white page and on its black one
-const ink = '#857E77';
+// The theme's ink for the logo and the headline, and a softer one for the line
+const ink = dark ? '#E5E3DD' : '#4F4C49';
+const soft = dark ? '#ABA9A4' : '#83807E';
 
-// A phone is white with a soft sheen in light mode and nearly black in dark mode. Their screens are 412 × 915 with rounded
-// corners, their bodies grow from the screen by the bevel, and they turn toward the text, the middle one a little higher.
-// The shadow on the wall shows on a light page and fades on a dark one, like a shadow on a dark wall.
+// The phones are white with a soft sheen by day and nearly black by night. Their screens are 412 × 915 with rounded corners,
+// their bodies grow from the screen by the bevel, and they turn toward the text, the middle one a little higher.
 const look = {
   W, H, DPR, frames: 128,
   screens: spec.screens.map((_, i) => `/screen-${i}.png`),
   radius: 48, bevel: 7, depth: 28, keys: [[250, 64], [100, 120]],
-  bodies: spec.modes.map((mode) => (mode === 'dark' ? { color: '#1E1C1A', roughness: 0.4 } : { color: '#F4F2EE', roughness: 0.42 })),
-  env: 0.85,
+  body: dark ? { color: '#1E1C1A', roughness: 0.4 } : { color: '#F4F2EE', roughness: 0.42 },
+  env: dark ? 0.7 : 1,
   glass: { roughness: 0.12, env: 0.6 },
   turn: 20, spacing: 500, stagger: [-30, 30, -30],
   wall: 110,
-  shadow: { color: '#4A3F35', opacity: 0.25 },
-  key: { intensity: 1.35, dir: [0.75, -0.9, -2], spread: 0.22 },
+  shadow: dark ? { color: '#000000', opacity: 0.55 } : { color: '#4A3F35', opacity: 0.25 },
+  key: { intensity: dark ? 1.2 : 1.5, dir: [0.75, -0.9, -2], spread: 0.22 },
   // The camera's lens and how much of the scene's height it sees, and where the phones' middle stands in the image
   fov: 22, viewH: 1166, cx: 1222, cy: 410,
 };
@@ -79,7 +81,7 @@ async function render(P) {
   const screenGeo = new THREE.ShapeGeometry(outline, 56);
   const pos = screenGeo.attributes.position, uv = screenGeo.attributes.uv;
   for (let i = 0; i < pos.count; i++) uv.setXY(i, (pos.getX(i) + SW / 2) / SW, (pos.getY(i) + SH / 2) / SH);
-  const bodyMats = P.bodies.map((b) => new THREE.MeshPhysicalMaterial({ color: b.color, metalness: 0, roughness: b.roughness, clearcoat: 0.6, clearcoatRoughness: 0.22 }));
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color: P.body.color, metalness: 0, roughness: P.body.roughness, clearcoat: 0.6, clearcoatRoughness: 0.22 });
   // The glass only adds its reflection to the screen
   const glassMat = new THREE.MeshPhysicalMaterial({
     color: 0x000000, roughness: P.glass.roughness, envMapIntensity: P.glass.env, transparent: true, depthWrite: false,
@@ -88,7 +90,6 @@ async function render(P) {
   const loader = new THREE.TextureLoader();
   for (const [i, url] of P.screens.entries()) {
     const phone = new THREE.Group();
-    const bodyMat = bodyMats[i];
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.castShadow = true;
     const map = await loader.loadAsync(url);
@@ -235,7 +236,7 @@ html, body { margin: 0; background: transparent; }
 .logo { display: flex; align-items: flex-start; gap: ${LOGO * 0.3}px; font-weight: 700; font-size: ${LOGO}px; line-height: 1; letter-spacing: -0.01em; }
 .logo svg { display: block; flex: none; margin: ${LOGO * 0.1585}px 0px 0px 0px; }
 .head { margin: 46px 0px 0px 0px; font-weight: 700; font-size: ${HEAD}px; line-height: 1.22; letter-spacing: -0.01em; }
-.line { margin: 26px 0px 0px 0px; font-weight: 500; font-size: ${SUB}px; line-height: ${SUB_LINE}; }
+.line { margin: 26px 0px 0px 0px; font-weight: 500; font-size: ${SUB}px; line-height: ${SUB_LINE}; color: ${soft}; }
 </style></head><body><div class="canvas">
 <img class="phones" src="${phones}">
 <div class="intro"><div class="logo">${icon}<span>Origami</span></div>
