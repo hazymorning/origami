@@ -2,17 +2,6 @@
 
 These rules are for work on Origami itself: its modules, theme, dashboard and docs in the hazymorning/origami repository. They hold what the code alone does not show, and coding agents follow them too.
 
-## Handing files to the user
-
-The user tests every change on a phone, in their own Home Assistant. Every round that changes a file the user has to paste, such as a module, a card, a pop-up or a script, ends the same way:
-
-- All changed files go on one published page, each with its own copy button, in the order to paste them. Files that did not change stay off the page.
-- The user keeps their own setup in step with the repository. A file counts as changed when its text differs from the version the user has, also after a cleanup that changes nothing they see. A file whose text is the same stays off the page.
-- Each file on the page says in one line what changed in it, such as a cleanup that looks and works the same, so the user knows why it is there.
-- The same page is updated for every round, so its link stays the same, and the reply gives that link.
-- Never paste long YAML into the conversation, and never send the files as attachments instead. The user can only copy from that page.
-- Replies put the important parts, such as a cause, a change the user has to make or the link to the page, in large headings, so the user sees them at once on the phone.
-
 ## The idea
 
 Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
