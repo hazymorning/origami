@@ -30,9 +30,9 @@ side by side, and has:
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
 
-hero.yaml makes images/v3/hero-light.webp and hero-dark.webp, the README's first image. Each of its phones takes another
-image's file with from and changes its keys in the same way, and hero.mjs puts the screens on phones in 3D beside the
-headline and the line. three.js is downloaded once into .github/bench/.cache too.
+hero.yaml makes images/v3/hero.webp, the README's first image, for GitHub's light and dark theme at once. Each of its phones
+takes another image's file with from, in its own mode, and changes its keys in the same way, and hero.mjs puts the screens on
+phones in 3D beside the headline and the line. three.js is downloaded once into .github/bench/.cache too.
 """
 import json, os, random, re, shutil, subprocess, sys, urllib.request
 import yaml
@@ -215,30 +215,30 @@ def screen(im, out):
 
 
 def hero(name, spec):
-    """Each phone's screen in both modes, then hero.mjs puts them on phones in 3D beside the headline"""
+    """Each phone's screen in its own mode, then hero.mjs puts them on phones in 3D beside the headline"""
     home = load(os.path.join(HERE, 'home.yaml'))
     work = os.path.join(CACHE, 'images', name)
-    screens = {'light': [], 'dark': []}
+    screens, modes = [], []
     for i, p in enumerate(spec['phones']):
         files = [load(os.path.join(HERE, p['from'] + '.yaml')), p]
         phone_work = os.path.join(work, str(i))
         folder(phone_work)
-        for mode in screens:
-            keys, shot = shoot(mode, home, files, phone_work, True)
-            im = Image.open(shot).convert('RGB')
-            out = {'kind': 'screen', 'mode': mode, 'shot': shot, 'font': os.path.join(CACHE, 'status-font.woff2'), 'out': os.path.join(phone_work, f'screen-{mode}.png')}
-            screen(im, out)
-            im.save(shot)
-            out.update(status(f'{name}-{p["from"]}', mode, p, keys))
-            frame(out, phone_work)
-            screens[mode].append(out['out'])
-    for mode in screens:
-        job = {'mode': mode, 'screens': screens[mode], 'headline': spec['headline'], 'line': spec['line'],
-               'three': os.path.join(CACHE, 'three'), 'fonts': os.path.join(REPO, 'www/fonts'), 'out': os.path.join(work, f'{name}-{mode}.png')}
-        with open(os.path.join(work, f'{name}-{mode}.json'), 'w') as f:
-            json.dump(job, f)
-        subprocess.run(['node', os.path.join(HERE, 'hero.mjs'), os.path.join(work, f'{name}-{mode}.json')], check=True)
-        save(Image.open(job['out']), os.path.join(OUT, f'{name}-{mode}.webp'), False)
+        mode = p['mode']
+        keys, shot = shoot(mode, home, files, phone_work, True)
+        im = Image.open(shot).convert('RGB')
+        out = {'kind': 'screen', 'mode': mode, 'shot': shot, 'font': os.path.join(CACHE, 'status-font.woff2'), 'out': os.path.join(phone_work, f'screen-{mode}.png')}
+        screen(im, out)
+        im.save(shot)
+        out.update(status(f'{name}-{p["from"]}', mode, p, keys))
+        frame(out, phone_work)
+        screens.append(out['out'])
+        modes.append(mode)
+    job = {'screens': screens, 'modes': modes, 'headline': spec['headline'], 'line': spec['line'],
+           'three': os.path.join(CACHE, 'three'), 'fonts': os.path.join(REPO, 'www/fonts'), 'out': os.path.join(work, f'{name}.png')}
+    with open(os.path.join(work, f'{name}.json'), 'w') as f:
+        json.dump(job, f)
+    subprocess.run(['node', os.path.join(HERE, 'hero.mjs'), os.path.join(work, f'{name}.json')], check=True)
+    save(Image.open(job['out']), os.path.join(OUT, f'{name}.webp'), False)
 
 
 def make(name):
