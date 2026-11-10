@@ -229,7 +229,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 ${font(500)}
 ${font(700)}
 html, body { margin: 0; background: transparent; }
-.canvas { position: relative; width: ${W}px; height: ${H}px; overflow: hidden; border-radius: 28px; background: ${ground}; }
+.canvas { position: relative; width: ${W}px; height: ${H}px; overflow: hidden; border-radius: 32px; background: ${ground}; }
 .phones { position: absolute; left: 0; top: 0; width: ${W}px; height: ${H}px; }
 .intro { position: absolute; left: ${LEFT}px; top: ${top}px; transform: translateY(-50%); color: ${ink}; font-family: 'Montserrat'; }
 .logo { display: flex; align-items: flex-start; gap: ${LOGO * 0.3}px; font-weight: 700; font-size: ${LOGO}px; line-height: 1; letter-spacing: -0.01em; }
