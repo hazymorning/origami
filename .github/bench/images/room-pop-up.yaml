@@ -12,7 +12,7 @@ light:
       attributes:
         friendly_name: Living room TV
         app_name: Netflix
-        media_title: Moon Over the Sea
+        media_title: Before the Storm
         media_content_type: video
         entity_picture: /local/tv-2.jpg
     switch.living_room_console:

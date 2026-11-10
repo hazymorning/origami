@@ -1,6 +1,6 @@
 # The README's first image: the home view, the music pop-up and the TV remote on three phones, turned toward the headline
 # beside them. Each phone takes another image's file and changes a few of its keys. By day, the home view's player plays the
-# song that the music pop-up shows. At night, the rooms stay cards with the climate table closed, and the speaker group stays closed.
+# song that the music pop-up shows. At night it rains, the rooms stay cards with the climate table closed, and the speaker group stays closed.
 kind: hero
 headline:
   - A chill dashboard
@@ -42,6 +42,7 @@ phones:
         - climate-table/card.yaml
       states:
         input_boolean.climate_table: {state: 'off', attributes: {friendly_name: Climate table}}
+        weather.home: {state: rainy, attributes: {friendly_name: Home, temperature: 6, temperature_unit: °C, humidity: 94, wind_speed: 14, wind_speed_unit: km/h, pressure: 1004, supported_features: 3}}
   - from: music-pop-up
     light:
       states:
