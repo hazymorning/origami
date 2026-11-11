@@ -3,6 +3,7 @@
 ## Next release
 
 - The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
+- A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it.
 
 ## 3.0 · The Final Fold
 

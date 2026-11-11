@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds ten modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
+This folder holds eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!NOTE]
 > Long-time Bubble Card users may wonder why many cards don't use the card types made for them, such as the media player card. Everything here is built around usability. People at home who aren't very technical didn't get ideas like a card that doubles as a slider when it's held. They're nice ideas, but they didn't work out in daily use for the people this was made for, so a card that explains itself is almost always the choice here.
@@ -28,6 +28,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Header](#header) | `origami_header` | separator | A section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Grids and lists of tiles. |
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
+| [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines or bars, below the content or behind it. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
 
 > [!TIP]
@@ -1427,6 +1428,88 @@ sub_button:
 ```
 
 The office has no thermostat, so its temperature cell names its column. The [climate table](../dashboard/climate-table/card.yaml) has five columns and uses the other keys, such as arrows for the warmest and the coldest room.
+
+</details>
+
+### Graph
+
+The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height, and it draws in from the left when the card appears.
+
+<img width="800" alt="A room card with its temperature as a soft area behind it, and a thermostat with its temperature and its heating times below its controls, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
+
+<details>
+<summary>Options and example</summary>
+
+<br>
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `attribute`, `type` and `color`. `type: bars` draws bars: the share of each time step that the entity was on, or its mean value. A thermostat's bars show how long it heated or cooled. |
+| `hours` | `24` | How many hours the graph shows, up to 168. |
+| `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
+| `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
+| `fill` | `fade` below, `solid` behind | `fade`, `solid` or `none`, for the area under the first line. |
+| `line` | `true` below, `false` behind | The line on top of the area. |
+| `points` | `last` below, `none` behind | `last` marks the newest value, `all` every value, and `none` none. |
+| `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
+| `min`, `max` | | Fixed ends of the scale for the first line's unit. Without them, the scale fits the values. |
+| `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
+| `smooth` | `true` | With `false`, the line runs straight from value to value. |
+| `animate` | `true` | Draws the graph in from the left when it appears. |
+
+Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
+
+Below its controls, this thermostat shows its temperature and when it heated. Behind a room card, `entities: [sensor.living_room_temperature]` and `position: background` are enough.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: switch
+entity: climate.living_room
+name: Heating
+icon: mdi:thermostat
+modules:
+  - origami_base
+  - origami_climate
+  - origami_graph
+origami_base:
+  group: true
+  tile: true
+origami_graph:
+  entities:
+    - entity: climate.living_room
+      attribute: current_temperature
+    - entity: climate.living_room
+      type: bars
+  extrema: true
+button_action:
+  tap_action:
+    action: more-info
+sub_button:
+  main:
+    - icon: mdi:minus
+      show_background: true
+      tap_action:
+        action: perform-action
+        perform_action: script.thermostat_step
+        data:
+          thermostat: climate.living_room
+          step: -0.5
+    - entity: climate.living_room
+      css_class: readout
+      show_icon: false
+      show_name: false
+      show_background: false
+      state_content: temperature
+    - icon: mdi:plus
+      show_background: true
+      tap_action:
+        action: perform-action
+        perform_action: script.thermostat_step
+        data:
+          thermostat: climate.living_room
+          step: 0.5
+```
 
 </details>
 

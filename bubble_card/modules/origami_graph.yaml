@@ -1,0 +1,595 @@
+origami_graph:
+  name: "Origami • Graph"
+  version: "1.0.0"
+  supported:
+    - button
+  description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and marks the last, highest and lowest values."
+  editor:
+    - name: entities
+      label: "Entities"
+      selector:
+        object:
+          multiple: true
+          label_field: entity
+          fields:
+            entity:
+              label: "Entity"
+              required: true
+              selector:
+                entity: {}
+            attribute:
+              label: "Attribute, such as current_temperature"
+              selector:
+                text: {}
+            type:
+              label: "Type"
+              selector:
+                select:
+                  mode: dropdown
+                  options:
+                    - label: Line
+                      value: line
+                    - label: Bars
+                      value: bars
+            color:
+              label: "Color"
+              selector:
+                text: {}
+    - name: hours
+      label: "Hours to show"
+      selector:
+        number:
+          min: 1
+          max: 168
+          mode: box
+      default: 24
+    - name: position
+      label: "Position"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Below the content
+              value: bottom
+            - label: Behind the content
+              value: background
+      default: bottom
+    - name: height
+      label: "Height, such as 64px, or 60% behind the content"
+      selector:
+        text: {}
+    - name: fill
+      label: "Fill under the line"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Fade
+              value: fade
+            - label: Solid
+              value: solid
+            - label: None
+              value: none
+      default: fade
+    - name: line
+      label: "Line on top of the area, shown below the content and hidden behind it unless set"
+      selector:
+        boolean: {}
+    - name: points
+      label: "Points"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Last value
+              value: last
+            - label: Every value
+              value: all
+            - label: None
+              value: none
+    - name: extrema
+      label: "Mark the highest and lowest value"
+      selector:
+        boolean: {}
+      default: false
+    - name: min
+      label: "Lowest value of the scale"
+      selector:
+        number:
+          mode: box
+          step: any
+    - name: max
+      label: "Highest value of the scale"
+      selector:
+        number:
+          mode: box
+          step: any
+    - name: gradient
+      label: "Color by value"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: None
+              value: none
+            - label: Temperature
+              value: temperature
+            - label: Own colors
+              value: custom
+      default: none
+    - name: stops
+      label: "Own colors, each from a value"
+      selector:
+        object:
+          multiple: true
+          label_field: value
+          fields:
+            value:
+              label: "Value"
+              required: true
+              selector:
+                number:
+                  mode: box
+                  step: any
+            color:
+              label: "Color"
+              required: true
+              selector:
+                text: {}
+    - name: smooth
+      label: "Smooth line"
+      selector:
+        boolean: {}
+      default: true
+    - name: animate
+      label: "Draw the graph in when it appears"
+      selector:
+        boolean: {}
+      default: true
+  code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_graph needs origami_base 13 or later");
+      const cfg = this.config.origami_graph ?? {};
+      const wrap = card.querySelector(".bubble-wrapper");
+      const box = card.querySelector(".bubble-container");
+      if (!wrap || !box) return "";
+      const bg = cfg.position === "background";
+      // Below the content, the card grows by the graph, so it asks for auto height until rows are set, as Header does
+      const auto = !bg && (this.config.grid_options?.rows ?? this.config.rows) === undefined;
+      const own = Object.getPrototypeOf(this)?.getGridOptions;
+      if (typeof own === "function" && auto !== !!this._orgGAutoRows) {
+        if (auto) this.getGridOptions = () => ({ ...own.call(this), rows: "auto", min_rows: undefined, max_rows: undefined });
+        else delete this.getGridOptions;
+        this._orgGAutoRows = auto;
+        requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
+      }
+
+      // The entities to draw. A plain entity ID is a line, and without entities the card's own entity is drawn.
+      // Bars of a thermostat show how long it heated or cooled, from its action.
+      const series = [].concat(cfg.entities ?? (entity ? [entity] : []))
+        .map((s) => (typeof s === "string" ? { entity: s } : s ?? {}))
+        .filter((s) => typeof s.entity === "string" && s.entity.includes("."))
+        .map((s, i) => {
+          const bars = s.type === "bars";
+          const attr = s.attribute || (bars && s.entity.startsWith("climate.") ? "hvac_action" : "");
+          return { i, id: s.entity, attr, bars, color: s.color || null, min: s.min, max: s.max };
+        });
+      const hours = Math.min(Math.max(Number(cfg.hours) || 24, 0.25), 168);
+
+      // One graph per card keeps its history and its elements on the card
+      const g = this._orgGraph ?? (this._orgGraph = { n: (globalThis.__origamiGraphs = (globalThis.__origamiGraphs ?? 0) + 1), rows: new Map() });
+
+      // The history comes from Home Assistant's history stream, which first sends the window and then each new state.
+      // After a reconnect, the stream starts again with a fresh window.
+      const ids = [...new Set(series.map((s) => s.id))];
+      const attrs = series.some((s) => s.attr);
+      const sub = ids.join(",") + "|" + hours + "|" + attrs;
+      const conn = hass.connection;
+      if (g.sub !== sub && ids.length && conn?.subscribeMessage) {
+        g.sub = sub;
+        g.rows = new Map();
+        g.shown = false;
+        const start = () => {
+          g.stop?.();
+          let off = null, live = true;
+          const take = (ev) => {
+            if (!live || !ev?.states) return;
+            g.answered = true;
+            for (const [id, rows] of Object.entries(ev.states)) {
+              if (!ids.includes(id) || !Array.isArray(rows)) continue;
+              const have = g.rows.get(id) ?? [];
+              let a = have.length ? have[have.length - 1].a : undefined;
+              for (const r of rows) {
+                a = r.a ?? a;
+                have.push({ t: Number(r.lu) * 1000, s: r.s, a });
+              }
+              have.sort((x, y) => x.t - y.t);
+              g.rows.set(id, have);
+            }
+            g.draw?.();
+          };
+          conn.subscribeMessage(take, {
+            type: "history/stream",
+            entity_ids: ids,
+            start_time: new Date(Date.now() - hours * 36e5).toISOString(),
+            minimal_response: !attrs,
+            no_attributes: !attrs,
+            significant_changes_only: !attrs,
+          }, { resubscribe: false }).then((u) => { if (live) off = u; else u?.(); }).catch(() => {});
+          const again = () => { g.rows = new Map(); start(); };
+          conn.addEventListener?.("ready", again);
+          g.stop = () => {
+            live = false;
+            off?.();
+            off = null;
+            conn.removeEventListener?.("ready", again);
+          };
+        };
+        start();
+      }
+
+      // The graph lies on the card's surface, right above its background and below its content, either as a strip at the
+      // bottom that the card grows by, or behind the content. Its SVG works in real pixels, so dots stay round.
+      let el = card.querySelector(".org-graph");
+      if (!el) {
+        el = document.createElement("div");
+        el.innerHTML = '<svg aria-hidden="true"><defs></defs><g class="org-graph-bars"></g><g class="org-graph-fills"></g><g class="org-graph-lines"></g><g class="org-graph-dots"></g><g class="org-graph-labels"></g></svg>';
+      }
+      el.className = "org-graph " + (bg ? "background" : "bottom");
+      const height = String(cfg.height ?? "").trim() || (bg ? "50%" : "calc(var(--tile-size) + var(--ha-space-4))");
+      if (card.style.getPropertyValue("--org-graph-h") !== height) card.style.setProperty("--org-graph-h", height);
+      if (bg) {
+        const under = wrap.querySelector(":scope > .bubble-background");
+        if (el.parentNode !== wrap || el.previousElementSibling !== under) wrap.insertBefore(el, under ? under.nextSibling : wrap.firstChild);
+      } else if (el.parentNode !== box || el.nextElementSibling) box.appendChild(el);
+
+      if (g.el !== el && typeof ResizeObserver === "function") {
+        g.ro?.disconnect();
+        g.ro = new ResizeObserver(() => g.draw?.());
+        g.ro.observe(el);
+        g.el = el;
+      }
+      g.tick ??= setInterval(() => g.draw?.(), 60000);
+      if (typeof onTeardown === "function") onTeardown(() => {
+        g.stop?.();
+        g.stop = null;
+        g.sub = null;
+        g.ro?.disconnect();
+        g.ro = null;
+        g.el = null;
+        clearInterval(g.tick);
+        g.tick = null;
+      });
+
+      g.ctx = { cfg, series, hours, bg, el, hass, num: org.num };
+      g.draw = () => {
+        if (g.raf) return;
+        g.raf = requestAnimationFrame(() => {
+          g.raf = 0;
+          try { paint(); } catch (e) { console.warn("origami_graph", e); }
+        });
+      };
+
+      const paint = () => {
+        const { cfg, series, hours, bg, el, hass } = g.ctx;
+        const svg = el.firstElementChild;
+        const W = Math.round(el.clientWidth), H = Math.round(el.clientHeight);
+        if (!svg || W < 2 || H < 2) return;
+        svg.setAttribute("width", W);
+        svg.setAttribute("height", H);
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        const ns = "http://www.w3.org/2000/svg";
+        const make = (tag, attrs, style) => {
+          const n = document.createElementNS(ns, tag);
+          for (const [k, v] of Object.entries(attrs ?? {})) n.setAttribute(k, v);
+          for (const [k, v] of Object.entries(style ?? {})) n.style.setProperty(k, v);
+          return n;
+        };
+        const [defs, barsG, fillsG, linesG, dotsG, labelsG] = svg.children;
+        for (const n of [defs, barsG, fillsG, linesG, dotsG, labelsG]) n.replaceChildren();
+        const uid = "og" + g.n + "-";
+        const f = (v) => Math.round(v * 10) / 10;
+
+        const now = Date.now(), from = now - hours * 36e5, span = now - from;
+        const ON = ["on", "heating", "cooling", "drying", "fan", "preheating", "defrosting", "open", "playing", "home", "active", "true", "detected"];
+        const isOn = (v) => ON.includes(String(v).toLowerCase());
+        // A value counts as a number also with a decimal comma or a unit after it, such as "21,5" or "21.5 °C" from a template
+        const number = (v) => (typeof v === "number" ? v : v === null || v === undefined || v === "" || typeof v === "boolean" ? NaN : parseFloat(String(v).replace(",", ".")));
+
+        // Each entity's states as steps that last until the next state, cut to the window. Older states go,
+        // except the last one before the window, which gives the value at its start.
+        const steps = (s) => {
+          let rows = g.rows.get(s.id) ?? [];
+          let i = 0;
+          while (i + 1 < rows.length && rows[i + 1].t <= from) i++;
+          if (i) g.rows.set(s.id, rows = rows.slice(i));
+          return rows.map((r, k) => ({ t0: Math.max(r.t, from), t1: Math.min(rows[k + 1]?.t ?? now, now), v: s.attr ? r.a?.[s.attr] : r.s }))
+            .filter((st) => st.t1 > st.t0);
+        };
+
+        // The window splits into steps of round clock times, so the shape stays the same as time passes. A line
+        // takes the mean of each step weighted by time, and a bar the share of the time its entity was on, or its mean.
+        const NICE = [1, 2, 5, 10, 15, 20, 30, 60, 120, 180, 240, 360, 720, 1440].map((m) => m * 6e4);
+        const buckets = (target) => {
+          const size = NICE.find((s) => span / s <= target) ?? NICE[NICE.length - 1];
+          const out = [];
+          for (let a = Math.floor(from / size) * size; a < now; a += size) out.push([Math.max(a, from), Math.min(a + size, now)]);
+          return out;
+        };
+        const sweep = (st, list, fn) => {
+          let j = 0;
+          return list.map(([a, b]) => {
+            while (j < st.length && st[j].t1 <= a) j++;
+            let sum = 0, dur = 0, on = 0;
+            for (let k = j; k < st.length && st[k].t0 < b; k++) {
+              const d = Math.min(st[k].t1, b) - Math.max(st[k].t0, a);
+              if (d <= 0) continue;
+              const n = number(st[k].v);
+              if (fn === "mean" && Number.isFinite(n)) { sum += n * d; dur += d; }
+              if (fn === "duty") { dur += d; if (isOn(st[k].v)) on += d; }
+            }
+            if (!dur) return null;
+            return fn === "mean" ? sum / dur : on / (b - a);
+          });
+        };
+
+        const lineCount = Math.max(8, W / (bg ? 10 : 7));
+        const barCount = Math.max(6, W / 14);
+        const unitOf = (s) => (s.attr
+          ? (/temp/.test(s.attr) ? hass.config?.unit_system?.temperature ?? "" : "")
+          : hass.states[s.id]?.attributes?.unit_of_measurement ?? "");
+        const lines = series.filter((s) => !s.bars).map((s) => {
+          const st = steps(s);
+          const list = buckets(lineCount);
+          const means = sweep(st, list, "mean");
+          const pts = [];
+          const first = st.find((x) => x.t0 <= from && Number.isFinite(number(x.v)));
+          if (first) pts.push([from, number(first.v)]);
+          list.forEach(([a, b], k) => pts.push([(a + b) / 2, means[k]]));
+          const last = [...st].reverse().find((x) => Number.isFinite(number(x.v)));
+          if (last && last.t1 >= now - 1) pts.push([now, number(last.v)]);
+          return { ...s, pts, unit: unitOf(s) };
+        });
+
+        // Lines with the same unit share a scale. min and max set the scale of the first line's unit.
+        const groups = new Map();
+        lines.forEach((l, k) => {
+          const key = l.unit || l.id + l.attr;
+          if (!groups.has(key)) groups.set(key, { first: k === 0 || !groups.size, vals: [], min: l.min, max: l.max });
+          const grp = groups.get(key);
+          grp.min ??= l.min;
+          grp.max ??= l.max;
+          for (const [, v] of l.pts) if (v !== null && Number.isFinite(v)) grp.vals.push(v);
+          l.grp = grp;
+        });
+        const marks = cfg.extrema === true && !bg;
+        // Behind the content, the graph is a soft area of the card's own fill, without a line or dots unless they are set
+        const r = bg ? 2 : 2.75;
+        const points = cfg.points ?? (bg ? "none" : "last");
+        const showLine = cfg.line ?? !bg;
+        const top = bg ? H * 0.12 : r + 3 + (marks ? 14 : 0);
+        const bottom = bg ? 0 : 3 + (marks ? 14 : 0);
+        for (const grp of groups.values()) {
+          const lo0 = grp.vals.length ? Math.min(...grp.vals) : 0, hi0 = grp.vals.length ? Math.max(...grp.vals) : 1;
+          const fixedLo = Number.isFinite(number(grp.min ?? (grp.first ? cfg.min : undefined)));
+          const fixedHi = Number.isFinite(number(grp.max ?? (grp.first ? cfg.max : undefined)));
+          let lo = fixedLo ? number(grp.min ?? cfg.min) : lo0, hi = fixedHi ? number(grp.max ?? cfg.max) : hi0;
+          const need = Math.max(Math.abs(hi0) * 0.02, 0.5);
+          if (hi - lo < need) {
+            const mid = (hi + lo) / 2;
+            if (!fixedLo) lo = mid - need / 2;
+            if (!fixedHi) hi = mid + need / 2;
+          }
+          const pad = (hi - lo) * 0.12;
+          if (!fixedLo) lo -= pad;
+          if (!fixedHi) hi += pad;
+          grp.y = (v) => top + (1 - (v - lo) / (hi - lo || 1)) * (H - top - bottom);
+        }
+        const right = points === "none" ? 1 : r + 2;
+        const x = (t) => ((t - from) / span) * (W - right);
+
+        // Color by value: the temperature colors of the room cards, or own colors, each from its value
+        const TEMP = [[12, "#728FA8"], [15, "#7C97A9"], [17, "#8BA2A8"], [18.5, "#9AAEA3"], [22, "#88A37E"], [24, "#99A677"], [25, "#AEA76F"],
+          [26, "#BB9F68"], [27, "#C0935F"], [28, "#BF8A5F"], [29, "#BB7E5D"], [30.5, "#B3735C"], [32, "#AA6A5A"], [34, "#9C6056"]];
+        const fahrenheit = (u) => /F/.test(String(u));
+        const stopsFor = (l) => {
+          if (cfg.gradient === "temperature") return TEMP.map(([v, c]) => [fahrenheit(l.unit) ? v * 1.8 + 32 : v, c]);
+          if (cfg.gradient === "custom") return [].concat(cfg.stops ?? []).map((s) => [number(s?.value), s?.color]).filter(([v, c]) => Number.isFinite(v) && c);
+          return [];
+        };
+        const colorAt = (stops, v) => (stops.find(([top]) => v <= top) ?? stops[stops.length - 1])?.[1];
+        // Graphs stay neutral, as Origami's controls do, and a second and a third line are dashed and dotted. Their quiet look
+        // comes from these default colors: a line a little darker than the fill under it, a stronger dot for the last value and
+        // soft bars. An entity's own color or color by value replaces them at full strength.
+        const mix = (c, pct) => "color-mix(in srgb, " + c + " " + pct + "%, transparent)";
+        const INK = "var(--primary-text-color)";
+        const LINE = mix(INK, bg ? 14 : 24);
+        const DOT = mix(INK, 45);
+
+        // The fill fades from the top of the drawing to the bottom edge
+        const fade = make("linearGradient", { id: uid + "fade", gradientUnits: "userSpaceOnUse", x1: 0, y1: top, x2: 0, y2: H });
+        fade.append(make("stop", { offset: 0 }, { "stop-color": "white", "stop-opacity": "1" }), make("stop", { offset: 1 }, { "stop-color": "white", "stop-opacity": "0" }));
+        const mask = make("mask", { id: uid + "mask", maskUnits: "userSpaceOnUse", x: 0, y: 0, width: W, height: H });
+        mask.append(make("rect", { x: 0, y: 0, width: W, height: H, fill: "url(#" + uid + "fade)" }));
+        defs.append(fade, mask);
+
+        // Bars stand behind the lines
+        series.filter((s) => s.bars).forEach((s) => {
+          const st = steps(s);
+          const list = buckets(barCount);
+          const numeric = st.length && st.every((x) => x.v === null || x.v === undefined || x.v === "unavailable" || x.v === "unknown" || Number.isFinite(number(x.v)));
+          const vals = sweep(st, list, numeric ? "mean" : "duty");
+          const peak = numeric ? Math.max(...vals.filter((v) => v !== null), 0) || 1 : 1;
+          const color = s.color || (s.id.startsWith("climate.") ? mix("var(--heat-color)", bg ? 9 : 18) : mix(INK, bg ? 5 : 10));
+          list.forEach(([a, b], k) => {
+            const v = vals[k];
+            if (!v || v <= 0) return;
+            const x0 = x(a), x1 = x(b), w = x1 - x0, gap = Math.min(Math.max(w * 0.22, 1), 4);
+            const h = Math.max((v / peak) * H * (bg ? 0.5 : 0.8), 1.5);
+            barsG.append(make("rect", { class: "org-graph-bar", x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: color }));
+          });
+        });
+
+        // A monotone curve goes through every point and never past them, so a step stays a step and a peak keeps its value
+        const curve = (p) => {
+          const n = p.length;
+          if (n < 2) return "";
+          if (cfg.smooth === false || n < 3) return "M" + p.map(([a, b]) => f(a) + "," + f(b)).join("L");
+          const m = [], t = [];
+          for (let i = 0; i < n - 1; i++) m.push((p[i + 1][1] - p[i][1]) / (p[i + 1][0] - p[i][0] || 1));
+          for (let i = 1; i < n - 1; i++) {
+            const h0 = p[i][0] - p[i - 1][0], h1 = p[i + 1][0] - p[i][0];
+            const q = (m[i - 1] * h1 + m[i] * h0) / (h0 + h1 || 1);
+            t[i] = (Math.sign(m[i - 1]) + Math.sign(m[i])) * Math.min(Math.abs(m[i - 1]), Math.abs(m[i]), 0.5 * Math.abs(q)) || 0;
+          }
+          const end = (s, tn) => (Math.sign(s) !== Math.sign((3 * s - tn) / 2) ? 0 : Math.abs((3 * s - tn) / 2) > 3 * Math.abs(s) ? 3 * s : (3 * s - tn) / 2);
+          t[0] = end(m[0], t[1]);
+          t[n - 1] = end(m[n - 2], t[n - 2]);
+          let d = "M" + f(p[0][0]) + "," + f(p[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const h = (p[i + 1][0] - p[i][0]) / 3;
+            d += "C" + f(p[i][0] + h) + "," + f(p[i][1] + h * t[i]) + "," + f(p[i + 1][0] - h) + "," + f(p[i + 1][1] - h * t[i + 1]) + "," + f(p[i + 1][0]) + "," + f(p[i + 1][1]);
+          }
+          return d;
+        };
+
+        const fill = cfg.fill ?? (bg ? "solid" : "fade");
+        lines.forEach((l, k) => {
+          const y = l.grp.y;
+          const stops = l.grp.first ? stopsFor(l) : [];
+          let paint = l.color || LINE;
+          let base = l.color || INK;
+          if (stops.length) {
+            const grad = make("linearGradient", { id: uid + "c" + k, gradientUnits: "userSpaceOnUse", x1: 0, y1: 0, x2: 0, y2: H });
+            stops.map(([v, c]) => [Math.min(Math.max(y(v) / H, 0), 1), c]).sort((a, b) => a[0] - b[0])
+              .forEach(([o, c]) => grad.append(make("stop", { offset: f(o * 1000) / 1000 }, { "stop-color": c })));
+            defs.append(grad);
+            paint = base = "url(#" + uid + "c" + k + ")";
+          }
+          // A gap in the history, such as while the entity was unavailable, splits the line
+          const runs = [[]];
+          for (const [t, v] of l.pts) {
+            if (v === null || !Number.isFinite(v)) { if (runs[runs.length - 1].length) runs.push([]); continue; }
+            runs[runs.length - 1].push([x(t), y(v)]);
+          }
+          const live = l.pts.length && l.pts[l.pts.length - 1][0] === now;
+          for (const run of runs.filter((q) => q.length > 1)) {
+            const d = curve(run);
+            // The fill of the newest run reaches the right edge, under the last value's dot
+            const [ex, ey] = run[run.length - 1];
+            const edge = live && run === runs[runs.length - 1] ? "L" + W + "," + f(ey) + "L" + W + "," + H : "L" + f(ex) + "," + H;
+            const area = bg && !l.color && !stops.length ? "var(--fill-subtle)" : base;
+            if (fill !== "none" && k === 0) fillsG.append(make("path", { class: "org-graph-fill", d: d + edge + "L" + f(run[0][0]) + "," + H + "Z", ...(fill === "fade" ? { mask: "url(#" + uid + "mask)" } : {}) }, { fill: area }));
+            if (showLine) linesG.append(make("path", { class: "org-graph-line" + (k ? " org-graph-line-" + Math.min(k, 2) : ""), d }, { stroke: paint }));
+          }
+          const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
+          const dot = (t, v, cls, rr) => {
+            const c = stops.length ? colorAt(stops, v) : l.color || DOT;
+            dotsG.append(make("circle", { class: cls, cx: f(x(t)), cy: f(y(v)), r: rr }, { fill: c }));
+          };
+          if (points === "all") real.slice(1, -1).forEach(([t, v]) => dot(t, v, "org-graph-point", Math.max(r - 1.5, 1.5)));
+          if (points !== "none" && real.length) {
+            const [t, v] = real[real.length - 1];
+            dot(t, v, "org-graph-dot", r);
+          }
+          // The highest and the lowest value of the first line, with their values
+          if (marks && k === 0 && real.length > 2) {
+            const inner = real.slice(1, -1).length ? real.slice(1, -1) : real;
+            const hi = inner.reduce((a, b) => (b[1] > a[1] ? b : a)), lo = inner.reduce((a, b) => (b[1] < a[1] ? b : a));
+            const digits = /°|F|C/.test(l.unit) ? 1 : 0;
+            for (const [[t, v], below] of [[hi, false], [lo, true]]) {
+              dot(t, v, "org-graph-point", 2);
+              const tx = x(t), anchor = tx < 24 ? "start" : tx > W - 24 ? "end" : "middle";
+              const label = make("text", { class: "org-graph-label", x: f(tx), y: f(below ? y(v) + 15 : y(v) - 8), "text-anchor": anchor });
+              label.textContent = g.ctx.num(hass, v, digits) + (/°/.test(l.unit) ? "°" : l.unit === "%" ? "%" : "");
+              labelsG.append(label);
+            }
+          }
+        });
+
+        // The graph draws itself in from the left when it first has data, and dots and values follow
+        const any = lines.some((l) => l.pts.length > 1) || barsG.childElementCount;
+        if (g.answered && !any && !g.told) {
+          g.told = true;
+          console.info("origami_graph: no history with numbers for " + series.map((s) => s.id + (s.attr ? " (" + s.attr + ")" : "")).join(", ") + ". Check that the recorder keeps these entities.");
+        }
+        if (any && !g.shown) {
+          g.shown = true;
+          const still = cfg.animate === false || matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (!still && svg.animate) {
+            const ease = "cubic-bezier(.22, 1, .36, 1)";
+            svg.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }], { duration: 1100, easing: ease });
+            for (const n of [dotsG, labelsG]) n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 850, easing: ease, fill: "backwards" });
+          }
+        }
+      };
+      // Data, size and the passing time redraw the graph on their own, and a style pass only when the settings change
+      const sig = JSON.stringify(cfg) + "|" + entity;
+      if (g.sig !== sig) {
+        g.sig = sig;
+        g.draw();
+      }
+      return "";
+    })()}
+    ha-card .org-graph {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--org-graph-h);
+      pointer-events: none;
+      color: var(--primary-text-color);
+    }
+    ha-card .org-graph > svg {
+      display: block;
+      overflow: visible;
+    }
+    ha-card:has(.org-graph.background) .bubble-wrapper > :is(.bubble-content-container, .bubble-sub-button-container, .bubble-sub-button-bottom-container, .bubble-buttons-container) {
+      position: relative;
+      z-index: 1;
+    }
+    ha-card:has(.org-graph.bottom) .card-content:not(:has(.with-bottom-buttons)) {
+      height: calc(var(--org-row-height) + var(--org-graph-h)) !important;
+    }
+    ha-card:has(.org-graph.bottom) .bubble-container:not(.with-bottom-buttons) > .bubble-wrapper {
+      bottom: auto !important;
+      height: var(--org-row-height) !important;
+    }
+    ha-card:has(.org-graph.bottom) .bubble-container:not(.with-bottom-buttons) > .bubble-wrapper > .bubble-background {
+      top: 0 !important;
+      bottom: calc(-1 * var(--org-graph-h)) !important;
+      height: auto !important;
+    }
+    ha-card:has(.org-graph.bottom) .with-bottom-buttons > .bubble-wrapper {
+      padding-bottom: calc(var(--org-pad) + var(--org-graph-h)) !important;
+    }
+    ha-card .org-graph-line {
+      fill: none;
+      stroke-width: var(--org-line-width);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    ha-card .org-graph-line-1 {
+      stroke-dasharray: 4 4;
+    }
+    ha-card .org-graph-line-2 {
+      stroke-dasharray: 1 4;
+    }
+    ha-card .org-graph-fill {
+      opacity: .1;
+    }
+
+    ha-card .org-graph-label {
+      fill: var(--secondary-text-color);
+      font-family: var(--ha-font-family-body);
+      font-size: calc(var(--ha-font-size-xs) * .75);
+      font-weight: var(--ha-font-weight-medium);
+      font-variant-numeric: tabular-nums;
+    }
+    ha-card .org-graph.background .org-graph-fill {
+      opacity: 1;
+    }
+    ha-card .org-graph.background .org-graph-line {
+      stroke-width: 1.5px;
+    }
