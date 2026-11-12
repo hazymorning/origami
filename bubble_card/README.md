@@ -1450,7 +1450,7 @@ The Graph module draws the history of one or more entities on a button card, as 
 | `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
 | `fill` | `fade` below, `solid` behind | `fade`, `solid` or `none`, for the area under the first line. |
 | `line` | `true` below, `false` behind | The line on top of the area. |
-| `points` | `last` below, `none` behind | `last` marks the newest value, `all` every value, and `none` none. |
+| `points` | `none` | `last` marks the newest value and `all` every value. |
 | `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
 | `min`, `max` | | Fixed ends of the scale for the first line's unit. Without them, the scale fits the values. |
 | `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |

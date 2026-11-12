@@ -3,7 +3,7 @@ origami_graph:
   version: "1.0.0"
   supported:
     - button
-  description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and marks the last, highest and lowest values."
+  description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
   editor:
     - name: entities
       label: "Entities"
@@ -87,6 +87,7 @@ origami_graph:
               value: all
             - label: None
               value: none
+      default: none
     - name: extrema
       label: "Mark the highest and lowest value"
       selector:
@@ -364,9 +365,9 @@ origami_graph:
           l.grp = grp;
         });
         const marks = cfg.extrema === true && !bg;
-        // Behind the content, the graph is a soft area of the card's own fill, without a line or dots unless they are set
+        // Behind the content, the graph is a soft area of the card's own fill, without a line unless it is set. Dots show only when points asks for them.
         const r = bg ? 2 : 2.75;
-        const points = cfg.points ?? (bg ? "none" : "last");
+        const points = cfg.points ?? "none";
         const showLine = cfg.line ?? !bg;
         const top = bg ? H * 0.12 : r + 3 + (marks ? 14 : 0);
         const bottom = bg ? 0 : 3 + (marks ? 14 : 0);
