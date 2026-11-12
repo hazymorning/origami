@@ -156,6 +156,7 @@ cards:
           tap_action:
             action: none
         sub_button:
+          bottom_layout: rows
           main:
             # The arrows set the direction and show only on a fan that has one. On some fans, such as Xiaomi's, it turns the head a step to the side.
             - icon: mdi:chevron-left
@@ -205,7 +206,7 @@ cards:
               sub_button_type: slider
               always_visible: true
               slider_value_position: hidden
-        rows: '2.2'
+        rows: auto
       # Two presets and three speeds. A button is filled while the fan has its preset or its speed.
       - type: custom:bubble-card
         card_type: sub-buttons

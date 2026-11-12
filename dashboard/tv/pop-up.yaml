@@ -56,6 +56,7 @@ cards:
           tap_action:
             action: more-info
         sub_button:
+          bottom_layout: rows
           main:
             - icon: mdi:power
               show_background: true
@@ -68,7 +69,7 @@ cards:
             - entity: media_player.living_room
               sub_button_type: slider
               always_visible: true
-        rows: '2.2'
+        rows: auto
 
       # The row switches the TV's input, sends the TV's sound through the speaker and sets the volume in steps
       - type: custom:bubble-card
