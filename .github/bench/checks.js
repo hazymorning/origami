@@ -368,7 +368,7 @@ window.__check = async () => {
     report('slider keys', fails, `${sliders.length} standalone slider has its keys after the track, as tall as it and with its background`);
   }
 
-  // Scroll taps: a scrolling row reaches past its card, and only its buttons take taps there, so the card above keeps the taps on its own edge
+  // Scroll taps: a scrolling row reaches past its card only at its sides, so the card above keeps the taps on its own edge
   {
     const fails = [];
     const rows = origami.filter((c) => c.cfg.card_type === 'sub-buttons' && c.cfg.origami_button?.scroll === true);
@@ -389,7 +389,7 @@ window.__check = async () => {
       if (cardAt(x, t.top + t.height / 2) !== card.el) fails.push(`card ${card.i}: a tap on a button does not reach the card`);
     }
     if (!rows.length) fails.push('the sheet has no scrolling row');
-    report('scroll taps', fails, `${rows.length} scrolling row takes taps only on its buttons`);
+    report('scroll taps', fails, `${rows.length} scrolling row leaves the taps just above its buttons to the card above`);
   }
 
   // Players: a player in players gives the music before the speaker, also when a template in its list names it. On the sheet, such a speaker's player is its entity ID with _ma.
