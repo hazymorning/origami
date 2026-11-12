@@ -1,32 +1,34 @@
+# ◪ Origami
+
 <div>
 <a href="https://github.com/hazymorning/origami/releases/latest"><img alt="Latest release" src="https://img.shields.io/badge/Release-V3.0-F6F4F1?labelColor=181715"></a>
 <a href="https://github.com/hazymorning?tab=repositories&q=origami"><img alt="Origami suite" src="https://img.shields.io/badge/Origami-Suite-F6F4F1?labelColor=181715&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiBmaWxsPSJub25lIiBzdHJva2U9IiNGNkY0RjEiIHN0cm9rZS13aWR0aD0iMiIvPjxwb2x5Z29uIHBvaW50cz0iMjEsMyAyMSwyMSAzLDIxIiBmaWxsPSIjRjZGNEYxIi8%2BPC9zdmc%2B"></a>
 </div>
+
+A dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It has changed with daily use for many years. Most of it was made by hand on a phone, so phones come first. It should never feel overwhelming, work for everyone at home and look nice without trying too hard.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
   <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
 </picture>
 
-Origami is a dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It grew and changed over a long time, and most of it was built by hand on a phone, which is why it's made for phones first. The idea is that nothing feels overwhelming, everyone at home can use it, and it's nice to look at without trying too hard.
-
 > [!NOTE]
-> **Origami takes some setting up.** It builds on Bubble Card and on Home Assistant's own themes, helpers and scripts, and adds its own code only where nothing else fits. So a part is more than a card to paste, and its README lists what else it needs. In return, it all fits together and stays easy to change, with fewer parts that can break. [How Origami is built](#how-origami-is-built) explains the idea.
+> **Setting it up takes a while.** Most parts need a module, a helper or a script next to the card, and each part's README lists them. [How Origami is built](#how-origami-is-built) says why.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
 ## Get started
 
-Start with the theme, the font and Bubble Card. Each part below lists what else it needs.
+The theme, the font and Bubble Card come first.
 
 <details>
 <summary><b>Install the theme</b></summary>
 
 <br>
 
-The theme has Origami's colors, sizes and shadows for light and dark mode.
+Colors, sizes and shadows for light and dark mode.
 
-1. If Home Assistant doesn't load themes from the `themes` folder yet, add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, only the `themes` line goes under it.
+1. If themes from the `themes` folder don't load yet, add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. With `frontend:` already there, only the `themes` line goes under it.
 
    ```yaml
    frontend:
@@ -39,7 +41,7 @@ The theme has Origami's colors, sizes and shadows for light and dark mode.
 
 3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
-> **Light and dark.** Origami and its weather card are made to follow the phone's light and dark mode, which most phones switch with the sun. Light or dark all day works just as well: choose **Light** or **Dark** next to the theme in the user profile.
+> **Light and dark.** The theme and the weather card follow the phone's light or dark mode, which most phones change at sunrise and sunset. Staying light or dark all day works too: choose **Light** or **Dark** next to the theme in the user profile.
 
 </details>
 
@@ -48,7 +50,7 @@ The theme has Origami's colors, sizes and shadows for light and dark mode.
 
 <br>
 
-Origami uses the Montserrat font.
+The font is Montserrat.
 
 1. Open [Resources](https://my.home-assistant.io/redirect/lovelace_resources/) and select **Add resource**.
 2. Paste this URL, choose **Stylesheet** and select **Create**.
@@ -68,7 +70,7 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](https
 
 <br>
 
-Most of Origami is built with the wonderful [Bubble Card](https://github.com/Clooos/Bubble-Card) by Clooos. Origami needs version 3.4 or later, and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) to add its modules.
+Most of Origami is made with the wonderful [Bubble Card](https://github.com/Clooos/Bubble-Card) by Clooos. It needs version 3.4 or later, and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) to add the modules.
 
 1. Download Bubble Card and Bubble Card Tools in HACS, or update them if they're already there.
 
@@ -89,7 +91,7 @@ Every module needs Base, so start with that one.
 2. In the editor of any Bubble card, or of a new one under **Add card**, open **Modules**, then **My Modules**, and select **Import from YAML**.
 3. Paste the module and save.
 
-To add all modules at once, copy the [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) folder to `/config/bubble_card/modules` and reload the page. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) explains every module.
+To add all modules at once, copy the [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) folder to `/config/bubble_card/modules` and reload the page. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) has every module's options.
 
 </details>
 
@@ -101,7 +103,7 @@ To add all modules at once, copy the [`bubble_card/modules`](https://github.com/
 1. Edit the dashboard and select **Add card**.
 2. Choose **Manual**, paste the file's contents and select **Save**.
 
-A pop-up stays hidden until a button opens it with **Navigate** to its hash, such as `#popup_server`. Both need to be in the same view. The parts are made for a view of the type **Sections**.
+A pop-up stays hidden until a button opens it with **Navigate** to its hash, like `#popup_server`. Both need to be in the same view. The parts are made for a **Sections** view.
 
 </details>
 
@@ -109,11 +111,11 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, suc
 
 <img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/home-view.webp">
 
-The start page, from the greeting down to the navigation bar:
+From top to bottom:
 
-- **[Greeting and notifications](https://github.com/hazymorning/origami/tree/main/dashboard/greeting).** Greeting and info on the left, and a notification island on the right.
-- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** The weather at a glance, for example as a cute little paper landscape.
-- **[Favorites](https://github.com/hazymorning/origami/tree/main/dashboard/favorites).** Quick access to favorites, and to whatever is running right now.
+- **[Greeting and notifications](https://github.com/hazymorning/origami/tree/main/dashboard/greeting).** A hello for the time of day, the next event, and whatever needs attention right now.
+- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** A cute little paper landscape, or nearly any other weather card.
+- **[Favorites](https://github.com/hazymorning/origami/tree/main/dashboard/favorites).** Everyday shortcuts, and timers or devices while they run.
 - **[Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms).** How each room is doing, and the way into its pop-up.
 - **[Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table).** All rooms side by side, to see at once where it's too warm, too cold or a window is open.
 - **[Navigation bar](https://github.com/hazymorning/origami/tree/main/dashboard/navigation-bar).** The most used pop-ups within thumb's reach, with the music that's playing just above.
@@ -122,7 +124,7 @@ The start page, from the greeting down to the navigation bar:
 
 <img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
 
-Truly hides Home Assistant's header and, if wanted, adds a menu that slides down. It uses the Origami Header card, because Home Assistant still has no proper way to hide its header. [More](https://github.com/hazymorning/origami/tree/main/dashboard/menu)
+Hides Home Assistant's header for good, with a menu in its place if wanted. Home Assistant has no proper way to do this yet, so it takes the Origami Header card. [More](https://github.com/hazymorning/origami/tree/main/dashboard/menu)
 
 ## Pop-ups
 
@@ -130,19 +132,19 @@ Truly hides Home Assistant's header and, if wanted, adds a menu that slides down
 
 <img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
 
-Everything for one room in one place. [More](https://github.com/hazymorning/origami/tree/main/dashboard/room)
+A pop-up for each room, with its media, lights and climate. [More](https://github.com/hazymorning/origami/tree/main/dashboard/room)
 
 ### Lights
 
 <img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
 
-The home's main light control: its power key turns on the scene for the time of day or turns off every light, and each lamp and scene is a tap away. [More](https://github.com/hazymorning/origami/tree/main/dashboard/lights)
+Every lamp and scene in the home, and one key that turns on the scene for the time of day or turns everything off. [More](https://github.com/hazymorning/origami/tree/main/dashboard/lights)
 
 ### Music
 
 <img width="800" alt="The music pop-up with the cover, the play row and the volume, and with its group open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/music-pop-up.webp">
 
-Music in every room from one place, with speakers grouped as needed. [More](https://github.com/hazymorning/origami/tree/main/dashboard/music)
+One music card for all speakers, playing alone or as a group. [More](https://github.com/hazymorning/origami/tree/main/dashboard/music)
 
 ### TV
 
@@ -182,15 +184,13 @@ Cleaning for the whole home or just one room. [More](https://github.com/hazymorn
 
 <br>
 
-Bubble Card does the layout, the actions, the pop-ups and the editor, and Origami only adds what's missing. Each part uses the first of these that works:
+Bubble Card does the layout, the actions, the pop-ups and the editor. Each part uses the first of these that works:
 
 1. Bubble Card's own card types and options.
-2. An Origami module, where a Bubble card needs another look or behavior.
-3. A template in the card, for a value that the card can work out itself, instead of a template sensor.
-4. Home Assistant's own helpers and scripts, where a card can't do it alone, such as a timer for the fan or the steps of a thermostat. Scripts get their entities from the card, so they work in any home as they are.
-5. A card of its own, only for a gap that nothing else fills, as with Origami Weather, Origami Notifications and Origami Header.
-
-So the look stays in one place, and every part follows the theme.
+2. An Origami module, for a look or behavior that Bubble Card doesn't have.
+3. A template in the card instead of a template sensor, for a value the card can work out itself.
+4. Home Assistant's helpers and scripts, for what a card can't do alone, like the fan's timer or a thermostat's steps. Scripts get their entities from the card and work in any home without edits.
+5. A card of its own, only for a gap nothing else fills, like Origami Weather, Origami Notifications and Origami Header.
 
 </details>
 
@@ -199,13 +199,13 @@ So the look stays in one place, and every part follows the theme.
 
 <br>
 
-Updating Origami in HACS only updates the theme. The Bubble Card modules were copied in by hand, so they're updated the same way.
+HACS only updates the theme. The modules were copied in by hand, so the new ones are pasted the same way.
 
 1. Update Origami and Bubble Card in HACS.
-2. Paste all the new modules over the old ones. The new parts need them.
+2. Paste all the new modules over the old ones.
 3. Make the small change that the [upgrade steps](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) list for a few cards.
 
-The 2.0 dashboard keeps working, and the new parts can take the place of the old cards one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) also has which part replaces which card and what looks different on the old ones.
+After that, the 2.0 dashboard keeps working, and its cards can be replaced with the new parts one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) lists which part replaces which card, and what looks different on the old ones.
 
 </details>
 
@@ -214,11 +214,11 @@ The 2.0 dashboard keeps working, and the new parts can take the place of the old
 
 <br>
 
-1. Copy [`themes/origami.yaml`](https://github.com/hazymorning/origami/blob/main/themes/origami.yaml) to `/config/themes` under a new name, such as `my-origami.yaml`.
-2. In the copy, change `Origami:` at the top to a new name, then change the colors. The comments in the file say what each group of settings does.
+1. Copy [`themes/origami.yaml`](https://github.com/hazymorning/origami/blob/main/themes/origami.yaml) to `/config/themes` under a new name, like `my-origami.yaml`.
+2. In the copy, rename `Origami:` at the top, then change the colors. The comments in the file say what each group of settings does.
 3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and select the new theme in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
-Most changes need a few lines: `primary-color` and `accent-color` in each mode for the accent, `radius-ratio` for how round the controls are, and a state color, such as `state-light-active-color: var(--orange-color)`, for one kind of device. Leave the original file alone, since an update replaces it.
+A few lines are usually enough: `primary-color` and `accent-color` in each mode for the accent, `radius-ratio` for how round the controls are, or a state color for one kind of device, like `state-light-active-color: var(--orange-color)`. Leave the original file alone, since an update replaces it.
 
 </details>
 
@@ -232,7 +232,7 @@ Most changes need a few lines: `primary-color` and `accent-color` in each mode f
 - **A card says "Custom element doesn't exist".** Download the card in HACS and reload the page. In the Companion app, select **Reset frontend cache** in the app settings.
 - **The font doesn't change.** Check that the stylesheet is under [Resources](https://my.home-assistant.io/redirect/lovelace_resources/), then reload the page.
 - **A Bubble card looks plain.** Check that Bubble Card Tools is added as an integration and that the card's modules are under **Modules**, then **My Modules**. Then reload the page.
-- **A tap doesn't open a pop-up.** The pop-up has to be in the same view as the button, and its `hash` has to match the button's navigation path, such as `#popup_tv`.
+- **A tap doesn't open a pop-up.** The pop-up has to be in the same view as the button, with a `hash` that matches the button's navigation path, like `#popup_tv`.
 - **The header and its edit button are gone.** The [menu](https://github.com/hazymorning/origami/tree/main/dashboard/menu) hides them. **Edit** in the menu, or `?edit=1` at the end of the address, opens edit mode.
 
 </details>
@@ -242,13 +242,13 @@ Most changes need a few lines: `primary-color` and `accent-color` in each mode f
 
 <br>
 
-Many details in Origami look like they could be done in an easier way, but most of them came out of a lot of trial and error on real phones: why a value is worked out in the card instead of a template sensor, why a pop-up uses a mini pop-up instead of a helper, or why a size comes from the theme instead of the card. An AI assistant doesn't know that history, so where it has to guess, it often undoes one of these choices without noticing. These steps give it what it needs:
+Many details look like they could be simpler, but most of them came from a lot of trial and error on real phones: a value worked out in the card instead of a template sensor, a mini pop-up instead of a helper, a size from the theme instead of the card. An assistant doesn't know that history, and where it has to guess, it often undoes one of these choices without noticing.
 
-- Give it the files of the part, not a link or a screenshot. It can only follow what it can read, and a screenshot doesn't show the options behind the look.
-- Ask it to read the part's README and the [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) before it writes anything. They say which options exist and why a part is built the way it is, so it doesn't make up options that the modules don't have.
-- Ask it to build in the order under [How Origami is built](#how-origami-is-built), so the part still fits the rest of the dashboard after an update. Never card-mod, because it writes over the same styles as the modules, and the two get in each other's way.
-- Give it the real entity IDs. It can't see Home Assistant, so it makes up any ID it doesn't get, and a part with a made-up ID doesn't work.
-- Keep a copy of the configuration before pasting anything, so a change that goes wrong is easy to undo.
+- Hand it the part's files, not a link or a screenshot. It can only follow what it reads, and a screenshot hides the options behind the look.
+- Have it read the part's README and the [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) first, so it doesn't make up options that the modules don't have.
+- Ask it to build in the order under [How Origami is built](#how-origami-is-built), so the part still fits the rest after an update. No card-mod, since it writes over the same styles as the modules and the two get in each other's way.
+- Give it the real entity IDs. It can't see Home Assistant and makes up any ID it doesn't get.
+- Keep a copy of the configuration before pasting anything.
 
 </details>
 
@@ -257,11 +257,11 @@ Many details in Origami look like they could be done in an easier way, but most 
 
 <br>
 
-Origami is one home's dashboard, written down so other homes can use it too. The READMEs explain every part as generally as possible, so it works in most homes. Still, it all grew out of that one setup and a lot of fussing over details, so quite a few things work the way that home needs and look the way one person likes. Most dashboards that people share are probably like that, but here at least every part can be changed to fit another home.
+This is one home's dashboard. The READMEs describe every part as generally as possible, but it all grew out of that one setup and a lot of fussing over details. Quite a few things work the way that home needs and look the way one person likes. Most dashboards that people share are probably like that, but here at least every part can be changed to fit another home.
 
-- **Changes.** Origami changes along with the home it comes from, for a fix, for something that makes daily use nicer, or just for fun. An update can change how a part looks or works, and the [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) says what changed and what to update.
-- **Roadmap.** There's none. New things come from daily use and from what others share, so ideas and questions are welcome in the [Discussions](https://github.com/hazymorning/origami/discussions).
+- **Changes.** The dashboard grows with the home it comes from, for a fix, for something that makes daily use nicer, or just for fun. After an update, a part can look or work differently, and the [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) says what's new and what to update.
+- **Roadmap.** There's none. New things come from daily use and from what others share, and ideas and questions are welcome in the [Discussions](https://github.com/hazymorning/origami/discussions).
 
-> ⚠️ **Watch only the releases.** On the [repository's page](https://github.com/hazymorning/origami), select **Watch**, then **Custom**, check **Releases** and select **Apply**. Then an email comes with each release and its new modules, fixes and improvements. **All Activity** sends one for every issue and comment as well, which gets a lot very quickly.
+> ⚠️ **Watch only the releases.** On the [repository's page](https://github.com/hazymorning/origami), select **Watch**, then **Custom**, check **Releases** and select **Apply**. Each release then comes by email, with its new modules, fixes and improvements. **All Activity** also sends one for every issue and comment, which gets a lot very quickly.
 
 </details>
