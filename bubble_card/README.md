@@ -1433,9 +1433,9 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 ### Graph
 
-The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height, and it draws in from the left when the card appears.
+The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height.
 
-<img width="800" alt="A room card with its temperature as a soft area behind it, and a thermostat with its temperature and its heating times below its controls, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
+<img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1455,60 +1455,33 @@ The Graph module draws the history of one or more entities on a button card, as 
 | `min`, `max` | | Fixed ends of the scale for the first line's unit. Without them, the scale fits the values. |
 | `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
-| `animate` | `true` | Draws the graph in from the left when it appears. |
+| `animate` | `false` | Draws the graph in from the left when it appears. |
 
 Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
 
-Below its controls, this thermostat shows its temperature and when it heated. Behind a room card, `entities: [sensor.living_room_temperature]` and `position: background` are enough.
+Behind a room card, the temperature of the last day is a soft area:
 
 ```yaml
 type: custom:bubble-card
 card_type: button
-button_type: switch
-entity: climate.living_room
-name: Heating
-icon: mdi:thermostat
+button_type: name
+entity: light.living_room
+name: Living room
+icon: mdi:sofa
 modules:
   - origami_base
-  - origami_climate
   - origami_graph
 origami_base:
-  group: true
   tile: true
+  vertical: true
 origami_graph:
   entities:
-    - entity: climate.living_room
-      attribute: current_temperature
-    - entity: climate.living_room
-      type: bars
-  extrema: true
+    - sensor.living_room_temperature
+  position: background
 button_action:
   tap_action:
-    action: more-info
-sub_button:
-  main:
-    - icon: mdi:minus
-      show_background: true
-      tap_action:
-        action: perform-action
-        perform_action: script.thermostat_step
-        data:
-          thermostat: climate.living_room
-          step: -0.5
-    - entity: climate.living_room
-      css_class: readout
-      show_icon: false
-      show_name: false
-      show_background: false
-      state_content: temperature
-    - icon: mdi:plus
-      show_background: true
-      tap_action:
-        action: perform-action
-        perform_action: script.thermostat_step
-        data:
-          thermostat: climate.living_room
-          step: 0.5
+    action: navigate
+    navigation_path: '#popup_living_room'
 ```
 
 </details>

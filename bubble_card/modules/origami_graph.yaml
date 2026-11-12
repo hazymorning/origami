@@ -145,7 +145,7 @@ origami_graph:
       label: "Draw the graph in when it appears"
       selector:
         boolean: {}
-      default: true
+      default: false
   code: |
     ${(() => {
       const org = card._org;
@@ -508,7 +508,7 @@ origami_graph:
           }
         });
 
-        // The graph draws itself in from the left when it first has data, and dots and values follow
+        // With animate, the graph draws itself in from the left when it first has data, and dots and values follow
         const any = lines.some((l) => l.pts.length > 1) || barsG.childElementCount;
         if (g.answered && !any && !g.told) {
           g.told = true;
@@ -516,7 +516,7 @@ origami_graph:
         }
         if (any && !g.shown) {
           g.shown = true;
-          const still = cfg.animate === false || matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const still = cfg.animate !== true || matchMedia("(prefers-reduced-motion: reduce)").matches;
           if (!still && svg.animate) {
             const ease = "cubic-bezier(.22, 1, .36, 1)";
             svg.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }], { duration: 1100, easing: ease });
