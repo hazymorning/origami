@@ -5,7 +5,11 @@
 <a href="https://github.com/hazymorning?tab=repositories&q=origami"><img alt="Origami suite" src="https://img.shields.io/badge/Origami-Suite-F6F4F1?labelColor=181715&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiBmaWxsPSJub25lIiBzdHJva2U9IiNGNkY0RjEiIHN0cm9rZS13aWR0aD0iMiIvPjxwb2x5Z29uIHBvaW50cz0iMjEsMyAyMSwyMSAzLDIxIiBmaWxsPSIjRjZGNEYxIi8%2BPC9zdmc%2B"></a>
 </div>
 
-A dashboard for Home Assistant, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). It has changed with daily use for many years. Most of it was made by hand on a phone, so phones come first. It should never feel overwhelming, work for everyone at home and look nice without trying too hard.
+<br>
+
+This is the documentation of a personal Home Assistant dashboard and its parts, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). After many years of fussing over small details, it suddenly just felt right. Most of it was made by hand on a phone, so it's mainly meant for phones.
+
+If just one person used it, it would probably look and work differently. But others in the house use it too, and they shouldn't have to ask how anything works, so the whole thing is shaped around being easy to use. At the same time, a small digital version of a home should feel as welcoming and pleasant as the home itself, which is why design and UI/UX play such a big part too.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
@@ -13,7 +17,7 @@ A dashboard for Home Assistant, built around [Bubble Card](https://github.com/Cl
 </picture>
 
 > [!NOTE]
-> **Setting it up takes a while.** Most parts need a module, a helper or a script next to the card, and each part's README lists them. [How Origami is built](#how-origami-is-built) says why.
+> **Setting this up takes a while.** It tries to work with Home Assistant, not around it or on top of it. This means most parts need a module, a helper or a script next to the card, and each part's README lists them. [How Origami is built](#how-origami-is-built) explains this further.
 
 [Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
 
