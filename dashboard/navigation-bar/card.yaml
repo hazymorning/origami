@@ -211,9 +211,10 @@ styles: |-
     --navbar-box-shadow-desktop: var(--navbar-shadow);
   }
 
+  /* The bar reaches under the phone's navigation bar, and its buttons stay above it */
   .navbar-card {
     gap: var(--ha-space-2) !important;
-    padding: var(--ha-space-5) !important;
+    padding: var(--ha-space-5) var(--ha-space-5) calc(var(--ha-space-5) + var(--safe-area-inset-bottom, 0px)) var(--ha-space-5) !important;
     backdrop-filter: var(--blur-strong);
     -webkit-backdrop-filter: var(--blur-strong);
     border-radius: var(--ha-card-border-radius) var(--ha-card-border-radius) 0px 0px !important;

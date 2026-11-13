@@ -115,6 +115,7 @@ cards:
             action: navigate
             navigation_path: '#popup_music'
         sub_button:
+          bottom_layout: rows
           main:
             - icon: mdi:play
               show_background: true
@@ -149,7 +150,7 @@ cards:
             - entity: media_player.bathroom
               sub_button_type: slider
               always_visible: true
-        rows: '2.2'
+        rows: auto
 
       # Lights: the header counts the lamps of the group that are on, and a tap opens the group's dialog with each lamp.
       # All switches them together

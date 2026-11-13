@@ -1,5 +1,12 @@
 # Changelog
 
+## Next release
+
+- The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
+- A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it.
+- Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
+- The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.
+
 ## 3.0 · The Final Fold
 
 <picture>

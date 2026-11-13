@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds ten modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
+This folder holds eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!NOTE]
 > Long-time Bubble Card users may wonder why many cards don't use the card types made for them, such as the media player card. Everything here is built around usability. People at home who aren't very technical didn't get ideas like a card that doubles as a slider when it's held. They're nice ideas, but they didn't work out in daily use for the people this was made for, so a card that explains itself is almost always the choice here.
@@ -28,6 +28,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Header](#header) | `origami_header` | separator | A section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Grids and lists of tiles. |
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
+| [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines or bars, below the content or behind it. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
 
 > [!TIP]
@@ -838,7 +839,7 @@ The Button module creates rows and grids of buttons on a sub-buttons card, and s
 | `chips` | `false` | The buttons are chips, with the label in the text color and the icon in the secondary color. Active chips have a bold label. |
 | `pending` | `false` | After a tap, a button shows its next look, faded and without taps, until its state changes or 10 seconds pass. Only buttons whose look can change wait, never segments or buttons that only open something. A button's own `pending` key decides for that button. |
 | `label_size` | `large` | The size of segment labels. `large` suits short figures, and `normal` suits words. |
-| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge, and only its buttons take taps, so a tap beside them reaches the card next to it. The card is as tall as its buttons, and the row reaches past it only at its sides, so a pop-up that scrolls ends right below it. |
+| `scroll` | `false` | The buttons stay in one row that scrolls sideways, and `columns` has no effect. The row reaches past the card to the screen's edge. The card is as tall as its buttons, and the row reaches past it only at its sides, so a pop-up that scrolls ends right below it. |
 | `labels` | `inside` | `below` makes each button a large icon field with its name under it, as for scenes, with larger icons unless `icon_size` is set. A field without a name is a square. |
 | `field_size` | `var(--tile-size-lg)` | The size of the icon fields with `labels: below`, such as `76px`, and of a stacked button's field, 64 px by default. |
 | `outline` | | Takes the same values as `active`. Matching buttons that are not active get a ring, such as a suggested scene. |
@@ -1430,6 +1431,61 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 </details>
 
+### Graph
+
+The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height.
+
+<img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
+
+<details>
+<summary>Options and example</summary>
+
+<br>
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `attribute`, `type` and `color`. `type: bars` draws bars: the share of each time step that the entity was on, or its mean value. A thermostat's bars show how long it heated or cooled. |
+| `hours` | `24` | How many hours the graph shows, up to 168. |
+| `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
+| `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
+| `fill` | `fade` below, `solid` behind | `fade`, `solid` or `none`, for the area under the first line. |
+| `line` | `true` below, `false` behind | The line on top of the area. |
+| `points` | `none` | `last` marks the newest value and `all` every value. |
+| `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
+| `min`, `max` | | Fixed ends of the scale for the first line's unit. Without them, the scale fits the values. |
+| `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
+| `smooth` | `true` | With `false`, the line runs straight from value to value. |
+| `animate` | `false` | Draws the graph in from the left when it appears. |
+
+Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
+
+Behind a room card, the temperature of the last day is a soft area:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: name
+entity: light.living_room
+name: Living room
+icon: mdi:sofa
+modules:
+  - origami_base
+  - origami_graph
+origami_base:
+  tile: true
+  vertical: true
+origami_graph:
+  entities:
+    - sensor.living_room_temperature
+  position: background
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#popup_living_room'
+```
+
+</details>
+
 ### Popup
 
 The Popup module styles a pop-up's header, backdrop and close button, and it works with Base. On a header that shows only a name, the sub-buttons are values below or beside the title, as text or as chips. With `scrolling_effect: false` on the pop-up, a long title ends with an ellipsis instead of scrolling. A header with a button, a switch or a slider keeps Bubble Card's layout. A key in the pop-up can open a mini pop-up, a small pop-up with cards of its own.
@@ -1597,7 +1653,7 @@ Base puts its helpers on `card._org` for the modules that run after it. A module
 | `pending(on, wait)` | Shows a tapped bottom sub-button with the look it is about to get until its look changes or 10 seconds pass, as Button's and Tiles' `pending` options do. `on` lists the numbers of the sub-buttons that look on now, and `wait` those that wait after a tap. The module styles the classes `org-pending-on` and `org-pending-off`. |
 | `later(key, work)` | Runs `work` in the next frame, once per card and `key` however many style passes ask for it, with the `work` of the last pass. Bubble Card runs several passes for one change, about seven while a pop-up opens, so work that reads the layout, such as measuring a name, is done once. |
 | `fade(selector, start)` and `pen(element, pseudo)` | `fade()` returns the rules that fade a scrolling row out at both ends, in both directions of writing, from `start` to 48 px before the end. `pen()` measures texts in the font of an element's `::before`, or of `pseudo`, and returns the computed style as `cs` and a `width(text)` function. |
-| `scroller()` | The rules that turn the bottom sub-buttons of a sub-buttons card into one row that scrolls sideways to the screen's edge, as Button's and Tiles' `scroll` options do. Only the sub-buttons take taps, and the row reaches past the card above and below only by `--org-key-room`. |
+| `scroller()` | The rules that turn the bottom sub-buttons of a sub-buttons card into one row that scrolls sideways to the screen's edge, as Button's and Tiles' `scroll` options do. The row reaches past the card above and below only by `--org-key-room`. |
 | `shows(item)` and `unframe(pad)` | `shows()` tells whether a sub-button shows its name or a state. `unframe()` returns the rules that remove a sub-buttons card's frame, so the bottom sub-buttons fill it with `pad` around them, as in Button, Slider, Table and Tiles. |
 | `backdrop(selector, address, mix, blur, round, host)` | The rules that show a cover behind a card's content. `mix` is its share from 0 to 100, `blur` blurs it, and `round` rounds the corners. Media's cover background and Popup's art use it. With the element that holds the layer as `host`, the last cover stays until the next one has loaded. |
 
