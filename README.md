@@ -21,6 +21,8 @@ A dashboard for Home Assistant, built around [Bubble Card](https://github.com/Cl
 
 The theme, the font and Bubble Card come first.
 
+> **Marketplace.** Home Assistant installs community projects from its Marketplace, under **Settings**. Before Home Assistant 2026.11, HACS does this, with **Download** in place of **Install**.
+
 <details>
 <summary><b>Install the theme</b></summary>
 
@@ -35,11 +37,8 @@ Colors, sizes and shadows for light and dark mode.
      themes: !include_dir_merge_named themes
    ```
 
-2. Open Origami in HACS. If HACS asks to add the repository, select **Add**. Then select **Download**.
-
-   [![Open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme)
-
-3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
+2. Open the [Marketplace](https://my.home-assistant.io/redirect/marketplace_browse/), select **Add from link**, enter `hazymorning/origami` and select **Add**. The first time, the Marketplace asks to connect GitHub. Then open Origami and select **Install**.
+3. Pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
 > **Light and dark.** The theme and the weather card follow the phone's light or dark mode, which most phones change at sunrise and sunset. Staying light or dark all day works too: choose **Light** or **Dark** next to the theme in the user profile.
 
@@ -72,11 +71,11 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](https
 
 Most of Origami is made with the wonderful [Bubble Card](https://github.com/Clooos/Bubble-Card) by Clooos. It needs version 3.4 or later, and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) to add the modules.
 
-1. Download Bubble Card and Bubble Card Tools in HACS, or update them if they're already there.
+1. Install Bubble Card and Bubble Card Tools in the Marketplace, or update them if they're already there.
 
-   [Open Bubble Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
+   [Open Bubble Card in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
 
-2. Restart Home Assistant. If Bubble Card Tools isn't set up yet, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration.
+2. If Bubble Card Tools isn't set up yet, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration. Then reload the page.
 
 </details>
 
@@ -201,9 +200,9 @@ Bubble Card does the layout, the actions, the pop-ups and the editor. Each part 
 
 <br>
 
-HACS only updates the theme. The modules were copied in by hand, so the new ones are pasted the same way.
+The Marketplace only updates the theme. The modules were copied in by hand, so the new ones are pasted the same way.
 
-1. Update Origami and Bubble Card in HACS.
+1. Update Origami and Bubble Card under [Updates](https://my.home-assistant.io/redirect/updates/).
 2. Paste all the new modules over the old ones.
 3. Make the small change that the [upgrade steps](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) list for a few cards.
 
@@ -230,8 +229,8 @@ A few lines are usually enough: `primary-color` and `accent-color` in each mode 
 <br>
 
 - **Origami isn't in the theme list.** Add the `themes` line from [Get started](#get-started) to `configuration.yaml` and restart Home Assistant.
-- **HACS can't find Origami.** The **Open in HACS** button under [Get started](#get-started) adds the repository to HACS.
-- **A card says "Custom element doesn't exist".** Download the card in HACS and reload the page. In the Companion app, select **Reset frontend cache** in the app settings.
+- **The Marketplace can't find Origami.** Origami isn't in its catalog, so it comes in with **Add from link**, as under [Get started](#get-started).
+- **A card says "Custom element doesn't exist".** Install the card in the Marketplace and reload the page. In the Companion app, select **Reset frontend cache** in the app settings.
 - **The font doesn't change.** Check that the stylesheet is under [Resources](https://my.home-assistant.io/redirect/lovelace_resources/), then reload the page.
 - **A Bubble card looks plain.** Check that Bubble Card Tools is added as an integration and that the card's modules are under **Modules**, then **My Modules**. Then reload the page.
 - **A tap doesn't open a pop-up.** The pop-up has to be in the same view as the button, with a `hash` that matches the button's navigation path, like `#popup_tv`.

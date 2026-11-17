@@ -59,12 +59,12 @@ At the top of its file, the card turns off the sun, the moon and every effect, a
 ## Requirements
 
 - [Get started](../../README.md#get-started), for the theme and the font
-- [Origami Weather](https://github.com/hazymorning/origami_weather) from HACS
+- [Origami Weather](https://github.com/hazymorning/origami_weather) from the Marketplace
 - A weather entity with a daily forecast, such as the one from [Met.no](https://www.home-assistant.io/integrations/met/), which comes with Home Assistant
 
 ## Setup
 
-1. [Open Origami Weather in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_weather&category=plugin). If HACS asks to add the repository, select **Add**. Then select **Download**, or update it if it's already there.
+1. [Open Origami Weather in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=hazymorning&repository=origami_weather&category=plugin) and select **Install**, or update it if it's already there.
 2. Pick a card: [`diorama.yaml`](diorama.yaml), [`house.yaml`](house.yaml) or [`comparison.yaml`](comparison.yaml). In its file, change each `weather.home` to the home's weather entity.
 3. Add the card to the dashboard, as described under [Get started](../../README.md#get-started).
 

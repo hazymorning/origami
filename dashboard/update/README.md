@@ -2,7 +2,7 @@
 
 <img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/update-card.webp">
 
-New Origami modules with one tap, once the Marketplace or HACS has the new release.
+New Origami modules with one tap, once the Marketplace has the new release.
 
 ## Requirements
 
@@ -17,4 +17,4 @@ New Origami modules with one tap, once the Marketplace or HACS has the new relea
 
 | Entity | Used for |
 | --- | --- |
-| Origami's update entity | The installed release, as the Marketplace or HACS lists it under [Updates](https://my.home-assistant.io/redirect/updates/). The card finds it on its own. Without it, the card takes the newest release on GitHub. |
+| Origami's update entity | The installed release, as the Marketplace lists it under [Updates](https://my.home-assistant.io/redirect/updates/). The card finds it on its own. Without it, the card takes the newest release on GitHub. |

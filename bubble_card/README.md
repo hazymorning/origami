@@ -1638,7 +1638,7 @@ The Update module brings the Origami modules to the release that is installed. A
 | --- | --- | --- |
 | `ref` | The installed release | A release or a branch to update from, such as `next`. |
 
-The installed release comes from Origami's update entity in the Marketplace or HACS, and without it from the newest release on GitHub. Only an admin can update. The card's texts are in English, and in German for a German Home Assistant.
+The installed release comes from Origami's update entity in the Marketplace, and without it from the newest release on GitHub. Only an admin can update. The card's texts are in English, and in German for a German Home Assistant.
 
 A key with `fire-dom-event` and `origami_update: install` replaces the modules, and one with `origami_update: reload` reloads the page afterwards. Each key shows only while it can do something. Own changes to the Origami modules are replaced, so the key asks first:
 

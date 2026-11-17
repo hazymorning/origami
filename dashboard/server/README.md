@@ -20,7 +20,7 @@ How the Home Assistant server is doing, with its backups and updates, and button
 
 ## Optional
 
-- **Load graph.** It needs [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from HACS. Without it, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
+- **Load graph.** It needs [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from the Marketplace. Without it, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
 
 ## Entities
 

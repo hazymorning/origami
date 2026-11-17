@@ -7,11 +7,11 @@ A bar at the bottom of the screen with buttons for the most used pop-ups and the
 ## Requirements
 
 - [Get started](../../README.md#get-started), for the theme and the font
-- [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) 1.8.0 or later from HACS
+- [Navbar Card](https://github.com/joseluis9595/lovelace-navbar-card) 1.8.0 or later from the Marketplace
 
 ## Setup
 
-1. [Open Navbar Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) and select **Download**, or update it if it's already there.
+1. [Open Navbar Card in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin) and select **Install**, or update it if it's already there.
 2. In [`card.yaml`](card.yaml), change the entities to the home's own, as listed under [Entities](#entities). The speakers are in several lists, under the music button and in the first player under `media_player`, so change each list.
 3. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started). The bar stands at the bottom of the screen, wherever the card is in the view.
 
