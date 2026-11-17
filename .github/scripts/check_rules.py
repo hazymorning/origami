@@ -187,7 +187,7 @@ for name in READMES:
 # Parts: each part's README has its sections in order, keeps everything optional out of Requirements and Setup,
 # and lists exactly the modules that its files use, with Base whenever there is one
 SECTIONS = ["Requirements", "Setup", "Optional", "Entities"]
-MODULE_NAMES = r"\b(Base|Fan|Climate|Media|Slider|Button|Header|Tiles|Table|Popup)\b"
+MODULE_NAMES = r"\b(Base|Fan|Climate|Media|Slider|Button|Header|Tiles|Table|Graph|Popup|Update)\b"
 for readme in sorted((ROOT / "dashboard").glob("*/README.md")):
     where = str(readme.relative_to(ROOT))
     parts = re.split(r"^## (.+)$", re.sub(r"^[ \t]*```.*?^[ \t]*```", "", readme.read_text(encoding="utf-8"), flags=re.M | re.S), flags=re.M)

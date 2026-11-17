@@ -1,6 +1,6 @@
 # Origami modules for Bubble Card
 
-This folder holds eleven modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
+This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bubble-Card). They give Bubble cards the frame, text styles, colors and controls of the rest of the Origami dashboard, and they need the [Origami theme](../README.md#get-started) for its colors and sizes.
 
 > [!NOTE]
 > Long-time Bubble Card users may wonder why many cards don't use the card types made for them, such as the media player card. Everything here is built around usability. People at home who aren't very technical didn't get ideas like a card that doubles as a slider when it's held. They're nice ideas, but they didn't work out in daily use for the people this was made for, so a card that explains itself is almost always the choice here.
@@ -30,6 +30,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
 | [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines or bars, below the content or behind it. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
+| [Update](#update) | `origami_update` | button | Brings the Origami modules to the installed release with one tap. |
 
 > [!TIP]
 > In a sections view, give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a slider at the bottom `rows: '2.2'`, also in pop-ups. Cards with Base's `vertical` option need no `rows`, and a card with `bottom_layout: rows` and `rows: auto` grows with its rows.
@@ -1619,6 +1620,58 @@ cards: []  # Add the pop-up's cards here
 ```
 
 The theme sets the pop-up background, so Bubble Card's `bg_color`, `bg_opacity` and `bg_blur` aren't needed. A pop-up at the bottom of the screen casts the theme's `shadow-sheet`, which rises from its top edge, and a centered one `shadow-elevated`, whatever `shadow_opacity` says, unless it is `0`. The shadow slides in and out with the pop-up. The main README explains the dashboard's pop-ups under [Pop-ups](../README.md#pop-ups).
+
+</details>
+
+### Update
+
+The Update module brings the Origami modules to the release that is installed. A card with the module shows how many modules the release has in a newer version, and its keys replace them and reload the page. It writes through Bubble Card Tools, as **Import from YAML** does, and replaces only the Origami modules that are there, Base first and never with an older version. Cards, dashboards, the theme and other modules stay as they are.
+
+<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/update-card.webp">
+
+<details>
+<summary>Options and example</summary>
+
+<br>
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `ref` | The installed release | A release or a branch to update from, such as `next`. |
+
+The installed release comes from Origami's update entity in the Marketplace or HACS, and without it from the newest release on GitHub. Only an admin can update. The card's texts are in English, and in German for a German Home Assistant.
+
+A key with `fire-dom-event` and `origami_update: install` replaces the modules, and one with `origami_update: reload` reloads the page afterwards. Each key shows only while it can do something. Own changes to the Origami modules are replaced, so the key asks first:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Origami
+icon: mdi:update
+show_state: true
+scrolling_effect: false
+modules:
+  - origami_update
+button_action:
+  tap_action:
+    action: none
+sub_button:
+  main:
+    - name: Update
+      icon: mdi:download
+      show_name: true
+      tap_action:
+        action: fire-dom-event
+        origami_update: install
+        confirmation:
+          text: Replace the Origami modules? Own changes to them are lost.
+    - name: Reload
+      icon: mdi:refresh
+      show_name: true
+      tap_action:
+        action: fire-dom-event
+        origami_update: reload
+```
 
 </details>
 

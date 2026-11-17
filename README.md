@@ -93,6 +93,8 @@ Every module needs Base, so start with that one.
 
 To add all modules at once, copy the [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) folder to `/config/bubble_card/modules` and reload the page. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) has every module's options.
 
+> **Updates.** With the [update card](https://github.com/hazymorning/origami/tree/main/dashboard/update), the modules of a new release replace the old ones in one tap.
+
 </details>
 
 <details>

@@ -7,6 +7,7 @@
 - Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
 - The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.
 - Chips in a row of buttons are as tall as the chips in a header and have the same room around their icon, so a row with larger icons no longer looks squeezed.
+- A new Update module and card replace the Origami modules with the ones of the installed release in one tap.
 
 ## 3.0 · The Final Fold
 
