@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.1.0"
+  version: "1.1.1"
   supported:
     - button
   description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
@@ -597,10 +597,10 @@ origami_graph:
       gap: var(--ha-space-1) !important;
     }
     ` + card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
-      background-color: color-mix(in srgb, var(--ha-card-background, var(--card-background-color)) 72%, transparent) !important;
+      /* Base fills a key from --org-key-bg, so the legend gives its values the card's background there, and a blur keeps them readable over the lines */
+      --org-key-bg: color-mix(in srgb, var(--ha-card-background, var(--card-background-color)) 80%, transparent);
       -webkit-backdrop-filter: blur(var(--ha-space-2));
       backdrop-filter: blur(var(--ha-space-2));
-      box-shadow: none !important;
     }` : ""}
     ha-card .org-graph > svg {
       display: block;
