@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.13.1"
+  version: "13.14.0"
   is_global: true
   supported:
     - button
@@ -573,8 +573,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too, and 13.6 added scroller().
-        version: 13.6,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too, 13.6 added scroller(), and 13.7 added chip().
+        version: 13.7,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -857,11 +857,13 @@ origami_base:
           const bleed = blur ? "100px" : "0px";
           return sel + " { content: " + (art ? '""' : "none") + "; position: absolute; inset: -" + bleed + "; background: " + (art ? "url(" + str(art) + ") center / cover no-repeat, var(--org-under, none) center / cover no-repeat" : "none") + "; opacity: " + (Number.isFinite(share) ? share / 100 : 0.25) + "; filter: " + (blur ? "blur(50px) saturate(170%)" : "none") + "; clip-path: inset(" + bleed + " round " + round + "); pointer-events: none; transition: opacity var(--duration-normal) ease; }";
         },
+        // chip() returns the height of a chip with an icon of this size. A chip is as tall as a header chip, 32 px with its icon of 14 px, and a larger icon makes it taller by as much, so every chip has the same room above and below its icon.
+        chip: (icon) => "calc(var(--control-height-mini) + max(0px, " + icon + " - var(--icon-size-2xs)))",
         // chips() returns the rules that turn the values in a container into chips, for Header and Popup. A value with show_background turned off stays plain.
         chips: (scope) => {
           const chip = [".background-off", ".background-on"].map((c) => scope + " .bubble-sub-button" + c);
           return scope + " { gap: var(--ha-space-2) !important; }\n"
-            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: var(--control-height-mini) !important; padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
+            + chip.join(", ") + " { gap: var(--ha-space-1) !important; min-height: " + card._org.chip("var(--icon-size-2xs)") + " !important; padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important; border-radius: var(--radius-small) !important; background-color: var(--org-value-chip, var(--fill-subtle)) !important; color: var(--primary-text-color) !important; font-variant-numeric: tabular-nums; }\n"
             + card._org.each(chip, " .bubble-sub-button-icon:not(.hidden)") + " { --mdc-icon-size: var(--icon-size-2xs) !important; margin: 0 !important; color: inherit !important; }\n"
             + card._org.each(chip, " .bubble-sub-button-name-container:empty") + " { display: none !important; }";
         },
