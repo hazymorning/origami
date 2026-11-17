@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.1.1"
+  version: "1.2.0"
   supported:
     - button
   description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
@@ -276,7 +276,14 @@ origami_graph:
       const drawn = series.filter((s) => !s.bars);
       const keys = cfg.legend === true ? org.items(this.config).slice(0, org.layout(this.config).mains)
         .map((item, i) => ({ n: i + 1, k: drawn.findIndex((s) => s.id === item.entity) })).filter((x) => x.k >= 0) : [];
-      card._orgG = { keys, bg, look: keys.map(({ k }) => ["solid", "dashed", "dotted"][Math.min(k, 2)] + " " + (drawn[k].color || "var(--org-graph-key)")) };
+      // Each value stands after its name in bold: a percentage and a temperature as on the room cards, other values with their unit
+      const reading = (id) => {
+        const st = hass.states[id];
+        const unit = String(st?.attributes?.unit_of_measurement ?? "");
+        if (!st || !Number.isFinite(Number(st.state))) return st ? org.word(hass, st) : "";
+        return unit === "%" ? org.num(hass, st.state, 0, "%") : /°/.test(unit) ? org.num(hass, st.state, 1) + "°" : org.num(hass, st.state, 0) + (unit ? "\u00a0" + unit : "");
+      };
+      card._orgG = { keys, bg, look: keys.map(({ k }) => ["solid", "dashed", "dotted"][Math.min(k, 2)] + " " + (drawn[k].color || "var(--org-graph-key)")), values: keys.map(({ k }) => org.str(reading(drawn[k].id))) };
       g.ctx = { cfg, series, hours, bg, el, hass, num: org.num, keys };
       g.draw = () => {
         if (g.raf) return;
@@ -590,7 +597,7 @@ origami_graph:
     ${card._orgG.keys.length ? card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
       padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important;
     }
-    ` + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + "::before { content: \"\"; order: 1; flex: none; width: var(--ha-space-4); margin-inline-end: var(--ha-space-2); border-top: var(--org-line-width) " + card._orgG.look[i] + "; }").join("\n    ") : ""}
+    ` + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-name-container::after { content: " + card._orgG.values[i] + "; margin-inline-start: var(--ha-space-1); font-weight: var(--ha-font-weight-bold); }").join("\n    ") + "\n    " + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + "::before { content: \"\"; order: 1; flex: none; width: var(--ha-space-4); margin-inline-end: var(--ha-space-2); border-top: var(--org-line-width) " + card._orgG.look[i] + "; }").join("\n    ") : ""}
     ${card._orgG.keys.length && card._orgG.bg ? `ha-card .bubble-sub-button-container {
       flex-direction: column !important;
       align-items: flex-end !important;
@@ -599,6 +606,8 @@ origami_graph:
     ` + card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
       /* Base fills a key from --org-key-bg, so the legend gives its values the card's background there, and a blur keeps them readable over the lines */
       --org-key-bg: color-mix(in srgb, var(--ha-card-background, var(--card-background-color)) 80%, transparent);
+      /* The card's background on the page's gray casts the chip shadow, as a key on a tile does */
+      --org-key-shadow: var(--tile-chip-shadow);
       -webkit-backdrop-filter: blur(var(--ha-space-2));
       backdrop-filter: blur(var(--ha-space-2));
     }` : ""}

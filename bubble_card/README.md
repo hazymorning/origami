@@ -30,7 +30,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
 | [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines or bars, below the content or behind it. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
-| [Update](#update) | `origami_update` | button | Brings the Origami modules to the installed release with one tap. |
+| [Update](#update) | `origami_update` | button, sub-buttons | Brings the Origami modules to the installed release with one tap. |
 
 > [!TIP]
 > In a sections view, give button cards `rows: 1.375`, compact cards `rows: 1` and media cards with a slider at the bottom `rows: '2.2'`, also in pop-ups. Cards with Base's `vertical` option need no `rows`, and a card with `bottom_layout: rows` and `rows: auto` grows with its rows.
@@ -1457,7 +1457,7 @@ The Graph module draws the history of one or more entities on a button card, as 
 | `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
-| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with a blur. The lines are then as strong as below the content. |
+| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with a blur and the chip shadow. The lines are then as strong as below the content. |
 
 Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
 
@@ -1641,7 +1641,7 @@ The Update module brings the Origami modules to the release that is installed. A
 
 The installed release comes from Origami's update entity in the Marketplace, and without it from the newest release on GitHub. Only an admin can update. The card's texts are in English, and in German for a German Home Assistant.
 
-A key with `fire-dom-event` and `origami_update: install` replaces the modules, and one with `origami_update: reload` reloads the page afterwards. Each key shows only while it can do something. Own changes to the Origami modules are replaced, so the key asks first:
+A key with `fire-dom-event` and `origami_update: install` replaces the modules, and one with `origami_update: reload` reloads the page afterwards. Each key shows only while it can do something. In a list of [Tiles](#tiles), one row with `origami_update: install` does both: it shows the state at its end, in the accent color while there is an update, and a tap replaces the modules or, after that, reloads the page. A tap reaches its confirmation only when there is something to replace. Own changes to the Origami modules are replaced, so the key asks first:
 
 ```yaml
 type: custom:bubble-card

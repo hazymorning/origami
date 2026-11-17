@@ -1,9 +1,10 @@
 origami_update:
   name: "Origami • Update"
-  version: "1.0.0"
+  version: "1.1.0"
   supported:
     - button
-  description: "Update brings the Origami modules to the installed release with one tap. It replaces each Origami module that the release has in a newer version, through Bubble Card Tools, and touches nothing else."
+    - sub-buttons
+  description: "Update brings the Origami modules to the installed release with one tap, from a card or from a row in a list. It replaces each Origami module that the release has in a newer version, through Bubble Card Tools, and touches nothing else."
   editor:
     - name: ref
       label: "Release or branch to update from, such as next (empty for the installed release)"
@@ -27,7 +28,8 @@ origami_update:
         };
         // A module's version is the first version line of its file, also in a file that Bubble Card's editor wrote again
         const version = (text) => String(text ?? "").match(/^\s+version:\s*["']?(\d+(?:\.\d+)*)/m)?.[1] ?? "0";
-        const line = () => {
+        // A row says what its tap does next, and a card has a key for that
+        const line = (row) => {
           const n = u.list.length;
           const de = u.de;
           return ({
@@ -35,16 +37,17 @@ origami_update:
             none: (de ? "Aktuell · " : "Up to date · ") + u.ref,
             ready: n + (de ? (n === 1 ? " Modul · " : " Module · ") : (n === 1 ? " module · " : " modules · ")) + u.ref,
             busy: de ? "Wird ersetzt" : "Replacing",
-            done: de ? "Module ersetzt" : "Modules replaced",
+            done: row ? (de ? "Ersetzt · neu laden" : "Replaced · reload") : (de ? "Module ersetzt" : "Modules replaced"),
             tools: de ? "Bubble Card Tools fehlt" : "Bubble Card Tools is missing",
             admin: de ? "Nur für Admins" : "Admins only",
             error: (de ? "Fehler: " : "Error: ") + u.error
           })[u.state];
         };
-        // Bubble Card hands the state line to a module whose code contains this exact assignment
+        // Bubble Card hands the state line to a module whose code contains this exact assignment. A row in a list of Tiles shows its state from --org-tile-state, so Update writes it on the row.
         u.paint = (card) => {
           card.dataset.orgUpdate = u.state;
           if (card.querySelector('.bubble-state')) card.querySelector('.bubble-state').textContent = line();
+          (card._orgU?.rows ?? []).forEach((sel) => card.querySelectorAll(sel).forEach((el) => el.style.setProperty("--org-tile-state", card._org.str(line(true)))));
         };
         u.set = (state) => {
           u.state = state;
@@ -105,6 +108,23 @@ origami_update:
           else if (a === "reload") location.reload();
         });
       }
+      // The keys and rows with origami_update. On a card, the key with install shows while there is an update and the one with reload after it. A row in a list shows the state and does both.
+      const keys = (a) => org.items(this.config).map((item, i) => (a ? item.tap_action?.origami_update === a : item.tap_action?.origami_update) ? "ha-card .bubble-sub-button-" + (i + 1) : "").filter(Boolean);
+      const own = this.config.card_type === "sub-buttons";
+      card._orgU = own ? { install: [], reload: [], rows: keys() } : { install: keys("install"), reload: keys("reload"), rows: [] };
+      // A tap that has nothing to update never reaches Home Assistant, so its confirmation shows only when the modules are replaced. After the update, the tap reloads the page.
+      if (!card._orgUTaps) {
+        card._orgUTaps = true;
+        card.addEventListener("hass-action", (e) => {
+          const a = e.detail?.config?.[(e.detail?.action ?? "tap") + "_action"]?.origami_update;
+          if (!a) return;
+          const state = globalThis.__origamiUpdate?.state;
+          if (a === "reload" || state === "done") {
+            e.stopPropagation();
+            location.reload();
+          } else if (state !== "ready") e.stopPropagation();
+        });
+      }
       u.cards.add(card);
       // The release to update to: the option, else the release of the theme that the Marketplace or HACS installed, else the newest release on GitHub
       const theme = Object.values(hass.states).find((s) => s.entity_id.startsWith("update.") && String(s.attributes?.release_url ?? "").includes("github.com/" + repo));
@@ -114,10 +134,8 @@ origami_update:
         u.check(want);
       }
       u.paint(card);
-      // The keys with origami_update: install and reload show only while they can do something
-      const keys = (a) => org.items(this.config).map((item, i) => item.tap_action?.origami_update === a ? "ha-card .bubble-sub-button-" + (i + 1) : "").filter(Boolean);
-      card._orgU = { install: keys("install"), reload: keys("reload") };
       return "";
     })()}
     ${card._orgU.install.length ? card._orgU.install.map((s) => s.replace("ha-card", 'ha-card:not([data-org-update="ready"])')).join(", ") + " { display: none !important; }" : ""}
     ${card._orgU.reload.length ? card._orgU.reload.map((s) => s.replace("ha-card", 'ha-card:not([data-org-update="done"])')).join(", ") + " { display: none !important; }" : ""}
+    ${card._orgU.rows.length ? card._orgU.rows.map((s) => s + " .bubble-sub-button-name-container::after").join(", ") + " { display: block !important; }\n    " + card._orgU.rows.map((s) => s.replace("ha-card", 'ha-card[data-org-update="ready"]') + " .bubble-sub-button-name-container::after").join(", ") + " { color: var(--accent-color) !important; }" : ""}
