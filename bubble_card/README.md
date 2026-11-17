@@ -1434,7 +1434,7 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 ### Graph
 
-The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height.
+The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height. A graph shows once its data and its place stay the same for a moment and then fades in, so it doesn't move while the page builds.
 
 <img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
 
@@ -1457,6 +1457,7 @@ The Graph module draws the history of one or more entities on a button card, as 
 | `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
+| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with a blur. The lines are then as strong as below the content. |
 
 Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
 

@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.0.0"
+  version: "1.1.0"
   supported:
     - button
   description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
@@ -147,10 +147,15 @@ origami_graph:
       selector:
         boolean: {}
       default: false
+    - name: legend
+      label: "Legend: each sub-button that shows a drawn entity gets a sample of its line"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
-      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_graph needs origami_base 13 or later");
+      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_graph needs origami_base 13.1 or later");
       const cfg = this.config.origami_graph ?? {};
       const wrap = card.querySelector(".bubble-wrapper");
       const box = card.querySelector(".bubble-container");
@@ -237,6 +242,8 @@ origami_graph:
         el = document.createElement("div");
         el.innerHTML = '<svg aria-hidden="true"><defs></defs><g class="org-graph-bars"></g><g class="org-graph-fills"></g><g class="org-graph-lines"></g><g class="org-graph-dots"></g><g class="org-graph-labels"></g></svg>';
       }
+      // The graph stays hidden until it shows, so it never shows before its styles, its data and its size are there
+      if (!g.shown && el.style.opacity !== "0") el.style.opacity = "0";
       el.className = "org-graph " + (bg ? "background" : "bottom");
       const height = String(cfg.height ?? "").trim() || (bg ? "50%" : "calc(var(--tile-size) + var(--ha-space-4))");
       if (card.style.getPropertyValue("--org-graph-h") !== height) card.style.setProperty("--org-graph-h", height);
@@ -258,12 +265,19 @@ origami_graph:
         g.sub = null;
         g.ro?.disconnect();
         g.ro = null;
+        clearTimeout(g.settle);
         g.el = null;
         clearInterval(g.tick);
         g.tick = null;
       });
 
-      g.ctx = { cfg, series, hours, bg, el, hass, num: org.num };
+      // With legend, each main sub-button that shows a drawn entity gets a short sample of that entity's line, so a value names its line.
+      // Behind the content, they stand on top of each other at the end, in the order of their lines, on the card's background with a blur, so they stay readable over the lines.
+      const drawn = series.filter((s) => !s.bars);
+      const keys = cfg.legend === true ? org.items(this.config).slice(0, org.layout(this.config).mains)
+        .map((item, i) => ({ n: i + 1, k: drawn.findIndex((s) => s.id === item.entity) })).filter((x) => x.k >= 0) : [];
+      card._orgG = { keys, bg, look: keys.map(({ k }) => ["solid", "dashed", "dotted"][Math.min(k, 2)] + " " + (drawn[k].color || "var(--org-graph-key)")) };
+      g.ctx = { cfg, series, hours, bg, el, hass, num: org.num, keys };
       g.draw = () => {
         if (g.raf) return;
         g.raf = requestAnimationFrame(() => {
@@ -405,7 +419,8 @@ origami_graph:
         // soft bars. An entity's own color or color by value replaces them at full strength.
         const mix = (c, pct) => "color-mix(in srgb, " + c + " " + pct + "%, transparent)";
         const INK = "var(--primary-text-color)";
-        const LINE = mix(INK, bg ? 14 : 24);
+        // With legend, the lines carry the values, so they are as strong behind the content as below it
+        const LINE = mix(INK, bg && !cfg.legend ? 14 : 24);
         const DOT = mix(INK, 45);
 
         // The fill fades from the top of the drawing to the bottom edge
@@ -509,20 +524,39 @@ origami_graph:
           }
         });
 
-        // With animate, the graph draws itself in from the left when it first has data, and dots and values follow
+        // Behind the content, the legend's values stand in the order of their lines' newest values, the highest line on top
+        if (bg && g.ctx.keys.length) {
+          const end = (k) => {
+            const real = lines[k]?.pts.filter(([, v]) => v !== null && Number.isFinite(v)) ?? [];
+            return real.length ? lines[k].grp.y(real[real.length - 1][1]) : Infinity;
+          };
+          [...g.ctx.keys].sort((a, b) => end(a.k) - end(b.k)).forEach(({ n }, i) => {
+            const key = card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n);
+            if (key && key.style.order !== String(i)) key.style.order = String(i);
+          });
+        }
+
         const any = lines.some((l) => l.pts.length > 1) || barsG.childElementCount;
         if (g.answered && !any && !g.told) {
           g.told = true;
           console.info("origami_graph: no history with numbers for " + series.map((s) => s.id + (s.attr ? " (" + s.attr + ")" : "")).join(", ") + ". Check that the recorder keeps these entities.");
         }
-        if (any && !g.shown) {
-          g.shown = true;
-          const still = cfg.animate !== true || matchMedia("(prefers-reduced-motion: reduce)").matches;
-          if (!still && svg.animate) {
-            const ease = "cubic-bezier(.22, 1, .36, 1)";
-            svg.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }], { duration: 1100, easing: ease });
-            for (const n of [dotsG, labelsG]) n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 850, easing: ease, fill: "backwards" });
-          }
+        // The graph shows once its data and its place have stayed the same for a moment, so it never moves while the page builds, and then it fades in.
+        // With animate, it draws itself in from the left at that moment, and dots and values follow.
+        if (any && !g.shown && getComputedStyle(el).position === "absolute") {
+          clearTimeout(g.settle);
+          g.settle = setTimeout(() => {
+            g.settle = 0;
+            if (g.shown) return;
+            g.shown = true;
+            el.style.removeProperty("opacity");
+            const still = cfg.animate !== true || matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (!still && svg.animate) {
+              const ease = "cubic-bezier(.22, 1, .36, 1)";
+              svg.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }], { duration: 1100, easing: ease });
+              for (const n of [dotsG, labelsG]) n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 850, easing: ease, fill: "backwards" });
+            }
+          }, 250);
         }
       };
       // Data, size and the passing time redraw the graph on their own, and a style pass only when the settings change
@@ -533,6 +567,10 @@ origami_graph:
       }
       return "";
     })()}
+    ha-card {
+      /* A line's sample in the legend is as dark as the dot on its newest value, so its dashes show on the small key */
+      --org-graph-key: color-mix(in srgb, var(--primary-text-color) 45%, transparent);
+    }
     ha-card .org-graph {
       position: absolute;
       left: 0;
@@ -541,7 +579,29 @@ origami_graph:
       height: var(--org-graph-h);
       pointer-events: none;
       color: var(--primary-text-color);
+      transition: opacity var(--duration-normal) ease;
     }
+    @media (prefers-reduced-motion: reduce) {
+      ha-card .org-graph {
+        transition: none;
+      }
+    }
+    /* Bubble Card lays a sub-button out in reverse, so the line's sample comes before the text with the higher order, in both directions of writing */
+    ${card._orgG.keys.length ? card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
+      padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important;
+    }
+    ` + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + "::before { content: \"\"; order: 1; flex: none; width: var(--ha-space-4); margin-inline-end: var(--ha-space-2); border-top: var(--org-line-width) " + card._orgG.look[i] + "; }").join("\n    ") : ""}
+    ${card._orgG.keys.length && card._orgG.bg ? `ha-card .bubble-sub-button-container {
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      gap: var(--ha-space-1) !important;
+    }
+    ` + card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
+      background-color: color-mix(in srgb, var(--ha-card-background, var(--card-background-color)) 72%, transparent) !important;
+      -webkit-backdrop-filter: blur(var(--ha-space-2));
+      backdrop-filter: blur(var(--ha-space-2));
+      box-shadow: none !important;
+    }` : ""}
     ha-card .org-graph > svg {
       display: block;
       overflow: visible;
