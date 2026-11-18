@@ -7,9 +7,15 @@ name: Living room
 icon: mdi:sofa
 modules:
   - origami_base
+  - origami_graph
 origami_base:
   tile: true
   vertical: true
+# The temperature of the last day, as a soft area behind the card
+origami_graph:
+  entities:
+    - sensor.living_room_temperature
+  position: background
 grid_options:
   columns: 6
   rows: auto

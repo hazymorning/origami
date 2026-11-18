@@ -1,12 +1,12 @@
 # Rooms
 
-<img width="800" alt="The rooms header and the room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
+<img width="800" alt="The rooms header and the room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
 
 A card for each room with its climate and lights, which opens the room's pop-up. The header shows the average temperature and how many windows are open.
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base and Header
+- [Get started](../../README.md#get-started), with the modules Base, Header and Graph
 
 ## Setup
 
@@ -25,7 +25,7 @@ A card for each room with its climate and lights, which opens the room's pop-up.
 
 | Entity | Used for |
 | --- | --- |
-| `sensor.living_room_temperature`, `sensor.bedroom_temperature`, `sensor.office_temperature` | The average in the header. On a room card, the temperature and the dot, from blue for cold to red for hot. |
+| `sensor.living_room_temperature`, `sensor.bedroom_temperature`, `sensor.office_temperature` | The average in the header. On a room card, the temperature, the dot from blue for cold to red for hot, and the last day behind it. |
 | `sensor.living_room_humidity` | The humidity on the room card |
 | `light.living_room` | The room's lights. The icon lights up while one of them is on, and a hold on the card opens them. |
 | `binary_sensor.living_room_window`, `binary_sensor.bedroom_window` | Windows: the open windows in the header, and the window on a room card while it's open |
