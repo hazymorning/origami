@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.14.0"
+  version: "13.15.0"
   is_global: true
   supported:
     - button
@@ -1518,6 +1518,12 @@ origami_base:
     ha-card .bubble-sub-button-group {
       display: contents !important;
     }
+    /* A group that Bubble Card aligns to the end, with justify_content: end, stands at the end of the line */
+    ha-card .bubble-sub-button-alignment-lane.lane-end {
+      display: flex !important;
+      gap: var(--ha-space-1);
+      margin-inline-start: auto !important;
+    }
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
       flex: 0 0 auto !important;
       color: var(--secondary-text-color) !important;
@@ -1702,6 +1708,13 @@ origami_base:
       if (org.opts.vertical) list.forEach((sub) => {
         const { n, item } = sub;
         if (!drop(sub) && (item.sub_button_type ?? "default") === "default" && !item.tap_action && !item.hold_action && !item.double_tap_action) rules.push("ha-card .bubble-sub-button.bubble-sub-button-" + n + " { pointer-events: none !important; }");
+      });
+      // Under the icon, a sub-button with a background is a small key around its icon in that color, such as the page's color for a hole in the card. It is as tall as the line, so the line keeps its height.
+      if (org.opts.vertical) list.forEach(({ n, opt }) => {
+        if (!org.has(opt?.background)) return;
+        const sel = "ha-card .bubble-sub-button-bottom-container .bubble-sub-button.bubble-sub-button-" + n;
+        rules.push(sel + " { --org-hole: calc(var(--ha-font-size-s) * var(--ha-line-height-normal)); justify-content: center !important; width: var(--org-hole) !important; height: var(--org-hole) !important; border-radius: calc(var(--org-hole) * var(--radius-ratio)) !important; background: var(--org-value-chip) !important; }",
+          sel + " .bubble-sub-button-icon:not(.hidden) { margin: 0 !important; }");
       });
       // Each sub-button's own origami_base key works the same as a value in Header and Popup
       return [...rules, ...org.values(env, this.config, "origami_base", "ha-card", "var(--org-sub-text, var(--ha-font-size-s))", list)].join("\n");

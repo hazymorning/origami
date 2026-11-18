@@ -4,7 +4,7 @@
 
 - The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
 - A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it, and can turn the card's values into its legend.
-- The room cards show the temperature of the last day as a soft area behind them.
+- The room cards show a small note at the end of their line while the room's speaker plays, in the page's color like a hole in the card. Base lets such a group stand at the end of the line and gives it its background.
 - The server pop-up draws its load with the Graph module instead of Plotly Graph Card, with processor and memory as its legend, and its list can update the Origami modules.
 - Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
 - The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.

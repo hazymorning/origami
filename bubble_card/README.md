@@ -174,6 +174,7 @@ Each sub-button can have its own `origami_base` key with these entries, which ac
 | `dot` | While true, the sub-button takes the text color and shows a small dot under its icon, to mark a control that is on without a fill, such as shuffle. |
 | `hidden` | While true, the sub-button takes no space, as with Bubble Card's `visibility`, but the template can read any entity at once, such as the group of the speaker that a helper selects. |
 | `label` | A small line under the sub-button's text, such as CPU under 12 %. The text then has the size of the card's name and the label the size of its state line. Both end at the same edge, and the sub-button has no fill, as for the values on the server card. |
+| `background` | Under `vertical`, a small key around the sub-button's icon in this color, such as `var(--dashboard-background)` for a hole in the card. |
 
 All keys except `on` and `label` work the same in Header, Button and Popup. On a slider with `always_visible: true`, `name` stands before the value, so `Group ·` reads as Group · 20 %.
 
@@ -259,7 +260,7 @@ On a key with an icon and a name, such as Pause, the icon is 20 px and stands 8 
 
 #### Name under the icon
 
-With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.
+With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. A group of bottom sub-buttons with Bubble Card's `justify_content: end` stands at the end of the line, like the speaker on a room card. The room cards use this layout with `tile: true`.
 
 <img width="800" alt="The rooms header and four room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
 
