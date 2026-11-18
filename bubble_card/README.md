@@ -1592,7 +1592,7 @@ origami_popup:
               # Network, Line In and the other inputs work the same way
 ```
 
-The backdrop is blurred as with Bubble Card's `backdrop_blur: 10`, so every pop-up blurs the page the same way, unless it sets its own `backdrop_blur`, hides its backdrop or uses Bubble Card's performance mode. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set. As with `backdrop_blur`, the pop-up's surface then has no blur of its own.
+The backdrop is blurred as with Bubble Card's `backdrop_blur: 10`, so every pop-up blurs the page the same way, unless it sets its own `backdrop_blur`, hides its backdrop or uses Bubble Card's performance mode. An empty `backdrop_blur`, as Bubble Card's editor leaves it, counts as not set. As with `backdrop_blur`, the pop-up's surface then has no blur of its own. A hidden backdrop has no blur, because Bubble Card keeps it on the page from the start until the first pop-up closes, and browsers would still work out the blur. It keeps the blur while it fades out.
 
 ```yaml
 type: custom:bubble-card

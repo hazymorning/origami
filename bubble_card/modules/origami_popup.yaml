@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.17.1"
+  version: "4.17.2"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -275,6 +275,11 @@ origami_popup:
     .bubble-pop-up {
       --custom-popup-filter: none !important;
     }` : ""}
+    /* Bubble Card puts its backdrop on the page when the page loads and keeps it there, hidden but blurred, until the first pop-up closes. Browsers still work out that blur, so a hidden backdrop has none. While it fades out, Bubble Card marks it with is-closing, and it keeps its blur. */
+    .bubble-backdrop.is-hidden:not(.is-closing) {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
     .bubble-header-container {
       padding: calc(2 * var(--ha-space-4)) calc(2 * var(--ha-space-4)) var(--org-header-pad-bottom) !important;
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon)) !important;
