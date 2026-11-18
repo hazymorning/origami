@@ -114,7 +114,7 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, lik
 
 ## Home view
 
-<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/home-view.webp">
+<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view.webp">
 
 From top to bottom:
 
