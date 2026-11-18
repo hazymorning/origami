@@ -240,7 +240,7 @@ dark:
       - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
-    replace: {'rotate: 3': 'rotate: 600'}
+    replace: {'rotate: 3': 'rotate: 0'}
   - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
@@ -287,7 +287,7 @@ light:
     timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}
   cards:
   - file: greeting/card.yaml
-    replace: {'rotate: 3': 'rotate: 600'}
+    replace: {'rotate: 3': 'rotate: 0'}
   - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
