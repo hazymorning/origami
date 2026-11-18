@@ -141,7 +141,7 @@ A pop-up for each room, with its media, lights and climate. [More](https://githu
 
 ### Lights
 
-<img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
 Every lamp and scene in the home, and one key that turns on the scene for the time of day or turns everything off. [More](https://github.com/hazymorning/origami/tree/main/dashboard/lights)
 

@@ -4,7 +4,8 @@
 # "Calm-sea-haleiwa (Unsplash)", tv-1 "Misty forest on a green slope" and tv-2 "Moonlight over the Red Sea (53255278929)".
 # The home view, behind every pop-up
 home:
-  - {file: greeting/card.yaml}
+  # The notifications stay on their first one, so every shot shows the same
+  - {file: greeting/card.yaml, replace: {'rotate: 3': 'rotate: 600'}}
   - {file: weather/diorama.yaml}
   - {file: favorites/header.yaml}
   - {file: favorites/tiles.yaml}
