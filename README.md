@@ -127,7 +127,7 @@ From top to bottom:
 
 ### Menu
 
-<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
+<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
 Hides Home Assistant's header for good, with a menu in its place if wanted. Home Assistant has no proper way to do this yet, so it takes the Origami Header card. [More](https://github.com/hazymorning/origami/tree/main/dashboard/menu)
 
@@ -153,7 +153,7 @@ One music card for all speakers, playing alone or as a group. [More](https://git
 
 ### TV
 
-<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
+<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up.webp">
 
 The TV's remote on the phone. [More](https://github.com/hazymorning/origami/tree/main/dashboard/tv)
 
@@ -177,7 +177,7 @@ A look at the server's health, backups and updates. [More](https://github.com/ha
 
 ### Vacuum
 
-<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
+<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 Cleaning for the whole home or just one room. [More](https://github.com/hazymorning/origami/tree/main/dashboard/vacuum)
 

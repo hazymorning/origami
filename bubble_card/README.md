@@ -5,7 +5,7 @@ This folder holds twelve modules for [Bubble Card](https://github.com/Clooos/Bub
 > [!NOTE]
 > Long-time Bubble Card users may wonder why many cards don't use the card types made for them, such as the media player card. Everything here is built around usability. People at home who aren't very technical didn't get ideas like a card that doubles as a slider when it's held. They're nice ideas, but they didn't work out in daily use for the people this was made for, so a card that explains itself is almost always the choice here.
 
-<img width="800" alt="A pop-up built from the modules, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-popup.webp">
+<img width="800" alt="A pop-up built from the modules, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-popup.webp">
 
 ## Installation
 
