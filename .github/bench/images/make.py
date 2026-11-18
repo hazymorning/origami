@@ -4,7 +4,8 @@
 
 Without names, it makes every image that has a file here. It needs Python with PyYAML and Pillow,
 and the bench set up as .github/bench/bench.mjs says. The other cards and the status bar's font are
-downloaded once into .github/bench/.cache.
+downloaded once into .github/bench/.cache, and again when their address changes, such as for a new version.
+The weather part's images are Origami Weather's own, from its README, so no file here makes them.
 
 home.yaml has the example home: its states, the answers to templates and messages, and the home view,
 which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp, with its light and dark mode
@@ -44,7 +45,6 @@ CACHE = os.path.join(HERE, '../.cache')
 OUT = os.path.join(REPO, 'images/v3')
 # The other cards that the parts use, in the versions the dashboard was built with
 CARDS = {
-    'origami-weather.js': 'https://raw.githubusercontent.com/hazymorning/origami_weather/V1.6.1/dist/origami-weather.js',
     'origami-notifications.js': 'https://raw.githubusercontent.com/hazymorning/origami_notifications/v1.6.0/dist/origami-notifications.js',
     'origami-header.js': 'https://raw.githubusercontent.com/hazymorning/origami_header/v0.4.3/origami-header.js',
     'navbar-card.js': 'https://github.com/joseluis9595/lovelace-navbar-card/releases/download/v1.8.0/navbar-card.js',
@@ -54,8 +54,15 @@ CARDS = {
     'plotly-DHew52Zl.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-DHew52Zl.js',
     'status-font.woff2': 'https://fonts.gstatic.com/s/googlesans/v76/4UasrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RPjIUvQ.woff2',
 }
+# Origami Weather, with the parts and the diorama's pictures that it loads itself from its own folder
+WEATHER = 'https://raw.githubusercontent.com/hazymorning/origami_weather/V1.7/dist/'
+WEATHER_PARTS = ['chunk-5CNMYL65.js', 'image-assets-birds-Z4ZU72J5.js', 'image-assets-clouds-HYH5R5U7.js', 'image-assets-home-XH2BCB2O.js',
+                 'image-assets-mist-VNQVJN3V.js', 'image-assets-planes-H3FJKFTA.js', 'layout-presets-S2LNF6XF.js', 'origami-weather-editor-R5QL4VJW.js']
+DIORAMA = ['sunny', 'partlycloudy', 'cloudy', 'fog', 'rainy', 'pouring', 'lightning', 'lightning-rainy', 'hail', 'snowy', 'snowy-rainy',
+           'windy', 'windy-variant', 'clear-night', 'exceptional']
+CARDS.update({n: WEATHER + n for n in ['origami-weather.js', *WEATHER_PARTS, *(f'diorama/{m}/{w}.webp' for m in ('light', 'dark') for w in DIORAMA)]})
 # Parts of a card that the card loads itself
-CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js'}
+CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js', *WEATHER_PARTS}
 # three.js, which draws the hero's phones
 THREE_JS = 'https://raw.githubusercontent.com/mrdoob/three.js/r170/'
 THREE = {
@@ -76,9 +83,13 @@ def load(path):
 def fetch():
     for name, url in [*CARDS.items(), *((n, THREE_JS + p) for n, p in THREE.items())]:
         path = os.path.join(CACHE, name)
-        if not os.path.exists(path):
+        # Next to each file lies its address, so a file whose address changed is downloaded again
+        source = path + '.url'
+        if not os.path.exists(path) or not os.path.exists(source) or open(source).read() != url:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             urllib.request.urlretrieve(url, path)
+            with open(source, 'w') as f:
+                f.write(url)
 
 
 def card(c):
@@ -177,6 +188,7 @@ def folder(work):
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(work)
     for n in CARDS:
+        os.makedirs(os.path.dirname(os.path.join(work, n)), exist_ok=True)
         os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
     for n in os.listdir(os.path.join(HERE, 'files')):
         os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))

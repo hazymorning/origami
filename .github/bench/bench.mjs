@@ -11,7 +11,7 @@
 //     With a seed, advance lets the animations run for that many seconds before the shot, frame by frame and the same in every
 //     shot, such as birds that cross the weather card's sky.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
-//     Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree.
+//     Files of this repository that a card loads from jsDelivr come from the working tree.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
 // Bubble Card's version below is downloaded once into .cache. Raise it when the dashboard moves to a newer Bubble Card.
@@ -265,7 +265,7 @@ window.__PREVIEW = ${!!scenario.preview};
 ${shot ? '' : '<script src="/checks.js"></script>'}
 </body></html>`;
 
-const types = { '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.yaml': 'text/yaml', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
+const types = { '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.yaml': 'text/yaml', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const send = (body, type) => { res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' }); res.end(body); };
@@ -277,8 +277,13 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/mdi.js') return file(icons);
   if (['/page.js', '/checks.js'].includes(url.pathname)) return file(path.join(here, url.pathname.slice(1)));
   if (url.pathname.startsWith('/local/fonts/')) return file(path.join(repo, 'www/fonts', path.basename(url.pathname)));
-  // Pictures that a scenario uses, such as a cover, from the folder next to the scenario
-  if (url.pathname.startsWith('/local/')) return file(path.join(path.dirname(path.resolve(scenarioPath)), path.basename(url.pathname)));
+  // Pictures that a scenario uses, such as a cover, from the folder next to the scenario. A card's own files, such as the
+  // weather card's diorama, keep their folders.
+  if (url.pathname.startsWith('/local/')) {
+    const dir = path.dirname(path.resolve(scenarioPath));
+    const own = path.join(dir, decodeURIComponent(url.pathname.slice('/local/'.length)));
+    return file(own.startsWith(dir + path.sep) && fs.existsSync(own) ? own : path.join(dir, path.basename(url.pathname)));
+  }
   res.writeHead(404); res.end();
 });
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -301,7 +306,7 @@ try {
         return next(streams.get(file));
       };
     }, scenario.seed);
-    // Files of this repository that a card loads from jsDelivr, such as the weather card's house, come from the working tree
+    // Files of this repository that a card loads from jsDelivr come from the working tree
     await context.route(/^https:\/\/cdn\.jsdelivr\.net\/gh\/hazymorning\/origami@[^/]+\/([^?#]+)/, (route) => {
       const file = path.join(repo, decodeURIComponent(route.request().url().match(/@[^/]+\/([^?#]+)/)[1]));
       if (!file.startsWith(repo + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404 });

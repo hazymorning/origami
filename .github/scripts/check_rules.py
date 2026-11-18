@@ -219,7 +219,7 @@ for name in READMES:
         if src and not (ROOT / src.group(2)).exists():
             alt = re.search(r'alt="([^"]*)"', tag)
             shots.setdefault(src.group(2), alt.group(1) if alt else "")
-# A card's own images, such as the weather card's house, load from the repository through jsDelivr. Each one exists,
+# A card's own images load from the repository through jsDelivr. Each one exists,
 # or each folder of them, which ends with a slash, such as the weather pictures. Like the README images, they point to next
 # while a release is built. With --release, such an image fails.
 for path in sorted((ROOT / "dashboard").glob("**/*.yaml")):

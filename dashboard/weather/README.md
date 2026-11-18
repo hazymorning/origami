@@ -3,82 +3,70 @@
 Origami Weather is a little passion project which started as "Atmospheric Weather Card" on a previous GitHub account. It grew into a small builder for weather cards, so nearly anything is possible, from a realistic sky to a classic forecast or something very creative. The three cards here are only a start and some inspiration.
 
 <details>
-<summary><b>Calm on purpose</b></summary>
+<summary><b>More layouts</b></summary>
 
 <br>
 
-All three cards keep the weather calm, and the house and the comparison card leave out most of its effects, such as the drifting clouds. That's only a matter of taste though. Origami Weather can show much more. Its [README](https://github.com/hazymorning/origami_weather#backgrounds) shows more examples.
+The three cards are Origami Weather's own layouts. It has a few more, such as a classic forecast and a detailed panel, and its [README](https://github.com/hazymorning/origami_weather#layouts) shows them all.
 
 </details>
 
 ### Diorama
 
-<img width="800" alt="The diorama card, a paper landscape for each kind of weather: a partly cloudy midday with the sun above the hills, and a snowy night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather.webp">
+<img width="800" alt="The diorama card, a paper landscape for each kind of weather: a partly cloudy day with birds over the lake, and a windy night with the moon, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
 
-A little paper landscape for each kind of weather, the one layout made for Origami. The sun and the moon cross the sky and set behind the hills, and it's the card on the home view. [`diorama.yaml`](diorama.yaml)
+A little paper landscape for each kind of weather, made for Origami, and the card on the home view. [`diorama.yaml`](diorama.yaml)
 
 <details>
-<summary><b>Another landscape, or a house</b></summary>
+<summary><b>Another landscape</b></summary>
 
 <br>
 
-The diorama is a set of pictures, one for each kind of weather in light and dark mode, named after the weather, such as `rainy.webp`. Any other place works the same way, such as a beach, a city or a house. The card loads the pictures from [`diorama`](diorama) in this repository, so a home needs no files of its own. Pictures of one's own go into the `www` folder of Home Assistant's configuration, and `weather_image_path` and `weather_image_path_dark` then point to `/local/` followed by their folder, and so does each `--sky` address in `css`.
+Any other place works the same way, with a picture for each kind of weather. Origami Weather's README [explains how](https://github.com/hazymorning/origami_weather#pictures).
 
 </details>
+
+### Sky
+
+<img width="800" alt="The sky card, a partly cloudy day with the sun behind the clouds, and the next days at night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-sky.webp">
+
+The sky as it is outside, and a tap shows the next days. [`sky.yaml`](sky.yaml)
 
 ### House
 
-<img width="800" alt="The house card, a house whose rooms light up and show how warm they are: a gray midday with the living room lit, and a rainy night with three rooms lit, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather-house.webp">
+<img width="800" alt="The house card, a little house in the weather with the wind and the rooms' temperatures: a sunny afternoon, and a snowy night with lit windows, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather-house.webp">
 
-A house whose rooms light up with the home's lights and show how warm they are, with the day's weather, low and high on a chip below the temperature. [`house.yaml`](house.yaml)
+A little house in the weather outside, with the next sunset or sunrise, the wind and how warm the rooms are. [`house.yaml`](house.yaml)
 
 <details>
-<summary><b>Creating an image for a home</b></summary>
+<summary><b>A drawing of the real home</b></summary>
 
 <br>
 
-The house is a drawing, with one more picture for each room's light, and the card loads them from [`house`](house) in this repository. The [Origami Weather README](https://github.com/hazymorning/origami_weather#layouts) explains how to create a custom image. The pictures go into the `www` folder of Home Assistant's configuration. In [`house.yaml`](house.yaml), each `image` and `image_dark` then points to `/local/` followed by the file's name, and the temperature chips move with `position_x` and `position_y`.
-
-</details>
-
-### Comparison
-
-<img width="800" alt="The comparison card, whose color follows the weather, with the next days on tiles: a rainy midday and a clear night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/weather-comparison.webp">
-
-Origami Weather's Comparison layout in calm colors, with the next days on tiles, the temperature on a bar and the chance of rain. Only the color changes with the weather. In Fahrenheit, change `bar_min` and `bar_max` to `14` and `95`. [`comparison.yaml`](comparison.yaml)
-
-<details>
-<summary><b>With the sky behind it</b></summary>
-
-<br>
-
-At the top of its file, the card turns off the sun, the moon and every effect, and gives each kind of weather a color. Without those lines, the same layout stands on Origami Weather's own sky, with everything that moves in it.
+An AI can draw the real home in place of this house. Origami Weather's README [explains how](https://github.com/hazymorning/origami_weather#house).
 
 </details>
 
 ## Requirements
 
 - [Get started](../../README.md#get-started), for the theme and the font
-- [Origami Weather](https://github.com/hazymorning/origami_weather) from the Marketplace
+- [Origami Weather](https://github.com/hazymorning/origami_weather) 1.7 or later, from the Marketplace
 - A weather entity with a daily forecast, such as the one from [Met.no](https://www.home-assistant.io/integrations/met/), which comes with Home Assistant
 
 ## Setup
 
 1. [Open Origami Weather in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=hazymorning&repository=origami_weather&category=plugin) and select **Install**, or update it if it's already there.
-2. Pick a card: [`diorama.yaml`](diorama.yaml), [`house.yaml`](house.yaml) or [`comparison.yaml`](comparison.yaml). In its file, change each `weather.home` to the home's weather entity.
+2. Pick a card: [`diorama.yaml`](diorama.yaml), [`sky.yaml`](sky.yaml) or [`house.yaml`](house.yaml). In its file, change each `weather.home` to the home's weather entity.
 3. Add the card to the dashboard, as described under [Get started](../../README.md#get-started).
 
 ## Optional
 
-- **Lit rooms.** For the house card in a home with lights. The house has a living room, a kitchen, a bedroom and an office, and their windows light up while their light is on. Change `light.living_room`, `light.kitchen`, `light.bedroom` and `light.office` to the home's lights, such as a light group for each room. Without a light, its room stays dark.
-- **Room temperatures.** For the house card in a home with temperature sensors. The office and the kitchen always show their temperature, and the bathroom and the bedroom show theirs while a window is open. Change the sensors and the window contacts in the last block of [`house.yaml`](house.yaml) to the home's. A room without a sensor shows no temperature.
+- **Room temperatures.** For the house card in a home with temperature sensors. Change `sensor.living_room_temperature`, `sensor.office_temperature` and `sensor.bathroom_temperature` to the home's sensors, and each room's `text`, such as `Living`, to its name. A room without a sensor isn't shown.
 
 ## Entities
 
 | Entity | Used for |
 | --- | --- |
-| `weather.home` | The weather and the temperature on every card, the day's low and high on the house card, and the next days and the chance of rain on the comparison card |
-| `sun.sun` | The next sunset or sunrise and where the sun stands on the diorama card, and whether the sun or the moon shows on the house card. It comes with Home Assistant |
-| `light.living_room`, `light.kitchen`, `light.bedroom`, `light.office` | Lit rooms: a room's windows light up while its light is on |
-| `sensor.office_temperature`, `sensor.kitchen_temperature`, `sensor.bathroom_temperature`, `sensor.bedroom_temperature` | Room temperatures: the temperature of each room on the house |
-| `binary_sensor.bathroom_window`, `binary_sensor.bedroom_window` | Room temperatures: the bathroom and the bedroom show their temperature while their window is open |
+| `weather.home` | The weather and the temperature on every card, the next days on the sky card, and the wind on the house card |
+| `sun.sun` | The sun and the moon on the diorama and sky cards, and the next sunset or sunrise on the house card. It comes with Home Assistant |
+| `sensor.living_room_temperature`, `sensor.office_temperature`, `sensor.bathroom_temperature` | Room temperatures: how warm each room is on the house card |
