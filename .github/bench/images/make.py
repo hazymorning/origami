@@ -24,7 +24,7 @@ side by side, and has:
   time: the clock, and clock: the time in the status bar. Each image's status bar moves home.yaml's clock by a few minutes and
     has its own battery, Wi-Fi and signal, so no two look the same. An image's own clock, battery, wifi (1 to 3) or cell (1 to 4)
     sets one exactly.
-  click, preview, admin, scale, seed, advance: passed to the bench, as bench.mjs describes
+  click, preview, admin, scale, seed, advance, moon, tools: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
@@ -210,7 +210,7 @@ def shoot(mode, home, files, work, phone_page):
         # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
         'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
     }
-    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
+    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance', 'moon', 'tools'):
         if k in keys:
             scenario[k] = keys[k]
     path = os.path.join(work, f'scenario-{mode}.yaml')

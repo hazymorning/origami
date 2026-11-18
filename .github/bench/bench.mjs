@@ -9,9 +9,11 @@
 //     preview shows other cards as in the card editor, and admin makes the user an admin. seed makes Math.random repeat the
 //     same numbers, so a card that places things at random, such as the weather card's clouds, looks the same in every shot.
 //     With a seed, advance lets the animations run for that many seconds before the shot, frame by frame and the same in every
-//     shot, such as birds that cross the weather card's sky.
+//     shot, such as birds that cross the weather card's sky. moon sets the weather card's moon, from 0 for a new moon to 0.5
+//     for a full one. A tap with fire-dom-event reaches the page as ll-custom, as in Home Assistant after a confirmation.
+//     tools stands in for Bubble Card Tools with the modules it lists, each at the version it gives, such as an older one.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
-//     Files of this repository that a card loads from jsDelivr come from the working tree.
+//     Files of this repository that a card loads from jsDelivr or GitHub come from the working tree.
 //
 // It needs Node, then `npm ci` and `npx playwright install chromium` in this folder.
 // Bubble Card's version below is downloaded once into .cache. Raise it when the dashboard moves to a newer Bubble Card.
@@ -56,6 +58,11 @@ if (!fs.existsSync(icons)) {
 
 // The modules in one YAML document, where Bubble Card looks for them, and the theme's tokens for each mode
 const modDir = path.join(repo, 'bubble_card/modules');
+// Bubble Card Tools, for a scenario with tools: the modules it lists, each from this folder at the version it gives, such as an older one
+if (scenario.tools) scenario.tools = Object.fromEntries(Object.entries(scenario.tools).map(([file, version]) => {
+  const text = fs.readFileSync(path.join(modDir, file), 'utf8');
+  return ['modules/' + file, version ? text.replace(/^(\s+version:\s*)["']?[\d.]+["']?/m, `$1"${version}"`) : text];
+}));
 const modules = fs.readdirSync(modDir).filter((f) => f.endsWith('.yaml')).sort()
   .map((f) => fs.readFileSync(path.join(modDir, f), 'utf8').replace(/\s*$/, '\n')).join('\n');
 const { modes: themeModes, ...theme } = yaml.load(fs.readFileSync(path.join(repo, 'themes/origami.yaml'), 'utf8')).Origami;
@@ -311,6 +318,13 @@ try {
       const file = path.join(repo, decodeURIComponent(route.request().url().match(/@[^/]+\/([^?#]+)/)[1]));
       if (!file.startsWith(repo + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404 });
       return route.fulfill({ body: fs.readFileSync(file), contentType: types[path.extname(file)] || 'application/octet-stream' });
+    });
+    // So do its files on GitHub at any branch or release, such as the modules that the update card compares
+    await context.route(/^https:\/\/raw\.githubusercontent\.com\/hazymorning\/origami\/[^/]+\/([^?#]+)/, (route) => {
+      const cors = { 'access-control-allow-origin': '*' };
+      const file = path.join(repo, decodeURIComponent(route.request().url().match(/origami\/[^/]+\/([^?#]+)/)[1]));
+      if (!file.startsWith(repo + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404, headers: cors });
+      return route.fulfill({ body: fs.readFileSync(file), contentType: 'text/plain', headers: cors });
     });
     const p = await context.newPage();
     if (shot && scenario.time) await p.clock.setFixedTime(new Date(scenario.time));

@@ -1,6 +1,6 @@
 # Update card
 
-<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/update-card.webp">
+<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/update-card.webp">
 
 New Origami modules with one tap, once the Marketplace has the new release.
 

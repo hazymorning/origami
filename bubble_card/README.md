@@ -1436,7 +1436,7 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height. A graph shows once its data and its place stay the same for a moment and then fades in, so it doesn't move while the page builds.
 
-<img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/module-graph.webp">
+<img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-graph.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1628,7 +1628,7 @@ The theme sets the pop-up background, so Bubble Card's `bg_color`, `bg_opacity` 
 
 The Update module brings the Origami modules to the release that is installed. A card with the module shows how many modules the release has in a newer version, and its keys replace them and reload the page. It writes through Bubble Card Tools, as **Import from YAML** does, and replaces only the Origami modules that are there, Base first and never with an older version. Cards, dashboards, the theme and other modules stay as they are.
 
-<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/update-card.webp">
+<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/update-card.webp">
 
 <details>
 <summary>Options and example</summary>

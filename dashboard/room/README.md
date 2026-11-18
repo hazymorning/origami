@@ -2,7 +2,7 @@
 
 <img width="800" alt="The living room pop-up with the speaker or the TV, the lights and the climate, and with its scenes open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up-living-room.webp">
 
-<img width="800" alt="The bathroom pop-up with the speaker, the lamps and the climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up-bathroom.webp">
+<img width="800" alt="The bathroom pop-up with the speaker, the lamps and the climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom.webp">
 
 A room's media, lights and climate in one pop-up, made of blocks for the room's devices. It comes as two examples: a living room with a TV, a fan and two lamps, and a bathroom with a speaker and two lamps.
 

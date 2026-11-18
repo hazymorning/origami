@@ -93,6 +93,8 @@ light:
 dark:
   time: '2026-11-04T22:40:00'
   clock: '22:40'
+  # The moon is almost full over the diorama
+  moon: 0.44
   states:
     weather.home:
       state: clear-night

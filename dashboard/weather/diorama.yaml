@@ -5,6 +5,8 @@ weather_entity: weather.home
 color_mode: theme
 card_height: 160px
 card_padding: '0'
+# On a phone, the card keeps a little more space from the greeting above it
+card_offset: 20px 0px 0px 0px
 sun_size: 30
 moon_size: 30
 sun_moon_x: dynamic
@@ -62,7 +64,10 @@ background_thresholds:
     color_dark: '#47332c'
 card_tap_action:
   action: more-info
-css: '#weather-bg > img { object-position: right bottom; }'
+css: |
+  #weather-bg > img { object-position: right bottom; }
+  /* On a wide screen, the heading above the card sets the space */
+  @media (min-width: 768px) { :host { margin: 0px 0px 0px 0px !important; } }
 button_containers:
   - name: Now
     padding: var(--ha-space-4, 16px) var(--ha-space-4, 16px) var(--ha-space-4, 16px) calc(var(--ha-space-4, 16px) + 4px)

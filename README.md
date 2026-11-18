@@ -135,7 +135,7 @@ Hides Home Assistant's header for good, with a menu in its place if wanted. Home
 
 ### Room
 
-<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
+<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up.webp">
 
 A pop-up for each room, with its media, lights and climate. [More](https://github.com/hazymorning/origami/tree/main/dashboard/room)
 
@@ -159,7 +159,7 @@ The TV's remote on the phone. [More](https://github.com/hazymorning/origami/tree
 
 ### Fan
 
-<img width="800" alt="The fan pop-up at medium speed, and at low speed with the Nature preset, oscillation and its timer running, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
+<img width="800" alt="The fan pop-up at medium speed, and at low speed with the Nature preset, oscillation and its timer running, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
 A fan's controls, with a timer that turns it off later. [More](https://github.com/hazymorning/origami/tree/main/dashboard/fan)
 
