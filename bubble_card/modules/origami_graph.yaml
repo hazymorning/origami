@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.2.0"
+  version: "1.2.1"
   supported:
     - button
   description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
@@ -272,7 +272,7 @@ origami_graph:
       });
 
       // With legend, each main sub-button that shows a drawn entity gets a short sample of that entity's line, so a value names its line.
-      // Behind the content, they stand on top of each other at the end, in the order of their lines, on the card's background with a blur, so they stay readable over the lines.
+      // Behind the content, they stand on top of each other at the end, in the order of their lines, on the card's background, so they stay readable over the lines.
       const drawn = series.filter((s) => !s.bars);
       const keys = cfg.legend === true ? org.items(this.config).slice(0, org.layout(this.config).mains)
         .map((item, i) => ({ n: i + 1, k: drawn.findIndex((s) => s.id === item.entity) })).filter((x) => x.k >= 0) : [];
@@ -604,12 +604,10 @@ origami_graph:
       gap: var(--ha-space-1) !important;
     }
     ` + card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
-      /* Base fills a key from --org-key-bg, so the legend gives its values the card's background there, and a blur keeps them readable over the lines */
-      --org-key-bg: color-mix(in srgb, var(--ha-card-background, var(--card-background-color)) 80%, transparent);
+      /* Base fills a key from --org-key-bg, so the legend's values stand on the card's background, solid like a card over the lines */
+      --org-key-bg: var(--ha-card-background, var(--card-background-color));
       /* The card's background on the page's gray casts the chip shadow, as a key on a tile does */
       --org-key-shadow: var(--tile-chip-shadow);
-      -webkit-backdrop-filter: blur(var(--ha-space-2));
-      backdrop-filter: blur(var(--ha-space-2));
     }` : ""}
     ha-card .org-graph > svg {
       display: block;

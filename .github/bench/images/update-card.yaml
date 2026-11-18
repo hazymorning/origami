@@ -8,6 +8,5 @@ states:
 tools:
   origami_base.yaml: 13.0.0
   origami_graph.yaml: 1.1.0
-  origami_update.yaml: ''
 dark:
   click: ['.bubble-sub-button-1']

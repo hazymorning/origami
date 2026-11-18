@@ -6,7 +6,7 @@ How the Home Assistant server is doing, with its backups and updates, and button
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Tiles and Graph
+- [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Tiles, Graph and Update
 - [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/), an integration that comes with Home Assistant
 - Automatic backups, set up under **Settings**, **System**, **Backups**
 
@@ -17,6 +17,10 @@ How the Home Assistant server is doing, with its backups and updates, and button
 3. If an entity ID differs from the ones under [Entities](#entities), change it in [`pop-up.yaml`](pop-up.yaml).
 4. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 5. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
+
+## Optional
+
+- **Origami updates.** Only useful for updating the Origami modules right here. The **Origami** row replaces them with the newer ones of the installed release in one tap, as the [update card](../update/README.md) does. Without it, delete the **Origami** row and `origami_update` from the modules of the list under **Maintenance**.
 
 ## Entities
 

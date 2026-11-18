@@ -2,7 +2,7 @@
 
 <img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/update-card.webp">
 
-New Origami modules with one tap, once the Marketplace has the new release.
+For a dashboard with the Origami modules: their new versions in one tap, once the Marketplace has the new release. The [server pop-up](../server/README.md) has the same as a row in its list.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ New Origami modules with one tap, once the Marketplace has the new release.
 
 ## Setup
 
-1. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started), for example in the [server pop-up](../server/README.md).
+1. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 
 ## Entities
 

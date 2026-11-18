@@ -132,11 +132,13 @@ cards:
               tap_action:
                 action: navigate
                 navigation_path: /config/logs
+      # Updates, the Origami modules, backups and repairs
       - type: custom:bubble-card
         card_type: sub-buttons
         modules:
           - origami_base
           - origami_tiles
+          - origami_update
         origami_tiles:
           layout: list
           slim: true
@@ -160,6 +162,14 @@ cards:
               tap_action:
                 action: navigate
                 navigation_path: /config/updates
+            # Newer Origami modules of the installed release in one tap, as on the update card. A tap after the update loads them.
+            - name: Origami
+              icon: mdi:update
+              tap_action:
+                action: fire-dom-event
+                origami_update: install
+                confirmation:
+                  text: Replace the Origami modules? Own changes to them are lost.
             - entity: sensor.backup_next_scheduled_automatic_backup
               name: Next backup
               icon: mdi:cloud-check-outline

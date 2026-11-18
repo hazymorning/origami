@@ -4,11 +4,14 @@
 kind: phone
 home: true
 open: '#popup_server'
+# The Origami row: by day the release has newer versions of two modules, and at night they are up to date
+admin: true
 cards:
 - {file: server/pop-up.yaml}
 templates:
 - {match: Uptime unknown, result: Up 12 days}
 states:
+  update.origami: {state: 'off', attributes: {friendly_name: Origami, installed_version: V3.1, latest_version: V3.1, release_url: 'https://github.com/hazymorning/origami/releases/tag/V3.1'}}
   sensor.system_monitor_uptime:
     state: '2026-10-23T08:14:00+00:00'
     attributes: {device_class: timestamp, friendly_name: Uptime}
@@ -37,6 +40,9 @@ states:
     state: 'off'
     attributes: {friendly_name: Music Assistant Update}
 light:
+  tools:
+    origami_popup.yaml: 4.17.0
+    origami_tiles.yaml: 3.8.0
   templates:
   - {match: Disk almost full, result: 1 update}
   messages:
@@ -239,6 +245,7 @@ light:
         - {s: '37.3', lu: 1793794500}
         - {s: '37.6', lu: 1793795400}
 dark:
+  tools: true
   templates:
   - {match: Disk almost full, result: Backup due}
   states:

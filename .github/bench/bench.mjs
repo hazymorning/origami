@@ -11,7 +11,7 @@
 //     With a seed, advance lets the animations run for that many seconds before the shot, frame by frame and the same in every
 //     shot, such as birds that cross the weather card's sky. moon sets the weather card's moon, from 0 for a new moon to 0.5
 //     for a full one. A tap with fire-dom-event reaches the page as ll-custom, as in Home Assistant after a confirmation.
-//     tools stands in for Bubble Card Tools with the modules it lists, each at the version it gives, such as an older one.
+//     tools stands in for Bubble Card Tools with every module, and gives some of them another version, such as an older one.
 //     A scenario that opens a pop-up with open, or sets viewport, also gets a shot of the whole page.
 //     Files of this repository that a card loads from jsDelivr or GitHub come from the working tree.
 //
@@ -58,11 +58,14 @@ if (!fs.existsSync(icons)) {
 
 // The modules in one YAML document, where Bubble Card looks for them, and the theme's tokens for each mode
 const modDir = path.join(repo, 'bubble_card/modules');
-// Bubble Card Tools, for a scenario with tools: the modules it lists, each from this folder at the version it gives, such as an older one
-if (scenario.tools) scenario.tools = Object.fromEntries(Object.entries(scenario.tools).map(([file, version]) => {
-  const text = fs.readFileSync(path.join(modDir, file), 'utf8');
-  return ['modules/' + file, version ? text.replace(/^(\s+version:\s*)["']?[\d.]+["']?/m, `$1"${version}"`) : text];
-}));
+// Bubble Card Tools, for a scenario with tools: every module of this folder, at the version that tools gives for one, such as an older one
+if (scenario.tools) {
+  const versions = scenario.tools === true ? {} : scenario.tools;
+  scenario.tools = Object.fromEntries(fs.readdirSync(modDir).filter((f) => f.endsWith('.yaml')).map((file) => {
+    const text = fs.readFileSync(path.join(modDir, file), 'utf8');
+    return ['modules/' + file, versions[file] ? text.replace(/^(\s+version:\s*)["']?[\d.]+["']?/m, `$1"${versions[file]}"`) : text];
+  }));
+}
 const modules = fs.readdirSync(modDir).filter((f) => f.endsWith('.yaml')).sort()
   .map((f) => fs.readFileSync(path.join(modDir, f), 'utf8').replace(/\s*$/, '\n')).join('\n');
 const { modes: themeModes, ...theme } = yaml.load(fs.readFileSync(path.join(repo, 'themes/origami.yaml'), 'utf8')).Origami;

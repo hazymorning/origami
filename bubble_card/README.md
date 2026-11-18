@@ -1457,7 +1457,7 @@ The Graph module draws the history of one or more entities on a button card, as 
 | `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
-| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with a blur and the chip shadow. The lines are then as strong as below the content. |
+| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. The lines are then as strong as below the content. |
 
 Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
 
