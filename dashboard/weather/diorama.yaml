@@ -1,4 +1,4 @@
-# Origami Weather's Diorama layout, a paper landscape for each kind of weather. Its pictures come with the card.
+# The Diorama layout from Origami Weather. Its pictures, one for every kind of weather, come with the card.
 type: custom:origami-weather
 weather_entity: weather.home
 # Light or dark with the theme, like the rest of the dashboard

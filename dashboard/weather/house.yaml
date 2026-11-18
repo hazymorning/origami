@@ -1,5 +1,4 @@
-# Origami Weather's Home layout, a house in the weather outside, with the next sunset or sunrise, the wind and the
-# temperature of three rooms.
+# The Home layout, with the next sunset or sunrise, the wind and how warm three of the rooms are.
 type: custom:origami-weather
 weather_entity: weather.home
 # Light or dark with the theme, like the rest of the dashboard

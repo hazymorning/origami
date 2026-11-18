@@ -1,4 +1,4 @@
-# Origami Weather's Sky layout, the sky as it is outside. A tap shows the next days, and another tap the sky again.
+# The Sky layout. A tap switches between the sky and the next days.
 type: custom:origami-weather
 weather_entity: weather.home
 # Light or dark with the theme, like the rest of the dashboard

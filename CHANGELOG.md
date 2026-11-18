@@ -9,7 +9,7 @@
 - Chips in a row of buttons are as tall as the chips in a header and have the same room around their icon, so a row with larger icons no longer looks squeezed.
 - A new Update module replaces the Origami modules with the ones of the installed release in one tap, from its own card or from a row in a list.
 - The pop-ups' hidden backdrop no longer keeps its blur until the first pop-up closes, which should give phones a little less to do.
-- The weather part has Origami Weather 1.7's own layouts: the diorama, the sky in place of the comparison card, and a new house. Their pictures come with Origami Weather, and the cards from 3.0 keep working.
+- The weather part now uses Origami Weather 1.7's own layouts: the diorama, the sky instead of the comparison, and a new house. The pictures are built in, and the 3.0 versions keep working.
 
 ## 3.0 · The Final Fold
 
