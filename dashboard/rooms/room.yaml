@@ -7,9 +7,15 @@ name: Living room
 icon: mdi:sofa
 modules:
   - origami_base
+  - origami_graph
 origami_base:
   tile: true
   vertical: true
+# The temperature of the last day, as a soft area behind the card
+origami_graph:
+  entities:
+    - sensor.living_room_temperature
+  position: background
 grid_options:
   columns: 6
   rows: auto
@@ -47,12 +53,3 @@ sub_button:
       show_icon: false
       origami_base:
         name: ${num(state, 0, '%')}
-    # While the room's speaker plays, its note stands at the end of the line, in the page's color like a hole in the card
-    - name: Music
-      justify_content: end
-      group:
-        - entity: media_player.living_room
-          icon: mdi:music
-          origami_base:
-            background: var(--dashboard-background)
-            hidden: ${!['on', 'playing'].includes(state)}

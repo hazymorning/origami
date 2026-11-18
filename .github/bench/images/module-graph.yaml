@@ -1,44 +1,31 @@
 # Four room cards with the temperature of the last day as a soft area behind them, from home.yaml's history.
-# Light: around noon, with the kitchen warm from cooking. Dark: late in the evening. No speaker plays, so the graph stands alone.
+# Light: around noon, with the kitchen warm from cooking. Dark: late in the evening.
 kind: panel
 cards:
 - type: grid
   columns: 2
   cards:
   - file: rooms/room.yaml
-    with:
-      modules: [origami_base, origami_graph]
-      origami_graph: {entities: [sensor.living_room_temperature], position: background}
   - file: rooms/room.yaml
     replace:
       living_room: bedroom
       Living room: Bedroom
       mdi:sofa: mdi:bed-king-outline
-    with:
-      modules: [origami_base, origami_graph]
-      origami_graph: {entities: [sensor.bedroom_temperature], position: background}
   - file: rooms/room.yaml
     replace:
       living_room: kitchen
       Living room: Kitchen
       mdi:sofa: mdi:countertop-outline
-    with:
-      modules: [origami_base, origami_graph]
-      origami_graph: {entities: [sensor.kitchen_temperature], position: background}
   - file: rooms/room.yaml
     replace:
       living_room: office
       Living room: Office
       mdi:sofa: mdi:desk
-    with:
-      modules: [origami_base, origami_graph]
-      origami_graph: {entities: [sensor.office_temperature], position: background}
 states:
   light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen, brightness: 200}}
   light.office: {state: 'off', attributes: {friendly_name: Office}}
   sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Kitchen humidity}}
   binary_sensor.kitchen_window: {state: 'off', attributes: {friendly_name: Kitchen window, device_class: window}}
-  media_player.living_room: {state: idle, attributes: {friendly_name: Living room}}
 light:
   states:
     sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
@@ -47,4 +34,3 @@ dark:
     sensor.kitchen_temperature: {state: '20.8', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
     sensor.office_temperature: {state: '18.9', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Office temperature}}
     light.kitchen: {state: 'off', attributes: {friendly_name: Kitchen}}
-    media_player.bedroom: {state: idle, attributes: {friendly_name: Bedroom}}

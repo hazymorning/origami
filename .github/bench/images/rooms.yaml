@@ -1,5 +1,4 @@
-# Light: four rooms and All rooms, with music in the living room. Dark: All rooms open, with the bathroom and the kids room below
-# and Fewer rooms, and music in the bedroom.
+# Light: four rooms and All rooms. Dark: All rooms open, with the bathroom and the kids room below and Fewer rooms.
 kind: panel
 trim: 16
 cards:
@@ -111,9 +110,6 @@ states:
     state: 'off'
     attributes:
       friendly_name: All rooms
-light:
-  states:
-    media_player.living_room: {state: playing, attributes: {friendly_name: Living room}}
 dark:
   states:
     light.kitchen:
