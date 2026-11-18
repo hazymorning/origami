@@ -12,7 +12,7 @@ This is the documentation of a personal Home Assistant dashboard and its parts, 
 If just one person used it, it would probably look and work differently. But others in the house use it too, and they shouldn't have to ask how anything works, so the whole thing is shaped around being easy to use. At the same time, a small digital version of a home should feel as welcoming and pleasant as the home itself, which is why design and UI/UX play such a big part too.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero-dark.webp">
   <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero-light.webp">
 </picture>
 
