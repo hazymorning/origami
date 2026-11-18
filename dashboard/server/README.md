@@ -1,12 +1,12 @@
 # Server pop-up
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 How the Home Assistant server is doing, with its backups and updates, and buttons to back up, check the configuration and restart. The top line names the most urgent problem, like a full disk or a backup that's due.
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Popup, Header and Tiles
+- [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Tiles and Graph
 - [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/), an integration that comes with Home Assistant
 - Automatic backups, set up under **Settings**, **System**, **Backups**
 
@@ -17,10 +17,6 @@ How the Home Assistant server is doing, with its backups and updates, and button
 3. If an entity ID differs from the ones under [Entities](#entities), change it in [`pop-up.yaml`](pop-up.yaml).
 4. Add [`pop-up.yaml`](pop-up.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 5. Open the pop-up from a button whose tap action is **Navigate** to `#popup_server`, such as the server card in the [menu](../menu/README.md).
-
-## Optional
-
-- **Load graph.** It needs [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from the Marketplace. Without it, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
 
 ## Entities
 

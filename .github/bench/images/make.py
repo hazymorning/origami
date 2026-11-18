@@ -48,10 +48,6 @@ CARDS = {
     'origami-notifications.js': 'https://raw.githubusercontent.com/hazymorning/origami_notifications/v1.6.0/dist/origami-notifications.js',
     'origami-header.js': 'https://raw.githubusercontent.com/hazymorning/origami_header/v0.4.3/origami-header.js',
     'navbar-card.js': 'https://github.com/joseluis9595/lovelace-navbar-card/releases/download/v1.8.0/navbar-card.js',
-    'plotly-graph-card.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-graph-card.js',
-    'card-BgJGmfH_.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/card-BgJGmfH_.js',
-    'rolldown-runtime-B0Z9INg1.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/rolldown-runtime-B0Z9INg1.js',
-    'plotly-DHew52Zl.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-DHew52Zl.js',
     'status-font.woff2': 'https://fonts.gstatic.com/s/googlesans/v76/4UasrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RPjIUvQ.woff2',
 }
 # Origami Weather, with the parts and the diorama's pictures that it loads itself from its own folder
@@ -62,7 +58,7 @@ DIORAMA = ['sunny', 'partlycloudy', 'cloudy', 'fog', 'rainy', 'pouring', 'lightn
            'windy', 'windy-variant', 'clear-night', 'exceptional']
 CARDS.update({n: WEATHER + n for n in ['origami-weather.js', *WEATHER_PARTS, *(f'diorama/{m}/{w}.webp' for m in ('light', 'dark') for w in DIORAMA)]})
 # Parts of a card that the card loads itself
-CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js', *WEATHER_PARTS}
+CHUNKS = {*WEATHER_PARTS}
 # three.js, which draws the hero's phones
 THREE_JS = 'https://raw.githubusercontent.com/mrdoob/three.js/r170/'
 THREE = {

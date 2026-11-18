@@ -171,7 +171,7 @@ Quick access to favorites: other pop-ups, devices, anything really. [More](https
 
 ### Server
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 A look at the server's health, backups and updates. [More](https://github.com/hazymorning/origami/tree/main/dashboard/server)
 

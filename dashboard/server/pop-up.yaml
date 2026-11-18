@@ -175,223 +175,43 @@ cards:
                 action: navigate
                 navigation_path: /config/repairs
 
-      # The load of the last 24 hours. It needs Plotly Graph Card.
-      - type: custom:plotly-graph
-        hours_to_show: 24
-        refresh_interval: auto
-        extended_touch_support:
-          pinch_to_zoom: false
-          double_tap_drag_to_zoom: false
-          hold_to_scan: true
-        color_setup: |-
-          $fn ({ vars, css_vars }) => {
-            const ha = document.querySelector("home-assistant") || document.documentElement;
-            const read = (name) =>
-              getComputedStyle(ha).getPropertyValue(name).trim() ||
-              getComputedStyle(document.body).getPropertyValue(name).trim();
-            vars.cCpu = css_vars["accent-color"] || read("--accent-color") || "#8DA399";
-            vars.cRam = read("--water-color") || "#8BC2CF";
-            vars.cErr = css_vars["error-color"] || read("--error-color") || "#E6867A";
-            vars.cBg = read("--popup-background") || css_vars["primary-background-color"];
-          }
-        smooth_filters:
-          - resample: 5m
-          - sliding_window_moving_average:
-              window_size: 3
-              extended: true
-              centered: true
-          - filter: '!isNaN(+x) && isFinite(+y)'
-        max_marker:
-          - fn: |-
-              ({ xs, ys }) => {
-                let bi = -1, bv = -Infinity;
-                for (let i = 0; i < ys.length; i++) {
-                  const v = +ys[i];
-                  if (isFinite(+xs[i]) && isFinite(v) && v > bv) { bv = v; bi = i; }
-                }
-                if (bi < 0) return { xs: [], ys: [] };
-                return { xs: [new Date(Math.min(+xs[bi], Date.now() - 30000))], ys: [bv] };
-              }
-        defaults:
-          entity:
-            mode: lines
-            showlegend: false
-            line:
-              shape: spline
-              smoothing: 1
-              width: 2.5
-          yaxes:
-            fixedrange: true
-            showgrid: false
-            zeroline: false
-            showline: false
-            ticks: ''
-            tickfont:
-              size: 12
-            title:
-              text: ''
-        entities:
-          - entity: sensor.system_monitor_memory_usage
-            name: RAM
-            line:
-              color: $ex vars.cRam
-            fill: tozeroy
-            fillgradient:
-              type: vertical
-              colorscale: $ex [[0, "rgba(0,0,0,0)"], [1, vars.cRam + "52"]]
-            hovertemplate: '%{y:.0f} %<extra>RAM</extra>'
-            filters: '$ex [...get("smooth_filters"), { store_var: "ram" }]'
-          - entity: sensor.system_monitor_processor_use
-            name: CPU
-            line:
-              color: $ex vars.cCpu
-            fill: tozeroy
-            fillgradient:
-              type: vertical
-              colorscale: $ex [[0, "rgba(0,0,0,0)"], [1, vars.cCpu + "52"]]
-            hovertemplate: '%{y:.0f} %<extra>CPU</extra>'
-            filters: '$ex [...get("smooth_filters"), { store_var: "cpu" }]'
-          - entity: sensor.system_monitor_processor_use
-            name: max cpu
-            hoverinfo: skip
-            hovertemplate: null
-            mode: markers+text
-            cliponaxis: false
-            texttemplate: <b>%{y:.0f}%</b>
-            textposition: top center
-            textfont:
-              size: 11
-              color: $ex vars.cCpu
-            marker:
-              size: 6
-              color: $ex vars.cBg
-              line:
-                width: 2
-                color: $ex vars.cCpu
-            filters: $ex [...get("smooth_filters"), ...get("max_marker")]
-          - entity: sensor.system_monitor_memory_usage
-            name: max ram
-            hoverinfo: skip
-            hovertemplate: null
-            mode: markers+text
-            cliponaxis: false
-            texttemplate: <b>%{y:.0f}%</b>
-            textposition: top center
-            textfont:
-              size: 11
-              color: $ex vars.cRam
-            marker:
-              size: 6
-              color: $ex vars.cBg
-              line:
-                width: 2
-                color: $ex vars.cRam
-            filters: $ex [...get("smooth_filters"), ...get("max_marker")]
-        layout:
-          height: 130
-          dragmode: false
-          paper_bgcolor: |-
-            $fn () => {
-              try {
-                const fix = (root) => {
-                  if (!root || !root.querySelectorAll) return;
-                  root.querySelectorAll("plotly-graph").forEach((el) => {
-                    el.style.setProperty("--ha-card-box-shadow", "none");
-                    el.style.setProperty("--ha-card-border-width", "0px");
-                  });
-                  root.querySelectorAll("*").forEach((n) => {
-                    if (n.tagName && n.tagName.includes("-") && n.shadowRoot) fix(n.shadowRoot);
-                  });
-                };
-                fix(document);
-              } catch (e) {}
-              return "rgba(0,0,0,0)";
-            }
-          plot_bgcolor: rgba(0,0,0,0)
-          hovermode: x unified
-          showlegend: false
-          font:
-            family: Montserrat, sans-serif
-            size: 13
-          margin:
-            t: 18
-            b: 30
-            l: 36
-            r: 86
-          hoverlabel:
-            font:
-              family: Montserrat, sans-serif
-              size: 12
-          annotations: |-
-            $fn ({ vars }) => {
-              const last = (s) => {
-                const ys = (s && s.ys) || [];
-                for (let i = ys.length - 1; i >= 0; i--) {
-                  if (ys[i] != null && isFinite(+ys[i])) return +ys[i];
-                }
-                return null;
-              };
-              const cpu = last(vars.cpu), ram = last(vars.ram);
-              if (cpu == null || ram == null) return [];
-              // The two chips keep apart, and stay inside the graph
-              let yc = cpu, yr = ram;
-              if (Math.abs(yc - yr) < 22) {
-                const mid = Math.min(Math.max((yc + yr) / 2, 11), 91);
-                if (yc < yr) { yc = mid - 11; yr = mid + 11; }
-                else { yc = mid + 11; yr = mid - 11; }
-              }
-              const chip = (label, val, y, color) => ({
-                xref: "paper", x: 1, xanchor: "left", xshift: 8,
-                yref: "y", y: y, showarrow: false, borderpad: 4,
-                text: "<b>" + label + " " + Math.round(val) + "%</b>",
-                font: { size: 11, color: vars.cBg }, bgcolor: color,
-              });
-              return [chip("CPU", cpu, yc, vars.cCpu), chip("RAM", ram, yr, vars.cRam)];
-            }
-          xaxis:
-            showgrid: false
-            showline: false
-            ticks: ''
-            nticks: 6
-            tickfont:
-              size: 12
-            showspikes: true
-            spikemode: across
-            spikethickness: -2
-            spikedash: solid
-            spikecolor: rgba(128,128,128,0.5)
-            tickformatstops:
-              - dtickrange:
-                  - null
-                  - 86400000
-                value: '%H:%M'
-              - dtickrange:
-                  - 86400000
-                  - null
-                value: '%b %d'
-          yaxis:
-            range:
-              - 0
-              - 102
-            # Only 50 and 100, so the axis stays clear of the times below it
-            tickvals:
-              - 50
-              - 100
-            ticktext:
-              - 50%
-              - 100%
-          shapes:
-            - type: line
-              xref: paper
-              x0: 0
-              x1: 1
-              yref: 'y'
-              y0: 90
-              y1: 90
-              layer: below
-              line:
-                width: 1
-                dash: dot
-                color: $ex vars.cErr + "8C"
-        config:
-          displayModeBar: false
+      # The load of the last 24 hours behind the card, with processor and memory as the legend
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: sensor.system_monitor_processor_use
+        show_icon: false
+        show_name: false
+        modules:
+          - origami_base
+          - origami_graph
+        origami_base:
+          frameless: true
+          padding: var(--ha-space-6)
+          sub_button_height: var(--control-height-mini)
+          sub_button_text_size: var(--ha-font-size-s)
+        origami_graph:
+          entities:
+            - sensor.system_monitor_processor_use
+            - sensor.system_monitor_memory_usage
+          position: background
+          height: 100%
+          line: true
+          fill: fade
+          min: 0
+          legend: true
+        button_action:
+          tap_action:
+            action: more-info
+        sub_button:
+          main:
+            - entity: sensor.system_monitor_processor_use
+              name: CPU
+              show_name: true
+              show_icon: false
+              show_background: true
+            - entity: sensor.system_monitor_memory_usage
+              name: RAM
+              show_name: true
+              show_icon: false
+              show_background: true
