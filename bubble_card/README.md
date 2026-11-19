@@ -259,7 +259,7 @@ On a key with an icon and a name, such as Pause, the icon is 20 px and stands 8 
 
 #### Name under the icon
 
-With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.
+With `vertical: true`, the icon is at the top left with the name below it, and the main sub-buttons are at the top right, at the icon's size. A single one stands in a square as large as the icon's tile, so the two mirror each other. The bottom sub-buttons form a line of small icons and values under the name. The state line is hidden, only sub-buttons with `css_class: accent` are filled, and `toggle` and `group` are off. The room cards use this layout with `tile: true`.
 
 <img width="800" alt="The rooms header and four room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
 
@@ -1436,7 +1436,7 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height. A graph shows once its data and its place stay the same for a moment and then fades in, so it doesn't move while the page builds.
 
-<img width="800" alt="Room cards with the temperature of the last day as a soft area behind them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-graph.webp">
+<img width="800" alt="The load of the server's last day behind a card, with processor and memory as its legend, by day and at night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-graph.webp">
 
 <details>
 <summary>Options and example</summary>
@@ -1461,29 +1461,48 @@ The Graph module draws the history of one or more entities on a button card, as 
 
 Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
 
-Behind a room card, the temperature of the last day is a soft area:
+The load of the server's last day behind a card, with processor and memory as its legend:
 
 ```yaml
 type: custom:bubble-card
 card_type: button
 button_type: name
-entity: light.living_room
-name: Living room
-icon: mdi:sofa
+entity: sensor.system_monitor_processor_use
+show_icon: false
+show_name: false
 modules:
   - origami_base
   - origami_graph
 origami_base:
-  tile: true
-  vertical: true
+  frameless: true
+  padding: var(--ha-space-6)
+  sub_button_height: var(--control-height-mini)
+  sub_button_text_size: var(--ha-font-size-s)
 origami_graph:
   entities:
-    - sensor.living_room_temperature
+    - sensor.system_monitor_processor_use
+    - sensor.system_monitor_memory_usage
   position: background
+  height: 100%
+  line: true
+  fill: fade
+  min: 0
+  legend: true
 button_action:
   tap_action:
-    action: navigate
-    navigation_path: '#popup_living_room'
+    action: more-info
+sub_button:
+  main:
+    - entity: sensor.system_monitor_processor_use
+      name: CPU
+      show_name: true
+      show_icon: false
+      show_background: true
+    - entity: sensor.system_monitor_memory_usage
+      name: RAM
+      show_name: true
+      show_icon: false
+      show_background: true
 ```
 
 </details>

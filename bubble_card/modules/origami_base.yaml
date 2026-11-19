@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.14.0"
+  version: "13.14.1"
   is_global: true
   supported:
     - button
@@ -1424,7 +1424,8 @@ origami_base:
     ha-card .bubble-wrapper {
       position: relative !important;
       display: grid !important;
-      grid-template: "icon more" "name name" "info info" / minmax(0, 1fr) minmax(var(--control-height-icon), auto);
+      /* The column at the top right is at least as wide as the icon's tile, so a single sign there stands in the same square as the icon, mirrored */
+      grid-template: "icon more" "name name" "info info" / minmax(0, 1fr) minmax(var(--org-tile-size), auto);
       box-sizing: border-box;
       padding: var(--org-pad);
     }
@@ -1501,8 +1502,9 @@ origami_base:
       background: none !important;
       transition: var(--transition-interactive) !important;
     }
+    /* The signs at the top right are as large as the card's own icon */
     ha-card .bubble-sub-button-container .bubble-sub-button-icon:not(.hidden) {
-      --mdc-icon-size: var(--icon-size-l);
+      --mdc-icon-size: var(--org-icon-size);
       opacity: var(--opacity-quiet);
     }
     ha-card .bubble-sub-button-bottom-container {

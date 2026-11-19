@@ -191,6 +191,27 @@ window.__check = async () => {
     report('row ends', fails, `${count} rows end at the card's padding`);
   }
 
+  // Mirror: on a card with the name under the icon, a single sign at the top right, such as a room card's arrow, is as large as the card's icon and stands in the same square as the icon's tile on the other side
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => c.cfg.origami_base?.vertical === true)) {
+      const main = Array.isArray(card.cfg.sub_button) ? card.cfg.sub_button : card.cfg.sub_button?.main ?? [];
+      const sign = card.root.querySelector('.bubble-sub-button-container .bubble-sub-button-icon:not(.hidden)');
+      const tile = card.root.querySelector('.bubble-main-icon-container');
+      const icon = tile?.querySelector('.bubble-main-icon');
+      if (main.length !== 1 || !sign || !visible(sign) || !icon) continue;
+      count++;
+      const box = card.haCard.getBoundingClientRect(), t = tile.getBoundingClientRect(), s = sign.getBoundingClientRect(), i = icon.getBoundingClientRect();
+      if (!near(s.width, i.width)) fails.push(`card ${card.i}: the sign is ${r1(s.width)} px, expected the icon's ${r1(i.width)} px`);
+      const want = { top: t.top + t.height / 2 - box.top, side: t.left + t.width / 2 - box.left };
+      const got = { top: s.top + s.height / 2 - box.top, side: box.right - (s.left + s.width / 2) };
+      if (!near(got.top, want.top) || !near(got.side, want.side)) fails.push(`card ${card.i}: the sign's middle is ${r1(got.top)} px from the top and ${r1(got.side)} px from the end, expected ${r1(want.top)} and ${r1(want.side)} as the icon's tile from the top and the start`);
+    }
+    if (!count) fails.push('no card with the name under the icon and a single sign found on the sheet');
+    report('mirror', fails, `${count} signs stand mirrored to the icon, at its size`);
+  }
+
   // End column: a tray with three keys and a compact card's side slider are as wide as --org-end-col
   {
     const fails = [];
