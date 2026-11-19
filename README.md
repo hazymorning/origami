@@ -19,13 +19,11 @@ If just one person used it, it would probably look and work differently. But oth
 > [!NOTE]
 > **Setting this up takes a while.** It tries to work with Home Assistant, not around it or on top of it. This means most parts need a module, a helper or a script next to the card, and each part's README lists them. [How Origami is built](#how-origami-is-built) explains this further.
 
-[Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
+[Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [Updates](#updates) · [More](#more)
 
 ## Get started
 
 The theme, the font and Bubble Card come first.
-
-> **Marketplace.** Home Assistant installs community projects from its Marketplace, under **Settings**. Before Home Assistant 2026.11, HACS does this, with **Download** in place of **Install**.
 
 <details>
 <summary><b>Install the theme</b></summary>
@@ -95,8 +93,6 @@ Every module needs Base, so start with that one.
 3. Paste the module and save.
 
 To add all modules at once, copy the [`bubble_card/modules`](https://github.com/hazymorning/origami/tree/main/bubble_card/modules) folder to `/config/bubble_card/modules` and reload the page. The [module reference](https://github.com/hazymorning/origami/blob/main/bubble_card/README.md) has every module's options.
-
-> **Updates.** With the [update card](https://github.com/hazymorning/origami/tree/main/dashboard/update), the modules of a new release replace the old ones in one tap.
 
 </details>
 
@@ -181,6 +177,12 @@ A look at the server's health, backups and updates. [More](https://github.com/ha
 
 Cleaning for the whole home or just one room. [More](https://github.com/hazymorning/origami/tree/main/dashboard/vacuum)
 
+## Updates
+
+<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/update-card.webp">
+
+The modules of each new release in one tap, from a card of its own or from a row in the server pop-up. [More](https://github.com/hazymorning/origami/tree/main/dashboard/update)
+
 ## More
 
 <a name="how-origami-is-built"></a>
@@ -196,21 +198,6 @@ Bubble Card does the layout, the actions, the pop-ups and the editor. Each part 
 3. A template in the card instead of a template sensor, for a value the card can work out itself.
 4. Home Assistant's helpers and scripts, for what a card can't do alone, like the fan's timer or a thermostat's steps. Scripts get their entities from the card and work in any home without edits.
 5. A card of its own, only for a gap nothing else fills, like Origami Weather, Origami Notifications and Origami Header.
-
-</details>
-
-<details>
-<summary><b>Coming from 2.0</b></summary>
-
-<br>
-
-The Marketplace only updates the theme. The modules were copied in by hand, so the new ones are pasted the same way.
-
-1. Update Origami and Bubble Card under [Updates](https://my.home-assistant.io/redirect/updates/).
-2. Paste all the new modules over the old ones.
-3. Make the small change that the [upgrade steps](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) list for a few cards.
-
-After that, the 2.0 dashboard keeps working, and its cards can be replaced with the new parts one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) lists which part replaces which card, and what looks different on the old ones.
 
 </details>
 
