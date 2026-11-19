@@ -7,6 +7,7 @@ These rules are for work on Origami itself: its modules, theme, dashboard and do
 Origami builds on what Home Assistant already offers and does things the Home Assistant way: cards, helpers, scripts, templates and themes, with Bubble Card's features on top. It is the opposite of a dashboard that comes as one large script that does everything. Every part is modular and general, so people can take the music pop-up, keep their own approach for everything else and still have parts that fit together.
 
 - Prefer a clean solution with what Home Assistant and Bubble Card offer over a workaround.
+- Fix a look where it comes from, such as the icon or the size token. A rule that singles out one icon, card or state, such as by its name, is a patch and never goes in.
 - Every part works on its own and says what it needs.
 - Less is more. A feature never adds a new sensor, helper or script while Bubble Card, the modules or a template in the card itself can do it, even with a few more sub-buttons or a little JavaScript in the card. A tap that needs a value from a template becomes one sub-button for each value, each with its own fixed action, shown or hidden by `hidden`. Only when there is no other way does an existing sensor or script grow, and a new one comes last.
 
