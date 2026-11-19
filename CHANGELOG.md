@@ -13,6 +13,14 @@
 - The pop-ups' hidden backdrop no longer keeps its blur until the first pop-up closes, which should give phones a little less to do.
 - The weather part now uses Origami Weather 1.7's own layouts: the diorama, the sky instead of the comparison, and a new house. The pictures are built in, and the 3.0 versions keep working.
 
+### Updating
+
+1. Update Origami under [Updates](https://my.home-assistant.io/redirect/updates/).
+2. Only the first time: add the Update module, as under [Get started](https://github.com/hazymorning/origami#get-started), and then the [update card](https://github.com/hazymorning/origami/tree/main/dashboard/update).
+3. Select **Update** on the card, then **Reload**.
+
+From then on, an update takes only steps 1 and 3.
+
 ## 3.0 · The Final Fold
 
 <picture>
