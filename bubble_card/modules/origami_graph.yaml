@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.2.1"
+  version: "1.2.2"
   supported:
     - button
   description: "Graph draws the history of entities on a button card, as neutral lines with a fading fill or as bars, in a strip below the content or as a soft area behind it. It can color a line by its value and mark the last, highest and lowest values."
@@ -525,7 +525,7 @@ origami_graph:
               dot(t, v, "org-graph-point", 2);
               const tx = x(t), anchor = tx < 24 ? "start" : tx > W - 24 ? "end" : "middle";
               const label = make("text", { class: "org-graph-label", x: f(tx), y: f(below ? y(v) + 15 : y(v) - 8), "text-anchor": anchor });
-              label.textContent = g.ctx.num(hass, v, digits) + (/°/.test(l.unit) ? "°" : l.unit === "%" ? "%" : "");
+              label.textContent = g.ctx.num(hass, v, digits) + (/°/.test(l.unit) ? "°" : l.unit === "%" ? "\u00a0%" : "");
               labelsG.append(label);
             }
           }

@@ -3,11 +3,14 @@
 ## Next release
 
 - The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
+- On a wider screen, the navigation bar stands at the bottom under the column of cards, with the now playing card above it, as on a phone.
+- The navigation bar's filled buttons are keys of card background, its badges and the group link on the cover are a little smaller and filled, and with music and the TV the cards keep their whole shadows.
 - A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it, and can turn the card's values into its legend.
 - While music plays in a room, its card shows a note in place of the arrow, and a TV while the TV is on.
 - The arrow at the top of a room card is as large as the room's icon and stands in the same square on the other side.
 - Base's new `art` puts a picture in a card's icon and softly behind the card, such as tonight's dinner.
 - The room pop-up has two more examples, an office with its desk and a kitchen with tonight's dinner, and the bathroom's speaker makes announcements.
+- A percent sign has a space before it in every language, as on Bubble Card's sliders, such as 52 %.
 - The server pop-up draws its load with the Graph module instead of Plotly Graph Card, with processor and memory as its legend, and its list can update the Origami modules.
 - Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
 - The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.

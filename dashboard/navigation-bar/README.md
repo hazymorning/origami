@@ -1,6 +1,6 @@
 # Navigation bar
 
-<img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/navbar.webp">
+<img width="800" alt="The navigation bar with the now playing card above it, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/navbar.webp">
 
 A bar at the bottom of the screen with buttons for the most used pop-ups and the menu, and a card for what's playing. Holding the music button plays or pauses, and holding the lights button opens a list to turn the lights off or on and pick a scene.
 
@@ -21,6 +21,7 @@ A bar at the bottom of the screen with buttons for the most used pop-ups and the
 - **[Menu](../menu/README.md).** Without it, delete the menu button.
 - **Scenes.** Holding **Lights** lists the living room's scenes. Change them to the home's own, or delete the entries from **Evening** to **Night** under `popup`.
 - **TV in the now playing card.** With [Google Cast](https://www.home-assistant.io/integrations/cast/), the card also shows what's cast to the TV. Without it, delete the second player under `media_player`.
+- **One bar for every view.** Navbar Card can keep the bar as a shared template, so every view and dashboard shows the same one, and a change reaches all of them. In the card's visual editor, under **Template**, select **Save as new shared template** and name it `origami`. Every other view then needs only a card with `type: custom:navbar-card` and `template: origami`. Only administrators can save a template, and a card's own `styles` replace the template's instead of adding to them.
 
 > [!TIP]
 > With [Open with a speaker](../music/README.md#optional) from the music pop-up, the music button's tap action can run **Open music** without a `speaker`, so the pop-up opens with the speaker that plays, if only one does.
