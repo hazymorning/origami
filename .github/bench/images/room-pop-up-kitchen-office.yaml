@@ -1,0 +1,41 @@
+# The kitchen at midday with tonight's dinner, music and the counter light on, and the office late in the evening with
+# the computer and the monitor on, the desk lamp dimmed and music from its speaker.
+kind: phone
+home: true
+light:
+  open: '#popup_kitchen'
+  cards:
+  - file: room/kitchen.yaml
+  templates:
+  - {match: sensor.dinner_tonight, result: Vegetable miso ramen}
+  states:
+    sensor.dinner_tonight:
+      state: Vegetable miso ramen
+      attributes: {friendly_name: Dinner tonight, description: 'With corn, edamame and bamboo', entity_picture: /local/dinner.jpg}
+    media_player.kitchen:
+      state: playing
+      attributes: {friendly_name: Kitchen, volume_level: 0.28, media_title: Slow Morning, media_artist: Paper Lanterns, media_content_type: music, entity_picture: /local/cover-1.jpg, source: WiFi, group_members: [media_player.kitchen]}
+    light.kitchen:
+      state: 'on'
+      attributes: {friendly_name: Counter, brightness: 179, supported_color_modes: [brightness], color_mode: brightness}
+    automation.kitchen_motion_light: {state: 'on', attributes: {friendly_name: Kitchen motion light}}
+    sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
+    sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Kitchen humidity}}
+    climate.kitchen:
+      state: heat
+      attributes: {friendly_name: Kitchen, hvac_action: idle, hvac_modes: ['off', heat], temperature: 21, current_temperature: 22.3, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
+    switch.kitchen_air_purifier: {state: 'on', attributes: {friendly_name: Air purifier}}
+dark:
+  open: '#popup_office'
+  cards:
+  - file: room/office.yaml
+  states:
+    media_player.office:
+      state: playing
+      attributes: {friendly_name: Office, volume_level: 0.16, media_title: Low Tide, media_artist: Quiet Harbour, media_content_type: music, entity_picture: /local/cover-2.jpg, source: WiFi, group_members: [media_player.office]}
+    switch.office_computer: {state: 'on', attributes: {friendly_name: Computer}}
+    switch.office_monitor: {state: 'on', attributes: {friendly_name: Monitor}}
+    switch.office_printer: {state: 'off', attributes: {friendly_name: Printer}}
+    light.office_desk_lamp:
+      state: 'on'
+      attributes: {friendly_name: Desk lamp, brightness: 115, supported_color_modes: [brightness], color_mode: brightness}

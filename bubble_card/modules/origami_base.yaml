@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.14.1"
+  version: "13.15.0"
   is_global: true
   supported:
     - button
@@ -12,7 +12,7 @@ origami_base:
     - sub-buttons
     - separator
     - pop-up
-  description: "Base is the frame and shared core of every card with an Origami module. Its options create slim and joined rows, a pill switch, grouped sub-buttons, a tile, a frameless card, a name under the icon, fades, glides, sizes, the card's words and a card that hides itself."
+  description: "Base is the frame and shared core of every card with an Origami module. Its options create slim and joined rows, a pill switch, grouped sub-buttons, a tile, a frameless card, a picture, a name under the icon, fades, glides, sizes, the card's words and a card that hides itself."
   editor:
     - name: compact
       label: "Compact"
@@ -86,6 +86,31 @@ origami_base:
       label: "Words (a map from a state or a value to the word that the modules write on the card)"
       selector:
         object: {}
+    - name: art
+      label: "Art (a picture's address, a template or a media player, in the icon and behind the card)"
+      selector:
+        text: {}
+    - name: cover_mix
+      label: "Cover mix (the art's share behind the card in percent)"
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 2
+          mode: slider
+          unit_of_measurement: "%"
+      default: 25
+      visible:
+        - field: art
+          operator: exists
+    - name: cover_blur
+      label: "Cover blur"
+      selector:
+        boolean: {}
+      default: true
+      visible:
+        - field: art
+          operator: exists
   code: |
     ${(() => {
       // Base is a global module, so Bubble Card runs it first on every card, and no card has to list it. It works only on cards that use an Origami module.
@@ -967,6 +992,11 @@ origami_base:
         bare: ["separator", "sub-buttons", "pop-up"].includes(type)
       };
       card._org.me = look(hass, entity);
+      // art shows a picture in the icon of a button card and softly behind it, such as a recipe photo. It reads a picture's address, a template or a media player, as Popup's art does, and mixes and blurs as Media's cover does. The last picture stays until the next one has loaded, and while art is empty the card shows its own icon.
+      opts.art = cfgB.art === undefined || type !== "button" ? null : ((v) => /^media_player\.\w+$/.test(v) ? card._org.media(hass, v, { env: card._org.env }).art : card._org.picture(v))(String(value(card._org.env, cfgB.art, card._org.ctx) ?? "").trim()) ?? "";
+      if (opts.art) card._orgArt = opts.art;
+      opts.mix = cfgB.cover_mix ?? 25;
+      opts.blur = cfgB.cover_blur === undefined || yes(cfgB.cover_blur);
       // The card's words also reach the state line that Bubble Card writes from state_content, unless a module writes that line itself, as Climate and Media do, or the line is a template
       const line = opts.lines && Object.keys(words).length ? card.querySelector(".bubble-state") : null;
       const parts = [].concat(this.config.state_content ?? (["show_attribute", "show_last_changed", "show_last_updated"].some((k) => this.config[k]) ? [] : "state"));
@@ -1243,6 +1273,12 @@ origami_base:
       --mdc-icon-size: var(--org-icon-size);
       color: var(--primary-text-color) !important;
     }
+    ${card._org.opts.art === null ? "" : (card._org.opts.art ? card._org.cover(card._org.opts.art, "1", card.querySelector(".bubble-main-icon-container")) : "") + `
+    /* The art fills the icon and shows softly behind the card, mixed with the card's color */
+    ha-card .bubble-background {
+      overflow: hidden;
+    }
+    ${card._org.backdrop("ha-card .bubble-background::before", card._orgArt, card._org.opts.art ? card._org.opts.mix : 0, card._org.opts.blur, "0px", card.querySelector(".bubble-background"))}`}
     ${card._org.opts.frame ? `
     ${[].concat(this.config.modules ?? []).includes("origami_media") ? `.org-group-badge {
       position: absolute;

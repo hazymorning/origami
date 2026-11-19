@@ -6,6 +6,8 @@
 - A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it, and can turn the card's values into its legend.
 - While music plays in a room, its card shows a note in place of the arrow, and a TV while the TV is on.
 - The arrow at the top of a room card is as large as the room's icon and stands in the same square on the other side.
+- Base's new `art` puts a picture in a card's icon and softly behind the card, such as tonight's dinner.
+- The room pop-up has two more examples, an office with its desk and a kitchen with tonight's dinner, and the bathroom's speaker makes announcements.
 - The server pop-up draws its load with the Graph module instead of Plotly Graph Card, with processor and memory as its legend, and its list can update the Origami modules.
 - Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
 - The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.
