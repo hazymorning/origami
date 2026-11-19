@@ -1,36 +1,43 @@
-# Four room cards with the temperature of the last day as a soft area behind them, from home.yaml's history.
-# Light: around noon, with the kitchen warm from cooking. Dark: late in the evening.
+# The server's load of the last day behind its card, with processor and memory as the legend, from home.yaml's history.
+# Light: around noon. Dark: late in the evening.
 kind: panel
 cards:
-- type: grid
-  columns: 2
-  cards:
-  - file: rooms/room.yaml
-  - file: rooms/room.yaml
-    replace:
-      living_room: bedroom
-      Living room: Bedroom
-      mdi:sofa: mdi:bed-king-outline
-  - file: rooms/room.yaml
-    replace:
-      living_room: kitchen
-      Living room: Kitchen
-      mdi:sofa: mdi:countertop-outline
-  - file: rooms/room.yaml
-    replace:
-      living_room: office
-      Living room: Office
-      mdi:sofa: mdi:desk
-states:
-  light.kitchen: {state: 'on', attributes: {friendly_name: Kitchen, brightness: 200}}
-  light.office: {state: 'off', attributes: {friendly_name: Office}}
-  sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Kitchen humidity}}
-  binary_sensor.kitchen_window: {state: 'off', attributes: {friendly_name: Kitchen window, device_class: window}}
-light:
-  states:
-    sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
-dark:
-  states:
-    sensor.kitchen_temperature: {state: '20.8', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
-    sensor.office_temperature: {state: '18.9', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Office temperature}}
-    light.kitchen: {state: 'off', attributes: {friendly_name: Kitchen}}
+- type: custom:bubble-card
+  card_type: button
+  button_type: name
+  entity: sensor.system_monitor_processor_use
+  show_icon: false
+  show_name: false
+  modules:
+    - origami_base
+    - origami_graph
+  origami_base:
+    frameless: true
+    padding: var(--ha-space-6)
+    sub_button_height: var(--control-height-mini)
+    sub_button_text_size: var(--ha-font-size-s)
+  origami_graph:
+    entities:
+      - sensor.system_monitor_processor_use
+      - sensor.system_monitor_memory_usage
+    position: background
+    height: 100%
+    line: true
+    fill: fade
+    min: 0
+    legend: true
+  button_action:
+    tap_action:
+      action: more-info
+  sub_button:
+    main:
+      - entity: sensor.system_monitor_processor_use
+        name: CPU
+        show_name: true
+        show_icon: false
+        show_background: true
+      - entity: sensor.system_monitor_memory_usage
+        name: RAM
+        show_name: true
+        show_icon: false
+        show_background: true
