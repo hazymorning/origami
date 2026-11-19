@@ -7,9 +7,7 @@
 
 <br>
 
-This is the documentation of a personal Home Assistant dashboard and its parts, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). After many years of fussing over small details, it suddenly just felt right. Most of it was made by hand on a phone, so it's mainly meant for phones.
-
-If just one person used it, it would probably look and work differently. But others in the house use it too, and they shouldn't have to ask how anything works, so the whole thing is shaped around being easy to use. At the same time, a small digital version of a home should feel as welcoming and pleasant as the home itself, which is why design and UI/UX play such a big part too.
+This is the documentation of a personal Home Assistant dashboard and its parts, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). After many years of fussing over small details, it suddenly just felt right.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero-dark.webp">
