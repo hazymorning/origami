@@ -30,6 +30,8 @@ side by side, and has:
   cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
+  mode: light or dark makes an image of that mode alone, such as one room in the room pop-up's README
+  from: another image's file, whose keys come first, such as the room pop-up's for one of its rooms
 
 hero.yaml makes images/v3/hero-light.webp and hero-dark.webp, the README's first image. Each of its phones takes another
 image's file with from and changes its keys in the same way, and hero.mjs puts the screens on phones in 3D beside the
@@ -251,8 +253,10 @@ def hero(name, spec):
 
 def make(name):
     spec = load(os.path.join(HERE, name + '.yaml'))
-    if spec['kind'] == 'hero':
+    if spec.get('kind') == 'hero':
         return hero(name, spec)
+    files = [load(os.path.join(HERE, spec['from'] + '.yaml')), spec] if 'from' in spec else [spec]
+    spec = {k: v for f in files for k, v in f.items()}
     home = load(os.path.join(HERE, 'home.yaml'))
     work = os.path.join(CACHE, 'images', name)
     folder(work)
@@ -260,8 +264,8 @@ def make(name):
     phone = spec['kind'] == 'phone'
     phone_page = phone or 'bottom' in spec
     framed = {}
-    for mode in ('light', 'dark'):
-        keys, shot = shoot(mode, home, [spec], work, phone_page)
+    for mode in [spec['mode']] if 'mode' in spec else ['light', 'dark']:
+        keys, shot = shoot(mode, home, files, work, phone_page)
         im = Image.open(shot).convert('RGB')
         out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
         if phone:
@@ -278,12 +282,14 @@ def make(name):
             out['width'] = PHONE['width'] if 'bottom' in keys else keys.get('width', 396)
         im.save(shot)
         framed[mode] = frame(out, work).convert('RGBA')
-    # Light and dark side by side, with a transparent gap between them
+    # Light and dark side by side, with a transparent gap between them, or one mode alone
     gap = 40
-    light, dark = framed['light'], framed['dark']
-    both = Image.new('RGBA', (light.width + gap + dark.width, max(light.height, dark.height)), (0, 0, 0, 0))
-    both.paste(light, (0, 0))
-    both.paste(dark, (light.width + gap, 0))
+    shots = list(framed.values())
+    both = Image.new('RGBA', (sum(s.width for s in shots) + gap * (len(shots) - 1), max(s.height for s in shots)), (0, 0, 0, 0))
+    x = 0
+    for s in shots:
+        both.paste(s, (x, 0))
+        x += s.width + gap
     save(both, os.path.join(OUT, f'{name}.webp'), False)
 
 

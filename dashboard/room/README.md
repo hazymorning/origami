@@ -1,17 +1,30 @@
 # Room pop-up
 
-<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up.webp">
+A room's media, lights and climate in one pop-up, made of blocks for the room's devices. Each block works in any room.
 
-<img width="800" alt="The kitchen pop-up with tonight's dinner at midday and the office pop-up with its desk late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-kitchen-office.webp">
+### Living room
 
-A pop-up for each room with its media, lights and climate, made of blocks for the room's devices. The four examples show different rooms, and every block works in any room.
+<img width="400" alt="The living room pop-up at midday with music on the speaker, the console, the lamps, the fan and the heating, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-living-room.webp">
 
-| Room | Blocks | File |
-| --- | --- | --- |
-| Living room | **TV**, **Speaker**, **Plug**, **Lamps**, **Climate**, **Fan**, **Thermostat** | [`living-room.yaml`](living-room.yaml) |
-| Bathroom | **Speaker**, **Announcements**, **Lamps**, **Climate**, **Thermostat** | [`bathroom.yaml`](bathroom.yaml) |
-| Office | **Speaker**, **Plug** for a desk with three devices, **Lamp** | [`office.yaml`](office.yaml) |
-| Kitchen | **Up next**, **Speaker**, **Lamp**, **Motion**, **Climate**, **Thermostat**, **Plug** | [`kitchen.yaml`](kitchen.yaml) |
+A TV that plays through the speaker, a fan and lamps with scenes. [`living-room.yaml`](living-room.yaml)
+
+### Bathroom
+
+<img width="400" alt="The bathroom pop-up late in the evening with music over Bluetooth, the announcements, the lamps and the heating, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-bathroom.webp">
+
+Announcements on the speaker, such as that dinner's ready. [`bathroom.yaml`](bathroom.yaml)
+
+### Kitchen
+
+<img width="400" alt="The kitchen pop-up at midday with tonight's dinner, music, the counter light and its motion switch, the heating and the air purifier, in light mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-kitchen.webp">
+
+Tonight's dinner on top, and a light that turns on with motion. [`kitchen.yaml`](kitchen.yaml)
+
+### Office
+
+<img width="400" alt="The office pop-up late in the evening with music, the desk's three plugs, the desk lamp and Done for the day, in dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up-office.webp">
+
+A desk with three devices on plugs, which **Done for the day** turns off with the lamp. [`office.yaml`](office.yaml)
 
 ## Requirements
 
@@ -19,7 +32,7 @@ A pop-up for each room with its media, lights and climate, made of blocks for th
 
 ## Setup
 
-1. Pick the example in the table above that's closest to the room.
+1. Pick the example above that's closest to the room.
 2. Go through the blocks below. Keep the ones for devices that the room has, set them up as each one says, and delete the others.
 3. Change the entities to the room's own. **Everything off**, or the office's **Done for the day**, turns off the entities in its list. Leave speakers out of it, since some, like Sonos, can't be turned off and make it fail.
 4. Add the file to the dashboard, as described under [Get started](../../README.md#get-started).
@@ -32,15 +45,15 @@ Each block is only for a room that has its device.
 
 ### Media
 
-- **Up next.** For something the room looks forward to, as tonight's dinner in the kitchen. Any entity with a picture works, such as a meal planner's dinner or the next episode of a series. The card's name shows its state, the line below the attribute under `state_content`, and Base's `art` shows the picture in the icon and softly behind the card. Change `description` and `entity_picture` to the entity's own attributes.
 - **Speaker.** For a room with a speaker, as in every example. A tap opens the [music pop-up](../music/README.md), or change its tap action. With [Open with a speaker](../music/README.md#optional), change its `tap_action`, and the `tap_action` under `button_action`, to the lines there with the room's speaker, so the pop-up opens with that speaker selected. It needs the Media module.
 - **TV.** For a TV whose sound plays through the room's speaker, as in the living room. The TV card takes the speaker's place while the speaker uses its TV input, so change `Optical In` to the name of that input. With [Google Cast](https://www.home-assistant.io/integrations/cast/), it also shows what's cast to the TV. A tap opens the [TV pop-up](../tv/README.md). For a TV without a separate speaker, delete both `conditional` cards, put the TV card from the first one in their place and point its slider to the TV. It needs the Media module.
 - **Announcements.** For a room with a speaker, as in the bathroom. Each chip says its message on the speaker through `tts.speak`, so change the names and the messages. It needs a text-to-speech engine, such as [Google Translate text-to-speech](https://www.home-assistant.io/integrations/google_translate/), whose entity takes the place of `tts.google_translate_en_com`.
+- **Up next.** For something the room looks forward to, as tonight's dinner in the kitchen. Any entity with a picture works, such as a meal planner's dinner or the next episode of a series. The card's name shows its state, the line below the attribute under `state_content`, and Base's `art` shows the picture in the icon and softly behind the card. Change `description` and `entity_picture` to the entity's own attributes.
 
 ### Lights
 
 - **Lamps.** For a room with lamps, as in the living room and the bathroom. **All** switches and dims them together, its palette opens the scenes, and the arrow beside its slider a row for each lamp. The header counts the lamps that are on. In the living room, a tap on it opens the [lights pop-up](../lights/README.md). In another room, or without the lights pop-up, its `tap_action` is `action: more-info`, as in the bathroom. Unless the room has a light group already, open [Helpers](https://my.home-assistant.io/redirect/helpers/) and select **Create helper**, then **Group** and **Light group**, and add the room's lamps. The lamps and the scenes are under `mini_popups`, and each scene is also listed under `active`. Without scenes, delete `scenes` under `mini_popups` and the palette key. It needs the Slider module.
-- **Lamp.** For a room with one lamp, as in the office and the kitchen. Its row has a slider, and the header shows its brightness.
+- **Lamp.** For a room with one lamp, as in the kitchen and the office. Its row has a slider, and the header shows its brightness.
 - **Motion.** For a light that an automation turns on with motion, as in the kitchen. The row's switch turns the automation off while it's in the way and on again.
 
 ### Climate
@@ -51,7 +64,7 @@ Each block is only for a room that has its device.
 
 ### Devices
 
-- **Plug.** For a device on a smart plug, as the living room's console, the office's desk and the kitchen's air purifier. Each plug is a row with a switch. Several plugs share one background with Base's `join`, as on the office's desk, whose header counts the ones that are on.
+- **Plug.** For a device on a smart plug, as the living room's console, the kitchen's air purifier and the office's desk. Each plug is a row with a switch. Several plugs share one background with Base's `join`, as on the office's desk, whose header counts the ones that are on.
 
 > [!TIP]
 > The more-info dialog of a light group, which the bathroom's **Lights** header opens, lists each lamp with its own brightness and color. So each lamp of a room can be set on its own, such as a color for just one of them.
@@ -75,6 +88,7 @@ Each block is only for a room that has its device.
 | `sensor.living_room_temperature`, `sensor.living_room_humidity` | The climate header |
 | `fan.living_room` | The fan |
 | `climate.living_room` | The thermostat |
+| `script.thermostat_step` | The thermostat's minus and plus |
 
 ### Bathroom
 
@@ -87,14 +101,7 @@ Each block is only for a room that has its device.
 | `scene.bathroom_bright`, `scene.bathroom_bath`, `scene.bathroom_night` | The scenes under the palette on **All** |
 | `sensor.bathroom_temperature`, `sensor.bathroom_humidity` | The climate header |
 | `climate.bathroom` | The thermostat |
-
-### Office
-
-| Entity | Used for |
-| --- | --- |
-| `media_player.office` | The speaker |
-| `switch.office_computer`, `switch.office_monitor`, `switch.office_printer` | The desk's plugs, which its header counts |
-| `light.office_desk_lamp` | The desk lamp |
+| `script.thermostat_step` | The thermostat's minus and plus |
 
 ### Kitchen
 
@@ -106,10 +113,13 @@ Each block is only for a room that has its device.
 | `automation.kitchen_motion_light` | The automation that turns the lamp on with motion |
 | `sensor.kitchen_temperature`, `sensor.kitchen_humidity` | The climate header |
 | `climate.kitchen` | The thermostat |
+| `script.thermostat_step` | The thermostat's minus and plus |
 | `switch.kitchen_air_purifier` | The air purifier's plug |
 
-### Rooms with a thermostat
+### Office
 
 | Entity | Used for |
 | --- | --- |
-| `script.thermostat_step` | The thermostat's minus and plus |
+| `media_player.office` | The speaker |
+| `switch.office_computer`, `switch.office_monitor`, `switch.office_printer` | The desk's plugs, which its header counts |
+| `light.office_desk_lamp` | The desk lamp |
