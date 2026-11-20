@@ -1,0 +1,25 @@
+# The diorama in the weather part's README, alone and cut at its edges like Origami Weather's own images of the sky and the house.
+# Light shows a partly cloudy late morning with birds over the lake, dark the next days open at night, as a tap shows them.
+kind: card
+# The card is 363 px wide, as in a column of the dashboard
+width: 395
+seed: 21
+# The animations run for a few seconds before the shot, so birds fly across the lake by day
+advance: 11
+cards:
+- file: weather/diorama.yaml
+light:
+  # A late morning, with the sun a little higher than in November, so it shines above the cloud and behind the birds
+  time: '2026-11-04T11:10:00'
+  states:
+    sun.sun: {state: above_horizon, attributes: {friendly_name: Sun, next_rising: '2026-11-05T06:12:00+00:00', next_setting: '2026-11-04T16:41:00+00:00', elevation: 38}}
+    weather.home:
+      state: partlycloudy
+      attributes: {friendly_name: Home, temperature: 14, temperature_unit: °C, humidity: 71, wind_speed: 9, wind_speed_unit: km/h, pressure: 1016, supported_features: 3}
+dark:
+  # A tap on the card shows the next days
+  click: ['origami-weather']
+  states:
+    weather.home:
+      state: partlycloudy
+      attributes: {friendly_name: Home, temperature: 7, temperature_unit: °C, humidity: 82, wind_speed: 9, wind_speed_unit: km/h, pressure: 1014, supported_features: 3}

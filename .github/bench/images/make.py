@@ -5,13 +5,15 @@
 Without names, it makes every image that has a file here. It needs Python with PyYAML and Pillow,
 and the bench set up as .github/bench/bench.mjs says. The other cards and the status bar's font are
 downloaded once into .github/bench/.cache, and again when their address changes, such as for a new version.
-The weather part's images are Origami Weather's own, from its README, so no file here makes them.
+The sky's and the house's images are Origami Weather's own, from its README, so no file here makes them. weather.yaml
+makes the diorama's, with the next days open at night.
 
 home.yaml has the example home: its states, the answers to templates and messages, and the home view,
 which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp, with its light and dark mode
 side by side, and has:
 
-  kind: panel for a card, or phone for a pop-up or the menu on a phone
+  kind: panel for a card on its page, card for a card alone, cut at its edges like Origami Weather's own images,
+    or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
   drop: the files of cards to leave out, such as the climate table that another file's cards have
@@ -39,7 +41,7 @@ headline and the line. three.js is downloaded once into .github/bench/.cache too
 """
 import json, os, random, re, shutil, subprocess, sys, urllib.request
 import yaml
-from PIL import Image
+from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '../../..'))
@@ -173,6 +175,18 @@ def status(name, mode, spec, keys):
     return out
 
 
+def alone(im, scale):
+    """A card alone, cut at its edges with the theme's round corners, as Origami Weather's own images show its cards.
+    The bench's section pads the card by 16 px, and the theme's cards have a radius of 22 px."""
+    pad, radius = 16 * scale, 22 * scale
+    im = im.crop((pad, pad, im.width - pad, im.height - pad)).convert('RGBA')
+    # The corners are drawn four times as large and scaled down, so their edge is smooth
+    mask = Image.new('L', (im.width * 4, im.height * 4), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, mask.width - 1, mask.height - 1), radius * 4, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    return im
+
+
 def frame(spec, work):
     with open(os.path.join(work, 'frame.json'), 'w') as f:
         json.dump(spec, f)
@@ -267,6 +281,9 @@ def make(name):
     for mode in [spec['mode']] if 'mode' in spec else ['light', 'dark']:
         keys, shot = shoot(mode, home, files, work, phone_page)
         im = Image.open(shot).convert('RGB')
+        if spec['kind'] == 'card':
+            framed[mode] = alone(im, keys.get('scale', 2))
+            continue
         out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
         if phone:
             screen(im, out)

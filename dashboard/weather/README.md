@@ -13,7 +13,7 @@ Besides these three, Origami Weather has a classic forecast, a detailed panel an
 
 ### Diorama
 
-<img width="800" alt="The diorama on a partly cloudy day with birds over the lake, and the same weather at night under the moon and the stars, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
+<img width="800" alt="The diorama on a partly cloudy morning with birds over the lake, and at night with the next days open, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
 
 A paper landscape that changes with the weather, and the card on the home view. It's kept calm and simple on purpose, so nothing distracts from the picture. Since it takes the best spot on the page mostly for looks, a tap shows the next days, borrowed from Origami Weather's Sky layout. [`diorama.yaml`](diorama.yaml)
 
