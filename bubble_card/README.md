@@ -1462,7 +1462,7 @@ The Graph module draws the history of one or more entities on a button card: num
 | `animate` | `false` | Draws the graph in from the left when it appears. |
 | `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. |
 
-Bars show the share of each time step that the entity was on, or its mean value. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted.
+Bars show the share of each time step that the entity was on, or its mean value, each as tall as its value against the highest bar. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted.
 
 > **Colors.** The color names are the theme's own shades, so `orange` or `blue` stays as soft as the rest of Origami. A CSS color, such as `#C0935F`, works too.
 

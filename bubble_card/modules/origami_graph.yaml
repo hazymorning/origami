@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.4.1"
+  version: "1.4.2"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or softly behind it. A color, colors by value or state, a fixed scale, guide lines and the highest and lowest value each take one option."
@@ -548,7 +548,7 @@ origami_graph:
           const list = buckets(barCount, days);
           const numeric = s.meter || (st.length && st.every((x) => x.v === null || x.v === undefined || x.v === "unavailable" || x.v === "unknown" || Number.isFinite(number(x.v))));
           const vals = s.meter ? rise(s, list) : sweep(st, list, numeric ? "mean" : "duty");
-          const peak = numeric ? Math.max(...vals.filter((v) => v !== null), 0) || 1 : 1;
+          const peak = Math.max(...vals.filter((v) => v !== null), 0) || 1;
           const fixed = !lines.length && !j ? number(cfg.max) : NaN;
           const hi = numeric && fixed > 0 ? fixed : peak;
           const tall = H * (bg ? 0.5 : 0.8);
@@ -599,7 +599,8 @@ origami_graph:
             for (let v = Math.ceil(ruler.lo / step) * step; v < ruler.hi; v += step) vals.push(Number(v.toFixed(6)));
           }
           // A value stands over its line, at the start below the content and at the end behind it, where the content leaves
-          // room. One that would touch the value before it stays out.
+          // room, or at the start where a legend takes the end. One that would touch the value before it stays out.
+          const end = bg && !g.ctx.keys.length;
           let last = -Infinity;
           for (const v of vals) {
             const at = ruler.y(v);
@@ -607,7 +608,7 @@ origami_graph:
             guidesG.append(make("line", { class: "org-graph-guide", x1: 0, y1: f(at), x2: W, y2: f(at) }));
             if (Math.abs(at - last) < 12) continue;
             last = at;
-            const text = make("text", { class: "org-graph-label", x: f(bg ? W - inset : inset), y: f(at - 4), "text-anchor": bg ? "end" : "start" });
+            const text = make("text", { class: "org-graph-label", x: f(end ? W - inset : inset), y: f(at - 4), "text-anchor": end ? "end" : "start" });
             text.textContent = label(v, ruler.unit, digits ?? digitsOf(v, ruler.unit));
             labelsG.append(text);
           }
