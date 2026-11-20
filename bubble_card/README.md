@@ -1450,7 +1450,7 @@ The Graph module draws the history of one or more entities on a button card: num
 | `hours_to_show` | `24` | How many hours the graph shows, up to 168. |
 | `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
 | `color` | Gray | The graph's color: a theme color by its name, such as `orange`, `blue` or `primary`, `temperature` for the temperature colors of the room cards by value, or any CSS color. The fill under the line takes it too. |
-| `colors` | | Own colors, each a `color` with `from` or `state`. `from` colors everything from that value up, such as `red` from `3000` W, and `state` the blocks of a state, such as `heating`. |
+| `colors` | | Own colors, each a `color` with `from` or `state`. `from` colors everything from that value up, such as `red` from `3000` W, and below the first one the graph keeps its own look. `state` colors the blocks of a state, such as `heating`. |
 | `min`, `max` | | Fixed ends of the scale for the first line's unit, and `max` for bars without a line. Without them, the scale fits the values. |
 | `grid` | `false` | Guide lines at round values, each with its value, and one at each midnight. A list, such as `[40, 60]`, draws them at these values. |
 | `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |

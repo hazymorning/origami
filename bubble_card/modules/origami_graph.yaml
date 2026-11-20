@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.4.0"
+  version: "1.4.1"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or softly behind it. A color, colors by value or state, a fixed scale, guide lines and the highest and lowest value each take one option."
@@ -503,19 +503,20 @@ origami_graph:
         const right = points === "none" ? 1 : r + 2;
         const x = (t) => ((t - from) / span) * (W - right);
 
-        // Colors by value, each from its value up: the temperature colors of the room cards, in Celsius, or own colors. Own
-        // colors can also name a state, such as heating.
+        // Colors by value, each from its value up: the temperature colors of the room cards, in Celsius, or own colors. Below
+        // the first own color, a value keeps the graph's own look, written as null. Own colors can also name a state, such as heating.
         const TEMP = [[-Infinity, "#728FA8"], [12, "#7C97A9"], [15, "#8BA2A8"], [17, "#9AAEA3"], [18.5, "#88A37E"], [22, "#99A677"], [24, "#AEA76F"],
           [25, "#BB9F68"], [26, "#C0935F"], [27, "#BF8A5F"], [28, "#BB7E5D"], [29, "#B3735C"], [30.5, "#AA6A5A"], [32, "#9C6056"]];
         const own = [].concat(cfg.colors ?? []);
         const OWN = own.filter((c) => Number.isFinite(number(c?.from)) && c.color).map((c) => [number(c.from), hue(c.color)]).sort((a, b) => a[0] - b[0]);
         const STATE = new Map(own.filter((c) => c?.state !== undefined && c.color).map((c) => [String(c.state).toLowerCase(), hue(c.color)]));
-        const stopsOf = (s, unit) => (OWN.length ? OWN : s.color === "temperature" ? TEMP.map(([v, c]) => [/F/.test(String(unit)) ? v * 1.8 + 32 : v, c]) : null);
+        const stopsOf = (s, unit) => (OWN.length ? [[-Infinity, null], ...OWN] : s.color === "temperature" ? TEMP.map(([v, c]) => [/F/.test(String(unit)) ? v * 1.8 + 32 : v, c]) : null);
         const colorAt = (stops, v) => stops.reduce((c, [at, col]) => (v >= at ? col : c), stops[0][1]);
-        // A line and its fill take colors by value as a gradient from top to bottom, which changes at each value
+        // A line and its fill take colors by value as a gradient from top to bottom, which changes at each value, half a line
+        // lower, so a line right at a value takes its color in full
         const gradient = (id, stops, y) => {
           const grad = make("linearGradient", { id, gradientUnits: "userSpaceOnUse", x1: 0, y1: 0, x2: 0, y2: H });
-          const at = (v) => f(Math.min(Math.max(y(v) / H, 0), 1) * 1000) / 1000;
+          const at = (v) => f(Math.min(Math.max((y(v) + 1.5) / H, 0), 1) * 1000) / 1000;
           [[0, stops[stops.length - 1][1]], ...stops.slice(1).reverse().flatMap(([v, c], j, all) => [[at(v), c], [at(v), (all[j + 1] ?? stops[0])[1]]]), [1, stops[0][1]]]
             .forEach(([o, c]) => grad.append(make("stop", { offset: o }, { "stop-color": c })));
           defs.append(grad);
@@ -560,7 +561,7 @@ origami_graph:
             if (!v || v <= 0) return;
             const x0 = x(a), x1 = x(b), w = x1 - x0, gap = Math.min(Math.max(w * 0.22, 1), 4);
             const h = Math.max(H - y(v), 1.5);
-            barsG.append(make("rect", { class: "org-graph-bar", x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: sc ? colorAt(sc, v) : color }));
+            barsG.append(make("rect", { class: "org-graph-bar", x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: (sc && colorAt(sc, v)) || color }));
           });
         });
 
@@ -645,8 +646,12 @@ origami_graph:
           const y = l.grp.y;
           const sc = stopsOf(l, l.unit);
           const plain = hue(l.color);
-          const base = sc ? gradient(uid + "c" + k, sc, y) : plain || INK;
-          const paint = sc || plain ? base : LINE;
+          // A line takes its color in full, and the area under it a tenth of it, a fifth behind the content, where a neutral
+          // area takes the card's own fill instead
+          const stroke = (c) => c ?? plain ?? LINE;
+          const tint = (c) => ((c ??= plain) ? mix(c, bg ? 20 : 10) : bg ? "var(--fill-subtle)" : mix(INK, 10));
+          const paint = sc ? gradient(uid + "c" + k, sc.map(([v, c]) => [v, stroke(c)]), y) : stroke(null);
+          const area = sc ? gradient(uid + "a" + k, sc.map(([v, c]) => [v, tint(c)]), y) : tint(null);
           // A gap in the history, such as while the entity was unavailable, splits the line
           const runs = [[]];
           for (const [t, v] of l.pts) {
@@ -659,14 +664,12 @@ origami_graph:
             // The fill of the newest run reaches the right edge, under the last value's dot
             const [ex, ey] = run[run.length - 1];
             const edge = live && run === runs[runs.length - 1] ? "L" + W + "," + f(ey) + "L" + W + "," + H : "L" + f(ex) + "," + H;
-            // Behind the content, a neutral area takes the card's own fill, and a colored one stays soft
-            const area = bg && !sc && !plain ? "var(--fill-subtle)" : base;
-            if (fill !== "none" && k === 0) fillsG.append(make("path", { class: "org-graph-fill" + (sc || plain ? " tinted" : ""), d: d + edge + "L" + f(run[0][0]) + "," + H + "Z", ...(fill === "fade" ? { mask: "url(#" + uid + "mask)" } : {}) }, { fill: area }));
+            if (fill !== "none" && k === 0) fillsG.append(make("path", { class: "org-graph-fill", d: d + edge + "L" + f(run[0][0]) + "," + H + "Z", ...(fill === "fade" ? { mask: "url(#" + uid + "mask)" } : {}) }, { fill: area }));
             if (showLine) linesG.append(make("path", { class: "org-graph-line" + (k ? " org-graph-line-" + Math.min(k, 2) : ""), d }, { stroke: paint }));
           }
           const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
           const dot = (t, v, cls, rr) => {
-            const c = sc ? colorAt(sc, v) : plain || DOT;
+            const c = (sc && colorAt(sc, v)) || plain || DOT;
             dotsG.append(make("circle", { class: cls, cx: f(x(t)), cy: f(y(v)), r: rr }, { fill: c }));
           };
           if (points === "all") real.slice(1, -1).forEach(([t, v]) => dot(t, v, "org-graph-point", Math.max(r - 1.5, 1.5)));
@@ -801,9 +804,6 @@ origami_graph:
     ha-card .org-graph-line-2 {
       stroke-dasharray: 1 4;
     }
-    ha-card .org-graph-fill {
-      opacity: .1;
-    }
     /* Guide lines are hairlines, fainter than any line of the graph */
     ha-card .org-graph-guide {
       stroke: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
@@ -826,12 +826,6 @@ origami_graph:
       stroke: var(--ha-card-background, var(--card-background-color));
       stroke-width: 3px;
       stroke-linejoin: round;
-    }
-    ha-card .org-graph.background .org-graph-fill {
-      opacity: 1;
-    }
-    ha-card .org-graph.background .org-graph-fill.tinted {
-      opacity: .2;
     }
     ha-card .org-graph.background .org-graph-state {
       opacity: .12;
