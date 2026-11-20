@@ -108,12 +108,12 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, lik
 
 ## Home view
 
-<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view.webp">
+<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, and at night with the next days on the weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view.webp">
 
 From top to bottom:
 
 - **[Greeting and notifications](https://github.com/hazymorning/origami/tree/main/dashboard/greeting).** A hello for the time of day, the next event, and whatever needs attention right now.
-- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** A cute little paper landscape, or nearly any other weather card.
+- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** A cute little paper landscape that shows the next days on a tap, or nearly any other weather card.
 - **[Favorites](https://github.com/hazymorning/origami/tree/main/dashboard/favorites).** Everyday shortcuts, and timers or devices while they run.
 - **[Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms).** How each room is doing, and the way into its pop-up.
 - **[Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table).** All rooms side by side, to see at once where it's too warm, too cold or a window is open.

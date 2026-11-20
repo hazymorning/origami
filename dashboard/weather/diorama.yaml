@@ -1,4 +1,5 @@
 # The Diorama layout from Origami Weather. Its pictures, one for every kind of weather, come with the card.
+# A tap shows the next days, as on Origami Weather's Sky layout.
 type: custom:origami-weather
 weather_entity: weather.home
 # Light or dark with the theme, like the rest of the dashboard
@@ -62,15 +63,24 @@ background_thresholds:
   - value: exceptional
     color: '#eadad3'
     color_dark: '#47332c'
+# A tap shows the next days over the landscape, and they stay after a reload on the same device
+visibility_fade: true
+remember_switches: true
 card_tap_action:
-  action: more-info
+  action: toggle
+  entity: origami.forecast
 css: |
   #weather-bg > img { object-position: right bottom; }
   /* On a wide screen, the heading above the card sets the space */
   @media (min-width: 768px) { :host { margin: 0px 0px 0px 0px !important; } }
 button_containers:
+  # Hidden while the next days show. A tap on it opens the weather's dialog.
   - name: Now
     padding: var(--ha-space-4, 16px) var(--ha-space-4, 16px) var(--ha-space-4, 16px) calc(var(--ha-space-4, 16px) + 4px)
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'off'
     buttons:
       - name: Temperature and condition
         entity: weather.home
@@ -87,5 +97,376 @@ button_containers:
             size: 12px
             weight: '500'
             overflow: wrap
+  # The next days, as on the Sky layout. A tap on a day hides them again.
+  - name: Days
+    position: custom
+    position_anchor: top-left
+    position_x: '0'
+    position_y: '0'
+    custom_width: 100%
+    padding: 44px max(0px, calc(63.5px - 12.5cqw))
+    layout: horizontal-scroll
+    scroll_count: 5
+    row_height: 100%
+    align_items: stretch
+    gap: '0'
+    align: center
+    scroll_fade: true
+    scroll_fade_size: 48px
+    background: true
+    grouped: true
+    border: none
+    blurred_background: true
+    background_blur: 16
+    background_color: 'color-mix(in srgb, var(--origami-card-bg-color, var(--ha-card-background, var(--card-background-color, #fff))) 30%, transparent)'
+    button_style: vertical
+    button_gap: 5px
+    button_text_size: 12px
+    button_icon_size: 28px
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'on'
+    buttons:
+      - name: Today
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 0
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: Tomorrow
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 1
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 2 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 2
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 3 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 3
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 4 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 4
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 5 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 5
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 6 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 6
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 7 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 7
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 8 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 8
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - name: In 9 days
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 9
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
 grid_options:
   columns: full

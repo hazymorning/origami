@@ -15,7 +15,7 @@ Besides these three, Origami Weather has a classic forecast, a detailed panel an
 
 <img width="800" alt="The diorama on a partly cloudy day with birds over the lake, and the same weather at night under the moon and the stars, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/weather.webp">
 
-A paper landscape that changes with the weather, and the card on the home view. [`diorama.yaml`](diorama.yaml)
+A paper landscape that changes with the weather, and the card on the home view. It's kept calm and simple on purpose, so nothing distracts from the picture. Since it takes the best spot on the page mostly for looks, a tap shows the next days, borrowed from Origami Weather's Sky layout. [`diorama.yaml`](diorama.yaml)
 
 <details>
 <summary><b>Another landscape</b></summary>
@@ -23,6 +23,15 @@ A paper landscape that changes with the weather, and the card on the home view. 
 <br>
 
 A beach, a city or any other place works too, with one picture for every kind of weather. [Here's how](https://github.com/hazymorning/origami_weather#pictures).
+
+</details>
+
+<details>
+<summary><b>Something else on a tap</b></summary>
+
+<br>
+
+A tap can show anything else instead of the next days. They're the container named `Days`, which shows while the card's switch `origami.forecast` is on, and any other container with the same `visibility` can take its place. Origami Weather's [reference](https://github.com/hazymorning/origami_weather/blob/main/REFERENCE.md#buttons) explains the switches.
 
 </details>
 
@@ -67,6 +76,6 @@ An AI can draw the actual home in its place, and Origami Weather has [a prompt f
 
 | Entity | Used for |
 | --- | --- |
-| `weather.home` | The weather on all three cards, with the forecast on the sky and the wind on the house |
+| `weather.home` | The weather on all three cards, with the forecast on the diorama and the sky, and the wind on the house |
 | `sun.sun` | The sun and the moon on the diorama and the sky, and the next sunset or sunrise on the house. It comes with Home Assistant |
 | `sensor.living_room_temperature`, `sensor.office_temperature`, `sensor.bathroom_temperature` | Room temperatures: one for each room of the house |

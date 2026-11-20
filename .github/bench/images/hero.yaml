@@ -1,6 +1,7 @@
 # The README's first image: the home view, the music pop-up and the TV remote on three phones, turned toward the headline
 # beside them. Each phone takes another image's file and changes a few of its keys. By day, the home view's player plays the
-# song that the music pop-up shows. At night it rains, the rooms stay cards with the climate table closed, and the speaker group stays closed.
+# song that the music pop-up shows. At night it rains on the closed weather card, the rooms stay cards with the climate table closed,
+# and the speaker group stays closed.
 kind: hero
 headline:
   - A chill dashboard
@@ -38,6 +39,7 @@ phones:
               - media_player.living_room
               - media_player.kitchen
     dark:
+      click: []
       drop:
         - climate-table/card.yaml
       states:
