@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.3.0"
+  version: "1.4.0"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or softly behind it. A color, colors by value or state, a fixed scale, guide lines and the highest and lowest value each take one option."
@@ -74,7 +74,7 @@ origami_graph:
                       value: grey
                     - label: Blue grey
                       value: blue-grey
-    - name: hours
+    - name: hours_to_show
       label: "Hours to show, up to 168"
       selector:
         number:
@@ -108,11 +108,16 @@ origami_graph:
           selector:
             object:
               multiple: true
-              label_field: value
+              label_field: color
               fields:
-                value:
-                  label: "From this value, or for this state"
-                  required: true
+                from:
+                  label: "From this value up"
+                  selector:
+                    number:
+                      mode: box
+                      step: any
+                state:
+                  label: "Or for this state, such as heating"
                   selector:
                     text: {}
                 color:
@@ -120,11 +125,6 @@ origami_graph:
                   required: true
                   selector:
                     select: *colors
-        - name: vivid
-          label: "Vivid: colors at full strength, also on bars, blocks and areas"
-          selector:
-            boolean: {}
-          default: false
     - name: scale_group
       type: expandable
       flatten: true
@@ -177,9 +177,10 @@ origami_graph:
                   value: none
           default: fade
         - name: line
-          label: "Line on top of the area, shown below the content and hidden behind it unless set"
+          label: "Line on top of the area"
           selector:
             boolean: {}
+          default: true
         - name: points
           label: "Points"
           selector:
@@ -242,10 +243,9 @@ origami_graph:
           const text = v !== undefined && v !== null && !Number.isFinite(number(v)) && !["unavailable", "unknown", ""].includes(String(v));
           const type = ["line", "bars", "states"].includes(s.type) ? s.type : text ? "states" : "line";
           const meter = type === "bars" && !attr && /^total/.test(String(st?.attributes?.state_class ?? ""));
-          const color = s.color ?? cfg.color ?? (cfg.gradient === "temperature" ? "temperature" : null);
-          return { i, id: s.entity, attr, type, meter, color, min: s.min, max: s.max };
+          return { i, id: s.entity, attr, type, meter, color: s.color ?? cfg.color ?? null };
         });
-      const hours = Math.min(Math.max(Number(cfg.hours) || 24, 0.25), 168);
+      const hours = Math.min(Math.max(Number(cfg.hours_to_show) || 24, 0.25), 168);
       // Bars over three days or more stand for whole days, so the window then starts at a midnight
       const DAY = 864e5;
       const days = hours >= 72 && series.some((s) => s.type === "bars");
@@ -313,7 +313,7 @@ origami_graph:
       if (el.firstElementChild?.childElementCount !== 7) el.innerHTML = '<svg aria-hidden="true"><defs></defs><g class="org-graph-guides"></g><g class="org-graph-bars"></g><g class="org-graph-fills"></g><g class="org-graph-lines"></g><g class="org-graph-dots"></g><g class="org-graph-labels"></g></svg>';
       // The graph stays hidden until it shows, so it never shows before its styles, its data and its size are there
       if (!g.shown && el.style.opacity !== "0") el.style.opacity = "0";
-      el.className = "org-graph " + (bg ? "background" : "bottom") + (cfg.vivid === true ? " vivid" : "");
+      el.className = "org-graph " + (bg ? "background" : "bottom");
       const height = String(cfg.height ?? "").trim() || (bg ? "50%" : "calc(var(--tile-size) + var(--ha-space-4))");
       if (card.style.getPropertyValue("--org-graph-h") !== height) card.style.setProperty("--org-graph-h", height);
       if (bg) {
@@ -473,25 +473,22 @@ origami_graph:
         const groups = new Map();
         lines.forEach((l, k) => {
           const key = l.unit || l.id + l.attr;
-          if (!groups.has(key)) groups.set(key, { first: k === 0 || !groups.size, unit: l.unit, vals: k === 0 ? [...guides] : [], min: l.min, max: l.max });
+          if (!groups.has(key)) groups.set(key, { first: k === 0, unit: l.unit, vals: k === 0 ? [...guides] : [] });
           const grp = groups.get(key);
-          grp.min ??= l.min;
-          grp.max ??= l.max;
           for (const [, v] of l.pts) if (v !== null && Number.isFinite(v)) grp.vals.push(v);
           l.grp = grp;
         });
         const marks = cfg.extrema === true && !bg;
-        // Behind the content, the graph is a soft area of the card's own fill, without a line unless it is set. Dots show only when points asks for them.
+        // Behind the content, the graph is a soft area of the card's own fill. Dots show only when points asks for them.
         const r = bg ? 2 : 2.75;
         const points = cfg.points ?? "none";
-        const showLine = cfg.line ?? !bg;
+        const showLine = cfg.line !== false;
         const top = bg ? H * 0.12 : r + 3 + (marks ? 14 : 0);
         const bottom = bg ? 0 : 3 + (marks ? 14 : 0);
         for (const grp of groups.values()) {
           const lo0 = grp.vals.length ? Math.min(...grp.vals) : 0, hi0 = grp.vals.length ? Math.max(...grp.vals) : 1;
-          const fixedLo = Number.isFinite(number(grp.min ?? (grp.first ? cfg.min : undefined)));
-          const fixedHi = Number.isFinite(number(grp.max ?? (grp.first ? cfg.max : undefined)));
-          let lo = fixedLo ? number(grp.min ?? cfg.min) : lo0, hi = fixedHi ? number(grp.max ?? cfg.max) : hi0;
+          const fixedLo = grp.first && Number.isFinite(number(cfg.min)), fixedHi = grp.first && Number.isFinite(number(cfg.max));
+          let lo = fixedLo ? number(cfg.min) : lo0, hi = fixedHi ? number(cfg.max) : hi0;
           const need = Math.max(Math.abs(hi0) * 0.02, 0.5);
           if (hi - lo < need) {
             const mid = (hi + lo) / 2;
@@ -506,25 +503,21 @@ origami_graph:
         const right = points === "none" ? 1 : r + 2;
         const x = (t) => ((t - from) / span) * (W - right);
 
-        // Colors by value: the temperature colors of the room cards, each up to its value and blending into the next, or own
-        // colors, each from its value up. Own colors can also name a state, such as heating.
-        const TEMP = [[12, "#728FA8"], [15, "#7C97A9"], [17, "#8BA2A8"], [18.5, "#9AAEA3"], [22, "#88A37E"], [24, "#99A677"], [25, "#AEA76F"],
-          [26, "#BB9F68"], [27, "#C0935F"], [28, "#BF8A5F"], [29, "#BB7E5D"], [30.5, "#B3735C"], [32, "#AA6A5A"], [34, "#9C6056"]];
-        const own = [].concat(cfg.colors ?? (cfg.gradient === "custom" ? cfg.stops ?? [] : []));
-        const OWN = own.map((c) => [number(c?.value), hue(c?.color)]).filter(([v, c]) => Number.isFinite(v) && c).sort((a, b) => a[0] - b[0]);
-        const STATE = new Map(own.filter((c) => c?.color && !Number.isFinite(number(c.value))).map((c) => [String(c.value).toLowerCase(), hue(c.color)]));
-        const scaleOf = (s, unit) => (OWN.length ? { stops: OWN, own: true }
-          : s.color === "temperature" ? { stops: TEMP.map(([v, c]) => [/F/.test(String(unit)) ? v * 1.8 + 32 : v, c]), own: false } : null);
-        const colorAt = (sc, v) => (sc.own ? sc.stops.reduce((c, [at, col]) => (v >= at ? col : c), sc.stops[0][1])
-          : (sc.stops.find(([at]) => v <= at) ?? sc.stops[sc.stops.length - 1])[1]);
-        // A line and its fill take colors by value as a gradient from top to bottom: own colors change at their values
-        const gradient = (id, sc, y) => {
+        // Colors by value, each from its value up: the temperature colors of the room cards, in Celsius, or own colors. Own
+        // colors can also name a state, such as heating.
+        const TEMP = [[-Infinity, "#728FA8"], [12, "#7C97A9"], [15, "#8BA2A8"], [17, "#9AAEA3"], [18.5, "#88A37E"], [22, "#99A677"], [24, "#AEA76F"],
+          [25, "#BB9F68"], [26, "#C0935F"], [27, "#BF8A5F"], [28, "#BB7E5D"], [29, "#B3735C"], [30.5, "#AA6A5A"], [32, "#9C6056"]];
+        const own = [].concat(cfg.colors ?? []);
+        const OWN = own.filter((c) => Number.isFinite(number(c?.from)) && c.color).map((c) => [number(c.from), hue(c.color)]).sort((a, b) => a[0] - b[0]);
+        const STATE = new Map(own.filter((c) => c?.state !== undefined && c.color).map((c) => [String(c.state).toLowerCase(), hue(c.color)]));
+        const stopsOf = (s, unit) => (OWN.length ? OWN : s.color === "temperature" ? TEMP.map(([v, c]) => [/F/.test(String(unit)) ? v * 1.8 + 32 : v, c]) : null);
+        const colorAt = (stops, v) => stops.reduce((c, [at, col]) => (v >= at ? col : c), stops[0][1]);
+        // A line and its fill take colors by value as a gradient from top to bottom, which changes at each value
+        const gradient = (id, stops, y) => {
           const grad = make("linearGradient", { id, gradientUnits: "userSpaceOnUse", x1: 0, y1: 0, x2: 0, y2: H });
           const at = (v) => f(Math.min(Math.max(y(v) / H, 0), 1) * 1000) / 1000;
-          const list = sc.own
-            ? [[0, sc.stops[sc.stops.length - 1][1]], ...sc.stops.slice(1).reverse().flatMap(([v, c], j, all) => [[at(v), c], [at(v), (all[j + 1] ?? sc.stops[0])[1]]]), [1, sc.stops[0][1]]]
-            : sc.stops.map(([v, c]) => [at(v), c]).sort((a, b) => a[0] - b[0]);
-          list.forEach(([o, c]) => grad.append(make("stop", { offset: o }, { "stop-color": c })));
+          [[0, stops[stops.length - 1][1]], ...stops.slice(1).reverse().flatMap(([v, c], j, all) => [[at(v), c], [at(v), (all[j + 1] ?? stops[0])[1]]]), [1, stops[0][1]]]
+            .forEach(([o, c]) => grad.append(make("stop", { offset: o }, { "stop-color": c })));
           defs.append(grad);
           return "url(#" + id + ")";
         };
@@ -533,8 +526,7 @@ origami_graph:
         // bars and soft blocks for states, with the heat color while heating and the cool color while cooling. A color replaces them.
         const mix = (c, pct) => "color-mix(in srgb, " + c + " " + pct + "%, transparent)";
         const INK = "var(--primary-text-color)";
-        // With legend, the lines carry the values, so they are as strong behind the content as below it
-        const LINE = mix(INK, bg && !cfg.legend ? 14 : 24);
+        const LINE = mix(INK, 24);
         const DOT = mix(INK, 45);
         const TINT = { heating: "var(--heat-color)", preheating: "var(--heat-color)", defrosting: "var(--heat-color)", cooling: "var(--state-climate-cool-color)" };
         // Values: a temperature with one decimal, small numbers with one, and the unit after the value
@@ -556,20 +548,19 @@ origami_graph:
           const numeric = s.meter || (st.length && st.every((x) => x.v === null || x.v === undefined || x.v === "unavailable" || x.v === "unknown" || Number.isFinite(number(x.v))));
           const vals = s.meter ? rise(s, list) : sweep(st, list, numeric ? "mean" : "duty");
           const peak = numeric ? Math.max(...vals.filter((v) => v !== null), 0) || 1 : 1;
-          const fixed = number(s.max ?? (!lines.length && !j ? cfg.max : undefined));
+          const fixed = !lines.length && !j ? number(cfg.max) : NaN;
           const hi = numeric && fixed > 0 ? fixed : peak;
           const tall = H * (bg ? 0.5 : 0.8);
           const y = (v) => H - Math.min(Math.max(v / hi, 0), 1) * tall;
           if (!ruler && numeric) ruler = { lo: 0, hi, y, unit: unitOf(s) };
-          const sc = numeric ? scaleOf(s, unitOf(s)) : null;
-          const plain = hue(s.color);
-          const color = plain ?? (s.id.startsWith("climate.") ? mix("var(--heat-color)", bg ? 9 : 18) : mix(INK, bg ? 5 : 10));
+          const sc = numeric ? stopsOf(s, unitOf(s)) : null;
+          const color = hue(s.color) ?? mix(INK, bg ? 5 : 10);
           list.forEach(([a, b], k) => {
             const v = vals[k];
             if (!v || v <= 0) return;
             const x0 = x(a), x1 = x(b), w = x1 - x0, gap = Math.min(Math.max(w * 0.22, 1), 4);
             const h = Math.max(H - y(v), 1.5);
-            barsG.append(make("rect", { class: "org-graph-bar" + (sc || plain ? " own" : ""), x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: sc ? colorAt(sc, v) : color }));
+            barsG.append(make("rect", { class: "org-graph-bar", x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: sc ? colorAt(sc, v) : color }));
           });
         });
 
@@ -582,15 +573,15 @@ origami_graph:
           const put = () => {
             if (!run?.c) return;
             const w = Math.max(x(run.t1) - x(run.t0), 1);
-            barsG.append(make("rect", { class: "org-graph-state" + (run.own ? " own" : ""), x: f(x(run.t0)), y: f(y0), width: f(w), height: f(h), rx: f(Math.min(2.5, w / 2)) }, { fill: run.c }));
+            barsG.append(make("rect", { class: "org-graph-state", x: f(x(run.t0)), y: f(y0), width: f(w), height: f(h), rx: f(Math.min(2.5, w / 2)) }, { fill: run.c }));
           };
           for (const st of steps(s)) {
             const key = String(st.v ?? "").toLowerCase();
             const mine = STATE.get(key) ?? (isOn(key) ? hue(s.color) : null);
             const c = mine ?? (isOn(key) ? TINT[key] ?? INK : null);
-            if (run && run.c === c && run.own === !!mine) { run.t1 = st.t1; continue; }
+            if (run && run.c === c) { run.t1 = st.t1; continue; }
             put();
-            run = { t0: st.t0, t1: st.t1, c, own: !!mine };
+            run = { t0: st.t0, t1: st.t1, c };
           }
           put();
         });
@@ -649,10 +640,10 @@ origami_graph:
           return d;
         };
 
-        const fill = cfg.fill ?? (bg ? "solid" : "fade");
+        const fill = cfg.fill ?? "fade";
         lines.forEach((l, k) => {
           const y = l.grp.y;
-          const sc = scaleOf(l, l.unit);
+          const sc = stopsOf(l, l.unit);
           const plain = hue(l.color);
           const base = sc ? gradient(uid + "c" + k, sc, y) : plain || INK;
           const paint = sc || plain ? base : LINE;
@@ -819,12 +810,9 @@ origami_graph:
       stroke-width: 1px;
       shape-rendering: crispEdges;
     }
-    /* States are soft blocks. Bars and blocks in a color stay soft too, so a color never outweighs the card, and only a line takes it at full strength. */
+    /* Areas show through, as in any graph: the fill under a line and the blocks of states */
     ha-card .org-graph-state {
-      opacity: .18;
-    }
-    ha-card :is(.org-graph-state, .org-graph-bar).own {
-      opacity: .45;
+      opacity: .25;
     }
 
     ha-card .org-graph-label {
@@ -846,24 +834,8 @@ origami_graph:
       opacity: .2;
     }
     ha-card .org-graph.background .org-graph-state {
-      opacity: .09;
-    }
-    ha-card .org-graph.background :is(.org-graph-state, .org-graph-bar).own {
-      opacity: .22;
+      opacity: .12;
     }
     ha-card .org-graph.background .org-graph-line {
       stroke-width: 1.5px;
-    }
-    /* With vivid, a color shows at full strength: bars and blocks in a color in full, the heat and the cool color clearly, and the area under a line too */
-    ha-card .org-graph.vivid .org-graph-state {
-      opacity: .5;
-    }
-    ha-card .org-graph.vivid :is(.org-graph-state, .org-graph-bar).own {
-      opacity: 1;
-    }
-    ha-card .org-graph.vivid .org-graph-fill.tinted {
-      opacity: .35;
-    }
-    ha-card .org-graph.background.vivid .org-graph-fill.tinted {
-      opacity: .7;
     }

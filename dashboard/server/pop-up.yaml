@@ -206,8 +206,6 @@ cards:
             - sensor.system_monitor_memory_usage
           position: background
           height: 100%
-          line: true
-          fill: fade
           min: 0
           legend: true
         button_action:

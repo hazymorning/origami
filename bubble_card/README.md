@@ -1447,21 +1447,20 @@ The Graph module draws the history of one or more entities on a button card: num
 | Option | Default | Description |
 | --- | --- | --- |
 | `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `type`, `attribute` and `color`. Numbers draw a line and everything else its states, such as on and off, unless `type` is `line`, `bars` or `states`. A thermostat shows when it heated or cooled, and as a line its temperature. |
-| `hours` | `24` | How many hours the graph shows, up to 168. |
+| `hours_to_show` | `24` | How many hours the graph shows, up to 168. |
 | `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
 | `color` | Gray | The graph's color: a theme color by its name, such as `orange`, `blue` or `primary`, `temperature` for the temperature colors of the room cards by value, or any CSS color. The fill under the line takes it too. |
-| `colors` | | Own colors, each a `value` and a `color`. A number colors everything from that value up, such as `red` from `3000` W, and a state its blocks, such as `heating`. |
-| `vivid` | `false` | Colors at full strength. Without it, bars, blocks and areas in a color stay soft, and only a line shows its color in full. |
-| `min`, `max` | | Fixed ends of the scale for the first line's unit, or for bars without a line. Without them, the scale fits the values. |
+| `colors` | | Own colors, each a `color` with `from` or `state`. `from` colors everything from that value up, such as `red` from `3000` W, and `state` the blocks of a state, such as `heating`. |
+| `min`, `max` | | Fixed ends of the scale for the first line's unit, and `max` for bars without a line. Without them, the scale fits the values. |
 | `grid` | `false` | Guide lines at round values, each with its value, and one at each midnight. A list, such as `[40, 60]`, draws them at these values. |
 | `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
 | `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
-| `fill` | `fade` below, `solid` behind | `fade`, `solid` or `none`, for the area under the first line. |
-| `line` | `true` below, `false` behind | The line on top of the area. |
+| `fill` | `fade` | `fade`, `solid` or `none`, for the area under the first line. |
+| `line` | `true` | The line on top of the area. |
 | `points` | `none` | `last` marks the newest value and `all` every value. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
-| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. The lines are then as strong as below the content. |
+| `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. |
 
 Bars show the share of each time step that the entity was on, or its mean value. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted.
 
@@ -1486,14 +1485,14 @@ origami_graph:
   entities:
     - entity: sensor.energy_today
       type: bars
-  hours: 168
+  hours_to_show: 168
   grid: true
   colors:
-    - value: 0
+    - from: 0
       color: green
-    - value: 10
+    - from: 10
       color: amber
-    - value: 14
+    - from: 14
       color: red
 ```
 
@@ -1520,8 +1519,6 @@ origami_graph:
     - sensor.system_monitor_memory_usage
   position: background
   height: 100%
-  line: true
-  fill: fade
   min: 0
   legend: true
 button_action:

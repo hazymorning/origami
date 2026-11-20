@@ -144,12 +144,12 @@ dark:
       entities:
         - entity: sensor.energy_today
           type: bars
-      hours: 168
+      hours_to_show: 168
       grid: true
       colors:
-        - value: 0
+        - from: 0
           color: green
-        - value: 10
+        - from: 10
           color: amber
-        - value: 14
+        - from: 14
           color: red
