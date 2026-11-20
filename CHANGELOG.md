@@ -5,7 +5,7 @@
 - The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
 - On a wider screen, the navigation bar stands at the bottom under the column of cards, with the now playing card above it, as on a phone.
 - The navigation bar's filled buttons are keys of card background, its badges and the group link on the cover are a little smaller and filled, and with music and the TV the cards keep their whole shadows.
-- A new Graph module draws the history of entities as quiet lines or bars, below a card's content or softly behind it, and can turn the card's values into its legend.
+- A new Graph module draws the history of entities as quiet lines, bars or states, below a card's content or softly behind it. A color, colors by value or state, a fixed scale, guide lines and the energy of each day take one option each, and the card's values can become its legend.
 - While music plays in a room, its card shows a note in place of the arrow, and a TV while the TV is on.
 - The arrow at the top of a room card is as large as the room's icon and stands in the same square on the other side.
 - Base's new `art` puts a picture in a card's icon and softly behind the card, such as tonight's dinner.

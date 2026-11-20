@@ -1,43 +1,155 @@
-# The server's load of the last day behind its card, with processor and memory as the legend, from home.yaml's history.
-# Light: around noon. Dark: late in the evening.
+# The Graph module in the module reference. Light: the living room's last day in the temperature colors of the room cards,
+# with the heating as soft blocks behind it and guide lines with their values. Dark: the energy of the last week, a bar for each
+# day in own colors by value, green up to 10 kWh, then amber and red from 14 kWh.
 kind: panel
-cards:
-- type: custom:bubble-card
-  card_type: button
-  button_type: name
-  entity: sensor.system_monitor_processor_use
-  show_icon: false
-  show_name: false
-  modules:
-    - origami_base
-    - origami_graph
-  origami_base:
-    frameless: true
-    padding: var(--ha-space-6)
-    sub_button_height: var(--control-height-mini)
-    sub_button_text_size: var(--ha-font-size-s)
-  origami_graph:
-    entities:
-      - sensor.system_monitor_processor_use
-      - sensor.system_monitor_memory_usage
-    position: background
-    height: 100%
-    line: true
-    fill: fade
-    min: 0
-    legend: true
-  button_action:
-    tap_action:
-      action: more-info
-  sub_button:
-    main:
-      - entity: sensor.system_monitor_processor_use
-        name: CPU
-        show_name: true
-        show_icon: false
-        show_background: true
-      - entity: sensor.system_monitor_memory_usage
-        name: RAM
-        show_name: true
-        show_icon: false
-        show_background: true
+light:
+  states:
+    sensor.living_room_temperature: {state: '21.4', attributes: {friendly_name: Living room, unit_of_measurement: °C, device_class: temperature}}
+    climate.living_room: {state: heat, attributes: {friendly_name: Living room, hvac_action: idle, current_temperature: 21.4, temperature: 21}}
+  messages:
+    history/stream:
+      states:
+        sensor.living_room_temperature:
+        - {s: '21.0', lu: 1793707200}
+        - {s: '21.0', lu: 1793709000}
+        - {s: '21.1', lu: 1793710800}
+        - {s: '21.1', lu: 1793712600}
+        - {s: '21.1', lu: 1793714400}
+        - {s: '21.1', lu: 1793716200}
+        - {s: '21.1', lu: 1793718000}
+        - {s: '21.2', lu: 1793719800}
+        - {s: '21.2', lu: 1793721600}
+        - {s: '21.5', lu: 1793723400}
+        - {s: '21.7', lu: 1793725200}
+        - {s: '22.0', lu: 1793727000}
+        - {s: '22.3', lu: 1793728800}
+        - {s: '22.4', lu: 1793730600}
+        - {s: '22.4', lu: 1793732400}
+        - {s: '22.4', lu: 1793734200}
+        - {s: '22.3', lu: 1793736000}
+        - {s: '22.2', lu: 1793737800}
+        - {s: '22.0', lu: 1793739600}
+        - {s: '21.9', lu: 1793741400}
+        - {s: '21.8', lu: 1793743200}
+        - {s: '21.7', lu: 1793745000}
+        - {s: '21.6', lu: 1793746800}
+        - {s: '21.4', lu: 1793748600}
+        - {s: '21.3', lu: 1793750400}
+        - {s: '21.2', lu: 1793752200}
+        - {s: '21.1', lu: 1793754000}
+        - {s: '21.0', lu: 1793755800}
+        - {s: '20.8', lu: 1793757600}
+        - {s: '20.7', lu: 1793759400}
+        - {s: '20.6', lu: 1793761200}
+        - {s: '20.5', lu: 1793763000}
+        - {s: '20.4', lu: 1793764800}
+        - {s: '20.2', lu: 1793766600}
+        - {s: '20.1', lu: 1793768400}
+        - {s: '20.4', lu: 1793770200}
+        - {s: '20.7', lu: 1793772000}
+        - {s: '21.0', lu: 1793773800}
+        - {s: '21.2', lu: 1793775600}
+        - {s: '21.3', lu: 1793777400}
+        - {s: '21.3', lu: 1793779200}
+        - {s: '21.3', lu: 1793781000}
+        - {s: '21.3', lu: 1793782800}
+        - {s: '21.3', lu: 1793784600}
+        - {s: '21.4', lu: 1793786400}
+        - {s: '21.4', lu: 1793788200}
+        - {s: '21.4', lu: 1793790000}
+        - {s: '21.4', lu: 1793791800}
+        - {s: '21.4', lu: 1793793600}
+        - {s: '21.5', lu: 1793795400}
+        climate.living_room:
+        - {s: heat, lu: 1793707200, a: {hvac_action: idle}}
+        - {s: heat, lu: 1793723400, a: {hvac_action: heating}}
+        - {s: heat, lu: 1793736000, a: {hvac_action: idle}}
+        - {s: heat, lu: 1793770200, a: {hvac_action: heating}}
+        - {s: heat, lu: 1793777400, a: {hvac_action: idle}}
+  cards:
+  - type: custom:bubble-card
+    card_type: button
+    button_type: state
+    entity: sensor.living_room_temperature
+    name: Living room
+    icon: mdi:sofa
+    modules:
+      - origami_base
+      - origami_graph
+    origami_graph:
+      entities:
+        - sensor.living_room_temperature
+        - climate.living_room
+      color: temperature
+      grid: true
+      points: last
+dark:
+  states:
+    sensor.energy_today: {state: '10.3', attributes: {friendly_name: Energy today, unit_of_measurement: kWh, device_class: energy, state_class: total_increasing}}
+  messages:
+    history/stream:
+      states:
+        sensor.energy_today:
+        - {s: '0.00', lu: 1793145600}
+        - {s: '1.72', lu: 1793174400}
+        - {s: '3.87', lu: 1793192400}
+        - {s: '6.02', lu: 1793214000}
+        - {s: '8.60', lu: 1793226600}
+        - {s: '0.00', lu: 1793232000}
+        - {s: '1.88', lu: 1793260800}
+        - {s: '4.23', lu: 1793278800}
+        - {s: '6.58', lu: 1793300400}
+        - {s: '9.40', lu: 1793313000}
+        - {s: '0.00', lu: 1793318400}
+        - {s: '1.56', lu: 1793347200}
+        - {s: '3.51', lu: 1793365200}
+        - {s: '5.46', lu: 1793386800}
+        - {s: '7.80', lu: 1793399400}
+        - {s: '0.00', lu: 1793404800}
+        - {s: '2.24', lu: 1793433600}
+        - {s: '5.04', lu: 1793451600}
+        - {s: '7.84', lu: 1793473200}
+        - {s: '11.20', lu: 1793485800}
+        - {s: '0.00', lu: 1793491200}
+        - {s: '2.92', lu: 1793520000}
+        - {s: '6.57', lu: 1793538000}
+        - {s: '10.22', lu: 1793559600}
+        - {s: '14.60', lu: 1793572200}
+        - {s: '0.00', lu: 1793577600}
+        - {s: '1.78', lu: 1793606400}
+        - {s: '4.00', lu: 1793624400}
+        - {s: '6.23', lu: 1793646000}
+        - {s: '8.90', lu: 1793658600}
+        - {s: '0.00', lu: 1793664000}
+        - {s: '2.48', lu: 1793692800}
+        - {s: '5.58', lu: 1793710800}
+        - {s: '8.68', lu: 1793732400}
+        - {s: '12.40', lu: 1793745000}
+        - {s: '0.00', lu: 1793750400}
+        - {s: '2.06', lu: 1793779200}
+        - {s: '4.64', lu: 1793797200}
+        - {s: '7.21', lu: 1793818800}
+        - {s: '10.30', lu: 1793831400}
+  cards:
+  - type: custom:bubble-card
+    card_type: button
+    button_type: state
+    entity: sensor.energy_today
+    name: Energy
+    icon: mdi:lightning-bolt
+    modules:
+      - origami_base
+      - origami_graph
+    origami_graph:
+      entities:
+        - entity: sensor.energy_today
+          type: bars
+      hours: 168
+      grid: true
+      colors:
+        - value: 0
+          color: green
+        - value: 10
+          color: amber
+        - value: 14
+          color: red

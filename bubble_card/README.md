@@ -28,7 +28,7 @@ Base draws the frame of button and media player cards and holds the helpers that
 | [Header](#header) | `origami_header` | separator | A section header with values or a small switch. |
 | [Tiles](#tiles) | `origami_tiles` | sub-buttons | Grids and lists of tiles. |
 | [Table](#table) | `origami_table` | sub-buttons | Rows of cells that share their columns, such as the climate table. |
-| [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines or bars, below the content or behind it. |
+| [Graph](#graph) | `origami_graph` | button | Draws the history of entities as quiet lines, bars or states, below the content or behind it. |
 | [Popup](#popup) | `origami_popup` | pop-up | Styles a pop-up's header, backdrop and close button, and opens mini pop-ups. |
 | [Update](#update) | `origami_update` | button, sub-buttons | Brings the Origami modules to the installed release with one tap. |
 
@@ -1435,32 +1435,67 @@ The office has no thermostat, so its temperature cell names its column. The [cli
 
 ### Graph
 
-The Graph module draws the history of one or more entities on a button card, as lines with a fill that fades or as bars. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height. A graph shows once its data and its place stay the same for a moment and then fades in, so it doesn't move while the page builds.
+The Graph module draws the history of one or more entities on a button card: numbers as a line or as bars, and states, such as a heating that's on, as soft blocks. It sits in a strip below the card's content, which the card grows by, or behind the content as a soft area. Without settings it stays calm and gray like the rest of Origami, and a color, colors by value or state, a fixed scale or guide lines each take one option. The history comes from Home Assistant and follows each new value. The line goes through every value and never past it, so a peak keeps its height. A graph shows once its data and its place stay the same for a moment and then fades in, so it doesn't move while the page builds.
 
-<img width="800" alt="The load of the server's last day behind a card, with processor and memory as its legend, by day and at night, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-graph.webp">
+<img width="800" alt="A living room's last day in the temperature colors of the room cards, with the heating as soft blocks behind it and guide lines, and the energy of the last week as a bar for each day in own colors by value, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/module-graph.webp">
 
 <details>
-<summary>Options and example</summary>
+<summary>Options and examples</summary>
 
 <br>
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `attribute`, `type` and `color`. `type: bars` draws bars: the share of each time step that the entity was on, or its mean value. A thermostat's bars show how long it heated or cooled. |
+| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `type`, `attribute` and `color`. Numbers draw a line and everything else its states, such as on and off, unless `type` is `line`, `bars` or `states`. A thermostat shows when it heated or cooled, and as a line its temperature. |
 | `hours` | `24` | How many hours the graph shows, up to 168. |
 | `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
+| `color` | Gray | The graph's color: a theme color by its name, such as `orange`, `blue` or `primary`, `temperature` for the temperature colors of the room cards by value, or any CSS color. The fill under the line takes it too. |
+| `colors` | | Own colors, each a `value` and a `color`. A number colors everything from that value up, such as `red` from `3000` W, and a state its blocks, such as `heating`. |
+| `vivid` | `false` | Colors at full strength. Without it, bars, blocks and areas in a color stay soft, and only a line shows its color in full. |
+| `min`, `max` | | Fixed ends of the scale for the first line's unit, or for bars without a line. Without them, the scale fits the values. |
+| `grid` | `false` | Guide lines at round values, each with its value, and one at each midnight. A list, such as `[40, 60]`, draws them at these values. |
+| `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
 | `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
 | `fill` | `fade` below, `solid` behind | `fade`, `solid` or `none`, for the area under the first line. |
 | `line` | `true` below, `false` behind | The line on top of the area. |
 | `points` | `none` | `last` marks the newest value and `all` every value. |
-| `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
-| `min`, `max` | | Fixed ends of the scale for the first line's unit. Without them, the scale fits the values. |
-| `gradient` | `none` | `temperature` colors a line by its value with the temperature colors of the room cards. `custom` uses the colors under `stops`, each a `value` and a `color`. |
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
 | `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. The lines are then as strong as below the content. |
 
-Lines stay neutral. The first one is a little darker than the area under it, and a second and a third one are dashed and dotted. Lines with the same unit share a scale. A thermostat's bars take a soft tint of the heat color. An entity's own `color` replaces these colors at full strength.
+Bars show the share of each time step that the entity was on, or its mean value. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted.
+
+> **Colors.** The color names are the theme's own shades, so `orange` or `blue` stays as soft as the rest of Origami. A CSS color, such as `#C0935F`, works too.
+
+A room's temperature in the colors of the room cards, with the heating behind it, as in the light image:
+
+```yaml
+origami_graph:
+  entities:
+    - sensor.living_room_temperature
+    - climate.living_room
+  color: temperature
+  grid: true
+  points: last
+```
+
+The energy of the last week, a bar for each day, as in the dark image:
+
+```yaml
+origami_graph:
+  entities:
+    - entity: sensor.energy_today
+      type: bars
+  hours: 168
+  grid: true
+  colors:
+    - value: 0
+      color: green
+    - value: 10
+      color: amber
+    - value: 14
+      color: red
+```
 
 The load of the server's last day behind a card, with processor and memory as its legend:
 
