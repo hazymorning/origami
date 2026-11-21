@@ -1,6 +1,6 @@
 origami_button:
   name: "Origami • Button"
-  version: "3.16.0"
+  version: "3.16.1"
   supported:
     - sub-buttons
     - button
@@ -225,11 +225,11 @@ origami_button:
         else if (dotted) out.push(at(n) + " .bubble-sub-button-name-container { " + dot + "}", rtl(at(n) + " .bubble-sub-button-name-container"));
         return out;
       }).join("\n    ");
-      // A small segmented switch is a track around its group, and its active segment is filled like a segment of a whole bar
+      // A small segmented switch is a track around its group, like a tray around its keys: the segments are as tall as a button, with 8 px of track around them, and the active one is filled like a segment of a whole bar
       const bar = (g) => "ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:has(> :is(" + g.n.map((n) => ".bubble-sub-button-" + n).join(", ") + ")):not(.hidden)";
       // In a row that does not scroll, a switch fills the free width and its segments share it
-      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: var(--org-btn-height); padding: var(--ha-space-1); border-radius: var(--org-btn-radius); background-color: var(--fill-subtle);}\n    "
-        + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc(var(--org-btn-radius) - var(--ha-space-1)) !important; background: transparent !important; color: var(--secondary-text-color) !important; }").join("\n    ");
+      const barCss = bars.map((g) => bar(g) + " { display: flex !important; flex: " + (scroll ? "0 0 auto" : "1 1 auto") + "; gap: 0 !important; box-sizing: border-box; height: calc(var(--org-btn-height) + var(--ha-space-2)); padding: var(--ha-space-2); border-radius: calc((var(--org-btn-height) + var(--ha-space-2)) * var(--radius-ratio)); background-color: var(--fill-subtle);}\n    "
+        + bar(g) + " > .bubble-sub-button { " + (scroll ? "" : "flex: 1 1 0 !important; ") + "height: 100% !important; justify-content: center !important; padding: 0 calc(var(--ha-space-4) - 2px) 0 calc(var(--ha-space-4) - 2px) !important; border-radius: calc((var(--org-btn-height) + var(--ha-space-2)) * var(--radius-ratio) - var(--ha-space-2)) !important; background: transparent !important; color: var(--secondary-text-color) !important; }").join("\n    ");
       const barOn = bars.flatMap((g) => g.n.filter((n) => active.includes(n)).map((n) => bar(g) + " > .bubble-sub-button.bubble-sub-button-" + n));
       // A divider is a short line between two buttons, and it shows while its group shows
       const dividers = subs.filter(({ item }) => org.slug(item.css_class) === "divider").map(({ n }) => at(n));

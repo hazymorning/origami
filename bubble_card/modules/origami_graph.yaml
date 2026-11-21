@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.5.0"
+  version: "1.5.1"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or softly behind it. Colors, a fixed scale, guide lines, a good range, the newest values and tabs each take one option."
@@ -894,8 +894,10 @@ origami_graph:
     ha-card {
       /* A line's sample in the legend is as dark as the dot on its newest value, so its dashes show on the small key */
       --org-graph-key: color-mix(in srgb, var(--primary-text-color) 45%, transparent);
-      /* Tabs are as tall as a segmented bar of Button, and Base's sub_button_height sets both */
-      --org-graph-tab-h: ${card._org.opts?.sub || "var(--control-height)"};
+      /* The tabs are a tray of keys, as a small switch of Button is: keys as tall as a button, with 8 px of track around them. Base's sub_button_height sets the keys' height. */
+      --org-graph-tab-h: calc(${card._org.opts?.sub || "var(--control-height-icon)"} + var(--ha-space-2));
+      ${card._org.opts?.frameless ? `/* On a frameless card, the graph stands on the page, so its labels get no edge of the card's background */
+      --org-graph-halo: transparent;` : ""}
     }
     ha-card .org-graph {
       position: absolute;
@@ -947,7 +949,7 @@ origami_graph:
       height: var(--org-graph-tab-h);
       /* The graph reaches the card's edges, and the bar keeps the card's padding, as a row of buttons does */
       margin: var(--ha-space-3) var(--org-pad) var(--org-pad) var(--org-pad);
-      padding: var(--ha-space-1) var(--ha-space-1) var(--ha-space-1) var(--ha-space-1);
+      padding: var(--ha-space-2) var(--ha-space-2) var(--ha-space-2) var(--ha-space-2);
       border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio));
       background-color: var(--fill-subtle);
       pointer-events: auto;
@@ -962,7 +964,7 @@ origami_graph:
       margin: 0;
       padding: 0 calc(var(--ha-space-4) - 2px) 0 calc(var(--ha-space-4) - 2px);
       border: none;
-      border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio) - var(--ha-space-1));
+      border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio) - var(--ha-space-2));
       background: transparent;
       color: var(--secondary-text-color);
       font-family: var(--ha-font-family-body);
@@ -1053,7 +1055,7 @@ origami_graph:
       font-variant-numeric: tabular-nums;
       /* A thin edge of the card's background keeps a value readable where a line or a bar runs through it */
       paint-order: stroke;
-      stroke: var(--ha-card-background, var(--card-background-color));
+      stroke: var(--org-graph-halo, var(--ha-card-background, var(--card-background-color)));
       stroke-width: 3px;
       stroke-linejoin: round;
     }
