@@ -1454,6 +1454,8 @@ The Graph module draws the history of one or more entities on a button card: num
 | `min`, `max` | | Fixed ends of the scale for the first line's unit, and `max` for bars without a line. Without them, the scale fits the values. |
 | `grid` | `false` | Guide lines at round values, each with its value, and one at each midnight. A list, such as `[40, 60]`, draws them at these values. |
 | `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
+| `band` | | A soft area behind the lines from one value to another, such as a good range with `from: 40` and `to: 60`, and an optional `name` small at its start. The scale always shows the whole area. |
+| `values` | `false` | Each line's newest value stands at its end, on a soft label in the line's color. Labels that would touch move apart. |
 | `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
 | `fill` | `fade` | `fade`, `solid` or `none`, for the area under the first line. |
 | `line` | `true` | The line on top of the area. |
@@ -1461,8 +1463,9 @@ The Graph module draws the history of one or more entities on a button card: num
 | `smooth` | `true` | With `false`, the line runs straight from value to value. |
 | `animate` | `false` | Draws the graph in from the left when it appears. |
 | `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. |
+| `tabs` | | Tabs in a bar below the graph. Each tab has a `name`, an `icon` and any of the options above, such as other `entities` or another `band`, which take the place of the card's own while it shows. Only below the content. |
 
-Bars show the share of each time step that the entity was on, or its mean value, each as tall as its value against the highest bar. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted.
+Bars show the share of each time step that the entity was on, or its mean value, each as tall as its value against the highest bar. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted. A card without an icon, a name and sub-buttons is only as tall as its graph, such as a graph under a heading.
 
 > **Colors.** The color names are the theme's own shades, so `orange` or `blue` stays as soft as the rest of Origami. A CSS color, such as `#C0935F`, works too.
 
@@ -1494,6 +1497,31 @@ origami_graph:
       color: amber
     - from: 14
       color: red
+```
+
+Inside and outside in one card, with a tab for the temperature and one for the humidity, each with its good range behind the lines:
+
+```yaml
+origami_graph:
+  fill: none
+  values: true
+  tabs:
+    - name: Temperature
+      icon: mdi:thermometer
+      entities:
+        - sensor.living_room_temperature
+        - sensor.outdoor_temperature
+      band:
+        from: 19
+        to: 25
+    - name: Humidity
+      icon: mdi:water-percent
+      entities:
+        - sensor.living_room_humidity
+        - sensor.outdoor_humidity
+      band:
+        from: 40
+        to: 60
 ```
 
 The load of the server's last day behind a card, with processor and memory as its legend:

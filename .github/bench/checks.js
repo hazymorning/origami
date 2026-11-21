@@ -120,7 +120,8 @@ window.__check = async () => {
       const haCard = el.shadowRoot?.querySelector('ha-card');
       if (!haCard) continue;
       const card = el.config.entity ?? el.config.name ?? el.config.card_type;
-      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"]')) {
+      // The Graph module's tabs are a segmented bar of their own
+      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"], .org-graph-tabs, .org-graph-tab')) {
         if (!visible(c)) continue;
         judge(c, getComputedStyle(c), place(c, haCard), `${card} ${label(c)}`);
         // A segmented bar draws its active part on the segment's ::before, which lies on the segment's own fill. A line drawn there, such as a list's divider, is no control.

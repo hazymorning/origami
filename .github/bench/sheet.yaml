@@ -305,6 +305,18 @@ sections:
           bottom:
             - {name: Living, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.living_room}}}
             - {name: Kitchen, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.kitchen_speaker}}}
+      # A graph with tabs below it. The bar keeps the card's padding, and the shown tab lies on the bar's gray track, so it has the chip shadow.
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: sensor.living_room_temperature
+        name: Living room
+        icon: mdi:sofa
+        modules: [origami_base, origami_graph]
+        origami_graph:
+          tabs:
+            - {name: Temperature, icon: mdi:thermometer, entities: [sensor.living_room_temperature]}
+            - {name: Humidity, icon: mdi:water-percent, entities: [sensor.living_room_humidity]}
       # A grid whose named group stays cells, as a vacuum's room buttons do
       - type: custom:bubble-card
         card_type: sub-buttons
