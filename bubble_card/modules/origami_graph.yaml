@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.5.1"
+  version: "1.6.0"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or softly behind it. Colors, a fixed scale, guide lines, a good range, the newest values and tabs each take one option."
@@ -602,7 +602,9 @@ origami_graph:
           Object.assign(grp, { lo, hi, y: (v) => top + (1 - (v - lo) / (hi - lo || 1)) * (H - top - bottom) });
         }
         const right = points === "none" ? 1 : r + 2;
-        const x = (t) => ((t - from) / span) * (W - right);
+        // The drawing is as wide as the card, less the column of values at its end
+        let plotW = W;
+        const x = (t) => ((t - from) / span) * (plotW - right);
 
         // Colors by value, each from its value up: the temperature colors of the room cards, in Celsius, or own colors. Below
         // the first own color, a value keeps the graph's own look, written as null. Own colors can also name a state, such as heating.
@@ -634,6 +636,24 @@ origami_graph:
         // Values: a temperature with one decimal, small numbers with one, and the unit after the value
         const digitsOf = (v, unit) => (/°|F|C/.test(unit) || (Math.abs(v) < 10 && v % 1) ? 1 : 0);
         const label = (v, unit, digits) => g.ctx.num(hass, v, digits) + (/°/.test(unit) ? "°" : unit === "%" ? " %" : unit ? " " + unit : "");
+
+        // With values, each line's newest value stands in a column at the end of the graph, in the line's color, and the drawing
+        // narrows by that column, so a value never covers a line
+        const tags = cfg.values === true ? lines.map((l) => {
+          const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
+          if (!real.length) return null;
+          const v = real[real.length - 1][1];
+          const sc = stopsOf(l, l.unit);
+          const c = (sc ? colorAt(sc, v) : null) ?? hue(l.color);
+          const text = make("text", { class: "org-graph-value", x: 0, y: 0, "dominant-baseline": "central" }, c ? { color: c } : {});
+          text.textContent = label(v, l.unit, digitsOf(v, l.unit));
+          labelsG.append(text);
+          let b = null;
+          try { b = text.getBBox(); } catch (e) { b = null; }
+          return { el: text, y: l.grp.y(v), w: b?.width || text.textContent.length * 7, h: b?.height || 16 };
+        }).filter(Boolean) : [];
+        const space = parseFloat(getComputedStyle(el).getPropertyValue("--ha-space-2")) || 8;
+        if (tags.length) plotW = Math.max(W - Math.ceil(Math.max(...tags.map((t) => t.w))) - space, W / 2);
 
         // The fill fades from the top of the drawing to the bottom edge
         const fade = make("linearGradient", { id: uid + "fade", gradientUnits: "userSpaceOnUse", x1: 0, y1: top, x2: 0, y2: H });
@@ -706,10 +726,10 @@ origami_graph:
           for (const v of vals) {
             const at = ruler.y(v);
             if (at < 9 || at > H - 2) continue;
-            guidesG.append(make("line", { class: "org-graph-guide", x1: 0, y1: f(at), x2: W, y2: f(at) }));
+            guidesG.append(make("line", { class: "org-graph-guide", x1: 0, y1: f(at), x2: f(plotW), y2: f(at) }));
             if (Math.abs(at - last) < 12) continue;
             last = at;
-            const text = make("text", { class: "org-graph-label", "data-guide": "", x: f(end ? W - inset : inset), y: f(at - 4), "text-anchor": end ? "end" : "start" });
+            const text = make("text", { class: "org-graph-label", "data-guide": "", x: f(end ? plotW - inset : inset), y: f(at - 4), "text-anchor": end ? "end" : "start" });
             text.textContent = label(v, ruler.unit, digits ?? digitsOf(v, ruler.unit));
             labelsG.append(text);
           }
@@ -718,7 +738,7 @@ origami_graph:
         if (band && lines.length) {
           const by = lines[0].grp.y;
           const top = by(band.hi), low = by(band.lo);
-          guidesG.prepend(make("rect", { class: "org-graph-band", x: 0, y: f(top), width: W, height: f(Math.max(low - top, 1)) }));
+          guidesG.prepend(make("rect", { class: "org-graph-band", x: 0, y: f(top), width: f(plotW), height: f(Math.max(low - top, 1)) }));
           if (band.name) {
             const text = make("text", { class: "org-graph-label", "data-guide": "", x: f(inset), y: f(Math.min(top + 12, low - 3)), "text-anchor": "start" });
             text.textContent = String(band.name);
@@ -776,7 +796,7 @@ origami_graph:
             const d = curve(run);
             // The fill of the newest run reaches the right edge, under the last value's dot
             const [ex, ey] = run[run.length - 1];
-            const edge = live && run === runs[runs.length - 1] ? "L" + W + "," + f(ey) + "L" + W + "," + H : "L" + f(ex) + "," + H;
+            const edge = live && run === runs[runs.length - 1] ? "L" + f(plotW) + "," + f(ey) + "L" + f(plotW) + "," + H : "L" + f(ex) + "," + H;
             if (fill !== "none" && k === 0) fillsG.append(make("path", { class: "org-graph-fill", d: d + edge + "L" + f(run[0][0]) + "," + H + "Z", ...(fill === "fade" ? { mask: "url(#" + uid + "mask)" } : {}) }, { fill: area }));
             if (showLine) linesG.append(make("path", { class: "org-graph-line" + (k ? " org-graph-line-" + Math.min(k, 2) : ""), d }, { stroke: paint }));
           }
@@ -797,7 +817,7 @@ origami_graph:
             for (const [[t, v], below] of [[hi, false], [lo, true]]) {
               dot(t, v, "org-graph-point", 2);
               const tx = x(t), anchor = tx < 24 ? "start" : tx > W - 24 ? "end" : "middle";
-              const text = make("text", { class: "org-graph-label", x: f(anchor === "start" ? Math.max(tx, inset) : anchor === "end" ? Math.min(tx, W - inset) : tx), y: f(below ? y(v) + 15 : y(v) - 8), "text-anchor": anchor });
+              const text = make("text", { class: "org-graph-label", x: f(anchor === "start" ? Math.max(tx, inset) : anchor === "end" ? Math.min(tx, plotW - inset) : tx), y: f(below ? y(v) + 15 : y(v) - 8), "text-anchor": anchor });
               text.textContent = label(v, l.unit, digitsOf(v, l.unit));
               labelsG.append(text);
             }
@@ -811,40 +831,15 @@ origami_graph:
           }
         });
 
-        // With values, each line's newest value stands at the right edge, at its own height, on a soft label in the line's color
-        // that covers the line beneath it. Labels that would touch move apart, and a guide value or an extreme under one gives way.
-        if (cfg.values === true) {
-          const tags = lines.map((l, k) => {
-            const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
-            if (!real.length) return null;
-            const v = real[real.length - 1][1];
-            const sc = stopsOf(l, l.unit);
-            const c = (sc ? colorAt(sc, v) : null) ?? hue(l.color);
-            return { y: l.grp.y(v), text: label(v, l.unit, digitsOf(v, l.unit)), color: c };
-          }).filter(Boolean).sort((a, b) => a.y - b.y);
-          const h = 18, gap = 2;
-          for (let i = 1; i < tags.length; i++) tags[i].y = Math.max(tags[i].y, tags[i - 1].y + h + gap);
-          const over = tags.length ? tags[tags.length - 1].y + h / 2 - H : 0;
+        // The values stand at the height of their lines' ends, and values that would touch move apart
+        if (tags.length) {
+          tags.sort((a, b) => a.y - b.y);
+          for (let i = 1; i < tags.length; i++) tags[i].y = Math.max(tags[i].y, tags[i - 1].y + (tags[i - 1].h + tags[i].h) / 2);
+          const over = tags[tags.length - 1].y + tags[tags.length - 1].h / 2 - H;
           if (over > 0) tags.forEach((t) => (t.y -= over));
-          const boxes = [];
           for (const t of tags) {
-            const cy = Math.max(t.y, h / 2);
-            const pill = make("g", { class: "org-graph-value" }, t.color ? { color: t.color } : {});
-            const text = make("text", { x: f(W - 8), y: f(cy + 4), "text-anchor": "end" });
-            text.textContent = t.text;
-            pill.append(text);
-            labelsG.append(pill);
-            let b = null;
-            try { b = text.getBBox(); } catch (e) { b = null; }
-            const w = b && b.width ? b.width : t.text.length * 6.5;
-            const box = { x: W - 8 - w - 8, y: cy - h / 2, width: w + 16, height: h };
-            pill.insertBefore(make("rect", { x: f(box.x), y: f(box.y), width: f(box.width), height: h, rx: h / 2 }), text);
-            boxes.push(box);
-          }
-          for (const el of [...labelsG.querySelectorAll(".org-graph-label")]) {
-            let b = null;
-            try { b = el.getBBox(); } catch (e) { b = null; }
-            if (b && boxes.some((e) => b.x < e.x + e.width + 2 && e.x < b.x + b.width + 2 && b.y < e.y + e.height && e.y < b.y + b.height)) el.remove();
+            t.el.setAttribute("x", f(plotW + space));
+            t.el.setAttribute("y", f(Math.max(t.y, t.h / 2)));
           }
         }
 
@@ -896,8 +891,8 @@ origami_graph:
       --org-graph-key: color-mix(in srgb, var(--primary-text-color) 45%, transparent);
       /* The tabs are a tray of keys, as a small switch of Button is: keys as tall as a button, with 8 px of track around them. Base's sub_button_height sets the keys' height. */
       --org-graph-tab-h: calc(${card._org.opts?.sub || "var(--control-height-icon)"} + var(--ha-space-2));
-      ${card._org.opts?.frameless ? `/* On a frameless card, the graph stands on the page, so its labels get no edge of the card's background */
-      --org-graph-halo: transparent;` : ""}
+      ${card._org.opts?.frameless ? `/* On a frameless card, the graph stands on the page or the pop-up, so its labels get an edge of that color */
+      --org-graph-halo: var(--org-page, var(--primary-background-color));` : ""}
     }
     ha-card .org-graph {
       position: absolute;
@@ -942,7 +937,7 @@ origami_graph:
         transition: none;
       }
     }
-    /* The tabs are a segmented switch: a gray track, and the shown tab filled like a toggle that is on, with the chip shadow */
+    /* The tabs are a tray: a gray track with the names of the tabs, and the shown tab only bolder and at full strength */
     ha-card .org-graph-tabs {
       display: flex;
       box-sizing: border-box;
@@ -966,9 +961,10 @@ origami_graph:
       border: none;
       border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio) - var(--ha-space-2));
       background: transparent;
-      color: var(--secondary-text-color);
+      color: var(--primary-text-color);
+      opacity: var(--opacity-muted);
       font-family: var(--ha-font-family-body);
-      font-size: var(--ha-font-size-m);
+      font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-medium);
       cursor: pointer;
       --mdc-icon-size: var(--icon-size-2xs);
@@ -980,9 +976,7 @@ origami_graph:
       white-space: nowrap;
     }
     ha-card .org-graph-tab[aria-pressed="true"] {
-      background: var(--fill-active);
-      box-shadow: var(--tile-chip-shadow);
-      color: var(--text-color-active);
+      opacity: 1;
       font-weight: var(--ha-font-weight-bold);
     }
     ha-card:has(.org-graph.background) .bubble-wrapper > :is(.bubble-content-container, .bubble-sub-button-container, .bubble-sub-button-bottom-container, .bubble-buttons-container) {
@@ -1031,19 +1025,14 @@ origami_graph:
       opacity: .25;
     }
 
-    ha-card .org-graph-value {
-      color: var(--secondary-text-color);
-    }
     ha-card .org-graph-band {
       fill: color-mix(in srgb, var(--primary-text-color) 5%, transparent);
     }
-    ha-card .org-graph-value rect {
-      fill: color-mix(in srgb, currentColor 14%, var(--ha-card-background, var(--card-background-color)));
-    }
-    ha-card .org-graph-value text {
+    ha-card .org-graph-value {
+      color: var(--secondary-text-color);
       fill: currentColor;
       font-family: var(--ha-font-family-body);
-      font-size: var(--ha-font-size-xs);
+      font-size: var(--ha-font-size-s);
       font-weight: var(--ha-font-weight-bold);
       font-variant-numeric: tabular-nums;
     }

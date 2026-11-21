@@ -1390,6 +1390,8 @@ To leave a column empty, give the cells after the gap the `css_class` of their c
 
 A cell whose entity is on shows its icon in the state color on a tint, such as a heating thermostat. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed. A cell without a tap action opens its entity's more-info dialog, and `action: more-info` with an `entity` opens another one, such as the room's thermostat.
 
+A table wider than its card scrolls sideways, and its first column stays in place. While more columns follow, the table fades out at its end.
+
 ```yaml
 type: custom:bubble-card
 card_type: sub-buttons
@@ -1455,7 +1457,7 @@ The Graph module draws the history of one or more entities on a button card: num
 | `grid` | `false` | Guide lines at round values, each with its value, and one at each midnight. A list, such as `[40, 60]`, draws them at these values. |
 | `extrema` | `false` | Marks the highest and the lowest value of the first line, with their values. |
 | `band` | | A soft area behind the lines from one value to another, such as a good range with `from: 40` and `to: 60`, and an optional `name` small at its start. The scale always shows the whole area. |
-| `values` | `false` | Each line's newest value stands at its end, on a soft label in the line's color. Labels that would touch move apart. |
+| `values` | `false` | Each line's newest value stands in a column at the end of the graph, in the line's color, and the graph narrows by that column. Values that would touch move apart. |
 | `height` | One tile and 16 px below, `50%` behind | The height of the graph. |
 | `fill` | `fade` | `fade`, `solid` or `none`, for the area under the first line. |
 | `line` | `true` | The line on top of the area. |
@@ -1600,7 +1602,7 @@ sub_button:
         hidden: ${states('input_select.music_view') !== 'Music'}
 ```
 
-`gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack then has twice the gap above it and one gap below. Without `gap`, Bubble Card's own gap applies.
+`gap` sets the space between the cards of a vertical stack, such as `var(--ha-space-4)`. A Header in that stack keeps the same space above and below its title as with Bubble Card's own gap. Without `gap`, Bubble Card's own gap applies.
 
 `mini_popups` gives the pop-up mini pop-ups, each with a name and a list of cards. A key anywhere in the pop-up opens one with `tap_action: {action: fire-dom-event, mini_popup: <name>}`. It opens next to the key, above it where it fits, as wide as the pop-up's cards or its own `width`. Like a menu, it has the card background and grows out of its key over the dimmed pop-up, and a tap beside it or Esc closes it. A card with Base's `hidden` takes no space while it's hidden, and a Header at the top has no space above its title. A mini pop-up can stand in for a view that a helper switches, such as a speaker's volume:
 

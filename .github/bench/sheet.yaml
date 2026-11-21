@@ -317,6 +317,29 @@ sections:
           tabs:
             - {name: Temperature, icon: mdi:thermometer, entities: [sensor.living_room_temperature]}
             - {name: Humidity, icon: mdi:water-percent, entities: [sensor.living_room_humidity]}
+      # A table wider than its card scrolls sideways, and its first column stays in place
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_table]
+        sub_button:
+          main: []
+          bottom:
+            - name: Living
+              group:
+                - {entity: sensor.living_room_temperature, name: Living room, show_name: true}
+                - {entity: sensor.living_room_temperature, icon: mdi:thermometer, show_state: true}
+                - {entity: sensor.living_room_humidity, icon: mdi:water-percent, show_state: true}
+                - {entity: climate.bedroom, show_state: true}
+                - {entity: light.kitchen, name: Kitchen lamp, show_name: true}
+                - {entity: fan.bedroom, name: Bedroom fan, show_name: true}
+            - name: Office
+              group:
+                - {entity: switch.printer, name: Office, show_name: true}
+                - {entity: sensor.living_room_temperature, icon: mdi:thermometer, show_state: true}
+                - {entity: sensor.living_room_humidity, icon: mdi:water-percent, show_state: true}
+                - {entity: climate.bedroom, show_state: true}
+                - {entity: light.living_room, name: Desk lamp, show_name: true}
+                - {entity: switch.printer, name: Printer, show_name: true}
       # A grid whose named group stays cells, as a vacuum's room buttons do
       - type: custom:bubble-card
         card_type: sub-buttons

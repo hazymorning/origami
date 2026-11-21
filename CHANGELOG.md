@@ -16,6 +16,9 @@
 - The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.
 - Chips in a row of buttons are as tall as the chips in a header and have the same room around their icon, so a row with larger icons no longer looks squeezed.
 - A small switch in a row of buttons, such as the vacuum's suction, has as much room around its segments as the keys in a tray, so the chosen one no longer looks squeezed.
+- With Popup's `gap`, a heading keeps the space above and below it that it has in the room pop-ups, so the server and vacuum pop-ups have a little more room under their headings.
+- A table wider than its card scrolls sideways, and its first column stays in place.
+- A cell that stands out on a gray row of a table has the card background and the chip shadow, as a key in a tray.
 - A new Update module replaces the Origami modules with the ones of the installed release in one tap, from its own card or from a row in a list.
 - The pop-ups' hidden backdrop no longer keeps its blur until the first pop-up closes, which should give phones a little less to do.
 - The weather part now uses Origami Weather 1.7's own layouts: the diorama, the sky instead of the comparison, and a new house. The pictures are built in, and the 3.0 versions keep working.
