@@ -1,0 +1,166 @@
+# The Sky layout. A tap switches between the sky and the next days.
+type: custom:origami-weather
+weather_entity: weather.home
+# Light or dark with the theme, like the rest of the dashboard
+color_mode: theme
+card_height: 168px
+card_padding: '0'
+content_align: between
+sun_moon_x: 75%
+sun_moon_y: 50% 18%
+sun_size: 40
+moon_size: 40
+visibility_fade: true
+card_tap_action:
+  action: toggle
+  entity: origami.forecast
+button_containers:
+  - name: Now
+    layer: middle
+    padding: 22px 22px 0
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'off'
+    buttons:
+      - name: Condition and temperature
+        entity: weather.home
+        style: vertical
+        inner_gap: 10px
+        elements:
+          - type: text
+            size: 14px
+            weight: '500'
+          - type: text
+            attribute: temperature
+            precision: 0
+            format: °
+            size: 52px
+            weight: '700'
+            color: currentColor
+            margin: '-0.2em -0.06em -0.1em -0.05em'
+  - name: Today
+    padding: 0 18px 18px
+    background: true
+    button_padding: 7px 11px 7px 10px
+    button_gap: 8px
+    button_text_size: 14px
+    button_icon_size: 18px
+    button_background_color: 'color-mix(in srgb, var(--origami-card-bg-color, var(--ha-card-background, var(--card-background-color, #fff))) 45%, transparent)'
+    button_blurred_background: true
+    button_shadow: false
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'off'
+    buttons:
+      - name: Today
+        entity: weather.home
+        forecast: daily
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: icon
+            icon: weather
+          - type: text
+            text: Today
+            weight: '500'
+          - type: text
+            attribute: temperature
+            format: °
+            weight: '700'
+            color: currentColor
+  - name: Days
+    position: custom
+    position_anchor: top-left
+    position_x: '0'
+    position_y: '0'
+    custom_width: 100%
+    padding: 38px max(0px, calc(63.5px - 12.5cqw))
+    layout: horizontal-scroll
+    scroll_count: 5
+    row_height: 100%
+    align_items: stretch
+    gap: '0'
+    align: center
+    scroll_fade: true
+    scroll_fade_size: 48px
+    background: true
+    grouped: true
+    border: none
+    blurred_background: true
+    background_blur: 16
+    background_color: 'color-mix(in srgb, var(--origami-card-bg-color, var(--ha-card-background, var(--card-background-color, #fff))) 30%, transparent)'
+    button_style: vertical
+    button_gap: 5px
+    button_text_size: 12px
+    button_icon_size: 28px
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'on'
+    buttons:
+      # Every day after Today repeats it, with its own name and offset
+      - &day
+        name: Today
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 0
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - <<: *day
+        name: Tomorrow
+        forecast_offset: 1
+      - <<: *day
+        name: In 2 days
+        forecast_offset: 2
+      - <<: *day
+        name: In 3 days
+        forecast_offset: 3
+      - <<: *day
+        name: In 4 days
+        forecast_offset: 4
+      - <<: *day
+        name: In 5 days
+        forecast_offset: 5
+      - <<: *day
+        name: In 6 days
+        forecast_offset: 6
+      - <<: *day
+        name: In 7 days
+        forecast_offset: 7
+      - <<: *day
+        name: In 8 days
+        forecast_offset: 8
+      - <<: *day
+        name: In 9 days
+        forecast_offset: 9

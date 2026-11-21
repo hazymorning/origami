@@ -1,0 +1,29 @@
+# The card shows whether the release has newer Origami modules. Update replaces them after a confirmation, and Reload loads them.
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Origami
+icon: mdi:update
+show_state: true
+scrolling_effect: false
+modules:
+  - origami_update
+button_action:
+  tap_action:
+    action: none
+sub_button:
+  main:
+    - name: Update
+      icon: mdi:download
+      show_name: true
+      tap_action:
+        action: fire-dom-event
+        origami_update: install
+        confirmation:
+          text: Replace the Origami modules? Own changes to them are lost.
+    - name: Reload
+      icon: mdi:refresh
+      show_name: true
+      tap_action:
+        action: fire-dom-event
+        origami_update: reload

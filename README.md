@@ -7,19 +7,17 @@
 
 <br>
 
-This is the documentation of a personal Home Assistant dashboard and its parts, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). After many years of fussing over small details, it suddenly just felt right. Most of it was made by hand on a phone, so it's mainly meant for phones.
-
-If just one person used it, it would probably look and work differently. But others in the house use it too, and they shouldn't have to ask how anything works, so the whole thing is shaped around being easy to use. At the same time, a small digital version of a home should feel as welcoming and pleasant as the home itself, which is why design and UI/UX play such a big part too.
+This is the documentation of a personal Home Assistant dashboard and its parts, built around [Bubble Card](https://github.com/Clooos/Bubble-Card). After many years of fussing over small details, it suddenly just felt right.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-dark.webp">
-  <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/hero-light.webp">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero-dark.webp">
+  <img alt="Origami on three phones, with the home view, the music pop-up and the TV remote" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/hero-light.webp">
 </picture>
 
 > [!NOTE]
 > **Setting this up takes a while.** It tries to work with Home Assistant, not around it or on top of it. This means most parts need a module, a helper or a script next to the card, and each part's README lists them. [How Origami is built](#how-origami-is-built) explains this further.
 
-[Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [More](#more)
+[Get started](#get-started) · [Home view](#home-view) · [Pop-ups](#pop-ups) · [Updates](#updates) · [More](#more)
 
 ## Get started
 
@@ -39,11 +37,8 @@ Colors, sizes and shadows for light and dark mode.
      themes: !include_dir_merge_named themes
    ```
 
-2. Open Origami in HACS. If HACS asks to add the repository, select **Add**. Then select **Download**.
-
-   [![Open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami&category=theme)
-
-3. Run [`frontend.reload_themes`](https://my.home-assistant.io/redirect/developer_call_service/?service=frontend.reload_themes) and pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
+2. Open the [Marketplace](https://my.home-assistant.io/redirect/marketplace_browse/), select **Add from link**, enter `hazymorning/origami` and select **Add**. The first time, the Marketplace asks to connect GitHub. Then open Origami and select **Install**.
+3. Pick **Origami** under **Theme** in the [user profile](https://my.home-assistant.io/redirect/profile/).
 
 > **Light and dark.** The theme and the weather card follow the phone's light or dark mode, which most phones change at sunrise and sunset. Staying light or dark all day works too: choose **Light** or **Dark** next to the theme in the user profile.
 
@@ -76,11 +71,11 @@ To load the font from Home Assistant instead of Google, copy [`www/fonts`](https
 
 Most of Origami is made with the wonderful [Bubble Card](https://github.com/Clooos/Bubble-Card) by Clooos. It needs version 3.4 or later, and [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools) to add the modules.
 
-1. Download Bubble Card and Bubble Card Tools in HACS, or update them if they're already there.
+1. Install Bubble Card and Bubble Card Tools in the Marketplace, or update them if they're already there.
 
-   [Open Bubble Card in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
+   [Open Bubble Card in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Clooos&repository=Bubble-Card&category=plugin) · [Open Bubble Card Tools in the Marketplace](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Clooos&repository=Bubble-Card-Tools&category=integration)
 
-2. Restart Home Assistant. If Bubble Card Tools isn't set up yet, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration.
+2. If Bubble Card Tools isn't set up yet, [add it](https://my.home-assistant.io/redirect/config_flow_start/?domain=bubble_card_tools) as an integration. Then reload the page.
 
 </details>
 
@@ -113,12 +108,12 @@ A pop-up stays hidden until a button opens it with **Navigate** to its hash, lik
 
 ## Home view
 
-<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/home-view.webp">
+<img width="800" alt="The home view with the greeting, the weather, favorites, rooms and the navigation bar, and at night with the next days on the weather card, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/home-view.webp">
 
 From top to bottom:
 
 - **[Greeting and notifications](https://github.com/hazymorning/origami/tree/main/dashboard/greeting).** A hello for the time of day, the next event, and whatever needs attention right now.
-- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** A cute little paper landscape, or nearly any other weather card.
+- **[Weather](https://github.com/hazymorning/origami/tree/main/dashboard/weather).** A cute little paper landscape that shows the next days on a tap, or nearly any other weather card.
 - **[Favorites](https://github.com/hazymorning/origami/tree/main/dashboard/favorites).** Everyday shortcuts, and timers or devices while they run.
 - **[Rooms](https://github.com/hazymorning/origami/tree/main/dashboard/rooms).** How each room is doing, and the way into its pop-up.
 - **[Climate table](https://github.com/hazymorning/origami/tree/main/dashboard/climate-table).** All rooms side by side, to see at once where it's too warm, too cold or a window is open.
@@ -126,7 +121,7 @@ From top to bottom:
 
 ### Menu
 
-<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
+<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
 Hides Home Assistant's header for good, with a menu in its place if wanted. Home Assistant has no proper way to do this yet, so it takes the Origami Header card. [More](https://github.com/hazymorning/origami/tree/main/dashboard/menu)
 
@@ -134,13 +129,13 @@ Hides Home Assistant's header for good, with a menu in its place if wanted. Home
 
 ### Room
 
-<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/room-pop-up.webp">
+<img width="800" alt="The living room pop-up at midday and the bathroom pop-up late in the evening, each with its media, lights and climate, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/room-pop-up.webp">
 
 A pop-up for each room, with its media, lights and climate. [More](https://github.com/hazymorning/origami/tree/main/dashboard/room)
 
 ### Lights
 
-<img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/lights-pop-up.webp">
+<img width="800" alt="The lights pop-up with the slider for all lamps and the scenes, at midday and late in the evening, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/lights-pop-up.webp">
 
 Every lamp and scene in the home, and one key that turns on the scene for the time of day or turns everything off. [More](https://github.com/hazymorning/origami/tree/main/dashboard/lights)
 
@@ -152,13 +147,13 @@ One music card for all speakers, playing alone or as a group. [More](https://git
 
 ### TV
 
-<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/tv-pop-up.webp">
+<img width="800" alt="The TV pop-up, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/tv-pop-up.webp">
 
 The TV's remote on the phone. [More](https://github.com/hazymorning/origami/tree/main/dashboard/tv)
 
 ### Fan
 
-<img width="800" alt="The fan pop-up at medium speed, and at low speed with the Nature preset, oscillation and its timer running, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/fan-pop-up.webp">
+<img width="800" alt="The fan pop-up at medium speed, and at low speed with the Nature preset, oscillation and its timer running, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/fan-pop-up.webp">
 
 A fan's controls, with a timer that turns it off later. [More](https://github.com/hazymorning/origami/tree/main/dashboard/fan)
 
@@ -170,15 +165,21 @@ Quick access to favorites: other pop-ups, devices, anything really. [More](https
 
 ### Server
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 A look at the server's health, backups and updates. [More](https://github.com/hazymorning/origami/tree/main/dashboard/server)
 
 ### Vacuum
 
-<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/vacuum-pop-up.webp">
+<img width="800" alt="The vacuum pop-up while it cleans, and docked with a full bin, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/vacuum-pop-up.webp">
 
 Cleaning for the whole home or just one room. [More](https://github.com/hazymorning/origami/tree/main/dashboard/vacuum)
+
+## Updates
+
+<img width="800" alt="The update card with two newer modules, and after it replaced them, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/update-card.webp">
+
+The modules of each new release in one tap, from a card of its own or from a row in the server pop-up. [More](https://github.com/hazymorning/origami/tree/main/dashboard/update)
 
 ## More
 
@@ -195,21 +196,6 @@ Bubble Card does the layout, the actions, the pop-ups and the editor. Each part 
 3. A template in the card instead of a template sensor, for a value the card can work out itself.
 4. Home Assistant's helpers and scripts, for what a card can't do alone, like the fan's timer or a thermostat's steps. Scripts get their entities from the card and work in any home without edits.
 5. A card of its own, only for a gap nothing else fills, like Origami Weather, Origami Notifications and Origami Header.
-
-</details>
-
-<details>
-<summary><b>Coming from 2.0</b></summary>
-
-<br>
-
-HACS only updates the theme. The modules were copied in by hand, so the new ones are pasted the same way.
-
-1. Update Origami and Bubble Card in HACS.
-2. Paste all the new modules over the old ones.
-3. Make the small change that the [upgrade steps](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md#upgrading) list for a few cards.
-
-After that, the 2.0 dashboard keeps working, and its cards can be replaced with the new parts one at a time. The [changelog](https://github.com/hazymorning/origami/blob/main/CHANGELOG.md) lists which part replaces which card, and what looks different on the old ones.
 
 </details>
 
@@ -232,8 +218,8 @@ A few lines are usually enough: `primary-color` and `accent-color` in each mode 
 <br>
 
 - **Origami isn't in the theme list.** Add the `themes` line from [Get started](#get-started) to `configuration.yaml` and restart Home Assistant.
-- **HACS can't find Origami.** The **Open in HACS** button under [Get started](#get-started) adds the repository to HACS.
-- **A card says "Custom element doesn't exist".** Download the card in HACS and reload the page. In the Companion app, select **Reset frontend cache** in the app settings.
+- **The Marketplace can't find Origami.** Origami isn't in its catalog, so it comes in with **Add from link**, as under [Get started](#get-started).
+- **A card says "Custom element doesn't exist".** Install the card in the Marketplace and reload the page. In the Companion app, select **Reset frontend cache** in the app settings.
 - **The font doesn't change.** Check that the stylesheet is under [Resources](https://my.home-assistant.io/redirect/lovelace_resources/), then reload the page.
 - **A Bubble card looks plain.** Check that Bubble Card Tools is added as an integration and that the card's modules are under **Modules**, then **My Modules**. Then reload the page.
 - **A tap doesn't open a pop-up.** The pop-up has to be in the same view as the button, with a `hash` that matches the button's navigation path, like `#popup_tv`.

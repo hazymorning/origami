@@ -3,6 +3,13 @@
   const sc = await (await fetch('/scenario.json')).json();
   // Other cards that the scenario loads, from the folder next to it
   for (const r of sc.resources || []) await import('/local/' + r.split('/').pop());
+  // The weather card's moon in the scenario's phase, from 0 for a new moon to 0.5 for a full one, whatever the date
+  if (sc.moon !== undefined && customElements.get('origami-weather')) customElements.get('origami-weather')._moonPhase = () => sc.moon;
+  // As Home Assistant does once a confirmation is accepted, a tap with fire-dom-event reaches the page as ll-custom
+  window.addEventListener('hass-action', (e) => {
+    const a = e.detail?.config?.[(e.detail?.action ?? 'tap') + '_action'];
+    if (a?.action === 'fire-dom-event') window.dispatchEvent(new CustomEvent('ll-custom', { detail: a }));
+  });
   const lang = sc.language || 'en';
   const now = Date.now();
   const states = {};
@@ -64,6 +71,13 @@
     callService: async () => {},
     callApi: async () => ({}),
     callWS: async (msg) => {
+      // Bubble Card Tools in memory, with the scenario's modules
+      if (sc.tools && String(msg?.type).startsWith('bubble_card_tools/')) {
+        if (msg.type === 'bubble_card_tools/list_modules') return { files: Object.keys(sc.tools).map((name) => ({ name, updated_at: 1 })) };
+        if (msg.type === 'bubble_card_tools/read_module') return { name: msg.name, content: sc.tools[msg.name] };
+        if (msg.type === 'bubble_card_tools/read_all_modules') return { modules: (msg.names || []).map((name) => ({ name, content: sc.tools[name] })) };
+        if (msg.type === 'bubble_card_tools/write_module') { sc.tools[msg.name] = msg.content; return { status: 'ok' }; }
+      }
       if (msg?.type === 'frontend/get_icons') return { resources: msg.category === 'entity_component' ? icons : {} };
       if (sc.messages && msg?.type in sc.messages) return sc.messages[msg.type];
       throw { code: 'unknown_command', message: 'Unknown command.' };

@@ -115,6 +115,7 @@ cards:
             action: navigate
             navigation_path: '#popup_music'
         sub_button:
+          bottom_layout: rows
           main:
             - icon: mdi:play
               show_background: true
@@ -149,7 +150,64 @@ cards:
             - entity: media_player.bathroom
               sub_button_type: slider
               always_visible: true
-        rows: '2.2'
+        rows: auto
+      # Announcements: each chip says its message on the room's speaker
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          scroll: true
+          chips: true
+          icon_size: var(--icon-size-xs)
+        sub_button:
+          main: []
+          bottom:
+            - name: Dinner's ready
+              icon: mdi:silverware-fork-knife
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: tts.speak
+                target:
+                  entity_id: tts.google_translate_en_com
+                data:
+                  media_player_entity_id: media_player.bathroom
+                  message: Dinner's ready.
+            - name: Leaving soon
+              icon: mdi:door-open
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: tts.speak
+                target:
+                  entity_id: tts.google_translate_en_com
+                data:
+                  media_player_entity_id: media_player.bathroom
+                  message: We're leaving in five minutes.
+            - name: Parcel
+              icon: mdi:package-variant-closed
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: tts.speak
+                target:
+                  entity_id: tts.google_translate_en_com
+                data:
+                  media_player_entity_id: media_player.bathroom
+                  message: A parcel just arrived.
+            - name: Bedtime
+              icon: mdi:bed-outline
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: tts.speak
+                target:
+                  entity_id: tts.google_translate_en_com
+                data:
+                  media_player_entity_id: media_player.bathroom
+                  message: It's time for bed.
 
       # Lights: the header counts the lamps of the group that are on, and a tap opens the group's dialog with each lamp.
       # All switches them together

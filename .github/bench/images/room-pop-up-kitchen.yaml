@@ -1,0 +1,26 @@
+# The kitchen at midday with tonight's dinner, music and the counter light on
+kind: phone
+home: true
+mode: light
+open: '#popup_kitchen'
+cards:
+- file: room/kitchen.yaml
+templates:
+- {match: sensor.dinner_tonight, result: Vegetable miso ramen}
+states:
+  sensor.dinner_tonight:
+    state: Vegetable miso ramen
+    attributes: {friendly_name: Dinner tonight, description: 'With corn, edamame and bamboo', entity_picture: /local/dinner.jpg}
+  media_player.kitchen:
+    state: playing
+    attributes: {friendly_name: Kitchen, volume_level: 0.28, media_title: Slow Morning, media_artist: Paper Lanterns, media_content_type: music, entity_picture: /local/cover-1.jpg, source: WiFi, group_members: [media_player.kitchen]}
+  light.kitchen:
+    state: 'on'
+    attributes: {friendly_name: Counter, brightness: 179, supported_color_modes: [brightness], color_mode: brightness}
+  automation.kitchen_motion_light: {state: 'on', attributes: {friendly_name: Kitchen motion light}}
+  sensor.kitchen_temperature: {state: '22.3', attributes: {unit_of_measurement: °C, device_class: temperature, friendly_name: Kitchen temperature}}
+  sensor.kitchen_humidity: {state: '58', attributes: {unit_of_measurement: '%', device_class: humidity, friendly_name: Kitchen humidity}}
+  climate.kitchen:
+    state: heat
+    attributes: {friendly_name: Kitchen, hvac_action: idle, hvac_modes: ['off', heat], temperature: 21, current_temperature: 22.3, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
+  switch.kitchen_air_purifier: {state: 'on', attributes: {friendly_name: Air purifier}}

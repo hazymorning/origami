@@ -1,6 +1,7 @@
 // Renders scenarios with the modules and the theme of a commit and with the ones in the working tree, and compares what each card
 // draws: the computed style of every element and of its ::before and ::after, its own text, its icon and the pixels of each section.
-// A change that should look the same, such as a cleanup, passes only when every render is the same.
+// A change that should look the same, such as a cleanup, passes only when every render is the same. Each scenario runs at its own
+// time in UTC, as in bench.mjs, so a graph finds the history that the scenario gives it.
 //
 //   node .github/bench/compare.mjs [--ref <commit>] [--rtl] [--shots <folder>] <scenario.yaml ...>
 //     The commit is HEAD unless --ref names another one. With --shots, the sections that differ are saved there as pictures.
@@ -215,8 +216,8 @@ for (const f of files) {
     const got = {};
     for (const side of ['A', 'B']) {
       servers[side].scenario = scenario; servers[side].dir = path.dirname(path.resolve(f));
-      const context = await browser.newContext({ deviceScaleFactor: 1, viewport: { width: 1200, height: 1600 }, colorScheme: mode });
-      await context.clock.setFixedTime(new Date('2026-10-29T12:00:00Z'));
+      const context = await browser.newContext({ deviceScaleFactor: 1, viewport: { width: 1200, height: 1600 }, colorScheme: mode, timezoneId: 'UTC' });
+      await context.clock.setFixedTime(new Date(scenario.time ?? '2026-10-29T12:00:00Z'));
       const p = await context.newPage();
       const errors = [];
       p.on('pageerror', (e) => errors.push(e.message));

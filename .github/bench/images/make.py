@@ -4,13 +4,16 @@
 
 Without names, it makes every image that has a file here. It needs Python with PyYAML and Pillow,
 and the bench set up as .github/bench/bench.mjs says. The other cards and the status bar's font are
-downloaded once into .github/bench/.cache.
+downloaded once into .github/bench/.cache, and again when their address changes, such as for a new version.
+The sky's and the house's images are Origami Weather's own, from its README, so no file here makes them. weather.yaml
+makes the diorama's, with the next days open at night.
 
 home.yaml has the example home: its states, the answers to templates and messages, and the home view,
 which stands behind every pop-up. Each <name>.yaml makes images/v3/<name>.webp, with its light and dark mode
 side by side, and has:
 
-  kind: panel for a card, or phone for a pop-up or the menu on a phone
+  kind: panel for a card on its page, card for a card alone, cut at its edges like Origami Weather's own images,
+    or phone for a pop-up or the menu on a phone
   cards: the cards, each a card or {file: <path under dashboard/>, replace: {text: text}, with: {key: value}},
     where replace changes the file's text, such as a room's name, and with sets or deletes top-level keys.
   drop: the files of cards to leave out, such as the climate table that another file's cards have
@@ -23,12 +26,14 @@ side by side, and has:
   time: the clock, and clock: the time in the status bar. Each image's status bar moves home.yaml's clock by a few minutes and
     has its own battery, Wi-Fi and signal, so no two look the same. An image's own clock, battery, wifi (1 to 3) or cell (1 to 4)
     sets one exactly.
-  click, preview, admin, scale, seed, advance: passed to the bench, as bench.mjs describes
+  click, preview, admin, scale, seed, advance, moon, tools: passed to the bench, as bench.mjs describes
   width: the width of a panel. trim: space in px to cut from a panel's top, such as above a heading
   bottom: a panel shows only this many px from the bottom of a phone-sized page, for a bar at its edge
   cut: a phone shows only this many px from its top, and bottom only this many px from its bottom, flush with the image's edge
   light and dark: any of these keys for one mode only, so the dark image can show another moment than the light one.
     home.yaml has them too, for the whole home.
+  mode: light or dark makes an image of that mode alone, such as one room in the room pop-up's README
+  from: another image's file, whose keys come first, such as the room pop-up's for one of its rooms
 
 hero.yaml makes images/v3/hero-light.webp and hero-dark.webp, the README's first image. Each of its phones takes another
 image's file with from and changes its keys in the same way, and hero.mjs puts the screens on phones in 3D beside the
@@ -36,7 +41,7 @@ headline and the line. three.js is downloaded once into .github/bench/.cache too
 """
 import json, os, random, re, shutil, subprocess, sys, urllib.request
 import yaml
-from PIL import Image
+from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '../../..'))
@@ -44,18 +49,20 @@ CACHE = os.path.join(HERE, '../.cache')
 OUT = os.path.join(REPO, 'images/v3')
 # The other cards that the parts use, in the versions the dashboard was built with
 CARDS = {
-    'origami-weather.js': 'https://raw.githubusercontent.com/hazymorning/origami_weather/V1.6.1/dist/origami-weather.js',
     'origami-notifications.js': 'https://raw.githubusercontent.com/hazymorning/origami_notifications/v1.6.0/dist/origami-notifications.js',
     'origami-header.js': 'https://raw.githubusercontent.com/hazymorning/origami_header/v0.4.3/origami-header.js',
     'navbar-card.js': 'https://github.com/joseluis9595/lovelace-navbar-card/releases/download/v1.8.0/navbar-card.js',
-    'plotly-graph-card.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-graph-card.js',
-    'card-BgJGmfH_.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/card-BgJGmfH_.js',
-    'rolldown-runtime-B0Z9INg1.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/rolldown-runtime-B0Z9INg1.js',
-    'plotly-DHew52Zl.js': 'https://github.com/dbuezas/lovelace-plotly-graph-card/releases/download/v4.0.2/plotly-DHew52Zl.js',
     'status-font.woff2': 'https://fonts.gstatic.com/s/googlesans/v76/4UasrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RPjIUvQ.woff2',
 }
+# Origami Weather, with the parts and the diorama's pictures that it loads itself from its own folder
+WEATHER = 'https://raw.githubusercontent.com/hazymorning/origami_weather/V1.7/dist/'
+WEATHER_PARTS = ['chunk-5CNMYL65.js', 'image-assets-birds-Z4ZU72J5.js', 'image-assets-clouds-HYH5R5U7.js', 'image-assets-home-XH2BCB2O.js',
+                 'image-assets-mist-VNQVJN3V.js', 'image-assets-planes-H3FJKFTA.js', 'layout-presets-S2LNF6XF.js', 'origami-weather-editor-R5QL4VJW.js']
+DIORAMA = ['sunny', 'partlycloudy', 'cloudy', 'fog', 'rainy', 'pouring', 'lightning', 'lightning-rainy', 'hail', 'snowy', 'snowy-rainy',
+           'windy', 'windy-variant', 'clear-night', 'exceptional']
+CARDS.update({n: WEATHER + n for n in ['origami-weather.js', *WEATHER_PARTS, *(f'diorama/{m}/{w}.webp' for m in ('light', 'dark') for w in DIORAMA)]})
 # Parts of a card that the card loads itself
-CHUNKS = {'card-BgJGmfH_.js', 'rolldown-runtime-B0Z9INg1.js', 'plotly-DHew52Zl.js'}
+CHUNKS = {*WEATHER_PARTS}
 # three.js, which draws the hero's phones
 THREE_JS = 'https://raw.githubusercontent.com/mrdoob/three.js/r170/'
 THREE = {
@@ -76,9 +83,13 @@ def load(path):
 def fetch():
     for name, url in [*CARDS.items(), *((n, THREE_JS + p) for n, p in THREE.items())]:
         path = os.path.join(CACHE, name)
-        if not os.path.exists(path):
+        # Next to each file lies its address, so a file whose address changed is downloaded again
+        source = path + '.url'
+        if not os.path.exists(path) or not os.path.exists(source) or open(source).read() != url:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             urllib.request.urlretrieve(url, path)
+            with open(source, 'w') as f:
+                f.write(url)
 
 
 def card(c):
@@ -164,6 +175,18 @@ def status(name, mode, spec, keys):
     return out
 
 
+def alone(im, scale):
+    """A card alone, cut at its edges with the theme's round corners, as Origami Weather's own images show its cards.
+    The bench's section pads the card by 16 px, and the theme's cards have a radius of 22 px."""
+    pad, radius = 16 * scale, 22 * scale
+    im = im.crop((pad, pad, im.width - pad, im.height - pad)).convert('RGBA')
+    # The corners are drawn four times as large and scaled down, so their edge is smooth
+    mask = Image.new('L', (im.width * 4, im.height * 4), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, mask.width - 1, mask.height - 1), radius * 4, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    return im
+
+
 def frame(spec, work):
     with open(os.path.join(work, 'frame.json'), 'w') as f:
         json.dump(spec, f)
@@ -177,6 +200,7 @@ def folder(work):
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(work)
     for n in CARDS:
+        os.makedirs(os.path.dirname(os.path.join(work, n)), exist_ok=True)
         os.symlink(os.path.join(CACHE, n), os.path.join(work, n))
     for n in os.listdir(os.path.join(HERE, 'files')):
         os.symlink(os.path.join(HERE, 'files', n), os.path.join(work, n))
@@ -198,7 +222,7 @@ def shoot(mode, home, files, work, phone_page):
         # A phone page is a sections view on a phone, which pads its sides as Home Assistant does
         'sections': [{'id': 'shot', 'width': PHONE['width'] if phone_page else keys.get('width', 396), 'cards': cards, **({'phone': True} if phone_page else {})}],
     }
-    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance'):
+    for k in ('open', 'click', 'preview', 'admin', 'scale', 'seed', 'advance', 'moon', 'tools'):
         if k in keys:
             scenario[k] = keys[k]
     path = os.path.join(work, f'scenario-{mode}.yaml')
@@ -243,8 +267,10 @@ def hero(name, spec):
 
 def make(name):
     spec = load(os.path.join(HERE, name + '.yaml'))
-    if spec['kind'] == 'hero':
+    if spec.get('kind') == 'hero':
         return hero(name, spec)
+    files = [load(os.path.join(HERE, spec['from'] + '.yaml')), spec] if 'from' in spec else [spec]
+    spec = {k: v for f in files for k, v in f.items()}
     home = load(os.path.join(HERE, 'home.yaml'))
     work = os.path.join(CACHE, 'images', name)
     folder(work)
@@ -252,9 +278,12 @@ def make(name):
     phone = spec['kind'] == 'phone'
     phone_page = phone or 'bottom' in spec
     framed = {}
-    for mode in ('light', 'dark'):
-        keys, shot = shoot(mode, home, [spec], work, phone_page)
+    for mode in [spec['mode']] if 'mode' in spec else ['light', 'dark']:
+        keys, shot = shoot(mode, home, files, work, phone_page)
         im = Image.open(shot).convert('RGB')
+        if spec['kind'] == 'card':
+            framed[mode] = alone(im, keys.get('scale', 2))
+            continue
         out = {'kind': spec['kind'], 'mode': mode, 'shot': shot, 'font': font, 'out': os.path.join(work, f'framed-{mode}.png')}
         if phone:
             screen(im, out)
@@ -270,12 +299,14 @@ def make(name):
             out['width'] = PHONE['width'] if 'bottom' in keys else keys.get('width', 396)
         im.save(shot)
         framed[mode] = frame(out, work).convert('RGBA')
-    # Light and dark side by side, with a transparent gap between them
+    # Light and dark side by side, with a transparent gap between them, or one mode alone
     gap = 40
-    light, dark = framed['light'], framed['dark']
-    both = Image.new('RGBA', (light.width + gap + dark.width, max(light.height, dark.height)), (0, 0, 0, 0))
-    both.paste(light, (0, 0))
-    both.paste(dark, (light.width + gap, 0))
+    shots = list(framed.values())
+    both = Image.new('RGBA', (sum(s.width for s in shots) + gap * (len(shots) - 1), max(s.height for s in shots)), (0, 0, 0, 0))
+    x = 0
+    for s in shots:
+        both.paste(s, (x, 0))
+        x += s.width + gap
     save(both, os.path.join(OUT, f'{name}.webp'), False)
 
 

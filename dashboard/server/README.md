@@ -1,12 +1,12 @@
 # Server pop-up
 
-<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/server-pop-up.webp">
+<img width="800" alt="The server pop-up with its status, the load and the updates, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/server-pop-up.webp">
 
 How the Home Assistant server is doing, with its backups and updates, and buttons to back up, check the configuration and restart. The top line names the most urgent problem, like a full disk or a backup that's due.
 
 ## Requirements
 
-- [Get started](../../README.md#get-started), with the modules Base, Popup, Header and Tiles
+- [Get started](../../README.md#get-started), with the modules Base, Popup, Header, Tiles, Graph and Update
 - [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/), an integration that comes with Home Assistant
 - Automatic backups, set up under **Settings**, **System**, **Backups**
 
@@ -20,7 +20,7 @@ How the Home Assistant server is doing, with its backups and updates, and button
 
 ## Optional
 
-- **Load graph.** It needs [Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card) from HACS. Without it, delete the card under `# The load of the last 24 hours` in [`pop-up.yaml`](pop-up.yaml).
+- **Origami updates.** Only useful for updating the Origami modules right here. The **Origami** row replaces them with the newer ones of the installed release in one tap, as the [update card](../update/README.md) does. Without it, delete the **Origami** row and `origami_update` from the modules of the list under **Maintenance**.
 
 ## Entities
 

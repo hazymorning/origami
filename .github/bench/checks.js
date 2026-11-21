@@ -120,7 +120,8 @@ window.__check = async () => {
       const haCard = el.shadowRoot?.querySelector('ha-card');
       if (!haCard) continue;
       const card = el.config.entity ?? el.config.name ?? el.config.card_type;
-      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"]')) {
+      // The Graph module's tabs are a segmented bar of their own
+      for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"], .org-graph-tabs, .org-graph-tab')) {
         if (!visible(c)) continue;
         judge(c, getComputedStyle(c), place(c, haCard), `${card} ${label(c)}`);
         // A segmented bar draws its active part on the segment's ::before, which lies on the segment's own fill. A line drawn there, such as a list's divider, is no control.
@@ -189,6 +190,27 @@ window.__check = async () => {
       if (!near(right - end, pad)) fails.push(`card ${card.i}: its row ends ${r1(right - end)} px from the edge, expected ${pad}`);
     }
     report('row ends', fails, `${count} rows end at the card's padding`);
+  }
+
+  // Mirror: on a card with the name under the icon, a single sign at the top right, such as a room card's arrow, is as large as the card's icon and stands in the same square as the icon's tile on the other side
+  {
+    const fails = [];
+    let count = 0;
+    for (const card of origami.filter((c) => c.cfg.origami_base?.vertical === true)) {
+      const main = Array.isArray(card.cfg.sub_button) ? card.cfg.sub_button : card.cfg.sub_button?.main ?? [];
+      const sign = card.root.querySelector('.bubble-sub-button-container .bubble-sub-button-icon:not(.hidden)');
+      const tile = card.root.querySelector('.bubble-main-icon-container');
+      const icon = tile?.querySelector('.bubble-main-icon');
+      if (main.length !== 1 || !sign || !visible(sign) || !icon) continue;
+      count++;
+      const box = card.haCard.getBoundingClientRect(), t = tile.getBoundingClientRect(), s = sign.getBoundingClientRect(), i = icon.getBoundingClientRect();
+      if (!near(s.width, i.width)) fails.push(`card ${card.i}: the sign is ${r1(s.width)} px, expected the icon's ${r1(i.width)} px`);
+      const want = { top: t.top + t.height / 2 - box.top, side: t.left + t.width / 2 - box.left };
+      const got = { top: s.top + s.height / 2 - box.top, side: box.right - (s.left + s.width / 2) };
+      if (!near(got.top, want.top) || !near(got.side, want.side)) fails.push(`card ${card.i}: the sign's middle is ${r1(got.top)} px from the top and ${r1(got.side)} px from the end, expected ${r1(want.top)} and ${r1(want.side)} as the icon's tile from the top and the start`);
+    }
+    if (!count) fails.push('no card with the name under the icon and a single sign found on the sheet');
+    report('mirror', fails, `${count} signs stand mirrored to the icon, at its size`);
   }
 
   // End column: a tray with three keys and a compact card's side slider are as wide as --org-end-col
@@ -368,7 +390,7 @@ window.__check = async () => {
     report('slider keys', fails, `${sliders.length} standalone slider has its keys after the track, as tall as it and with its background`);
   }
 
-  // Scroll taps: a scrolling row reaches past its card, and only its buttons take taps there, so the card above keeps the taps on its own edge
+  // Scroll taps: a scrolling row reaches past its card only at its sides, so the card above keeps the taps on its own edge
   {
     const fails = [];
     const rows = origami.filter((c) => c.cfg.card_type === 'sub-buttons' && c.cfg.origami_button?.scroll === true);
@@ -389,7 +411,7 @@ window.__check = async () => {
       if (cardAt(x, t.top + t.height / 2) !== card.el) fails.push(`card ${card.i}: a tap on a button does not reach the card`);
     }
     if (!rows.length) fails.push('the sheet has no scrolling row');
-    report('scroll taps', fails, `${rows.length} scrolling row takes taps only on its buttons`);
+    report('scroll taps', fails, `${rows.length} scrolling row leaves the taps just above its buttons to the card above`);
   }
 
   // Players: a player in players gives the music before the speaker, also when a template in its list names it. On the sheet, such a speaker's player is its entity ID with _ma.

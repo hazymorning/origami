@@ -1,6 +1,6 @@
 # Menu
 
-<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/menu.webp">
+<img width="800" alt="The menu sliding in from the top, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/menu.webp">
 
 Hides Home Assistant's header for good, without a flash while a dashboard loads, and adds a menu that slides down, if wanted, with shortcuts for the admin and a small card for the server.
 
@@ -10,11 +10,11 @@ Hides Home Assistant's header for good, without a flash while a dashboard loads,
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the Base module
-- [Origami Header](https://github.com/hazymorning/origami_header) from HACS, which needs Home Assistant 2026.9 or later
+- [Origami Header](https://github.com/hazymorning/origami_header) from the Marketplace, which needs Home Assistant 2026.9 or later
 
 ## Setup
 
-1. [Open Origami Header in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_header&category=plugin). If HACS asks to add the repository, select **Add**. Then select **Download**.
+1. In the [Marketplace](https://my.home-assistant.io/redirect/marketplace_browse/), add `hazymorning/origami_header` with **Add from link**, as for the theme under [Get started](../../README.md#get-started). Then select **Install**.
 2. Add these lines to [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/#editing-configurationyaml) and restart Home Assistant. If `frontend:` is already there, add only the `extra_module_url` lines under it.
 
    ```yaml

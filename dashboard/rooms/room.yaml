@@ -21,7 +21,12 @@ button_action:
     action: more-info
 sub_button:
   main:
+    # The arrow becomes a TV while the room's TV is on, and a note while its speaker plays
     - icon: mdi:chevron-right
+      origami_base:
+        icon: >-
+          ${!['off', 'standby', 'unavailable', 'unknown'].includes(states('media_player.living_room_tv')) ? 'mdi:television'
+          : states('media_player.living_room') === 'playing' ? 'mdi:music-note' : 'mdi:chevron-right'}
   bottom:
     # The dot's color goes from blue at 12° over green to red above 32°, or from 54° to 90° in Fahrenheit
     - entity: sensor.living_room_temperature

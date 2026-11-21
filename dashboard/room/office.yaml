@@ -1,0 +1,224 @@
+type: custom:bubble-card
+card_type: pop-up
+hash: '#popup_office'
+name: Office
+button_type: name
+show_icon: false
+scrolling_effect: false
+margin: 7px
+margin_top_mobile: 22px
+margin_top_desktop: 30%
+modules:
+  - origami_base
+  - origami_popup
+cards:
+  - type: vertical-stack
+    cards:
+      # Media: the speaker, with its cover blurred behind the card
+      - type: custom:bubble-card
+        card_type: media-player
+        button_type: state
+        entity: media_player.office
+        name: Speaker
+        icon: mdi:speaker
+        modules:
+          - origami_base
+          - origami_media
+        origami_base:
+          group: true
+        origami_media:
+          cover:
+            - background
+            - icon
+          cover_mix: 20
+          cover_blur: true
+        hide:
+          power_button: true
+          previous_button: true
+          next_button: true
+          volume_button: true
+          play_pause_button: true
+        tap_action:
+          action: navigate
+          navigation_path: '#popup_music'
+        button_action:
+          tap_action:
+            action: navigate
+            navigation_path: '#popup_music'
+        sub_button:
+          bottom_layout: rows
+          main:
+            - icon: mdi:play
+              show_background: true
+              origami_base:
+                icon: "${state === 'playing' ? 'mdi:pause' : ''}"
+              tap_action:
+                action: perform-action
+                perform_action: media_player.media_play_pause
+                target:
+                  entity_id: media_player.office
+            - icon: mdi:skip-next
+              show_background: false
+              tap_action:
+                action: perform-action
+                perform_action: media_player.media_next_track
+                target:
+                  entity_id: media_player.office
+          bottom:
+            - entity: media_player.office
+              sub_button_type: slider
+              always_visible: true
+        rows: auto
+
+      # Desk: the header counts the devices that are on, and each plug is a row with a switch. The rows share one background.
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Desk
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-s)
+            sub_button:
+              main:
+                - show_icon: false
+                  show_name: true
+                  show_background: false
+                  origami_header:
+                    name: >-
+                      ${(ids => (n => n ? n + ' of ' + ids.length + ' on' : 'All off')(ids.filter((id) =>
+                      states(id) === 'on').length))(['switch.office_computer', 'switch.office_monitor', 'switch.office_printer'])}
+                  tap_action:
+                    action: none
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.office_computer
+            name: Computer
+            icon: mdi:desktop-tower
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              toggle: true
+              tile: true
+              join: first
+            sub_button:
+              main:
+                - icon: mdi:circle
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            rows: 1
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.office_monitor
+            name: Monitor
+            icon: mdi:monitor
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              toggle: true
+              tile: true
+              join: middle
+            sub_button:
+              main:
+                - icon: mdi:circle
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            rows: 1
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: switch.office_printer
+            name: Printer
+            icon: mdi:printer
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              toggle: true
+              tile: true
+              join: last
+            sub_button:
+              main:
+                - icon: mdi:circle
+                  show_background: true
+                  tap_action:
+                    action: toggle
+            rows: 1
+
+      # Light: one lamp, so the header shows its brightness and the row has a slider in place of the switch
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Light
+            modules:
+              - origami_base
+              - origami_header
+            origami_header:
+              weight: medium
+              icon_size: var(--icon-size-s)
+            sub_button:
+              main:
+                - entity: light.office_desk_lamp
+                  show_icon: false
+                  show_name: true
+                  show_background: false
+                  origami_header:
+                    name: "${state === 'on' ? (attr.brightness ? num(attr.brightness / 2.55, 0, '%') : 'On') : 'Off'}"
+                  tap_action:
+                    action: more-info
+          - type: custom:bubble-card
+            card_type: button
+            button_type: switch
+            entity: light.office_desk_lamp
+            name: Desk lamp
+            icon: mdi:desk-lamp
+            modules:
+              - origami_base
+            origami_base:
+              compact: true
+              tile: true
+            sub_button:
+              main:
+                - entity: light.office_desk_lamp
+                  sub_button_type: slider
+                  always_visible: true
+                  allow_light_slider_to_0: true
+            rows: 1
+
+      # Done for the day turns off the desk and the lamp
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules:
+          - origami_base
+          - origami_button
+        origami_button:
+          background: false
+          align: center
+          muted: true
+          icon_size: var(--icon-size-xs)
+          padding: var(--ha-space-6) 0 100px 0
+        sub_button:
+          main: []
+          bottom:
+            - name: Done for the day
+              icon: mdi:power
+              show_name: true
+              tap_action:
+                action: perform-action
+                perform_action: homeassistant.turn_off
+                target:
+                  entity_id:
+                    - switch.office_computer
+                    - switch.office_monitor
+                    - switch.office_printer
+                    - light.office_desk_lamp

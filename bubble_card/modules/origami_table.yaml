@@ -1,9 +1,9 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.0.4"
+  version: "1.1.0"
   supported:
     - sub-buttons
-  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show."
+  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls sideways."
   editor:
     - name: columns
       label: "Columns"
@@ -125,6 +125,7 @@ origami_table:
       const scope = "ha-card .bubble-sub-button-bottom-container";
       const align = { start: "flex-end", center: "center", end: "flex-start" };
       const rules = [];
+      const firsts = [];
       let count = Math.max(cols.length, 1);
       const list = org.subs(env, this.config, "origami_table").map((s) => {
         const place = pos.get(s.n) ?? 0;
@@ -154,20 +155,41 @@ origami_table:
         const self = "justify-self: " + ({ start: "start", end: "end" }[side] ?? "center");
         if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", self);
         else if (/fr\b/.test(col?.width ?? "")) own.push(self);
-        if (on) own.push("--org-cell-bg: var(--fill-subtle)");
-        if (lit) own.push("--org-cell-ink: " + look.color, "--org-cell-bg: color-mix(in srgb, " + look.color + " var(--tint-strength), var(--ha-card-background))");
+        // A cell that stands out is a flat fill on the card or the page, and on a gray row it has the card background and the chip shadow, as a key in a tray
+        if (on) own.push("--org-cell-bg: var(--org-row-key, var(--fill-subtle))", "--org-cell-shadow: var(--org-row-shadow, none)");
+        if (lit) own.push("--org-cell-ink: " + look.color, "--org-cell-bg: color-mix(in srgb, " + look.color + " var(--tint-strength), var(--ha-card-background))", "--org-cell-shadow: var(--org-row-shadow, none)");
         // The icon next to a value is muted, unless the cell stands out or has a color of its own
         if (text && !on && !lit && !org.has(opt.color)) own.push("--org-cell-icon: var(--opacity-muted)");
         const obj = hass.states[s.entity];
         if (s.entity && (!obj || obj.state === "unavailable")) own.push("opacity: var(--opacity-disabled)");
         rules.push(scope + " .bubble-sub-button.bubble-sub-button-" + s.n + " { " + own.join("; ") + "; }");
+        if (first) firsts.push(scope + " .bubble-sub-button.bubble-sub-button-" + s.n);
         return { ...s, opt };
       });
       // The cells' text, icon, color, name_color and background work as the name, icon, color, name_color and background of a value in Header
       rules.push(...org.values(env, this.config, "origami_table", scope, "var(--ha-font-size-s)", list));
+      // A table wider than its card scrolls sideways, and its first column stays in place. While more columns follow at the end,
+      // the table fades out there. The card knows both from its rows, so a table that fits looks as before.
+      const box = card.querySelector(".bubble-sub-button-bottom-container");
+      if (box) {
+        const check = box._orgFit ?? (box._orgFit = () => {
+          const wide = box.scrollWidth > box.clientWidth + 1;
+          card.toggleAttribute("data-org-wide", wide);
+          card.toggleAttribute("data-org-end", !wide || Math.abs(box.scrollLeft) + box.clientWidth >= box.scrollWidth - 1);
+        });
+        if (!box._orgWatch) {
+          box._orgWatch = true;
+          box.addEventListener("scroll", check, { passive: true });
+          const ro = typeof ResizeObserver === "function" ? new ResizeObserver(check) : null;
+          ro?.observe(box);
+          if (typeof onTeardown === "function") onTeardown(() => { ro?.disconnect(); box.removeEventListener("scroll", check); box._orgWatch = false; });
+        }
+        requestAnimationFrame(check);
+      }
       card._orgT = {
         template: [...cols.map((c) => c.width), ...Array(count - cols.length).fill("auto")].join(" "),
         stripes: cfg.stripes ?? true,
+        firsts,
         rules: rules.join("\n    ")
       };
       return "";
@@ -185,6 +207,30 @@ origami_table:
       overflow: hidden;
       border-radius: var(--ha-card-border-radius);
     }
+    ha-card[data-org-wide] .bubble-sub-button-bottom-container {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    ha-card[data-org-wide]:not([data-org-end]) .bubble-sub-button-bottom-container {
+      mask-image: linear-gradient(to right, black calc(100% - var(--ha-space-8, 32px)), transparent 100%);
+    }
+    ha-card[data-org-wide]:not([data-org-end]):dir(rtl) .bubble-sub-button-bottom-container {
+      mask-image: linear-gradient(to left, black calc(100% - var(--ha-space-8, 32px)), transparent 100%);
+    }
+    /* While the table scrolls, the first column stays at the start. Its cells cover their row's height and padding in the row's color on the color behind the table, the pop-up's or the page's, so the columns that pass under them stay hidden. */
+    ${card._orgT.firsts.length ? card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] " + s.replace(/^ha-card /, "")), "") + ` {
+      position: sticky !important;
+      inset-inline-start: 0;
+      z-index: 1;
+      align-self: stretch;
+      height: auto !important;
+      margin-inline-start: calc(-1 * var(--ha-space-2)) !important;
+      padding-inline-start: calc(var(--ha-space-2) + 6px) !important;
+      border-radius: 0 !important;
+      /* The cover is drawn as an image, so it is no fill of its own: it continues the row and its gray, and casts no shadow */
+      background: linear-gradient(var(--org-row-bg, transparent), var(--org-row-bg, transparent)), linear-gradient(var(--org-page, var(--primary-background-color)), var(--org-page, var(--primary-background-color))) !important;
+    }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
       display: contents !important;
     }
@@ -201,6 +247,9 @@ origami_table:
       padding: 0 var(--ha-space-2);
     }
     ${card._orgT.stripes ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(even of :not(.hidden)) {
+      --org-row-bg: var(--fill-subtle);
+      --org-row-key: var(--ha-card-background);
+      --org-row-shadow: var(--tile-chip-shadow);
       background-color: var(--fill-subtle);
     }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
@@ -213,7 +262,7 @@ origami_table:
       padding: 0 6px !important;
       border-radius: calc(var(--org-cell) * var(--radius-ratio)) !important;
       background: var(--org-value-chip, var(--org-cell-bg, transparent)) !important;
-      box-shadow: none !important;
+      box-shadow: var(--org-cell-shadow, none) !important;
       color: var(--secondary-text-color) !important;
       font-size: var(--ha-font-size-s) !important;
       font-weight: var(--ha-font-weight-bold) !important;

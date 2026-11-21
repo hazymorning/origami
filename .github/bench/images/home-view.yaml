@@ -1,6 +1,6 @@
 # The home view on a phone, as far as the screen reaches, with the navigation bar at the bottom. Light shows a gray midday
-# with birds over the lake and the vacuum cleaning in the notifications, dark a clear night with a bath running in the
-# notifications and the climate table open with all six rooms. In each, the first favorite is on and the others wait for a tap, and the vacuum never shows twice.
+# with birds over the lake and the vacuum cleaning in the notifications, dark a clear night with the next days open on the
+# weather card, a bath running in the notifications and the climate table open with all six rooms. In each, the first favorite is on and the others wait for a tap, and the vacuum never shows twice.
 # The menu has its own image, because it is closed until it opens. The seed keeps the weather card's sky the same in every shot.
 seed: 27
 # The animations run for a few seconds before the shot, so birds fly across the weather card by day
@@ -42,22 +42,12 @@ states:
       entity_picture: /local/cover-1.jpg
       group_members:
       - media_player.living_room
-      - media_player.bedroom
+      - media_player.kitchen
       volume_level: 0.32
       media_duration: 214
       media_position: 71
       media_position_updated_at: '2026-11-04T12:39:00+00:00'
       supported_features: 152463
-  media_player.bedroom:
-    state: playing
-    attributes:
-      friendly_name: Bedroom
-      media_title: Slow Morning
-      media_artist: Paper Lanterns
-      entity_picture: /local/cover-1.jpg
-      group_members:
-      - media_player.living_room
-      - media_player.bedroom
   media_player.office:
     state: idle
     attributes:
@@ -92,6 +82,8 @@ states:
   binary_sensor.kids_room_window: {state: 'off', attributes: {device_class: window}}
   binary_sensor.bathroom_window: {state: 'off', attributes: {device_class: window}}
 dark:
+  # A tap on the weather card shows the next days
+  click: ['origami-weather']
   states:
     # The night of the climate table's own image: the bath runs, so the bathroom is warm and its window open against the steam
     climate.hallway: {state: heat, attributes: {friendly_name: Hall, hvac_action: idle, temperature: 18, current_temperature: 19.4}}
@@ -240,6 +232,7 @@ dark:
       - {datetime: '2026-11-05T10:00:00+00:00', condition: cloudy, temperature: 6, precipitation_probability: 5}
   cards:
   - file: greeting/card.yaml
+    replace: {'rotate: 3': 'rotate: 0'}
   - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
@@ -279,13 +272,19 @@ dark:
         living_room: office
         Living room: Office
         mdi:sofa: mdi:desk
+  # All six speakers, as the navigation bar's README says to add them, so the music key counts the kitchen too
   - file: navigation-bar/card.yaml
+    replace:
+      "'media_player.bedroom', 'media_player.office']": "'media_player.bedroom', 'media_player.office', 'media_player.kitchen', 'media_player.bathroom', 'media_player.kids_room']"
 light:
   states:
+    # The living room plays with the kitchen, whose card is out of view, so the bedroom's card keeps its arrow beside the living room's note
+    media_player.kitchen: {state: playing, attributes: {friendly_name: Kitchen, media_title: Slow Morning, media_artist: Paper Lanterns, entity_picture: /local/cover-1.jpg, group_members: [media_player.living_room, media_player.kitchen]}}
     vacuum.robot: {state: docked, attributes: {friendly_name: Vacuum, battery_level: 100}}
     timer.kitchen: {state: idle, attributes: {friendly_name: Timer, duration: '0:20:00'}}
   cards:
   - file: greeting/card.yaml
+    replace: {'rotate: 3': 'rotate: 0'}
   - file: weather/diorama.yaml
   - file: favorites/header.yaml
   - file: favorites/tiles.yaml
@@ -316,4 +315,7 @@ light:
         living_room: office
         Living room: Office
         mdi:sofa: mdi:desk
+  # All six speakers, as the navigation bar's README says to add them, so the music key counts the kitchen too
   - file: navigation-bar/card.yaml
+    replace:
+      "'media_player.bedroom', 'media_player.office']": "'media_player.bedroom', 'media_player.office', 'media_player.kitchen', 'media_player.bathroom', 'media_player.kids_room']"

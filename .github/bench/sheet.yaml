@@ -11,6 +11,7 @@ states:
   light.kitchen:
     state: 'on'
     attributes: {friendly_name: Kitchen, brightness: 160, supported_color_modes: [brightness], color_mode: brightness}
+  light.living_room: {state: 'off', attributes: {friendly_name: Living room}}
   climate.bedroom:
     state: heat
     attributes: {friendly_name: Bedroom, hvac_action: heating, temperature: 20.5, current_temperature: 19.8, min_temp: 7, max_temp: 30, target_temp_step: 0.5}
@@ -304,6 +305,41 @@ sections:
           bottom:
             - {name: Living, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.living_room}}}
             - {name: Kitchen, show_name: true, tap_action: {action: perform-action, perform_action: input_select.select_option, target: {entity_id: input_select.music_speaker}, data: {option: media_player.kitchen_speaker}}}
+      # A graph with tabs below it. The bar keeps the card's padding, and the shown tab lies on the bar's gray track, so it has the chip shadow.
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: sensor.living_room_temperature
+        name: Living room
+        icon: mdi:sofa
+        modules: [origami_base, origami_graph]
+        origami_graph:
+          tabs:
+            - {name: Temperature, icon: mdi:thermometer, entities: [sensor.living_room_temperature]}
+            - {name: Humidity, icon: mdi:water-percent, entities: [sensor.living_room_humidity]}
+      # A table wider than its card scrolls sideways, and its first column stays in place
+      - type: custom:bubble-card
+        card_type: sub-buttons
+        modules: [origami_base, origami_table]
+        sub_button:
+          main: []
+          bottom:
+            - name: Living
+              group:
+                - {entity: sensor.living_room_temperature, name: Living room, show_name: true}
+                - {entity: sensor.living_room_temperature, icon: mdi:thermometer, show_state: true}
+                - {entity: sensor.living_room_humidity, icon: mdi:water-percent, show_state: true}
+                - {entity: climate.bedroom, show_state: true}
+                - {entity: light.kitchen, name: Kitchen lamp, show_name: true}
+                - {entity: fan.bedroom, name: Bedroom fan, show_name: true}
+            - name: Office
+              group:
+                - {entity: switch.printer, name: Office, show_name: true}
+                - {entity: sensor.living_room_temperature, icon: mdi:thermometer, show_state: true}
+                - {entity: sensor.living_room_humidity, icon: mdi:water-percent, show_state: true}
+                - {entity: climate.bedroom, show_state: true}
+                - {entity: light.living_room, name: Desk lamp, show_name: true}
+                - {entity: switch.printer, name: Printer, show_name: true}
       # A grid whose named group stays cells, as a vacuum's room buttons do
       - type: custom:bubble-card
         card_type: sub-buttons
@@ -398,6 +434,37 @@ sections:
                 - {name: Print, icon: mdi:printer-outline, show_name: true, origami_base: {'on': true}}
                 - {icon: mdi:file-check-outline, fill_width: false}
                 - {icon: mdi:restart, fill_width: false}
+      # Two rooms with the name under the icon, whose sign at the top right stands mirrored to the icon: the arrow, and a note while music plays
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: light.kitchen
+        name: Kitchen
+        icon: mdi:countertop-outline
+        modules: [origami_base]
+        origami_base: {tile: true, vertical: true}
+        grid_options: {columns: 6, rows: auto}
+        sub_button:
+          main:
+            - {icon: mdi:chevron-right}
+          bottom:
+            - {entity: sensor.living_room_temperature, show_icon: false}
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        entity: light.living_room
+        name: Living room
+        icon: mdi:sofa
+        modules: [origami_base]
+        origami_base: {tile: true, vertical: true}
+        grid_options: {columns: 6, rows: auto}
+        sub_button:
+          main:
+            - icon: mdi:chevron-right
+              origami_base:
+                icon: "${states('media_player.living_room') === 'playing' ? 'mdi:music-note' : 'mdi:chevron-right'}"
+          bottom:
+            - {entity: sensor.living_room_humidity, show_icon: false}
       # A Bubble card without Origami modules, which Base leaves alone
       - type: custom:bubble-card
         card_type: button

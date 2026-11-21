@@ -1,150 +1,195 @@
-# A paper diorama for each kind of weather, with its own pictures for light and dark mode. The sun and the moon
-# cross the sky behind the hills, and the temperature and the weather stand at the top.
+# The Diorama layout from Origami Weather. Its pictures, one for every kind of weather, come with the card.
+# A tap shows the next days, as on Origami Weather's Sky layout.
 type: custom:origami-weather
 weather_entity: weather.home
+# Light or dark with the theme, like the rest of the dashboard
 color_mode: theme
-card_height: 150px
-card_padding: 0px 0px 0px 0px
+card_height: 160px
+card_padding: '0'
+# On a phone, the card keeps a little more space from the greeting above it
 card_offset: 20px 0px 0px 0px
-card_tap_action:
-  action: more-info
-sun_moon_size: 40
+sun_size: 30
+moon_size: 30
 sun_moon_x: dynamic
-# The chips lie on a colored card, so they have the chip shadow, as on a tile
-shadow_color: var(--tile-chip-shadow)
-# The pictures have their own clouds
 cloud_effects: false
-# One picture for each kind of weather, named after it, such as partlycloudy.webp, from the diorama folder of this repository
 background_mode: images
-weather_image_path: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/
-weather_image_path_dark: https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/
-grid_options:
-  columns: full
-  rows: auto
-content_direction: row
-content_align: end
+weather_image_path: diorama/light/
+weather_image_path_dark: diorama/dark/
+weather_image_type: webp
+weather_image_front: true
+background_thresholds:
+  - value: sunny
+    color: '#eee5d7'
+    color_dark: '#453728'
+  - value: partlycloudy
+    color: '#dee9ef'
+    color_dark: '#2f3e46'
+  - value: cloudy
+    color: '#e2e5e7'
+    color_dark: '#35393c'
+  - value: fog
+    color: '#e8e7e5'
+    color_dark: '#312f2e'
+  - value: rainy
+    color: '#d9e1ea'
+    color_dark: '#2f3946'
+  - value: pouring
+    color: '#d7dde4'
+    color_dark: '#2d363f'
+  - value: lightning
+    color: '#e5dfe8'
+    color_dark: '#3f3743'
+  - value: lightning-rainy
+    color: '#dfdbe2'
+    color_dark: '#37313c'
+  - value: hail
+    color: '#d3dfdf'
+    color_dark: '#293838'
+  - value: snowy
+    color: '#e5eaec'
+    color_dark: '#344043'
+  - value: snowy-rainy
+    color: '#dde2e5'
+    color_dark: '#383d41'
+  - value: windy
+    color: '#dce6e3'
+    color_dark: '#2f3f3c'
+  - value: windy-variant
+    color: '#dae1de'
+    color_dark: '#2f3936'
+  - value: clear-night
+    color: '#e0e3ed'
+    color_dark: '#2b2f40'
+  - value: exceptional
+    color: '#eadad3'
+    color_dark: '#47332c'
+# A tap shows the next days over the landscape, and they stay after a reload on the same device
+visibility_fade: true
+remember_switches: true
+card_tap_action:
+  action: toggle
+  entity: origami.forecast
 css: |
-  /* Origami Weather with the Origami theme's values */
-  :host {
-    --origami-text-light: var(--primary-text-color);
-    --origami-text-dark: var(--primary-text-color);
-    --origami-bottom-font-weight: var(--ha-font-weight-normal);
-    --origami-bottom-bg-filter: var(--blur-soft);
-    /* A chip's corner is 35 % of its height: the text and 6px above and below it */
-    --origami-bottom-bg-radius: calc((1em + 12px) * var(--radius-ratio));
-  }
-  /* The pictures have a clear sky, and the card paints the paper in the weather's color. Each picture is also the mask of the sky,
-     so the sun, the moon and the stars show only in the open sky and set behind the hills, the trees and the clouds. */
-  #card-root { --paper: #e2e5e7; --sky: none; }
-  #card-root.scheme-dark { --paper: #1b1e20; }
-  #card-root.weather-sunny { --paper: #eee5d7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/sunny.webp"); }
-  #card-root.scheme-dark.weather-sunny { --paper: #261d13; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/sunny.webp"); }
-  #card-root.weather-partlycloudy { --paper: #dee9ef; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/partlycloudy.webp"); }
-  #card-root.scheme-dark.weather-partlycloudy { --paper: #182227; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/partlycloudy.webp"); }
-  #card-root.weather-cloudy { --paper: #e2e5e7; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/cloudy.webp"); }
-  #card-root.scheme-dark.weather-cloudy { --paper: #1b1e20; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/cloudy.webp"); }
-  #card-root.weather-fog { --paper: #e8e7e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/fog.webp"); }
-  #card-root.scheme-dark.weather-fog { --paper: #222120; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/fog.webp"); }
-  #card-root.weather-rainy { --paper: #d9e1ea; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/rainy.webp"); }
-  #card-root.scheme-dark.weather-rainy { --paper: #171e26; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/rainy.webp"); }
-  #card-root.weather-pouring { --paper: #d7dde4; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/pouring.webp"); }
-  #card-root.scheme-dark.weather-pouring { --paper: #151b21; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/pouring.webp"); }
-  #card-root.weather-lightning { --paper: #e5dfe8; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/lightning.webp"); }
-  #card-root.scheme-dark.weather-lightning { --paper: #221d25; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/lightning.webp"); }
-  #card-root.weather-lightning-rainy { --paper: #dfdbe2; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/lightning-rainy.webp"); }
-  #card-root.scheme-dark.weather-lightning-rainy { --paper: #1d1920; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/lightning-rainy.webp"); }
-  #card-root.weather-hail { --paper: #d3dfdf; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/hail.webp"); }
-  #card-root.scheme-dark.weather-hail { --paper: #121c1c; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/hail.webp"); }
-  #card-root.weather-snowy { --paper: #e5eaec; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/snowy.webp"); }
-  #card-root.scheme-dark.weather-snowy { --paper: #1c2426; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/snowy.webp"); }
-  #card-root.weather-snowy-rainy { --paper: #dde2e5; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/snowy-rainy.webp"); }
-  #card-root.scheme-dark.weather-snowy-rainy { --paper: #1e2124; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/snowy-rainy.webp"); }
-  #card-root.weather-windy { --paper: #dce6e3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/windy.webp"); }
-  #card-root.scheme-dark.weather-windy { --paper: #182220; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/windy.webp"); }
-  #card-root.weather-windy-variant { --paper: #dae1de; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/windy-variant.webp"); }
-  #card-root.scheme-dark.weather-windy-variant { --paper: #171d1b; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/windy-variant.webp"); }
-  #card-root.weather-clear-night { --paper: #e0e3ed; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/clear-night.webp"); }
-  #card-root.scheme-dark.weather-clear-night { --paper: #161924; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/clear-night.webp"); }
-  #card-root.weather-exceptional { --paper: #eadad3; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/light/exceptional.webp"); }
-  #card-root.scheme-dark.weather-exceptional { --paper: #271a15; --sky: url("https://cdn.jsdelivr.net/gh/hazymorning/origami@main/dashboard/weather/diorama/dark/exceptional.webp"); }
-  #card-root.scheme-light, #card-root.scheme-dark { background-color: var(--paper); }
-  /* The landscape stands at the bottom left, however wide the card is */
-  #weather-bg > img { object-position: left bottom; }
-  #card-root.has-weather-bg :is(#sun-moon-layer, #star-canvas) {
-    -webkit-mask-image: var(--sky), linear-gradient(#000 0 0);
-    -webkit-mask-position: left bottom, 0 0;
-    -webkit-mask-size: cover, 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-composite: xor;
-    mask-image: var(--sky), linear-gradient(#000 0 0);
-    mask-position: left bottom, 0 0;
-    mask-size: cover, 100% 100%;
-    mask-repeat: no-repeat;
-    mask-composite: exclude;
-  }
-  /* The paper changes softly with the weather, and a new picture fades in */
-  @media (prefers-reduced-motion: no-preference) {
-    #card-root.scheme-light, #card-root.scheme-dark { transition: background-color 1.2s var(--ease-standard), transform .4s cubic-bezier(.2, 0, .2, 1); }
-    #weather-bg > img { animation: appear .9s var(--ease-standard) both; }
-  }
-  @keyframes appear { from { opacity: 0; } }
-  /* Rain, snow, birds and planes in calmer colors */
-  #weather-effects { filter: saturate(.6); }
+  #weather-bg > img { object-position: right bottom; }
   /* On a wide screen, the heading above the card sets the space */
   @media (min-width: 768px) { :host { margin: 0px 0px 0px 0px !important; } }
 button_containers:
-  # The next sunset by day, and the next sunrise by night
-  - position: custom
-    position_anchor: top-left
-    padding: 16px 16px 16px 16px
-    button_gap: 6px
+  # Hidden while the next days show. A tap on it opens the weather's dialog.
+  - name: Now
+    padding: var(--ha-space-4, 16px) var(--ha-space-4, 16px) var(--ha-space-4, 16px) calc(var(--ha-space-4, 16px) + 4px)
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'off'
     buttons:
-      - entity: sun.sun
-        visibility:
-          - condition: state
-            entity: sun.sun
-            state: above_horizon
-        elements:
-          - type: icon
-            icon: mdi:weather-sunset-down
-          - type: text
-            entity: sun.sun
-            attribute: next_setting
-            size: 12px
-            weight: '700'
-            color: var(--primary-text-color)
-      - entity: sun.sun
-        visibility:
-          - condition: state
-            entity: sun.sun
-            state: below_horizon
-        elements:
-          - type: icon
-            icon: mdi:weather-sunset-up
-          - type: text
-            entity: sun.sun
-            attribute: next_rising
-            size: 12px
-            weight: '700'
-            color: var(--primary-text-color)
-  # The temperature and the weather
-  - position: custom
-    position_anchor: top-right
-    align: end
-    padding: 16px 20px 16px 20px
-    buttons:
-      - entity: weather.home
+      - name: Temperature and condition
+        entity: weather.home
         style: vertical
         inner_gap: 6px
-        padding: 0px 0px 0px 0px
         elements:
           - type: text
             attribute: temperature
-            precision: 0
-            format: °
             size: 40px
             weight: '700'
-            color: var(--primary-text-color)
+            precision: 0
+            format: °
           - type: text
             size: 12px
             weight: '500'
+            overflow: wrap
+  # The next days, as on the Sky layout. A tap on a day hides them again.
+  - name: Days
+    position: custom
+    position_anchor: top-left
+    position_x: '0'
+    position_y: '0'
+    custom_width: 100%
+    padding: 44px max(0px, calc(63.5px - 12.5cqw))
+    layout: horizontal-scroll
+    scroll_count: 5
+    row_height: 100%
+    align_items: stretch
+    gap: '0'
+    align: center
+    scroll_fade: true
+    scroll_fade_size: 48px
+    background: true
+    grouped: true
+    border: none
+    blurred_background: true
+    background_blur: 16
+    background_color: 'color-mix(in srgb, var(--origami-card-bg-color, var(--ha-card-background, var(--card-background-color, #fff))) 30%, transparent)'
+    button_style: vertical
+    button_gap: 5px
+    button_text_size: 12px
+    button_icon_size: 28px
+    visibility:
+      - condition: state
+        entity: origami.forecast
+        state: 'on'
+    buttons:
+      # Every day after Today repeats it, with its own name and offset
+      - &day
+        name: Today
+        entity: weather.home
+        forecast: daily
+        forecast_offset: 0
+        tap_action:
+          action: toggle
+          entity: origami.forecast
+        elements:
+          - type: text
+            attribute: datetime
+            format: '%a'
+            weight: '500'
+          - type: icon
+            icon: weather
+            margin: 5px 0 4px
+          - type: text
+            attribute: temperature
+            format: °
+            size: 15px
+            weight: '700'
+          - type: text
+            attribute: templow
+            format: °
+            size: 13px
+            weight: '500'
+          - type: bar
+            bar_shape: curve
+            bar_height: 2px
+            bar_color: color-mix(in srgb, currentColor 22%, transparent)
+            margin: '-75px 0 0'
+            bar_values:
+              - attribute: temperature
+                marker_size: 28px
+                marker_gap: true
+      - <<: *day
+        name: Tomorrow
+        forecast_offset: 1
+      - <<: *day
+        name: In 2 days
+        forecast_offset: 2
+      - <<: *day
+        name: In 3 days
+        forecast_offset: 3
+      - <<: *day
+        name: In 4 days
+        forecast_offset: 4
+      - <<: *day
+        name: In 5 days
+        forecast_offset: 5
+      - <<: *day
+        name: In 6 days
+        forecast_offset: 6
+      - <<: *day
+        name: In 7 days
+        forecast_offset: 7
+      - <<: *day
+        name: In 8 days
+        forecast_offset: 8
+      - <<: *day
+        name: In 9 days
+        forecast_offset: 9
+grid_options:
+  columns: full

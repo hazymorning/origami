@@ -1,0 +1,141 @@
+origami_update:
+  name: "Origami • Update"
+  version: "1.1.0"
+  supported:
+    - button
+    - sub-buttons
+  description: "Update brings the Origami modules to the installed release with one tap, from a card or from a row in a list. It replaces each Origami module that the release has in a newer version, through Bubble Card Tools, and touches nothing else."
+  editor:
+    - name: ref
+      label: "Release or branch to update from, such as next (empty for the installed release)"
+      selector:
+        text: {}
+  code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13)) throw new Error("origami_update needs origami_base 13 or later");
+      const cfg = this.config.origami_update ?? {};
+      const repo = "hazymorning/origami";
+      // One state for every update card on the page, so the modules are compared once
+      const u = globalThis.__origamiUpdate ?? (globalThis.__origamiUpdate = { cards: new Set(), state: "check", list: [] });
+      u.hass = hass;
+      u.de = String(hass.locale?.language ?? hass.language ?? "en").startsWith("de");
+      if (!u.set) {
+        const newer = (a, b) => {
+          const x = String(a).split(".").map(Number), y = String(b).split(".").map(Number);
+          for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+          return false;
+        };
+        // A module's version is the first version line of its file, also in a file that Bubble Card's editor wrote again
+        const version = (text) => String(text ?? "").match(/^\s+version:\s*["']?(\d+(?:\.\d+)*)/m)?.[1] ?? "0";
+        // A row says what its tap does next, and a card has a key for that
+        const line = (row) => {
+          const n = u.list.length;
+          const de = u.de;
+          return ({
+            check: de ? "Wird geprüft" : "Checking",
+            none: (de ? "Aktuell · " : "Up to date · ") + u.ref,
+            ready: n + (de ? (n === 1 ? " Modul · " : " Module · ") : (n === 1 ? " module · " : " modules · ")) + u.ref,
+            busy: de ? "Wird ersetzt" : "Replacing",
+            done: row ? (de ? "Ersetzt · neu laden" : "Replaced · reload") : (de ? "Module ersetzt" : "Modules replaced"),
+            tools: de ? "Bubble Card Tools fehlt" : "Bubble Card Tools is missing",
+            admin: de ? "Nur für Admins" : "Admins only",
+            error: (de ? "Fehler: " : "Error: ") + u.error
+          })[u.state];
+        };
+        // Bubble Card hands the state line to a module whose code contains this exact assignment. A row in a list of Tiles shows its state from --org-tile-state, so Update writes it on the row.
+        u.paint = (card) => {
+          card.dataset.orgUpdate = u.state;
+          if (card.querySelector('.bubble-state')) card.querySelector('.bubble-state').textContent = line();
+          (card._orgU?.rows ?? []).forEach((sel) => card.querySelectorAll(sel).forEach((el) => el.style.setProperty("--org-tile-state", card._org.str(line(true)))));
+        };
+        u.set = (state) => {
+          u.state = state;
+          u.cards.forEach((c) => (c.isConnected ? u.paint(c) : u.cards.delete(c)));
+        };
+        // Each Origami module that Bubble Card Tools has and that the release has in a newer version, with Base first and this module last
+        u.check = async (ref) => {
+          const hass = u.hass;
+          u.list = [];
+          if (!hass.user?.is_admin) return u.set("admin");
+          u.set("check");
+          let files;
+          try {
+            files = (await hass.callWS({ type: "bubble_card_tools/list_modules" }))?.files;
+          } catch (e) {
+            return u.set("tools");
+          }
+          try {
+            u.ref = ref || (await (await fetch("https://api.github.com/repos/" + repo + "/releases/latest")).json()).tag_name;
+            if (!u.ref) throw new Error(u.de ? "kein Release gefunden" : "no release found");
+            const names = (files ?? []).map((f) => f.name).filter((n) => /(^|\/)origami_[a-z_]+\.ya?ml$/.test(n));
+            const found = await Promise.all(names.map(async (name) => {
+              const res = await fetch("https://raw.githubusercontent.com/" + repo + "/" + encodeURIComponent(u.ref) + "/bubble_card/modules/" + name.split("/").pop(), { cache: "no-store" });
+              if (!res.ok) return null;
+              const content = await res.text();
+              const now = (await hass.callWS({ type: "bubble_card_tools/read_module", name }))?.content;
+              return newer(version(content), version(now)) ? { name, content } : null;
+            }));
+            const rank = (n) => (n.includes("origami_base.") ? 0 : n.includes("origami_update.") ? 2 : 1);
+            u.list = found.filter(Boolean).sort((a, b) => rank(a.name) - rank(b.name));
+            u.set(u.list.length ? "ready" : "none");
+          } catch (e) {
+            u.error = String(e?.message ?? e);
+            u.set("error");
+          }
+        };
+        // All files are on hand before the first write. A write that fails stops the update, and the modules written before it work with the old ones, because Base comes first.
+        u.install = async () => {
+          if (u.state !== "ready") return;
+          u.set("busy");
+          try {
+            for (const m of u.list) {
+              const r = await u.hass.callWS({ type: "bubble_card_tools/write_module", name: m.name, content: m.content });
+              if (r?.status === "error") throw new Error(r.error ?? m.name);
+            }
+            u.list = [];
+            document.dispatchEvent(new CustomEvent("yaml-modules-updated"));
+            u.set("done");
+          } catch (e) {
+            u.error = String(e?.message ?? e);
+            u.set("error");
+          }
+        };
+        // A key's tap reaches the page as ll-custom after Home Assistant's confirmation, so a confirmation in the key's YAML comes first
+        window.addEventListener("ll-custom", (e) => {
+          const a = e.detail?.origami_update;
+          if (a === "install") u.install();
+          else if (a === "reload") location.reload();
+        });
+      }
+      // The keys and rows with origami_update. On a card, the key with install shows while there is an update and the one with reload after it. A row in a list shows the state and does both.
+      const keys = (a) => org.items(this.config).map((item, i) => (a ? item.tap_action?.origami_update === a : item.tap_action?.origami_update) ? "ha-card .bubble-sub-button-" + (i + 1) : "").filter(Boolean);
+      const own = this.config.card_type === "sub-buttons";
+      card._orgU = own ? { install: [], reload: [], rows: keys() } : { install: keys("install"), reload: keys("reload"), rows: [] };
+      // A tap that has nothing to update never reaches Home Assistant, so its confirmation shows only when the modules are replaced. After the update, the tap reloads the page.
+      if (!card._orgUTaps) {
+        card._orgUTaps = true;
+        card.addEventListener("hass-action", (e) => {
+          const a = e.detail?.config?.[(e.detail?.action ?? "tap") + "_action"]?.origami_update;
+          if (!a) return;
+          const state = globalThis.__origamiUpdate?.state;
+          if (a === "reload" || state === "done") {
+            e.stopPropagation();
+            location.reload();
+          } else if (state !== "ready") e.stopPropagation();
+        });
+      }
+      u.cards.add(card);
+      // The release to update to: the option, else the release of the theme that the Marketplace or HACS installed, else the newest release on GitHub
+      const theme = Object.values(hass.states).find((s) => s.entity_id.startsWith("update.") && String(s.attributes?.release_url ?? "").includes("github.com/" + repo));
+      const want = String(cfg.ref ?? "").trim() || theme?.attributes?.installed_version || "";
+      if (u.want !== want && !["busy", "done"].includes(u.state)) {
+        u.want = want;
+        u.check(want);
+      }
+      u.paint(card);
+      return "";
+    })()}
+    ${card._orgU.install.length ? card._orgU.install.map((s) => s.replace("ha-card", 'ha-card:not([data-org-update="ready"])')).join(", ") + " { display: none !important; }" : ""}
+    ${card._orgU.reload.length ? card._orgU.reload.map((s) => s.replace("ha-card", 'ha-card:not([data-org-update="done"])')).join(", ") + " { display: none !important; }" : ""}
+    ${card._orgU.rows.length ? card._orgU.rows.map((s) => s + " .bubble-sub-button-name-container::after").join(", ") + " { display: block !important; }\n    " + card._orgU.rows.map((s) => s.replace("ha-card", 'ha-card[data-org-update="ready"]') + " .bubble-sub-button-name-container::after").join(", ") + " { color: var(--accent-color) !important; }" : ""}
