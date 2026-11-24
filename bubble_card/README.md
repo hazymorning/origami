@@ -1038,7 +1038,7 @@ The Header module turns a separator card into a section header, with the card's 
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `value_style` | `text` | `text`, `chip`, `switch`, which joins the values into one small switch, or `tabs`, plain words where the chosen value is bold and the others are muted. With `chip`, a sub-button with `show_background: false` stays plain. |
+| `value_style` | `text` | `text`, `chip`, `switch`, which joins the values into one small switch, or `tabs`, plain words like the other values, where the chosen one is bold and in the title's color. With `chip`, a sub-button with `show_background: false` stays plain. |
 | `weight` | `bold` | The values' font weight: `bold`, `medium` or `regular`. With the Origami theme, `medium` looks like `regular`. |
 | `icon_color` | | The icon color of plain values: a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The icon size of plain values. Chips use `--icon-size-2xs`. For a small dot, use `var(--dot-size)`. |

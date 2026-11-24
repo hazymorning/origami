@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.4.0"
+  version: "1.4.1"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls under its first column."
@@ -156,10 +156,11 @@ origami_table:
         const own = ["justify-content: " + (align[side] ?? "center") + " !important", "grid-column: " + n];
         // Names and cells with only an icon use the text color, and values use the secondary text color
         if (first || !text || on || lit) own.push("color: var(--primary-text-color) !important");
-        // A cell with only an icon is a square, and a cell with text is as wide as its content, so a fill hugs its value and never
-        // stretches across its column. The first column's cells fill their column, because the card behind them is as wide as they are.
+        // A cell with only an icon is a square with the icon in its middle, and a cell with text is as wide as its content, so a fill
+        // hugs its value and never stretches across its column. The first column's cells fill their column, because the card behind
+        // them is as wide as they are.
         const self = "justify-self: " + ({ start: "start", end: "end" }[side] ?? "center");
-        if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", self);
+        if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", "gap: 0 !important", "justify-content: center !important", self);
         else if (!first) own.push(self);
         // A cell that stands out is a flat fill on the card or the page, and on a gray row it has the card background and the chip shadow, as a key in a tray
         if (on) own.push("--org-cell-bg: var(--org-row-key, var(--fill-subtle))", "--org-cell-shadow: var(--org-row-shadow, none)");

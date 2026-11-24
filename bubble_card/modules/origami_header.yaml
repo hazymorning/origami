@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.9.2"
+  version: "3.9.3"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, chips, one switch or quiet tabs, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -118,7 +118,7 @@ origami_header:
         chip: cfg.value_style === "chip",
         // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
         switch: cfg.value_style === "switch",
-        // Tabs are plain words, where the chosen value is only bolder and at full strength, as Graph's tabs are
+        // Tabs are plain words like the other values, where the chosen one is bold and in the title's color
         tabs: cfg.value_style === "tabs",
         picked: [],
         // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
@@ -326,7 +326,7 @@ origami_header:
     }
     ${card._org.fill(card._orgH.picked)}` : ""}
     ${card._orgH.tabs ? `
-    /* Tabs are plain words, as the values of a header are. The chosen one is bold and at full strength, and the others are muted. */
+    /* Tabs are plain words in the size, weight and color of the header's values. The chosen one is bold and in the title's color. */
     ha-card .bubble-sub-button-container {
       flex: 0 0 auto !important;
       gap: var(--ha-space-4) !important;
@@ -337,9 +337,6 @@ origami_header:
       justify-content: center !important;
       background: transparent !important;
       box-shadow: none !important;
-      color: var(--primary-text-color) !important;
-      font-weight: var(--ha-font-weight-medium) !important;
-      opacity: var(--opacity-muted);
       transition: var(--transition-interactive);
     }
     ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-name-container {
@@ -353,7 +350,7 @@ origami_header:
       transform: scale(var(--press-scale));
     }
     ${card._org.each(card._orgH.picked, "")} {
-      opacity: 1;
+      color: var(--primary-text-color) !important;
       font-weight: var(--ha-font-weight-bold) !important;
     }` : ""}
     ${card._orgH.above ? `
