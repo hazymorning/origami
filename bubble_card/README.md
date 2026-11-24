@@ -1038,7 +1038,7 @@ The Header module turns a separator card into a section header, with the card's 
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `value_style` | `text` | `text`, `chip`, `switch`, which joins the values into one small switch, or `tabs`, which joins them into one quiet track as tall as a chip, where the chosen value is bold. With `chip`, a sub-button with `show_background: false` stays plain. |
+| `value_style` | `text` | `text`, `chip`, `switch`, which joins the values into one small switch, or `tabs`, plain words where the chosen value is bold and the others are muted. With `chip`, a sub-button with `show_background: false` stays plain. |
 | `weight` | `bold` | The values' font weight: `bold`, `medium` or `regular`. With the Origami theme, `medium` looks like `regular`. |
 | `icon_color` | | The icon color of plain values: a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The icon size of plain values. Chips use `--icon-size-2xs`. For a small dot, use `var(--dot-size)`. |
@@ -1380,7 +1380,7 @@ The Table module turns a sub-buttons card into a table. Each group of sub-button
 | --- | --- | --- |
 | `name` | | A cell whose `css_class` has this name joins the column, wherever it stands in its row. |
 | `width` | `auto` | `auto` fits the widest cell, and `1fr` takes the free space. |
-| `align` | `start` in the first column, `center` in the others | Places the cells at the `start`, `center` or `end` of the column. With `justify`, a cell's icon stands at the start and its text at the end, so the icons and the values of a column line up. |
+| `align` | `start` in the first column, `center` in the others | Places the cells at the `start`, `center` or `end` of the column. |
 | `icon` | The cell's own icon | The icon of every cell in the column. |
 | `text` | The cell's own name or state | The text of every cell in the column. |
 | `color` | | The color of the cells' icons. |
@@ -1470,7 +1470,7 @@ The Graph module draws the history of one or more entities on a button card: num
 | `tabs` | | Tabs in a bar below the graph. Each tab has a `name`, an `icon` and any of the options above, such as other `entities` or another `band`, which take the place of the card's own while it shows. Only below the content. |
 | `tab_bar` | `true` | With `false`, the graph has no bar of its own, and keys elsewhere show its tabs, such as in a header. |
 
-`entity` can also list several entities, which add up: numbers add, and a state counts one while it's on, so bars of thermostats show how many of them heated. `state` sets the states that count as on, such as `heating`, in place of on, heating, open and the like. A thermostat that reports no action, such as heating, stands for its mode, as in Home Assistant's history. An entry's `name` stands in a legend below the graph, at its end, after a sample of its line, its bars or its blocks.
+`entity` can also list several entities, which add up: numbers add, and a state counts one while it's on, so bars of thermostats show how many of them heated. `state` sets the states that count as on, such as `heating`, in place of on, heating, open and the like. A thermostat that reports no action, such as heating, stands for its mode, as in Home Assistant's history. An entry's `name` stands in a legend below the graph, at the end of the drawing, after a sample of its line, its bars or its blocks.
 
 A key anywhere on the page with `tap_action: {action: fire-dom-event, graph_tab: <name>}` shows the tab of that name, such as a header with `value_style: tabs` over a graph with `tab_bar: false`. The tab lives in the browser, so no helper is needed, and each graph starts with its first tab.
 

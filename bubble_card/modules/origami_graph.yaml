@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.8.0"
+  version: "1.8.1"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or behind it. Entities can add up, such as thermostats that heat. Colors, a scale, guide lines, a good range, the newest values, a legend and tabs each take one option."
@@ -804,6 +804,11 @@ origami_graph:
         }).filter(Boolean) : [];
         const space = parseFloat(getComputedStyle(el).getPropertyValue("--ha-space-2")) || 8;
         if (tags.length) plotW = Math.max(W - Math.ceil(Math.max(...tags.map((t) => t.w))) - space, W / 2);
+        // The legend ends where the drawing ends, so the column of values stays free beside it
+        if (legendBox) {
+          const end = W - plotW > 0 ? Math.round(W - plotW) + "px" : "";
+          if (legendBox.style.marginRight !== end) legendBox.style.marginRight = end;
+        }
 
         // The fill fades from the top of the drawing to the bottom edge
         const fade = make("linearGradient", { id: uid + "fade", gradientUnits: "userSpaceOnUse", x1: 0, y1: top, x2: 0, y2: H });
@@ -1128,7 +1133,7 @@ origami_graph:
       opacity: 1;
       font-weight: var(--ha-font-weight-bold);
     }
-    /* The legend names the entries in one line below the graph, at its end, each after a sample of its line, its bars or its blocks. At the bottom of the card, it keeps the card's padding below it. */
+    /* The legend names the entries in one line below the graph, at the end of the drawing, each after a sample of its line, its bars or its blocks. At the bottom of the card, it keeps the card's padding below it. */
     ha-card .org-graph-legend {
       display: flex;
       align-items: center;

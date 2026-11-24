@@ -1,6 +1,6 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.9.1"
+  version: "3.9.2"
   supported:
     - separator
   description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, chips, one switch or quiet tabs, and they can scroll sideways. Each value can have its own name, icon, colors and background."
@@ -118,7 +118,7 @@ origami_header:
         chip: cfg.value_style === "chip",
         // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
         switch: cfg.value_style === "switch",
-        // Tabs join the values into one quiet track, where the chosen value is only bolder and at full strength, as Graph's tabs are
+        // Tabs are plain words, where the chosen value is only bolder and at full strength, as Graph's tabs are
         tabs: cfg.value_style === "tabs",
         picked: [],
         // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
@@ -326,22 +326,15 @@ origami_header:
     }
     ${card._org.fill(card._orgH.picked)}` : ""}
     ${card._orgH.tabs ? `
-    /* Tabs are one track as tall as a chip, with the values as plain words in it. The chosen one is bold and at full strength, and the others are muted. The track reaches a little above and below the title's line, so the header keeps the height and the spacing of a title alone. */
+    /* Tabs are plain words, as the values of a header are. The chosen one is bold and at full strength, and the others are muted. */
     ha-card .bubble-sub-button-container {
       flex: 0 0 auto !important;
-      gap: 0 !important;
-      margin-block: calc(-1 * var(--ha-space-1)) !important;
+      gap: var(--ha-space-4) !important;
       margin-inline-start: auto !important;
-      padding: 0 !important;
-      border-radius: var(--radius-small) !important;
-      background-color: var(--fill-subtle) !important;
     }
     ha-card .bubble-sub-button-container .bubble-sub-button {
       box-sizing: border-box;
       justify-content: center !important;
-      height: var(--control-height-mini) !important;
-      padding: 0 var(--ha-space-3) !important;
-      border-radius: var(--radius-small) !important;
       background: transparent !important;
       box-shadow: none !important;
       color: var(--primary-text-color) !important;
