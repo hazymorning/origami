@@ -1,6 +1,6 @@
 origami_graph:
   name: "Origami • Graph"
-  version: "1.7.0"
+  version: "1.8.0"
   supported:
     - button
   description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or behind it. Entities can add up, such as thermostats that heat. Colors, a scale, guide lines, a good range, the newest values, a legend and tabs each take one option."
@@ -18,7 +18,7 @@ origami_graph:
               selector:
                 entity: {}
             name:
-              label: "Name in the legend above the graph"
+              label: "Name in the legend below the graph"
               selector:
                 text: {}
             type:
@@ -334,6 +334,7 @@ origami_graph:
         g.sub = sub;
         g.rows = new Map();
         g.shown = false;
+        g.answered = false;
         const start = () => {
           g.stop?.();
           let off = null, live = true;
@@ -380,7 +381,8 @@ origami_graph:
       if (el.querySelector(":scope > svg")?.childElementCount !== 7) el.innerHTML = '<svg aria-hidden="true"><defs></defs><g class="org-graph-guides"></g><g class="org-graph-bars"></g><g class="org-graph-fills"></g><g class="org-graph-lines"></g><g class="org-graph-dots"></g><g class="org-graph-labels"></g></svg>';
       const svg = el.querySelector(":scope > svg");
       // The tabs' own bar stands below the graph, unless tab_bar is false and keys elsewhere show the tabs, such as in a header.
-      // The entries' names stand in a legend above the graph, in every tab, so the graph keeps its height when the tab changes.
+      // The entries' names stand in a legend below the graph, at its end, in every tab, so the graph keeps its height when the
+      // tab changes.
       const ownBar = tabbed && cfg.tab_bar !== false;
       const legend = !bg && views.some((v) => v.series.some((s) => s.name));
       let names = el.querySelector(":scope > .org-graph-legend");
@@ -388,19 +390,28 @@ origami_graph:
         names = document.createElement("div");
         names.className = "org-graph-legend";
         names.setAttribute("aria-hidden", "true");
-        el.insertBefore(names, svg);
-      } else if (!legend) names?.remove();
-      // The graph stays hidden until it shows, so it never shows before its styles, its data and its size are there.
-      // With tabs or a legend, only the drawing waits, and the rest shows at once.
-      const [veil, open] = ownBar || legend ? [svg, el] : [el, svg];
-      if (open.style.opacity) open.style.removeProperty("opacity");
-      if (!g.shown && veil.style.opacity !== "0") veil.style.opacity = "0";
+      }
+      if (legend && names.previousElementSibling !== svg) svg.after(names);
+      else if (!legend) names?.remove();
+      // The drawing stays hidden until it shows, so it never shows before its styles, its data and its size are there. The
+      // legend and the tabs show at once. While the history takes longer than a moment, a small ring turns in the graph's place.
+      if (el.style.opacity) el.style.removeProperty("opacity");
+      if (!g.shown && svg.style.opacity !== "0") svg.style.opacity = "0";
+      if (!bg && !el.querySelector(":scope > .org-graph-wait")) {
+        const wait = document.createElement("div");
+        wait.className = "org-graph-wait";
+        wait.setAttribute("aria-hidden", "true");
+        wait.innerHTML = '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"></circle></svg>';
+        el.append(wait);
+      }
+      el.toggleAttribute("data-wait", !bg && !g.answered);
       el.className = "org-graph " + (bg ? "background" : "bottom");
       const drawn0 = String(cfg.height ?? "").trim() || (bg ? "50%" : "calc(var(--tile-size) + var(--ha-space-4))");
-      // Above the graph, the legend adds its line and the space below it. Below the graph, the tabs add their bar, the space
-      // above it and the card's padding below it.
-      const height = ownBar || legend ? "calc(" + drawn0 + (legend ? " + var(--org-graph-legend-h) + var(--ha-space-3)" : "") + (ownBar ? " + var(--ha-space-3) + var(--org-graph-tab-h) + var(--org-pad)" : "") + ")" : drawn0;
+      // Below the graph, the legend adds its line and the space above it, and the tabs add their bar, the space above it and the
+      // card's padding below it. A legend at the bottom keeps the card's padding below it too.
+      const height = ownBar || legend ? "calc(" + drawn0 + (legend ? " + var(--ha-space-3) + var(--org-graph-legend-h)" : "") + (ownBar ? " + var(--ha-space-3) + var(--org-graph-tab-h)" : "") + " + var(--org-pad))" : drawn0;
       if (card.style.getPropertyValue("--org-graph-h") !== height) card.style.setProperty("--org-graph-h", height);
+      if (card.style.getPropertyValue("--org-graph-draw") !== drawn0) card.style.setProperty("--org-graph-draw", drawn0);
       if (bg) {
         const under = wrap.querySelector(":scope > .bubble-background");
         if (el.parentNode !== wrap || el.previousElementSibling !== under) wrap.insertBefore(el, under ? under.nextSibling : wrap.firstChild);
@@ -526,7 +537,7 @@ origami_graph:
         return unit === "%" ? org.num(hass, st.state, 0, "%") : /°/.test(unit) ? org.num(hass, st.state, 1) + "°" : org.num(hass, st.state, 0) + (unit ? " " + unit : "");
       };
       card._orgG = { keys: legendKeys, bg, look: legendKeys.map(({ k }) => ["solid", "dashed", "dotted"][Math.min(k, 2)] + " " + (hue(drawn[k].color) || "var(--org-graph-key)")), values: legendKeys.map(({ k }) => org.str(reading(drawn[k].id))) };
-      g.ctx = { views, first, bg, el, svg, veil, hass, num: org.num, keys: legendKeys, hue, number };
+      g.ctx = { views, first, bg, el, svg, hass, num: org.num, keys: legendKeys, hue, number };
       g.draw = () => {
         if (g.raf) return;
         g.raf = requestAnimationFrame(() => {
@@ -541,7 +552,7 @@ origami_graph:
         // The legend, the tabs' bar and the space around them are not part of the drawing
         let rest = 0;
         for (const c of el.children) {
-          if (c === svg) continue;
+          if (c === svg || c.classList.contains("org-graph-wait")) continue;
           const around = getComputedStyle(c);
           rest += c.offsetHeight + (parseFloat(around.marginTop) || 0) + (parseFloat(around.marginBottom) || 0);
         }
@@ -994,7 +1005,9 @@ origami_graph:
           });
         }
 
-        const any = lines.some((l) => l.pts.length > 1) || barsG.childElementCount;
+        // The ring turns until Home Assistant answers, and the graph shows once it has values to draw
+        if (g.answered) el.removeAttribute("data-wait");
+        const any = g.answered && (lines.some((l) => l.pts.filter(([, v]) => v !== null && Number.isFinite(v)).length > 1) || barsG.childElementCount > 0);
         if (g.answered && !any && !g.told) {
           g.told = true;
           console.info("origami_graph: no history for " + series.flatMap((s) => s.parts.map((p) => p.id + (p.attr ? " (" + p.attr + ")" : ""))).join(", ") + ". Check that the recorder keeps these entities.");
@@ -1007,7 +1020,9 @@ origami_graph:
             g.settle = 0;
             if (g.shown) return;
             g.shown = true;
-            g.ctx.veil.style.removeProperty("opacity");
+            svg.style.removeProperty("opacity");
+            // Keys elsewhere that show this graph's tabs get their mark again, now that the page has settled
+            keys();
             const still = cfg.animate !== true || matchMedia("(prefers-reduced-motion: reduce)").matches;
             if (!still && svg.animate) {
               const ease = "cubic-bezier(.22, 1, .36, 1)";
@@ -1043,12 +1058,6 @@ origami_graph:
       height: var(--org-graph-h);
       pointer-events: none;
       color: var(--primary-text-color);
-      transition: opacity var(--duration-normal) ease;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      ha-card .org-graph {
-        transition: none;
-      }
     }
     /* Bubble Card lays a sub-button out in reverse, so the line's sample comes before the text with the higher order, in both directions of writing */
     ${card._orgG.keys.length ? card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
@@ -1066,15 +1075,14 @@ origami_graph:
       /* The card's background on the page's gray casts the chip shadow, as a key on a tile does */
       --org-key-shadow: var(--tile-chip-shadow);
     }` : ""}
+    /* The drawing fades in once it shows */
     ha-card .org-graph > svg {
       display: block;
       overflow: visible;
-    }
-    ha-card .org-graph:has(> :is(.org-graph-tabs, .org-graph-legend)) > svg {
       transition: opacity var(--duration-normal) ease;
     }
     @media (prefers-reduced-motion: reduce) {
-      ha-card .org-graph:has(> :is(.org-graph-tabs, .org-graph-legend)) > svg {
+      ha-card .org-graph > svg {
         transition: none;
       }
     }
@@ -1120,14 +1128,15 @@ origami_graph:
       opacity: 1;
       font-weight: var(--ha-font-weight-bold);
     }
-    /* The legend names the entries in one line above the graph, each after a sample of its line, its bars or its blocks */
+    /* The legend names the entries in one line below the graph, at its end, each after a sample of its line, its bars or its blocks. At the bottom of the card, it keeps the card's padding below it. */
     ha-card .org-graph-legend {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 0 var(--ha-space-4);
       box-sizing: border-box;
       height: var(--org-graph-legend-h);
-      margin: 0 var(--org-pad) var(--ha-space-3) var(--org-pad);
+      margin: var(--ha-space-3) var(--org-pad) 0 var(--org-pad);
       overflow: hidden;
       color: var(--secondary-text-color);
       font-family: var(--ha-font-family-body);
@@ -1154,6 +1163,52 @@ origami_graph:
     }
     ha-card .org-graph-swatch-state {
       opacity: .25;
+    }
+    ha-card .org-graph-legend:not(:has(~ .org-graph-tabs)) {
+      margin-bottom: var(--org-pad);
+    }
+    /* While the history takes longer than a moment, a small ring turns in the middle of the graph's place */
+    ha-card .org-graph-wait {
+      display: none;
+      position: absolute;
+      top: calc(var(--org-graph-draw) / 2);
+      left: 50%;
+      width: var(--icon-size-s);
+      height: var(--icon-size-s);
+      margin: calc(var(--icon-size-s) / -2) 0 0 calc(var(--icon-size-s) / -2);
+      animation: org-graph-appear var(--duration-normal) ease 400ms both;
+    }
+    ha-card .org-graph[data-wait] > .org-graph-wait {
+      display: block;
+    }
+    ha-card .org-graph-wait > svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      animation: org-graph-turn 1s linear infinite;
+    }
+    ha-card .org-graph-wait circle {
+      fill: none;
+      stroke: var(--org-graph-key);
+      stroke-width: var(--org-line-width);
+      stroke-linecap: round;
+      stroke-dasharray: 34 17;
+    }
+    @keyframes org-graph-turn {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes org-graph-appear {
+      from {
+        opacity: 0;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ha-card .org-graph-wait > svg {
+        animation: none;
+      }
     }
     ha-card:has(.org-graph.background) .bubble-wrapper > :is(.bubble-content-container, .bubble-sub-button-container, .bubble-sub-button-bottom-container, .bubble-buttons-container) {
       position: relative;

@@ -20,7 +20,8 @@
 - A table wider than its card scrolls sideways, and its first column stays in place as a card with its shadow, so the other columns pass under it.
 - A cell that stands out on a gray row of a table has the card background and the chip shadow, as a key in a tray.
 - Several entities in one Graph entry add up, such as how many thermostats heated, and `state` says which states count. A thermostat that reports no action shows its mode, as in Home Assistant's history.
-- An entry's `name` puts it in a legend above the graph, and keys anywhere on the page can show a graph's tabs, such as in a header with Header's new `value_style: tabs`.
+- An entry's `name` puts it in a legend below the graph, and keys anywhere on the page can show a graph's tabs, such as in a header with Header's new `value_style: tabs`.
+- While a graph's history loads, a small ring turns in its place, and the graph fades in once it has values to draw.
 - A new Update module replaces the Origami modules with the ones of the installed release in one tap, from its own card or from a row in a list.
 - The pop-ups' hidden backdrop no longer keeps its blur until the first pop-up closes, which should give phones a little less to do.
 - The weather part now uses Origami Weather 1.7's own layouts: the diorama, the sky instead of the comparison, and a new house. The pictures are built in, and the 3.0 versions keep working.

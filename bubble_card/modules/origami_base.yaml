@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.16.0"
+  version: "13.16.1"
   is_global: true
   supported:
     - button
@@ -1018,13 +1018,17 @@ origami_base:
       const tabs = globalThis.__origamiTabs ?? (globalThis.__origamiTabs = { shown: new Map(), keys: new Set(), graphs: new Set() });
       const tabKeys = items(this.config).map((item, i) => [i + 1, act(item).action === "fire-dom-event" ? act(item).graph_tab : undefined]).filter(([, t]) => has(t));
       if (tabKeys.length) {
-        card._orgTabs = () => {
+        card._orgTabs = (tries = 0) => {
           const on = new Set([...tabs.shown.values()]);
+          let missing = false;
           tabKeys.forEach(([n, t]) => {
             const el = card.querySelector(".bubble-sub-button-" + n);
             const v = String(on.has(String(t)));
-            if (el && el.getAttribute("aria-pressed") !== v) el.setAttribute("aria-pressed", v);
+            if (!el) missing = true;
+            else if (el.getAttribute("aria-pressed") !== v) el.setAttribute("aria-pressed", v);
           });
+          // Bubble Card can build a key after this pass, so a key that isn't there yet gets its mark in one of the next frames
+          if (missing && tries < 30) requestAnimationFrame(() => card._orgTabs?.(tries + 1));
         };
         tabs.keys.add(card);
         card._org.later("tabs", card._orgTabs);
