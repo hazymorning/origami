@@ -1380,7 +1380,7 @@ The Table module turns a sub-buttons card into a table. Each group of sub-button
 | --- | --- | --- |
 | `name` | | A cell whose `css_class` has this name joins the column, wherever it stands in its row. |
 | `width` | `auto` | `auto` fits the widest cell, and `1fr` takes the free space. |
-| `align` | `start` in the first column, `center` in the others | Places the cells at the `start`, `center` or `end` of the column. |
+| `align` | `start` in the first column, `center` in the others | Places the cells at the `start`, `center` or `end` of the column. With `justify`, a cell's icon stands at the start and its text at the end, so the icons and the values of a column line up. |
 | `icon` | The cell's own icon | The icon of every cell in the column. |
 | `text` | The cell's own name or state | The text of every cell in the column. |
 | `color` | | The color of the cells' icons. |

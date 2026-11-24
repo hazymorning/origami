@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.3.0"
+  version: "1.3.1"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls under its first column."
@@ -43,6 +43,8 @@ origami_table:
                       value: center
                     - label: End
                       value: end
+                    - label: Icon at the start, text at the end
+                      value: justify
             icon:
               label: "Icon"
               group: "Cells"
@@ -128,7 +130,8 @@ origami_table:
       const rows = bottom.some((x) => x.group) ? bottom.map((x) => x.n) : [bottom.flatMap((x) => x.n)];
       const pos = new Map(rows.flatMap((r) => r.map((n, i) => [n, i])));
       const scope = "ha-card .bubble-sub-button-bottom-container";
-      const align = { start: "flex-end", center: "center", end: "flex-start" };
+      // Bubble Card lays a sub-button out in reverse. With justify, the icon stands at the start and the text at the end, so the icons and the values of a column line up.
+      const align = { start: "flex-end", center: "center", end: "flex-start", justify: "space-between" };
       const rules = [];
       const firsts = [];
       let count = Math.max(cols.length, 1);
@@ -157,7 +160,7 @@ origami_table:
         // Names and cells with only an icon use the text color, and values use the secondary text color
         if (first || !text || on || lit) own.push("color: var(--primary-text-color) !important");
         // A cell with only an icon is a square, and a cell in a column that takes the free space keeps the width of its text, so a fill never stretches across a wide column
-        const self = "justify-self: " + ({ start: "start", end: "end" }[side] ?? "center");
+        const self = "justify-self: " + ({ start: "start", end: "end", justify: "start" }[side] ?? "center");
         if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", self);
         else if (/fr\b/.test(col?.width ?? "")) own.push(self);
         // A cell that stands out is a flat fill on the card or the page, and on a gray row it has the card background and the chip shadow, as a key in a tray
@@ -275,11 +278,16 @@ origami_table:
       inset-inline: 0;
       z-index: -2;
       height: var(--org-table-h, 100%);
-      border-start-start-radius: var(--ha-card-border-radius);
-      border-end-start-radius: var(--ha-card-border-radius);
-      /* Under the card, the rows' colors on the color behind the table, the pop-up's or the page's, so nothing that passes under the card shows beside its round corners */
-      background-image: ${card._orgT.stripes ? "repeating-linear-gradient(to bottom, transparent 0, transparent var(--control-height-icon), var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(2 * var(--control-height-icon))), " : ""}linear-gradient(var(--org-page, var(--primary-background-color)), var(--org-page, var(--primary-background-color)));
+      /* Under the card, the rows' colors on the color behind the table, the pop-up's or the page's, so nothing that passes under the card shows beside its round corners. Beside its corners at the start, the table ends, so the color behind the table fills them, also while the rows are scrolled to the side. */
+      background-image: radial-gradient(circle at 100% 100%, transparent calc(var(--ha-card-border-radius) - 0.5px), var(--org-page, var(--primary-background-color)) var(--ha-card-border-radius)), radial-gradient(circle at 100% 0, transparent calc(var(--ha-card-border-radius) - 0.5px), var(--org-page, var(--primary-background-color)) var(--ha-card-border-radius)), ${card._orgT.stripes ? "repeating-linear-gradient(to bottom, transparent 0, transparent var(--control-height-icon), var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(2 * var(--control-height-icon))), " : ""}linear-gradient(var(--org-page, var(--primary-background-color)), var(--org-page, var(--primary-background-color)));
+      background-size: var(--ha-card-border-radius) var(--ha-card-border-radius), var(--ha-card-border-radius) var(--ha-card-border-radius), auto, auto;
+      background-position: left top, left bottom, 0 0, 0 0;
+      background-repeat: no-repeat, no-repeat, repeat, repeat;
       pointer-events: none;
+    }
+    ` + card._org.each(card._orgT.firsts.map((s) => card._orgT.anchor + ":dir(rtl) .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::after") + ` {
+      background-image: radial-gradient(circle at 0 100%, transparent calc(var(--ha-card-border-radius) - 0.5px), var(--org-page, var(--primary-background-color)) var(--ha-card-border-radius)), radial-gradient(circle at 0 0, transparent calc(var(--ha-card-border-radius) - 0.5px), var(--org-page, var(--primary-background-color)) var(--ha-card-border-radius)), ${card._orgT.stripes ? "repeating-linear-gradient(to bottom, transparent 0, transparent var(--control-height-icon), var(--fill-subtle) var(--control-height-icon), var(--fill-subtle) calc(2 * var(--control-height-icon))), " : ""}linear-gradient(var(--org-page, var(--primary-background-color)), var(--org-page, var(--primary-background-color)));
+      background-position: right top, right bottom, 0 0, 0 0;
     }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
       display: contents !important;
