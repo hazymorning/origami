@@ -1,8 +1,8 @@
 # Rooms
 
-<img width="800" alt="The rooms header and the room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/main/images/v3/rooms.webp">
+<img width="800" alt="The rooms header and the room cards, and with all rooms shown, in light and dark mode" src="https://raw.githubusercontent.com/hazymorning/origami/next/images/v3/rooms.webp">
 
-A card for each room with its climate and lights, which opens the room's pop-up. The header shows the average temperature and how many windows are open.
+A card for each room with its climate, its lights and what's playing, which opens the room's pop-up. The header shows the average temperature and how many windows are open.
 
 ## Requirements
 
@@ -18,6 +18,7 @@ A card for each room with its climate and lights, which opens the room's pop-up.
 ## Optional
 
 - **Windows.** For a home with window contacts. The header counts the open windows, and a room card shows its window while it's open. List the contacts in the four templates of **Windows** in [`header.yaml`](header.yaml), and give each room card its own. Without window contacts, delete **Windows** from the header and the window from each room card.
+- **Speaker and TV.** For a room with a speaker or a TV. While the TV is on, a TV takes the arrow's place, and while the speaker plays, a note. A tap still opens the room. Each room card names its own TV and speaker in the arrow's `icon`, and one that a room doesn't have can stay, since it never turns on. Without either, delete `origami_base` under the arrow.
 - **All rooms.** Some rooms stay hidden until a tap on **All rooms**, so the page stays short. Create a **Toggle** helper named **All rooms** under [Helpers](https://my.home-assistant.io/redirect/helpers/), so its entity ID is `input_boolean.all_rooms`, and add [`all-rooms.yaml`](all-rooms.yaml) below the room cards. In the editor of each room card that stays hidden, open **Visibility**, select **Add condition**, then **Entity state**, and choose **All rooms** and the state **On**.
 - **[Climate table](../climate-table/README.md).** The chevron and a tap on the temperature or the windows open and close it. Without the climate table, delete the chevron and those two tap actions in [`header.yaml`](header.yaml).
 
@@ -27,6 +28,7 @@ A card for each room with its climate and lights, which opens the room's pop-up.
 | --- | --- |
 | `sensor.living_room_temperature`, `sensor.bedroom_temperature`, `sensor.office_temperature` | The average in the header. On a room card, the temperature and the dot, from blue for cold to red for hot. |
 | `sensor.living_room_humidity` | The humidity on the room card |
+| `media_player.living_room_tv`, `media_player.living_room` | Speaker and TV: a TV while the TV is on, and a note while the speaker plays |
 | `light.living_room` | The room's lights. The icon lights up while one of them is on, and a hold on the card opens them. |
 | `binary_sensor.living_room_window`, `binary_sensor.bedroom_window` | Windows: the open windows in the header, and the window on a room card while it's open |
 | `input_boolean.all_rooms` | All rooms: shows the hidden rooms |

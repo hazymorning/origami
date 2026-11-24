@@ -1,5 +1,40 @@
 # Changelog
 
+## Next release
+
+- The navigation bar no longer sits under the phone's navigation buttons, such as Android's three buttons.
+- On a wider screen, the navigation bar stands at the bottom under the column of cards, with the now playing card above it, as on a phone.
+- The navigation bar's filled buttons are keys of card background, its badges and the group link on the cover are a little smaller and filled, and with music and the TV the cards keep their whole shadows.
+- A new Graph module draws the history of entities as quiet lines, bars or states, below a card's content or softly behind it. A color, colors by value or state, a fixed scale, guide lines, a good range, the newest values and the energy of each day take one option each, tabs switch between graphs, and the card's values can become its legend.
+- While music plays in a room, its card shows a note in place of the arrow, and a TV while the TV is on.
+- The arrow at the top of a room card is as large as the room's icon and stands in the same square on the other side.
+- Base's new `art` puts a picture in a card's icon and softly behind the card, such as tonight's dinner.
+- The room pop-up has two more examples, an office with its desk and a kitchen with tonight's dinner, and the bathroom's speaker makes announcements.
+- A percent sign has a space before it in every language, as on Bubble Card's sliders, such as 52 %.
+- The server pop-up draws its load with the Graph module instead of Plotly Graph Card, with processor and memory as its legend, and its list can update the Origami modules.
+- Rows of tiles and buttons that scroll sideways should now swipe on iPhones and iPads too.
+- The music, TV and fan cards have the same space above their slider as the light cards, with `rows: auto` and `bottom_layout: rows` instead of `rows: '2.2'`.
+- Chips in a row of buttons are as tall as the chips in a header and have the same room around their icon, so a row with larger icons no longer looks squeezed.
+- A small switch in a row of buttons, such as the vacuum's suction, has as much room around its segments as the keys in a tray, so the chosen one no longer looks squeezed.
+- With Popup's `gap`, a heading keeps the space above and below it that it has in the room pop-ups, so the server and vacuum pop-ups have a little more room under their headings.
+- A table wider than its card scrolls sideways, and its first column stays in place as a card with its shadow, so the other columns pass under it. With `anchor`, it stays a card while the table fits.
+- A cell that stands out in a table is as wide as its value, so its fill no longer stretches across its column, and a cell with only an icon has it in its middle.
+- Several entities in one Graph entry add up, such as how many thermostats heated, and `state` says which states count. A thermostat that reports no action shows its mode, as in Home Assistant's history.
+- An entry's `name` puts it in a legend below the graph, and keys anywhere on the page can show a graph's tabs, such as in a header with Header's new `value_style: tabs`.
+- While a graph's history loads, a small ring turns in its place, and the graph fades in once it has values to draw.
+- A new Update module replaces the Origami modules with the ones of the installed release in one tap, from its own card or from a row in a list.
+- The pop-ups' hidden backdrop no longer keeps its blur until the first pop-up closes, which should give phones a little less to do.
+- The weather part now uses Origami Weather 1.7's own layouts: the diorama, the sky instead of the comparison, and a new house. The pictures are built in, and the 3.0 versions keep working.
+- A tap on the diorama shows the next days, borrowed from Origami Weather's Sky layout, and a tap on its temperature opens the weather's dialog.
+
+### Updating
+
+1. Update Origami under [Updates](https://my.home-assistant.io/redirect/updates/).
+2. Only the first time: add the Update module, as under [Get started](https://github.com/hazymorning/origami#get-started), and then the [update card](https://github.com/hazymorning/origami/tree/main/dashboard/update).
+3. Select **Update** on the card, then **Reload**.
+
+From then on, an update takes only steps 1 and 3.
+
 ## 3.0 · The Final Fold
 
 <picture>

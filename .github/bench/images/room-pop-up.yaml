@@ -1,5 +1,5 @@
 # The room pop-up in the main README: the living room at midday with music from the speaker, and the bathroom late in the
-# evening with a bath and music over Bluetooth. Each room has its own image in the part's README.
+# evening with a bath and music over Bluetooth. The part's README shows each room alone, and these two take their states from here.
 kind: phone
 home: true
 light:

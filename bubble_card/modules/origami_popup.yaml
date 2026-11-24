@@ -1,6 +1,6 @@
 origami_popup:
   name: "Origami • Popup"
-  version: "4.17.1"
+  version: "4.17.3"
   supported:
     - pop-up
   description: "Popup styles a pop-up's header, backdrop and close button, and can show a cover behind the content. The title can be a template or a dropdown, with the sub-buttons as values beside or below it. A key in the pop-up can open a mini pop-up with its own cards."
@@ -54,7 +54,7 @@ origami_popup:
         css: [...(picks.length ? org.menu("div.bubble-header") : []), ...picks, ...org.values(env, this.config, "origami_popup", "div.bubble-header .bubble-sub-button-container", cfg.value_position === "beside" ? "var(--ha-font-size-s)" : "var(--ha-font-size-m)", list)].join("\n")
       };
       if (card._orgP.art) card._orgPArt = card._orgP.art;
-      // gap sets the space between the cards of a vertical stack in the pop-up, and a Header separator there has twice that space above its title and that space once below it
+      // gap sets the space between the cards of a vertical stack in the pop-up. A Header separator there keeps the space above and below its title that it has with Bubble Card's own gap, so headings stand the same in every pop-up.
       card._orgP.gap = String(cfg.gap ?? "").trim();
       // A mini pop-up is a small pop-up over this one, with cards of its own under mini_popups and a name. A key anywhere in the pop-up opens it with tap_action: fire-dom-event and mini_popup: that name. It opens next to the key, as wide as the pop-up's cards or its own width, and the pop-up behind it dims. A tap beside it, Esc or the pop-up closing closes it.
       const mini = card._orgMini ?? (card._orgMini = { built: {} });
@@ -243,11 +243,14 @@ origami_popup:
         display: none;
     }
     .bubble-pop-up-container {
+      /* The color that the pop-up's cards stand on, for a card without a background of its own that has to cover something, such as the first column of a table that scrolls */
+      --org-page: var(--bubble-pop-up-main-background-color);
       --scroller-bleed: calc(2 * var(--ha-space-4));
       --scroller-padding: var(--scroller-bleed) var(--scroller-bleed) calc(var(--scroller-bleed) + var(--ha-space-4));
       ${card._orgP.gap ? `--bubble-pop-up-gap: ${card._orgP.gap};
-      --org-header-above: ${card._orgP.gap};
-      --org-header-below: 0px;` : ""}
+      /* Bubble Card's own gap is 14 px, and a Header takes back what a larger gap adds */
+      --org-header-above: max(0px, calc(var(--ha-space-6, 24px) + 14px - ${card._orgP.gap}));
+      --org-header-below: max(0px, calc(var(--ha-space-2) + 14px - ${card._orgP.gap}));` : ""}
       margin-top: 0px !important;
       padding-top: var(--org-popup-pad) !important;
       padding-inline: calc(2 * var(--ha-space-4)) !important;
@@ -275,6 +278,11 @@ origami_popup:
     .bubble-pop-up {
       --custom-popup-filter: none !important;
     }` : ""}
+    /* Bubble Card puts its backdrop on the page when the page loads and keeps it there, hidden but blurred, until the first pop-up closes. Browsers still work out that blur, so a hidden backdrop has none. While it fades out, Bubble Card marks it with is-closing, and it keeps its blur. */
+    .bubble-backdrop.is-hidden:not(.is-closing) {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
     .bubble-header-container {
       padding: calc(2 * var(--ha-space-4)) calc(2 * var(--ha-space-4)) var(--org-header-pad-bottom) !important;
       height: calc(2 * var(--ha-space-4) + var(--org-header-pad-bottom) + var(--control-height-icon)) !important;
@@ -428,6 +436,7 @@ origami_popup:
       will-change: opacity;
       --org-header-above: 0px;
       --org-header-below: 0px;
+      --org-page: var(--ha-card-background);
     }
     /* The cards scroll in a box with the mini pop-up's padding, and they fade out in that padding while they scroll past it, as in Bubble Card's pop-ups */
     .org-mini-box {

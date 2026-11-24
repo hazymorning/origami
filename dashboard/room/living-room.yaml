@@ -128,6 +128,7 @@ cards:
                   action: navigate
                   navigation_path: '#popup_tv'
               sub_button:
+                bottom_layout: rows
                 main:
                   - icon: mdi:power
                     show_background: true
@@ -141,7 +142,7 @@ cards:
                   - entity: media_player.living_room
                     sub_button_type: slider
                     always_visible: true
-              rows: '2.2'
+              rows: auto
           - type: conditional
             conditions:
               - condition: state
@@ -180,6 +181,7 @@ cards:
                   action: navigate
                   navigation_path: '#popup_music'
               sub_button:
+                bottom_layout: rows
                 main:
                   - icon: mdi:play
                     show_background: true
@@ -214,7 +216,7 @@ cards:
                   - entity: media_player.living_room
                     sub_button_type: slider
                     always_visible: true
-              rows: '2.2'
+              rows: auto
           # A plug as a compact row with a switch
           - type: custom:bubble-card
             card_type: button

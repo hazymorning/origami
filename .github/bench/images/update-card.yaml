@@ -1,0 +1,12 @@
+# The update card. Light: the release has newer versions of two modules. Dark: Update replaced them, and Reload loads them.
+kind: panel
+admin: true
+cards:
+- file: update/card.yaml
+states:
+  update.origami: {state: 'off', attributes: {friendly_name: Origami, installed_version: V3.1, latest_version: V3.1, release_url: 'https://github.com/hazymorning/origami/releases/tag/V3.1'}}
+tools:
+  origami_base.yaml: 13.0.0
+  origami_graph.yaml: 1.1.0
+dark:
+  click: ['.bubble-sub-button-1']

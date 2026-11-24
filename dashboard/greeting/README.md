@@ -7,11 +7,11 @@ A greeting for the time of day and the next event, with notifications, repairs a
 ## Requirements
 
 - [Get started](../../README.md#get-started), with the modules Base and Header
-- [Origami Notifications](https://github.com/hazymorning/origami_notifications) from HACS, which needs Home Assistant 2026.4 or later
+- [Origami Notifications](https://github.com/hazymorning/origami_notifications) from the Marketplace, which needs Home Assistant 2026.4 or later
 
 ## Setup
 
-1. [Open Origami Notifications in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=hazymorning&repository=origami_notifications&category=plugin). If HACS asks to add the repository, select **Add**. Then select **Download**.
+1. In the [Marketplace](https://my.home-assistant.io/redirect/marketplace_browse/), add `hazymorning/origami_notifications` with **Add from link**, as for the theme under [Get started](../../README.md#get-started). Then select **Install**.
 2. In [`card.yaml`](card.yaml), change the words of the greeting and the entities to the home's own, and delete what the home doesn't have, such as a calendar for the event above the greeting or a weather entity. The [Origami Notifications README](https://github.com/hazymorning/origami_notifications#entities) lists what each kind of entity shows.
 3. Add [`card.yaml`](card.yaml) to the dashboard, as described under [Get started](../../README.md#get-started).
 

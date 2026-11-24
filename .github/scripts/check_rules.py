@@ -187,7 +187,7 @@ for name in READMES:
 # Parts: each part's README has its sections in order, keeps everything optional out of Requirements and Setup,
 # and lists exactly the modules that its files use, with Base whenever there is one
 SECTIONS = ["Requirements", "Setup", "Optional", "Entities"]
-MODULE_NAMES = r"\b(Base|Fan|Climate|Media|Slider|Button|Header|Tiles|Table|Popup)\b"
+MODULE_NAMES = r"\b(Base|Fan|Climate|Media|Slider|Button|Header|Tiles|Table|Graph|Popup|Update)\b"
 for readme in sorted((ROOT / "dashboard").glob("*/README.md")):
     where = str(readme.relative_to(ROOT))
     parts = re.split(r"^## (.+)$", re.sub(r"^[ \t]*```.*?^[ \t]*```", "", readme.read_text(encoding="utf-8"), flags=re.M | re.S), flags=re.M)
@@ -219,7 +219,7 @@ for name in READMES:
         if src and not (ROOT / src.group(2)).exists():
             alt = re.search(r'alt="([^"]*)"', tag)
             shots.setdefault(src.group(2), alt.group(1) if alt else "")
-# A card's own images, such as the weather card's house, load from the repository through jsDelivr. Each one exists,
+# A card's own images load from the repository through jsDelivr. Each one exists,
 # or each folder of them, which ends with a slash, such as the weather pictures. Like the README images, they point to next
 # while a release is built. With --release, such an image fails.
 for path in sorted((ROOT / "dashboard").glob("**/*.yaml")):

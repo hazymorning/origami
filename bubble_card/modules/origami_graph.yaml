@@ -1,0 +1,1292 @@
+origami_graph:
+  name: "Origami • Graph"
+  version: "1.8.1"
+  supported:
+    - button
+  description: "Graph draws the history of entities on a button card as calm lines, bars or states, below the content or behind it. Entities can add up, such as thermostats that heat. Colors, a scale, guide lines, a good range, the newest values, a legend and tabs each take one option."
+  editor:
+    - name: entities
+      label: "Entities, or none for the card's own entity"
+      selector:
+        object:
+          multiple: true
+          label_field: entity
+          fields:
+            entity:
+              label: "Entity, or in YAML a list of entities that add up"
+              required: true
+              selector:
+                entity: {}
+            name:
+              label: "Name in the legend below the graph"
+              selector:
+                text: {}
+            type:
+              label: "Draw as, or a line for numbers and states for the rest"
+              selector:
+                select:
+                  mode: dropdown
+                  options:
+                    - label: Line
+                      value: line
+                    - label: Bars
+                      value: bars
+                    - label: States
+                      value: states
+            attribute:
+              label: "Attribute, such as current_temperature"
+              selector:
+                text: {}
+            state:
+              label: "State that counts as on, such as heating"
+              selector:
+                text: {}
+            color:
+              label: "Color"
+              selector:
+                select: &colors
+                  mode: dropdown
+                  custom_value: true
+                  options:
+                    - label: Temperature colors by value
+                      value: temperature
+                    - label: Primary
+                      value: primary
+                    - label: Red
+                      value: red
+                    - label: Pink
+                      value: pink
+                    - label: Purple
+                      value: purple
+                    - label: Indigo
+                      value: indigo
+                    - label: Blue
+                      value: blue
+                    - label: Cyan
+                      value: cyan
+                    - label: Teal
+                      value: teal
+                    - label: Green
+                      value: green
+                    - label: Lime
+                      value: lime
+                    - label: Yellow
+                      value: yellow
+                    - label: Amber
+                      value: amber
+                    - label: Orange
+                      value: orange
+                    - label: Brown
+                      value: brown
+                    - label: Grey
+                      value: grey
+                    - label: Blue grey
+                      value: blue-grey
+    - name: hours_to_show
+      label: "Hours to show, up to 168"
+      selector:
+        number:
+          min: 1
+          max: 168
+          mode: box
+      default: 24
+    - name: position
+      label: "Position"
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - label: Below the content
+              value: bottom
+            - label: Behind the content
+              value: background
+      default: bottom
+    - name: colors_group
+      type: expandable
+      flatten: true
+      title: "Colors"
+      icon: mdi:palette-outline
+      schema:
+        - name: color
+          label: "Color: a theme color, temperature colors by value, or any CSS color"
+          selector:
+            select: *colors
+        - name: colors
+          label: "Own colors, each from a value up or for a state such as heating"
+          selector:
+            object:
+              multiple: true
+              label_field: color
+              fields:
+                from:
+                  label: "From this value up"
+                  selector:
+                    number:
+                      mode: box
+                      step: any
+                state:
+                  label: "Or for this state, such as heating"
+                  selector:
+                    text: {}
+                color:
+                  label: "Color"
+                  required: true
+                  selector:
+                    select: *colors
+    - name: scale_group
+      type: expandable
+      flatten: true
+      title: "Scale"
+      icon: mdi:ruler
+      schema:
+        - name: min
+          label: "Lowest value of the scale"
+          selector:
+            number:
+              mode: box
+              step: any
+        - name: max
+          label: "Highest value of the scale"
+          selector:
+            number:
+              mode: box
+              step: any
+        - name: grid
+          label: "Guide lines at round values, with their values"
+          selector:
+            boolean: {}
+          default: false
+        - name: band
+          label: "A good range behind the lines, from one value to another, with a name if wanted"
+          selector:
+            object:
+              fields:
+                from:
+                  label: "From"
+                  selector:
+                    number:
+                      mode: box
+                      step: any
+                to:
+                  label: "To"
+                  selector:
+                    number:
+                      mode: box
+                      step: any
+                name:
+                  label: "Name, such as good"
+                  selector:
+                    text: {}
+        - name: extrema
+          label: "Mark the highest and lowest value"
+          selector:
+            boolean: {}
+          default: false
+        - name: values
+          label: "Each line's newest value at its end"
+          selector:
+            boolean: {}
+          default: false
+    - name: look_group
+      type: expandable
+      flatten: true
+      title: "Look"
+      icon: mdi:tune-variant
+      schema:
+        - name: height
+          label: "Height, such as 64px, or 60% behind the content"
+          selector:
+            text: {}
+        - name: fill
+          label: "Fill under the line"
+          selector:
+            select:
+              mode: dropdown
+              options:
+                - label: Fade
+                  value: fade
+                - label: Solid
+                  value: solid
+                - label: None
+                  value: none
+          default: fade
+        - name: line
+          label: "Line on top of the area"
+          selector:
+            boolean: {}
+          default: true
+        - name: points
+          label: "Points"
+          selector:
+            select:
+              mode: dropdown
+              options:
+                - label: Last value
+                  value: last
+                - label: Every value
+                  value: all
+                - label: None
+                  value: none
+          default: none
+        - name: smooth
+          label: "Smooth line"
+          selector:
+            boolean: {}
+          default: true
+        - name: animate
+          label: "Draw the graph in when it appears"
+          selector:
+            boolean: {}
+          default: false
+    - name: legend
+      label: "Legend: each sub-button that shows a drawn line gets a sample of it"
+      selector:
+        boolean: {}
+      default: false
+    - name: tabs
+      label: "Tabs below the graph, each with a name, an icon and any of the options above, which replace the card's own while it shows"
+      selector:
+        object: {}
+    - name: tab_bar
+      label: "The tabs' own bar below the graph, or none for keys elsewhere, such as in a header"
+      selector:
+        boolean: {}
+      default: true
+  code: |
+    ${(() => {
+      const org = card._org;
+      if (org?.hass !== hass || !(org.version >= 13.1)) throw new Error("origami_graph needs origami_base 13.1 or later");
+      const cfg = this.config.origami_graph ?? {};
+      const wrap = card.querySelector(".bubble-wrapper");
+      const box = card.querySelector(".bubble-container");
+      if (!wrap || !box) return "";
+      const bg = cfg.position === "background";
+      // Below the content, the card grows by the graph, so it asks for auto height until rows are set, as Header does
+      const auto = !bg && (this.config.grid_options?.rows ?? this.config.rows) === undefined;
+      const own = Object.getPrototypeOf(this)?.getGridOptions;
+      if (typeof own === "function" && auto !== !!this._orgGAutoRows) {
+        if (auto) this.getGridOptions = () => ({ ...own.call(this), rows: "auto", min_rows: undefined, max_rows: undefined });
+        else delete this.getGridOptions;
+        this._orgGAutoRows = auto;
+        requestAnimationFrame(() => this.dispatchEvent(new CustomEvent("card-updated", { bubbles: true, composed: true })));
+      }
+
+      // A value counts as a number also with a decimal comma or a unit after it, such as "21,5" or "21.5 °C" from a template
+      const number = (v) => (typeof v === "number" ? v : v === null || v === undefined || v === "" || typeof v === "boolean" ? NaN : parseFloat(String(v).replace(",", ".")));
+      // The entities to draw, and without entities the card's own. Numbers draw a line and everything else its states, such as
+      // on and off, unless type says otherwise. A thermostat shows what it did, as in Home Assistant's history: heating or
+      // cooling, or without that its mode, and as a line its temperature. Bars of a meter that counts up, such as energy, show
+      // how much it counted in each step. An entry with several entities adds them up: numbers add, and a state adds one while
+      // it is on, so bars of thermostats show how many heated. state names the states that count as on.
+      // With tabs, each tab draws with its own options over the card's, and the card's options draw without them
+      const tabs = Array.isArray(cfg.tabs) ? cfg.tabs.filter((t) => t && typeof t === "object") : [];
+      const tabbed = tabs.length > 0 && !bg;
+      const DAY = 864e5;
+      const ON = ["on", "heating", "cooling", "drying", "fan", "preheating", "defrosting", "open", "playing", "home", "active", "true", "detected", "cleaning", "charging", "unlocked"];
+      const view = (c) => {
+        const series = [].concat(c.entities ?? (entity ? [entity] : []))
+          .map((s) => (typeof s === "string" ? { entity: s } : s ?? {}))
+          .map((s) => ({ ...s, ids: [].concat(s.entity ?? []).filter((e) => typeof e === "string" && e.includes(".")) }))
+          .filter((s) => s.ids.length)
+          .map((s, i) => {
+            const climate = (id) => id.startsWith("climate.");
+            const head = s.ids[0], st = hass.states[head];
+            const attr0 = s.attribute || (climate(head) ? (s.type === "line" ? "current_temperature" : "hvac_action") : "");
+            const v = attr0 ? st?.attributes?.[attr0] : st?.state;
+            const text = v !== undefined && v !== null && !Number.isFinite(number(v)) && !["unavailable", "unknown", ""].includes(String(v));
+            const type = ["line", "bars", "states"].includes(s.type) ? s.type : text ? "states" : "line";
+            // Each entity is a part with its attribute. A thermostat that reports no action stands for its mode, as Home Assistant's history does.
+            const parts = s.ids.map((id) => ({
+              id,
+              attr: s.attribute || (climate(id) ? (type === "line" ? "current_temperature" : "hvac_action") : ""),
+              mode: !s.attribute && climate(id) && type !== "line"
+            }));
+            const meter = type === "bars" && parts.every((p) => !p.attr && /^total/.test(String(hass.states[p.id]?.attributes?.state_class ?? "")));
+            const on = org.has(s.state) ? [].concat(s.state).map((x) => String(x).toLowerCase()) : ON;
+            return { i, id: head, attr: parts[0].attr, parts, type, meter, on, name: org.has(s.name) ? String(s.name) : "", color: s.color ?? c.color ?? null };
+          });
+        const hours = Math.min(Math.max(Number(c.hours_to_show) || 24, 0.25), 168);
+        // Bars over three days or more stand for whole days, so the window then starts at a midnight
+        const days = hours >= 72 && series.some((s) => s.type === "bars");
+        const begin = (now) => {
+          const t = now - hours * 36e5, zone = new Date(t).getTimezoneOffset() * 6e4;
+          return days ? Math.ceil((t - zone) / DAY) * DAY + zone : t;
+        };
+        return { cfg: c, series, hours, days, begin };
+      };
+      const views = (tabs.length ? tabs.map((t) => ({ ...cfg, ...t })) : [cfg]).map(view);
+
+      // One graph per card keeps its history, its elements and the tab it shows on the card
+      const g = this._orgGraph ?? (this._orgGraph = { n: (globalThis.__origamiGraphs = (globalThis.__origamiGraphs ?? 0) + 1), rows: new Map(), tab: 0 });
+      if (!(g.tab >= 0 && g.tab < views.length)) g.tab = 0;
+      const { series } = views[g.tab];
+
+      // The history comes from Home Assistant's history stream, which first sends the window and then each new state.
+      // After a reconnect, the stream starts again with a fresh window.
+      // With tabs, one history holds the entities of all of them and reaches back as far as the longest, so another tab shows at once
+      const every = views.flatMap((v) => v.series.flatMap((s) => s.parts));
+      const ids = [...new Set(every.map((p) => p.id))];
+      const attrs = every.some((p) => p.attr);
+      const first = (now) => Math.min(...views.map((v) => v.begin(now)));
+      const sub = ids.join(",") + "|" + views.map((v) => v.hours + (v.days ? "d" : "")).join(",") + "|" + attrs;
+      const conn = hass.connection;
+      if (g.sub !== sub && ids.length && conn?.subscribeMessage) {
+        g.sub = sub;
+        g.rows = new Map();
+        g.shown = false;
+        g.answered = false;
+        const start = () => {
+          g.stop?.();
+          let off = null, live = true;
+          const take = (ev) => {
+            if (!live || !ev?.states) return;
+            g.answered = true;
+            for (const [id, rows] of Object.entries(ev.states)) {
+              if (!ids.includes(id) || !Array.isArray(rows)) continue;
+              const have = g.rows.get(id) ?? [];
+              let a = have.length ? have[have.length - 1].a : undefined;
+              for (const r of rows) {
+                a = r.a ?? a;
+                have.push({ t: Number(r.lu) * 1000, s: r.s, a });
+              }
+              have.sort((x, y) => x.t - y.t);
+              g.rows.set(id, have);
+            }
+            g.draw?.();
+          };
+          conn.subscribeMessage(take, {
+            type: "history/stream",
+            entity_ids: ids,
+            start_time: new Date(first(Date.now())).toISOString(),
+            minimal_response: !attrs,
+            no_attributes: !attrs,
+            significant_changes_only: !attrs,
+          }, { resubscribe: false }).then((u) => { if (live) off = u; else u?.(); }).catch(() => {});
+          const again = () => { g.rows = new Map(); start(); };
+          conn.addEventListener?.("ready", again);
+          g.stop = () => {
+            live = false;
+            off?.();
+            off = null;
+            conn.removeEventListener?.("ready", again);
+          };
+        };
+        start();
+      }
+
+      // The graph lies on the card's surface, right above its background and below its content, either as a strip at the
+      // bottom that the card grows by, or behind the content. Its SVG works in real pixels, so dots stay round.
+      let el = card.querySelector(".org-graph");
+      if (!el) el = document.createElement("div");
+      if (el.querySelector(":scope > svg")?.childElementCount !== 7) el.innerHTML = '<svg aria-hidden="true"><defs></defs><g class="org-graph-guides"></g><g class="org-graph-bars"></g><g class="org-graph-fills"></g><g class="org-graph-lines"></g><g class="org-graph-dots"></g><g class="org-graph-labels"></g></svg>';
+      const svg = el.querySelector(":scope > svg");
+      // The tabs' own bar stands below the graph, unless tab_bar is false and keys elsewhere show the tabs, such as in a header.
+      // The entries' names stand in a legend below the graph, at its end, in every tab, so the graph keeps its height when the
+      // tab changes.
+      const ownBar = tabbed && cfg.tab_bar !== false;
+      const legend = !bg && views.some((v) => v.series.some((s) => s.name));
+      let names = el.querySelector(":scope > .org-graph-legend");
+      if (legend && !names) {
+        names = document.createElement("div");
+        names.className = "org-graph-legend";
+        names.setAttribute("aria-hidden", "true");
+      }
+      if (legend && names.previousElementSibling !== svg) svg.after(names);
+      else if (!legend) names?.remove();
+      // The drawing stays hidden until it shows, so it never shows before its styles, its data and its size are there. The
+      // legend and the tabs show at once. While the history takes longer than a moment, a small ring turns in the graph's place.
+      if (el.style.opacity) el.style.removeProperty("opacity");
+      if (!g.shown && svg.style.opacity !== "0") svg.style.opacity = "0";
+      if (!bg && !el.querySelector(":scope > .org-graph-wait")) {
+        const wait = document.createElement("div");
+        wait.className = "org-graph-wait";
+        wait.setAttribute("aria-hidden", "true");
+        wait.innerHTML = '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"></circle></svg>';
+        el.append(wait);
+      }
+      el.toggleAttribute("data-wait", !bg && !g.answered);
+      el.className = "org-graph " + (bg ? "background" : "bottom");
+      const drawn0 = String(cfg.height ?? "").trim() || (bg ? "50%" : "calc(var(--tile-size) + var(--ha-space-4))");
+      // Below the graph, the legend adds its line and the space above it, and the tabs add their bar, the space above it and the
+      // card's padding below it. A legend at the bottom keeps the card's padding below it too.
+      const height = ownBar || legend ? "calc(" + drawn0 + (legend ? " + var(--ha-space-3) + var(--org-graph-legend-h)" : "") + (ownBar ? " + var(--ha-space-3) + var(--org-graph-tab-h)" : "") + " + var(--org-pad))" : drawn0;
+      if (card.style.getPropertyValue("--org-graph-h") !== height) card.style.setProperty("--org-graph-h", height);
+      if (card.style.getPropertyValue("--org-graph-draw") !== drawn0) card.style.setProperty("--org-graph-draw", drawn0);
+      if (bg) {
+        const under = wrap.querySelector(":scope > .bubble-background");
+        if (el.parentNode !== wrap || el.previousElementSibling !== under) wrap.insertBefore(el, under ? under.nextSibling : wrap.firstChild);
+      } else if (el.parentNode !== box || el.nextElementSibling) box.appendChild(el);
+
+      // A tab shows at once, from the graph's own bar or from a key anywhere on the page with fire-dom-event and graph_tab,
+      // such as in a header. The page keeps the tabs that its graphs show, so Base can mark the keys of these tabs.
+      const T = globalThis.__origamiTabs ?? (globalThis.__origamiTabs = { shown: new Map(), keys: new Set(), graphs: new Set() });
+      const keys = () => T.keys.forEach((c) => (c.isConnected ? c._orgTabs?.() : T.keys.delete(c)));
+      const titles = tabs.map((t) => String(t.name ?? ""));
+      g.show = (i) => {
+        if (!(i >= 0 && i < titles.length)) return;
+        g.tab = i;
+        const b = el.querySelector(":scope > .org-graph-tabs");
+        if (b) for (const k of b.children) k.setAttribute("aria-pressed", String(Number(k.dataset.tab) === i));
+        T.shown.set(g.n, titles[i]);
+        keys();
+        g.draw?.();
+      };
+      g.pick = (name) => g.show(titles.indexOf(name));
+      if (tabbed) {
+        T.graphs.add(this);
+        if (T.shown.get(g.n) !== titles[g.tab]) {
+          T.shown.set(g.n, titles[g.tab]);
+          keys();
+        }
+      } else if (T.graphs.delete(this)) {
+        T.shown.delete(g.n);
+        keys();
+      }
+      if (!T.listen) {
+        T.listen = true;
+        window.addEventListener("ll-custom", (e) => {
+          const name = e.detail?.graph_tab;
+          if (name === undefined || name === null || name === "") return;
+          T.graphs.forEach((c) => (c.isConnected ? c._orgGraph?.pick?.(String(name)) : T.graphs.delete(c)));
+        });
+      }
+
+      // The own bar is a tray of the tabs, as a segmented switch of Button is
+      let bar = el.querySelector(":scope > .org-graph-tabs");
+      if (ownBar) {
+        if (!bar) {
+          bar = document.createElement("div");
+          bar.className = "org-graph-tabs";
+          bar.setAttribute("role", "group");
+          // A tap on a tab stays in the bar and never reaches the card's own tap
+          for (const type of ["pointerdown", "pointerup", "mousedown", "mouseup", "touchstart", "touchend", "click", "dblclick", "contextmenu"]) bar.addEventListener(type, (e) => e.stopPropagation());
+          bar.addEventListener("click", (e) => {
+            const key = e.target?.closest?.("button[data-tab]");
+            if (key) this._orgGraph?.show?.(Number(key.dataset.tab));
+          });
+          el.appendChild(bar);
+        }
+        const names = JSON.stringify(tabs.map((t) => [t.name ?? "", t.icon ?? ""]));
+        if (bar.dataset.tabs !== names) {
+          bar.dataset.tabs = names;
+          bar.replaceChildren(...tabs.map((t, i) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "org-graph-tab";
+            b.dataset.tab = String(i);
+            if (t.icon) {
+              const ic = document.createElement("ha-icon");
+              ic.setAttribute("icon", String(t.icon));
+              b.append(ic);
+            }
+            if (t.name !== undefined && t.name !== null && String(t.name) !== "") {
+              const name = document.createElement("span");
+              name.textContent = String(t.name);
+              b.append(name);
+            }
+            return b;
+          }));
+        }
+        for (const b of bar.children) {
+          const on = String(Number(b.dataset.tab) === g.tab);
+          if (b.getAttribute("aria-pressed") !== on) b.setAttribute("aria-pressed", on);
+        }
+      } else bar?.remove();
+
+      if (g.el !== el && typeof ResizeObserver === "function") {
+        g.ro?.disconnect();
+        g.ro = new ResizeObserver(() => g.draw?.());
+        g.ro.observe(el);
+        g.el = el;
+      }
+      g.tick ??= setInterval(() => g.draw?.(), 60000);
+      if (typeof onTeardown === "function") onTeardown(() => {
+        if (T.graphs.delete(this)) {
+          T.shown.delete(g.n);
+          keys();
+        }
+        g.stop?.();
+        g.stop = null;
+        g.sub = null;
+        g.ro?.disconnect();
+        g.ro = null;
+        clearTimeout(g.settle);
+        g.el = null;
+        clearInterval(g.tick);
+        g.tick = null;
+      });
+
+      // A theme color by its name, such as orange, takes the theme's own shade, as Home Assistant's cards do, and any other
+      // value is a CSS color. temperature colors by value, so it has no single color.
+      const NAMES = ["primary", "accent", "red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
+      const hue = (c) => {
+        const s = String(c ?? "").trim();
+        return !s || s === "temperature" ? null : NAMES.includes(s) ? "var(--" + s + "-color)" : s;
+      };
+
+      // With legend, each main sub-button that shows a drawn entity gets a short sample of that entity's line, so a value names its line.
+      // Behind the content, they stand on top of each other at the end, in the order of their lines, on the card's background, so they stay readable over the lines.
+      const drawn = series.filter((s) => s.type === "line");
+      const legendKeys = cfg.legend === true ? org.items(this.config).slice(0, org.layout(this.config).mains)
+        .map((item, i) => ({ n: i + 1, k: drawn.findIndex((s) => s.id === item.entity && s.parts.length === 1) })).filter((x) => x.k >= 0) : [];
+      // Each value stands after its name in bold: a percentage and a temperature as on the room cards, other values with their unit
+      const reading = (id) => {
+        const st = hass.states[id];
+        const unit = String(st?.attributes?.unit_of_measurement ?? "");
+        if (!st || !Number.isFinite(Number(st.state))) return st ? org.word(hass, st) : "";
+        return unit === "%" ? org.num(hass, st.state, 0, "%") : /°/.test(unit) ? org.num(hass, st.state, 1) + "°" : org.num(hass, st.state, 0) + (unit ? " " + unit : "");
+      };
+      card._orgG = { keys: legendKeys, bg, look: legendKeys.map(({ k }) => ["solid", "dashed", "dotted"][Math.min(k, 2)] + " " + (hue(drawn[k].color) || "var(--org-graph-key)")), values: legendKeys.map(({ k }) => org.str(reading(drawn[k].id))) };
+      g.ctx = { views, first, bg, el, svg, hass, num: org.num, keys: legendKeys, hue, number };
+      g.draw = () => {
+        if (g.raf) return;
+        g.raf = requestAnimationFrame(() => {
+          g.raf = 0;
+          try { paint(); } catch (e) { console.warn("origami_graph", e); }
+        });
+      };
+
+      const paint = () => {
+        const { views, first, bg, el, svg, hass, hue, number } = g.ctx;
+        const { cfg, series, hours, days, begin } = views[g.tab] ?? views[0];
+        // The legend, the tabs' bar and the space around them are not part of the drawing
+        let rest = 0;
+        for (const c of el.children) {
+          if (c === svg || c.classList.contains("org-graph-wait")) continue;
+          const around = getComputedStyle(c);
+          rest += c.offsetHeight + (parseFloat(around.marginTop) || 0) + (parseFloat(around.marginBottom) || 0);
+        }
+        const W = Math.round(el.clientWidth), H = Math.round(el.clientHeight - rest);
+        if (!svg || W < 2 || H < 2) return;
+        svg.setAttribute("width", W);
+        svg.setAttribute("height", H);
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        const ns = "http://www.w3.org/2000/svg";
+        const make = (tag, attrs, style) => {
+          const n = document.createElementNS(ns, tag);
+          for (const [k, v] of Object.entries(attrs ?? {})) n.setAttribute(k, v);
+          for (const [k, v] of Object.entries(style ?? {})) n.style.setProperty(k, v);
+          return n;
+        };
+        const [defs, guidesG, barsG, fillsG, linesG, dotsG, labelsG] = svg.children;
+        for (const n of svg.children) n.replaceChildren();
+        const uid = "og" + g.n + "-";
+        const f = (v) => Math.round(v * 10) / 10;
+        // Values at the edges keep the card's padding
+        const inset = parseFloat(getComputedStyle(el).getPropertyValue("--org-pad")) || 12;
+
+        const now = Date.now(), from = begin(now), span = now - from;
+        const zone = new Date(now).getTimezoneOffset() * 6e4;
+        const isOn = (s, v) => s.on.includes(String(v).toLowerCase());
+        // A thermostat without an action stands for its mode, as Home Assistant's history does: heat as heating
+        const MODES = { heat: "heating", cool: "cooling", dry: "drying", fan_only: "fan" };
+        const read = (p, r) => (!p.attr ? r.s : p.mode && !(r.a && p.attr in r.a) ? MODES[r.s] ?? r.s : r.a?.[p.attr]);
+
+        // Each entity's states as steps that last until the next state, cut to the window. Older states go,
+        // except the last one before the window, which gives the value at its start.
+        const cut = first(now);
+        const part = (p) => {
+          let rows = g.rows.get(p.id) ?? [];
+          let i = 0;
+          while (i + 1 < rows.length && rows[i + 1].t <= cut) i++;
+          if (i) g.rows.set(p.id, rows = rows.slice(i));
+          return rows.map((r, k) => ({ t0: Math.max(r.t, from), t1: Math.min(rows[k + 1]?.t ?? now, now), v: read(p, r) }))
+            .filter((st) => st.t1 > st.t0);
+        };
+        // Several entities add up step by step: a number adds itself and a state adds one while it is on. As states, they
+        // show while one of them is on, with its state, so a heating thermostat still has the heat color.
+        const steps = (s) => {
+          if (s.parts.length === 1) return part(s.parts[0]);
+          const each = s.parts.map(part);
+          const at = [...new Set(each.flatMap((st) => st.flatMap((x) => [x.t0, x.t1])))].sort((a, b) => a - b);
+          const k = each.map(() => 0), out = [];
+          for (let i = 0; i + 1 < at.length; i++) {
+            const a = at[i], b = at[i + 1];
+            let sum = 0, seen = false, lit = null;
+            each.forEach((st, j) => {
+              while (k[j] < st.length && st[k[j]].t1 <= a) k[j]++;
+              const x = st[k[j]];
+              if (!x || x.t0 > a) return;
+              seen = true;
+              const n = number(x.v);
+              if (Number.isFinite(n)) sum += n;
+              else if (isOn(s, x.v)) { sum += 1; lit ??= x.v; }
+            });
+            if (!seen) continue;
+            const v = s.type === "states" ? lit ?? "off" : sum;
+            const prev = out[out.length - 1];
+            if (prev && prev.t1 === a && prev.v === v) prev.t1 = b;
+            else out.push({ t0: a, t1: b, v });
+          }
+          return out;
+        };
+
+        // The window splits into steps of round clock times, or whole days, so the shape stays the same as time passes. A line
+        // takes the mean of each step weighted by time, and a bar the share of the time its entity was on, or its mean.
+        const NICE = [1, 2, 5, 10, 15, 20, 30, 60, 120, 180, 240, 360, 720, 1440].map((m) => m * 6e4);
+        const buckets = (target, whole) => {
+          const size = whole ? DAY : NICE.find((s) => span / s <= target) ?? NICE[NICE.length - 1];
+          const out = [];
+          for (let a = Math.floor((from - zone) / size) * size + zone; a < now; a += size) out.push([Math.max(a, from), Math.min(a + size, now)]);
+          return out;
+        };
+        const sweep = (st, list, fn, s) => {
+          let j = 0;
+          return list.map(([a, b]) => {
+            while (j < st.length && st[j].t1 <= a) j++;
+            let sum = 0, dur = 0, on = 0;
+            for (let k = j; k < st.length && st[k].t0 < b; k++) {
+              const d = Math.min(st[k].t1, b) - Math.max(st[k].t0, a);
+              if (d <= 0) continue;
+              const n = number(st[k].v);
+              if (fn === "mean" && Number.isFinite(n)) { sum += n * d; dur += d; }
+              if (fn === "duty") { dur += d; if (isOn(s, st[k].v)) on += d; }
+            }
+            if (!dur) return null;
+            return fn === "mean" ? sum / dur : on / (b - a);
+          });
+        };
+        // A meter adds up each rise in its step, and after it starts again from zero, its new value. Several meters add up.
+        const rise = (s, list) => {
+          const out = list.map(() => null);
+          for (const p of s.parts) {
+            let prev = NaN, j = 0;
+            for (const r of g.rows.get(p.id) ?? []) {
+              const v = number(r.s);
+              if (!Number.isFinite(v)) continue;
+              if (Number.isFinite(prev) && r.t >= from) {
+                while (j < list.length && list[j][1] <= r.t) j++;
+                if (j < list.length) out[j] = (out[j] ?? 0) + (v >= prev ? v - prev : v);
+              }
+              prev = v;
+            }
+          }
+          return out;
+        };
+
+        const lineCount = Math.max(8, W / (bg ? 10 : 7));
+        const barCount = Math.max(6, W / 14);
+        const unitOf = (s) => (s.attr
+          ? (/temp/.test(s.attr) ? hass.config?.unit_system?.temperature ?? "" : "")
+          : hass.states[s.id]?.attributes?.unit_of_measurement ?? "");
+        const lines = series.filter((s) => s.type === "line").map((s) => {
+          const st = steps(s);
+          const list = buckets(lineCount);
+          const means = sweep(st, list, "mean", s);
+          const pts = [];
+          const first = st.find((x) => x.t0 <= from && Number.isFinite(number(x.v)));
+          if (first) pts.push([from, number(first.v)]);
+          list.forEach(([a, b], k) => pts.push([(a + b) / 2, means[k]]));
+          const last = [...st].reverse().find((x) => Number.isFinite(number(x.v)));
+          if (last && last.t1 >= now - 1) pts.push([now, number(last.v)]);
+          return { ...s, pts, unit: unitOf(s) };
+        });
+
+        // Lines with the same unit share a scale. min and max set the scale of the first line's unit, and the values that grid
+        // lists stay on it.
+        const guides = Array.isArray(cfg.grid) ? cfg.grid.map(number).filter(Number.isFinite) : [];
+        const band = ((b) => b && Number.isFinite(number(b.from ?? b[0])) && Number.isFinite(number(b.to ?? b[1]))
+          ? { lo: Math.min(number(b.from ?? b[0]), number(b.to ?? b[1])), hi: Math.max(number(b.from ?? b[0]), number(b.to ?? b[1])), name: b.name ?? "" } : null)(cfg.band);
+        const reach = band ? [band.lo, band.hi] : [];
+        const groups = new Map();
+        lines.forEach((l, k) => {
+          const key = l.unit || l.id + l.attr;
+          if (!groups.has(key)) groups.set(key, { first: k === 0, unit: l.unit, vals: k === 0 ? [...guides, ...reach] : [] });
+          const grp = groups.get(key);
+          for (const [, v] of l.pts) if (v !== null && Number.isFinite(v)) grp.vals.push(v);
+          l.grp = grp;
+        });
+        const marks = cfg.extrema === true && !bg;
+        // Behind the content, the graph is a soft area of the card's own fill. Dots show only when points asks for them.
+        const r = bg ? 2 : 2.75;
+        const points = cfg.points ?? "none";
+        const showLine = cfg.line !== false;
+        const top = bg ? H * 0.12 : r + 3 + (marks ? 14 : 0);
+        const bottom = bg ? 0 : 3 + (marks ? 14 : 0);
+        for (const grp of groups.values()) {
+          const lo0 = grp.vals.length ? Math.min(...grp.vals) : 0, hi0 = grp.vals.length ? Math.max(...grp.vals) : 1;
+          const fixedLo = grp.first && Number.isFinite(number(cfg.min)), fixedHi = grp.first && Number.isFinite(number(cfg.max));
+          let lo = fixedLo ? number(cfg.min) : lo0, hi = fixedHi ? number(cfg.max) : hi0;
+          const need = Math.max(Math.abs(hi0) * 0.02, 0.5);
+          if (hi - lo < need) {
+            const mid = (hi + lo) / 2;
+            if (!fixedLo) lo = mid - need / 2;
+            if (!fixedHi) hi = mid + need / 2;
+          }
+          const pad = (hi - lo) * 0.12;
+          if (!fixedLo) lo -= pad;
+          if (!fixedHi) hi += pad;
+          Object.assign(grp, { lo, hi, y: (v) => top + (1 - (v - lo) / (hi - lo || 1)) * (H - top - bottom) });
+        }
+        const right = points === "none" ? 1 : r + 2;
+        // The drawing is as wide as the card, less the column of values at its end
+        let plotW = W;
+        const x = (t) => ((t - from) / span) * (plotW - right);
+
+        // Colors by value, each from its value up: the temperature colors of the room cards, in Celsius, or own colors. Below
+        // the first own color, a value keeps the graph's own look, written as null. Own colors can also name a state, such as heating.
+        const TEMP = [[-Infinity, "#728FA8"], [12, "#7C97A9"], [15, "#8BA2A8"], [17, "#9AAEA3"], [18.5, "#88A37E"], [22, "#99A677"], [24, "#AEA76F"],
+          [25, "#BB9F68"], [26, "#C0935F"], [27, "#BF8A5F"], [28, "#BB7E5D"], [29, "#B3735C"], [30.5, "#AA6A5A"], [32, "#9C6056"]];
+        const own = [].concat(cfg.colors ?? []);
+        const OWN = own.filter((c) => Number.isFinite(number(c?.from)) && c.color).map((c) => [number(c.from), hue(c.color)]).sort((a, b) => a[0] - b[0]);
+        const STATE = new Map(own.filter((c) => c?.state !== undefined && c.color).map((c) => [String(c.state).toLowerCase(), hue(c.color)]));
+        const stopsOf = (s, unit) => (OWN.length ? [[-Infinity, null], ...OWN] : s.color === "temperature" ? TEMP.map(([v, c]) => [/F/.test(String(unit)) ? v * 1.8 + 32 : v, c]) : null);
+        const colorAt = (stops, v) => stops.reduce((c, [at, col]) => (v >= at ? col : c), stops[0][1]);
+        // A line and its fill take colors by value as a gradient from top to bottom, which changes at each value, half a line
+        // lower, so a line right at a value takes its color in full
+        const gradient = (id, stops, y) => {
+          const grad = make("linearGradient", { id, gradientUnits: "userSpaceOnUse", x1: 0, y1: 0, x2: 0, y2: H });
+          const at = (v) => f(Math.min(Math.max((y(v) + 1.5) / H, 0), 1) * 1000) / 1000;
+          [[0, stops[stops.length - 1][1]], ...stops.slice(1).reverse().flatMap(([v, c], j, all) => [[at(v), c], [at(v), (all[j + 1] ?? stops[0])[1]]]), [1, stops[0][1]]]
+            .forEach(([o, c]) => grad.append(make("stop", { offset: o }, { "stop-color": c })));
+          defs.append(grad);
+          return "url(#" + id + ")";
+        };
+        // Graphs stay neutral, as Origami's controls do, and a second and a third line are dashed and dotted. Their quiet look
+        // comes from these default colors: a line a little darker than the fill under it, a stronger dot for the last value, soft
+        // bars and soft blocks for states, with the heat color while heating and the cool color while cooling. A color replaces them.
+        const mix = (c, pct) => "color-mix(in srgb, " + c + " " + pct + "%, transparent)";
+        const INK = "var(--primary-text-color)";
+        const LINE = mix(INK, 24);
+        const DOT = mix(INK, 45);
+        const TINT = { heating: "var(--heat-color)", preheating: "var(--heat-color)", defrosting: "var(--heat-color)", cooling: "var(--state-climate-cool-color)" };
+
+        // The legend names each entry that has a name, after a sample of its line, its bars or its blocks, as the graph draws them
+        const legendBox = el.querySelector(":scope > .org-graph-legend");
+        if (legendBox) {
+          const items = series.filter((s) => s.name).map((s) => {
+            const plain = hue(s.color);
+            if (s.type === "line") return { name: s.name, k: Math.min(Math.max(lines.findIndex((l) => l.i === s.i), 0), 2), c: plain ?? "var(--org-graph-key)" };
+            // Blocks without a color have the color of their state, such as the heat color for a thermostat that heats
+            const tint = s.parts.some((p) => p.mode) || s.on !== ON ? s.on.map((x) => TINT[x]).find(Boolean) : null;
+            return { name: s.name, type: s.type, c: plain ?? (s.type === "bars" ? mix(INK, 10) : tint ?? INK) };
+          });
+          const sig = JSON.stringify(items);
+          if (legendBox.dataset.sig !== sig) {
+            legendBox.dataset.sig = sig;
+            legendBox.replaceChildren(...items.map((it) => {
+              const item = document.createElement("span");
+              if (it.k !== undefined) {
+                const sample = make("svg", { width: 16, height: 4, viewBox: "0 0 16 4" });
+                sample.append(make("line", { class: "org-graph-line" + (it.k ? " org-graph-line-" + it.k : ""), x1: 1, y1: 2, x2: 15, y2: 2 }, { stroke: it.c }));
+                item.append(sample);
+              } else {
+                const swatch = document.createElement("i");
+                swatch.className = "org-graph-swatch" + (it.type === "states" ? " org-graph-swatch-state" : "");
+                swatch.style.background = it.c;
+                item.append(swatch);
+              }
+              const text = document.createElement("span");
+              text.textContent = it.name;
+              item.append(text);
+              return item;
+            }));
+          }
+        }
+        // Values: a temperature with one decimal, small numbers with one, and the unit after the value
+        const digitsOf = (v, unit) => (/°|F|C/.test(unit) || (Math.abs(v) < 10 && v % 1) ? 1 : 0);
+        const label = (v, unit, digits) => g.ctx.num(hass, v, digits) + (/°/.test(unit) ? "°" : unit === "%" ? " %" : unit ? " " + unit : "");
+
+        // With values, each line's newest value stands in a column at the end of the graph, in the line's color, and the drawing
+        // narrows by that column, so a value never covers a line
+        const tags = cfg.values === true ? lines.map((l) => {
+          const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
+          if (!real.length) return null;
+          const v = real[real.length - 1][1];
+          const sc = stopsOf(l, l.unit);
+          const c = (sc ? colorAt(sc, v) : null) ?? hue(l.color);
+          const text = make("text", { class: "org-graph-value", x: 0, y: 0, "dominant-baseline": "central" }, c ? { color: c } : {});
+          text.textContent = label(v, l.unit, digitsOf(v, l.unit));
+          labelsG.append(text);
+          let b = null;
+          try { b = text.getBBox(); } catch (e) { b = null; }
+          return { el: text, y: l.grp.y(v), w: b?.width || text.textContent.length * 7, h: b?.height || 16 };
+        }).filter(Boolean) : [];
+        const space = parseFloat(getComputedStyle(el).getPropertyValue("--ha-space-2")) || 8;
+        if (tags.length) plotW = Math.max(W - Math.ceil(Math.max(...tags.map((t) => t.w))) - space, W / 2);
+        // The legend ends where the drawing ends, so the column of values stays free beside it
+        if (legendBox) {
+          const end = W - plotW > 0 ? Math.round(W - plotW) + "px" : "";
+          if (legendBox.style.marginRight !== end) legendBox.style.marginRight = end;
+        }
+
+        // The fill fades from the top of the drawing to the bottom edge
+        const fade = make("linearGradient", { id: uid + "fade", gradientUnits: "userSpaceOnUse", x1: 0, y1: top, x2: 0, y2: H });
+        fade.append(make("stop", { offset: 0 }, { "stop-color": "white", "stop-opacity": "1" }), make("stop", { offset: 1 }, { "stop-color": "white", "stop-opacity": "0" }));
+        const mask = make("mask", { id: uid + "mask", maskUnits: "userSpaceOnUse", x: 0, y: 0, width: W, height: H });
+        mask.append(make("rect", { x: 0, y: 0, width: W, height: H, fill: "url(#" + uid + "fade)" }));
+        defs.append(fade, mask);
+
+        // Bars stand behind the lines, each as tall as its value against the highest one, or against max without a line
+        let ruler = lines[0]?.grp ?? null;
+        series.filter((s) => s.type === "bars").forEach((s, j) => {
+          const st = steps(s);
+          const list = buckets(barCount, days);
+          const numeric = s.meter || (st.length && st.every((x) => x.v === null || x.v === undefined || x.v === "unavailable" || x.v === "unknown" || Number.isFinite(number(x.v))));
+          const vals = s.meter ? rise(s, list) : sweep(st, list, numeric ? "mean" : "duty", s);
+          const peak = Math.max(...vals.filter((v) => v !== null), 0) || 1;
+          const fixed = !lines.length && !j ? number(cfg.max) : NaN;
+          const hi = numeric && fixed > 0 ? fixed : peak;
+          const tall = H * (bg ? 0.5 : 0.8);
+          const y = (v) => H - Math.min(Math.max(v / hi, 0), 1) * tall;
+          if (!ruler && numeric) ruler = { lo: 0, hi, y, unit: unitOf(s) };
+          const sc = numeric ? stopsOf(s, unitOf(s)) : null;
+          const color = hue(s.color) ?? mix(INK, bg ? 5 : 10);
+          list.forEach(([a, b], k) => {
+            const v = vals[k];
+            if (!v || v <= 0) return;
+            const x0 = x(a), x1 = x(b), w = x1 - x0, gap = Math.min(Math.max(w * 0.22, 1), 4);
+            const h = Math.max(H - y(v), 1.5);
+            barsG.append(make("rect", { class: "org-graph-bar", x: f(x0 + gap / 2), y: f(H - h), width: f(Math.max(w - gap, 1)), height: f(h + 3), rx: f(Math.min(2.5, (w - gap) / 2)) }, { fill: (sc && colorAt(sc, v)) || color }));
+          });
+        });
+
+        // States stand behind the lines as soft blocks while they last, one row for each entity. A state has its own color,
+        // or the entity's color while it's on. Without a color, it's on in the heat color, the cool color or a soft gray.
+        const blocks = series.filter((s) => s.type === "states");
+        blocks.forEach((s, j) => {
+          const lane = H / blocks.length, y0 = j * lane, h = blocks.length > 1 ? lane - 2 : H;
+          let run = null;
+          const put = () => {
+            if (!run?.c) return;
+            const w = Math.max(x(run.t1) - x(run.t0), 1);
+            barsG.append(make("rect", { class: "org-graph-state", x: f(x(run.t0)), y: f(y0), width: f(w), height: f(h), rx: f(Math.min(2.5, w / 2)) }, { fill: run.c }));
+          };
+          for (const st of steps(s)) {
+            const key = String(st.v ?? "").toLowerCase();
+            const mine = STATE.get(key) ?? (isOn(s, key) ? hue(s.color) : null);
+            const c = mine ?? (isOn(s, key) ? TINT[key] ?? INK : null);
+            if (run && run.c === c) { run.t1 = st.t1; continue; }
+            put();
+            run = { t0: st.t0, t1: st.t1, c };
+          }
+          put();
+        });
+
+        // Guide lines: with grid, at round values of the first line's scale, or of the first bars', each with its value at the
+        // start, and one at each midnight. A list of values draws them at these values.
+        if (ruler && (cfg.grid === true || guides.length)) {
+          let vals = guides, digits;
+          if (cfg.grid === true) {
+            const raw = (ruler.hi - ruler.lo) / 3, p = 10 ** Math.floor(Math.log10(raw || 1));
+            const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((m) => m >= raw) ?? raw;
+            digits = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+            vals = [];
+            for (let v = Math.ceil(ruler.lo / step) * step; v < ruler.hi; v += step) vals.push(Number(v.toFixed(6)));
+          }
+          // A value stands over its line, at the start below the content and at the end behind it, where the content leaves
+          // room, or at the start where a legend takes the end. One that would touch the value before it stays out.
+          const end = bg && !g.ctx.keys.length;
+          let last = -Infinity;
+          for (const v of vals) {
+            const at = ruler.y(v);
+            if (at < 9 || at > H - 2) continue;
+            guidesG.append(make("line", { class: "org-graph-guide", x1: 0, y1: f(at), x2: f(plotW), y2: f(at) }));
+            if (Math.abs(at - last) < 12) continue;
+            last = at;
+            const text = make("text", { class: "org-graph-label", "data-guide": "", x: f(end ? plotW - inset : inset), y: f(at - 4), "text-anchor": end ? "end" : "start" });
+            text.textContent = label(v, ruler.unit, digits ?? digitsOf(v, ruler.unit));
+            labelsG.append(text);
+          }
+        }
+        // The band lies behind everything as a soft area, with its name small at its start
+        if (band && lines.length) {
+          const by = lines[0].grp.y;
+          const top = by(band.hi), low = by(band.lo);
+          guidesG.prepend(make("rect", { class: "org-graph-band", x: 0, y: f(top), width: f(plotW), height: f(Math.max(low - top, 1)) }));
+          if (band.name) {
+            const text = make("text", { class: "org-graph-label", "data-guide": "", x: f(inset), y: f(Math.min(top + 12, low - 3)), "text-anchor": "start" });
+            text.textContent = String(band.name);
+            labelsG.append(text);
+          }
+        }
+        if (cfg.grid === true) {
+          for (let t = Math.ceil((from - zone) / DAY) * DAY + zone; t < now; t += DAY) {
+            if (t > from) guidesG.append(make("line", { class: "org-graph-guide", x1: f(x(t)), y1: 0, x2: f(x(t)), y2: H }));
+          }
+        }
+
+        // A monotone curve goes through every point and never past them, so a step stays a step and a peak keeps its value
+        const curve = (p) => {
+          const n = p.length;
+          if (n < 2) return "";
+          if (cfg.smooth === false || n < 3) return "M" + p.map(([a, b]) => f(a) + "," + f(b)).join("L");
+          const m = [], t = [];
+          for (let i = 0; i < n - 1; i++) m.push((p[i + 1][1] - p[i][1]) / (p[i + 1][0] - p[i][0] || 1));
+          for (let i = 1; i < n - 1; i++) {
+            const h0 = p[i][0] - p[i - 1][0], h1 = p[i + 1][0] - p[i][0];
+            const q = (m[i - 1] * h1 + m[i] * h0) / (h0 + h1 || 1);
+            t[i] = (Math.sign(m[i - 1]) + Math.sign(m[i])) * Math.min(Math.abs(m[i - 1]), Math.abs(m[i]), 0.5 * Math.abs(q)) || 0;
+          }
+          const end = (s, tn) => (Math.sign(s) !== Math.sign((3 * s - tn) / 2) ? 0 : Math.abs((3 * s - tn) / 2) > 3 * Math.abs(s) ? 3 * s : (3 * s - tn) / 2);
+          t[0] = end(m[0], t[1]);
+          t[n - 1] = end(m[n - 2], t[n - 2]);
+          let d = "M" + f(p[0][0]) + "," + f(p[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const h = (p[i + 1][0] - p[i][0]) / 3;
+            d += "C" + f(p[i][0] + h) + "," + f(p[i][1] + h * t[i]) + "," + f(p[i + 1][0] - h) + "," + f(p[i + 1][1] - h * t[i + 1]) + "," + f(p[i + 1][0]) + "," + f(p[i + 1][1]);
+          }
+          return d;
+        };
+
+        const fill = cfg.fill ?? "fade";
+        lines.forEach((l, k) => {
+          const y = l.grp.y;
+          const sc = stopsOf(l, l.unit);
+          const plain = hue(l.color);
+          // A line takes its color in full, and the area under it a tenth of it, a fifth behind the content, where a neutral
+          // area takes the card's own fill instead
+          const stroke = (c) => c ?? plain ?? LINE;
+          const tint = (c) => ((c ??= plain) ? mix(c, bg ? 20 : 10) : bg ? "var(--fill-subtle)" : mix(INK, 10));
+          const paint = sc ? gradient(uid + "c" + k, sc.map(([v, c]) => [v, stroke(c)]), y) : stroke(null);
+          const area = sc ? gradient(uid + "a" + k, sc.map(([v, c]) => [v, tint(c)]), y) : tint(null);
+          // A gap in the history, such as while the entity was unavailable, splits the line
+          const runs = [[]];
+          for (const [t, v] of l.pts) {
+            if (v === null || !Number.isFinite(v)) { if (runs[runs.length - 1].length) runs.push([]); continue; }
+            runs[runs.length - 1].push([x(t), y(v)]);
+          }
+          const live = l.pts.length && l.pts[l.pts.length - 1][0] === now;
+          for (const run of runs.filter((q) => q.length > 1)) {
+            const d = curve(run);
+            // The fill of the newest run reaches the right edge, under the last value's dot
+            const [ex, ey] = run[run.length - 1];
+            const edge = live && run === runs[runs.length - 1] ? "L" + f(plotW) + "," + f(ey) + "L" + f(plotW) + "," + H : "L" + f(ex) + "," + H;
+            if (fill !== "none" && k === 0) fillsG.append(make("path", { class: "org-graph-fill", d: d + edge + "L" + f(run[0][0]) + "," + H + "Z", ...(fill === "fade" ? { mask: "url(#" + uid + "mask)" } : {}) }, { fill: area }));
+            if (showLine) linesG.append(make("path", { class: "org-graph-line" + (k ? " org-graph-line-" + Math.min(k, 2) : ""), d }, { stroke: paint }));
+          }
+          const real = l.pts.filter(([, v]) => v !== null && Number.isFinite(v));
+          const dot = (t, v, cls, rr) => {
+            const c = (sc && colorAt(sc, v)) || plain || DOT;
+            dotsG.append(make("circle", { class: cls, cx: f(x(t)), cy: f(y(v)), r: rr }, { fill: c }));
+          };
+          if (points === "all") real.slice(1, -1).forEach(([t, v]) => dot(t, v, "org-graph-point", Math.max(r - 1.5, 1.5)));
+          if (points !== "none" && real.length) {
+            const [t, v] = real[real.length - 1];
+            dot(t, v, "org-graph-dot", r);
+          }
+          // The highest and the lowest value of the first line, with their values
+          if (marks && k === 0 && real.length > 2) {
+            const inner = real.slice(1, -1).length ? real.slice(1, -1) : real;
+            const hi = inner.reduce((a, b) => (b[1] > a[1] ? b : a)), lo = inner.reduce((a, b) => (b[1] < a[1] ? b : a));
+            for (const [[t, v], below] of [[hi, false], [lo, true]]) {
+              dot(t, v, "org-graph-point", 2);
+              const tx = x(t), anchor = tx < 24 ? "start" : tx > W - 24 ? "end" : "middle";
+              const text = make("text", { class: "org-graph-label", x: f(anchor === "start" ? Math.max(tx, inset) : anchor === "end" ? Math.min(tx, plotW - inset) : tx), y: f(below ? y(v) + 15 : y(v) - 8), "text-anchor": anchor });
+              text.textContent = label(v, l.unit, digitsOf(v, l.unit));
+              labelsG.append(text);
+            }
+            // A guide value gives way to the highest or the lowest value where the two would touch
+            const box = (el) => { try { return el.getBBox(); } catch (e) { return null; } };
+            const ext = [...labelsG.children].slice(-2).map(box).filter(Boolean);
+            for (const gl of [...labelsG.querySelectorAll("[data-guide]")]) {
+              const b = box(gl);
+              if (b && ext.some((e) => b.x < e.x + e.width + 2 && e.x < b.x + b.width + 2 && b.y < e.y + e.height && e.y < b.y + b.height)) gl.remove();
+            }
+          }
+        });
+
+        // The values stand at the height of their lines' ends, and values that would touch move apart
+        if (tags.length) {
+          tags.sort((a, b) => a.y - b.y);
+          for (let i = 1; i < tags.length; i++) tags[i].y = Math.max(tags[i].y, tags[i - 1].y + (tags[i - 1].h + tags[i].h) / 2);
+          const over = tags[tags.length - 1].y + tags[tags.length - 1].h / 2 - H;
+          if (over > 0) tags.forEach((t) => (t.y -= over));
+          for (const t of tags) {
+            t.el.setAttribute("x", f(plotW + space));
+            t.el.setAttribute("y", f(Math.max(t.y, t.h / 2)));
+          }
+        }
+
+        // Behind the content, the legend's values stand in the order of their lines' newest values, the highest line on top
+        if (bg && g.ctx.keys.length) {
+          const end = (k) => {
+            const real = lines[k]?.pts.filter(([, v]) => v !== null && Number.isFinite(v)) ?? [];
+            return real.length ? lines[k].grp.y(real[real.length - 1][1]) : Infinity;
+          };
+          [...g.ctx.keys].sort((a, b) => end(a.k) - end(b.k)).forEach(({ n }, i) => {
+            const key = card.querySelector(".bubble-sub-button-container .bubble-sub-button-" + n);
+            if (key && key.style.order !== String(i)) key.style.order = String(i);
+          });
+        }
+
+        // The ring turns until Home Assistant answers, and the graph shows once it has values to draw
+        if (g.answered) el.removeAttribute("data-wait");
+        const any = g.answered && (lines.some((l) => l.pts.filter(([, v]) => v !== null && Number.isFinite(v)).length > 1) || barsG.childElementCount > 0);
+        if (g.answered && !any && !g.told) {
+          g.told = true;
+          console.info("origami_graph: no history for " + series.flatMap((s) => s.parts.map((p) => p.id + (p.attr ? " (" + p.attr + ")" : ""))).join(", ") + ". Check that the recorder keeps these entities.");
+        }
+        // The graph shows once its data and its place have stayed the same for a moment, so it never moves while the page builds, and then it fades in.
+        // With animate, it draws itself in from the left at that moment, and dots and values follow.
+        if (any && !g.shown && getComputedStyle(el).position === "absolute") {
+          clearTimeout(g.settle);
+          g.settle = setTimeout(() => {
+            g.settle = 0;
+            if (g.shown) return;
+            g.shown = true;
+            svg.style.removeProperty("opacity");
+            // Keys elsewhere that show this graph's tabs get their mark again, now that the page has settled
+            keys();
+            const still = cfg.animate !== true || matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (!still && svg.animate) {
+              const ease = "cubic-bezier(.22, 1, .36, 1)";
+              svg.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }], { duration: 1100, easing: ease });
+              for (const n of [dotsG, labelsG]) n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 850, easing: ease, fill: "backwards" });
+            }
+          }, 250);
+        }
+      };
+      // Data, size and the passing time redraw the graph on their own, and a style pass only when the settings change
+      const sig = JSON.stringify(cfg) + "|" + entity;
+      if (g.sig !== sig) {
+        g.sig = sig;
+        g.draw();
+      }
+      return "";
+    })()}
+    ha-card {
+      /* A line's sample in the legend is as dark as the dot on its newest value, so its dashes show on the small key */
+      --org-graph-key: color-mix(in srgb, var(--primary-text-color) 45%, transparent);
+      /* The tabs are a tray of keys, as a small switch of Button is: keys as tall as a button, with 8 px of track around them. Base's sub_button_height sets the keys' height. */
+      --org-graph-tab-h: calc(${card._org.opts?.sub || "var(--control-height-icon)"} + var(--ha-space-2));
+      /* The legend is one line of small text above the graph */
+      --org-graph-legend-h: var(--ha-space-5);
+      ${card._org.opts?.frameless ? `/* On a frameless card, the graph stands on the page or the pop-up, so its labels get an edge of that color */
+      --org-graph-halo: var(--org-page, var(--primary-background-color));` : ""}
+    }
+    ha-card .org-graph {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--org-graph-h);
+      pointer-events: none;
+      color: var(--primary-text-color);
+    }
+    /* Bubble Card lays a sub-button out in reverse, so the line's sample comes before the text with the higher order, in both directions of writing */
+    ${card._orgG.keys.length ? card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
+      padding: 0 var(--ha-space-3) 0 var(--ha-space-3) !important;
+    }
+    ` + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + " .bubble-sub-button-name-container::after { content: " + card._orgG.values[i] + "; margin-inline-start: var(--ha-space-1); font-weight: var(--ha-font-weight-bold); }").join("\n    ") + "\n    " + card._orgG.keys.map(({ n }, i) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n + "::before { content: \"\"; order: 1; flex: none; width: var(--ha-space-4); margin-inline-end: var(--ha-space-2); border-top: var(--org-line-width) " + card._orgG.look[i] + "; }").join("\n    ") : ""}
+    ${card._orgG.keys.length && card._orgG.bg ? `ha-card .bubble-sub-button-container {
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      gap: var(--ha-space-1) !important;
+    }
+    ` + card._org.each(card._orgG.keys.map(({ n }) => "ha-card .bubble-sub-button-container .bubble-sub-button-" + n), "") + ` {
+      /* Base fills a key from --org-key-bg, so the legend's values stand on the card's background, solid like a card over the lines */
+      --org-key-bg: var(--ha-card-background, var(--card-background-color));
+      /* The card's background on the page's gray casts the chip shadow, as a key on a tile does */
+      --org-key-shadow: var(--tile-chip-shadow);
+    }` : ""}
+    /* The drawing fades in once it shows */
+    ha-card .org-graph > svg {
+      display: block;
+      overflow: visible;
+      transition: opacity var(--duration-normal) ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ha-card .org-graph > svg {
+        transition: none;
+      }
+    }
+    /* The tabs are a tray: a gray track with the names of the tabs, and the shown tab only bolder and at full strength */
+    ha-card .org-graph-tabs {
+      display: flex;
+      box-sizing: border-box;
+      height: var(--org-graph-tab-h);
+      /* The graph reaches the card's edges, and the bar keeps the card's padding, as a row of buttons does */
+      margin: var(--ha-space-3) var(--org-pad) var(--org-pad) var(--org-pad);
+      padding: var(--ha-space-2) var(--ha-space-2) var(--ha-space-2) var(--ha-space-2);
+      border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio));
+      background-color: var(--fill-subtle);
+      pointer-events: auto;
+    }
+    ha-card .org-graph-tab {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ha-space-2);
+      margin: 0;
+      padding: 0 calc(var(--ha-space-4) - 2px) 0 calc(var(--ha-space-4) - 2px);
+      border: none;
+      border-radius: calc(var(--org-graph-tab-h) * var(--radius-ratio) - var(--ha-space-2));
+      background: transparent;
+      color: var(--primary-text-color);
+      opacity: var(--opacity-muted);
+      font-family: var(--ha-font-family-body);
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
+      cursor: pointer;
+      --mdc-icon-size: var(--icon-size-2xs);
+      -webkit-tap-highlight-color: transparent;
+    }
+    ha-card .org-graph-tab > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    ha-card .org-graph-tab[aria-pressed="true"] {
+      opacity: 1;
+      font-weight: var(--ha-font-weight-bold);
+    }
+    /* The legend names the entries in one line below the graph, at the end of the drawing, each after a sample of its line, its bars or its blocks. At the bottom of the card, it keeps the card's padding below it. */
+    ha-card .org-graph-legend {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0 var(--ha-space-4);
+      box-sizing: border-box;
+      height: var(--org-graph-legend-h);
+      margin: var(--ha-space-3) var(--org-pad) 0 var(--org-pad);
+      overflow: hidden;
+      color: var(--secondary-text-color);
+      font-family: var(--ha-font-family-body);
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-medium);
+      line-height: var(--org-graph-legend-h);
+      white-space: nowrap;
+    }
+    ha-card .org-graph-legend > span {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ha-space-2);
+    }
+    ha-card .org-graph-legend svg {
+      flex: none;
+      overflow: visible;
+    }
+    ha-card .org-graph-swatch {
+      flex: none;
+      width: var(--dot-size);
+      height: var(--dot-size);
+      border-radius: calc(var(--dot-size) * var(--radius-ratio));
+    }
+    ha-card .org-graph-swatch-state {
+      opacity: .25;
+    }
+    ha-card .org-graph-legend:not(:has(~ .org-graph-tabs)) {
+      margin-bottom: var(--org-pad);
+    }
+    /* While the history takes longer than a moment, a small ring turns in the middle of the graph's place */
+    ha-card .org-graph-wait {
+      display: none;
+      position: absolute;
+      top: calc(var(--org-graph-draw) / 2);
+      left: 50%;
+      width: var(--icon-size-s);
+      height: var(--icon-size-s);
+      margin: calc(var(--icon-size-s) / -2) 0 0 calc(var(--icon-size-s) / -2);
+      animation: org-graph-appear var(--duration-normal) ease 400ms both;
+    }
+    ha-card .org-graph[data-wait] > .org-graph-wait {
+      display: block;
+    }
+    ha-card .org-graph-wait > svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      animation: org-graph-turn 1s linear infinite;
+    }
+    ha-card .org-graph-wait circle {
+      fill: none;
+      stroke: var(--org-graph-key);
+      stroke-width: var(--org-line-width);
+      stroke-linecap: round;
+      stroke-dasharray: 34 17;
+    }
+    @keyframes org-graph-turn {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes org-graph-appear {
+      from {
+        opacity: 0;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ha-card .org-graph-wait > svg {
+        animation: none;
+      }
+    }
+    ha-card:has(.org-graph.background) .bubble-wrapper > :is(.bubble-content-container, .bubble-sub-button-container, .bubble-sub-button-bottom-container, .bubble-buttons-container) {
+      position: relative;
+      z-index: 1;
+    }
+    ${this.config.show_icon === false && this.config.show_name === false && !card._org.items(this.config).length ? `/* A card that shows nothing but its graph is as tall as the graph */
+    ha-card {
+      --org-row-height: 0px !important;
+    }` : ""}
+    ha-card:has(.org-graph.bottom) .card-content:not(:has(.with-bottom-buttons)) {
+      height: calc(var(--org-row-height) + var(--org-graph-h)) !important;
+    }
+    ha-card:has(.org-graph.bottom) .bubble-container:not(.with-bottom-buttons) > .bubble-wrapper {
+      bottom: auto !important;
+      height: var(--org-row-height) !important;
+    }
+    ha-card:has(.org-graph.bottom) .bubble-container:not(.with-bottom-buttons) > .bubble-wrapper > .bubble-background {
+      top: 0 !important;
+      bottom: calc(-1 * var(--org-graph-h)) !important;
+      height: auto !important;
+    }
+    ha-card:has(.org-graph.bottom) .with-bottom-buttons > .bubble-wrapper {
+      padding-bottom: calc(var(--org-pad) + var(--org-graph-h)) !important;
+    }
+    ha-card .org-graph-line {
+      fill: none;
+      stroke-width: var(--org-line-width);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    ha-card .org-graph-line-1 {
+      stroke-dasharray: 4 4;
+    }
+    ha-card .org-graph-line-2 {
+      stroke-dasharray: 1 4;
+    }
+    /* Guide lines are hairlines, fainter than any line of the graph */
+    ha-card .org-graph-guide {
+      stroke: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+      stroke-width: 1px;
+      shape-rendering: crispEdges;
+    }
+    /* Areas show through, as in any graph: the fill under a line and the blocks of states */
+    ha-card .org-graph-state {
+      opacity: .25;
+    }
+
+    ha-card .org-graph-band {
+      fill: color-mix(in srgb, var(--primary-text-color) 5%, transparent);
+    }
+    ha-card .org-graph-value {
+      color: var(--secondary-text-color);
+      fill: currentColor;
+      font-family: var(--ha-font-family-body);
+      font-size: var(--ha-font-size-s);
+      font-weight: var(--ha-font-weight-bold);
+      font-variant-numeric: tabular-nums;
+    }
+    ha-card .org-graph-label {
+      fill: var(--secondary-text-color);
+      font-family: var(--ha-font-family-body);
+      font-size: calc(var(--ha-font-size-xs) * .75);
+      font-weight: var(--ha-font-weight-medium);
+      font-variant-numeric: tabular-nums;
+      /* A thin edge of the card's background keeps a value readable where a line or a bar runs through it */
+      paint-order: stroke;
+      stroke: var(--org-graph-halo, var(--ha-card-background, var(--card-background-color)));
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    ha-card .org-graph.background .org-graph-state {
+      opacity: .12;
+    }
+    ha-card .org-graph.background .org-graph-line {
+      stroke-width: 1.5px;
+    }
