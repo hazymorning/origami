@@ -1,6 +1,6 @@
 origami_base:
   name: "Origami • Base"
-  version: "13.15.1"
+  version: "13.16.0"
   is_global: true
   supported:
     - button
@@ -598,8 +598,8 @@ origami_base:
         img.src = art;
       };
       card._org = {
-        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too, 13.6 added scroller(), and 13.7 added chip().
-        version: 13.7,
+        // The version is the version of these helpers and of the variables that Base sets. 12.5 added unframe() and shows(), 12.6 added backdrop(), 12.8 added the card padding in --org-pad, 12.9 added the width of a tray with three keys in --org-end-col and the color of an icon that is not lit in --org-chip-rest, and 13 added env, ctx, classed(), each(), fade() and pen(), 13.1 added layout() and later(), 13.2 added dropdown(), menu() and picker(), 13.3 added the height of a slider in a row with a name in --org-row-slider-h, 13.4 added pending(), 13.5 added the fill and the shadow of a key in --org-key-bg and --org-key-shadow, which fill() gives a filled control too, 13.6 added scroller(), 13.7 added chip(), and 13.8 added aria-pressed on the keys that show a graph's tab.
+        version: 13.8,
         // A module checks this to know that Base ran before it in the same render
         hass,
         look,
@@ -1012,6 +1012,25 @@ origami_base:
           this.hidden = hide;
           this.dispatchEvent(new Event("card-visibility-changed", { bubbles: true, composed: true }));
         }
+      }
+      // A key with fire-dom-event and graph_tab shows that tab of a graph, and it is pressed while a graph shows it. Graph keeps the
+      // shown tabs here and repaints these keys when one changes, so a key in another card, such as a header, changes at once.
+      const tabs = globalThis.__origamiTabs ?? (globalThis.__origamiTabs = { shown: new Map(), keys: new Set(), graphs: new Set() });
+      const tabKeys = items(this.config).map((item, i) => [i + 1, act(item).action === "fire-dom-event" ? act(item).graph_tab : undefined]).filter(([, t]) => has(t));
+      if (tabKeys.length) {
+        card._orgTabs = () => {
+          const on = new Set([...tabs.shown.values()]);
+          tabKeys.forEach(([n, t]) => {
+            const el = card.querySelector(".bubble-sub-button-" + n);
+            const v = String(on.has(String(t)));
+            if (el && el.getAttribute("aria-pressed") !== v) el.setAttribute("aria-pressed", v);
+          });
+        };
+        tabs.keys.add(card);
+        card._org.later("tabs", card._orgTabs);
+      } else if (card._orgTabs) {
+        tabs.keys.delete(card);
+        card._orgTabs = null;
       }
       // With animate, a card on the page also glides to its new height when its content changes, such as a row of controls that appears or goes. A button or media player card glides, and so does a pop-up. Base watches the box that holds the content, and it ignores the changes that the glide itself causes. For each frame, Base holds the height in the element's own style, because a style there wins over the modules' fixed heights.
       const pop = type === "pop-up";
@@ -1770,6 +1789,8 @@ origami_base:
       if (by.set.length) sel.push("ha-card" + one(by.set));
       if (by.accent.length) sel.push("ha-card" + one(by.accent) + ".accent:is(.background-on, .background-off)");
       if (by.on.length) sel.push(auto + one(by.on) + ":is(.background-on, .background-off)");
+      // A key that shows the tab a graph shows is filled, as Base marks it
+      if (card._orgTabs) sel.push('ha-card .bubble-sub-button[aria-pressed="true"]' + keep);
       return org.fill(sel);
     })()}
     `}

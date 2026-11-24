@@ -317,7 +317,34 @@ sections:
           tabs:
             - {name: Temperature, icon: mdi:thermometer, entities: [sensor.living_room_temperature]}
             - {name: Humidity, icon: mdi:water-percent, entities: [sensor.living_room_humidity]}
-      # A table wider than its card scrolls sideways, and its first column stays in place
+      # A heading whose tabs show the tabs of the graph below, without a helper. The chosen tab is bold on the track, and the graph has a legend instead of its own bar.
+      - type: custom:bubble-card
+        card_type: separator
+        name: History
+        modules: [origami_header]
+        origami_header: {value_style: tabs}
+        sub_button:
+          main:
+            - {name: Temperature, show_name: true, show_icon: false, tap_action: {action: fire-dom-event, graph_tab: Temperature}}
+            - {name: Humidity, show_name: true, show_icon: false, tap_action: {action: fire-dom-event, graph_tab: Humidity}}
+      - type: custom:bubble-card
+        card_type: button
+        button_type: name
+        show_icon: false
+        show_name: false
+        modules: [origami_base, origami_graph]
+        origami_base: {frameless: true}
+        origami_graph:
+          tab_bar: false
+          tabs:
+            - name: Temperature
+              entities:
+                - {entity: sensor.living_room_temperature, name: Inside}
+                - {entity: [climate.bedroom], name: Heating, state: heating, type: bars}
+            - name: Humidity
+              entities:
+                - {entity: sensor.living_room_humidity, name: Inside}
+      # A table wider than its card scrolls sideways, and its first column stays in place as a card
       - type: custom:bubble-card
         card_type: sub-buttons
         modules: [origami_base, origami_table]

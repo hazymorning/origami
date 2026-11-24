@@ -49,6 +49,7 @@ Controls stay neutral. An active control is filled with `fill-active`, the text 
 - A sub-button is filled while its entity, or the card's entity, is on and has a state color, unless it has `show_background: false`.
 - A sub-button whose tap sets a value, such as a speed, a preset, a mode, a source, an app, a brightness or a target temperature, is filled only while its entity has that value, also without `show_background`. All values that a tap sets have to match, but colors are not compared. A tap that targets an area or a device follows the first rule.
 - Sub-buttons that navigate, open a URL, fire a browser event or open the more-info dialog, which is the default tap action, stay neutral unless they have `css_class: accent`.
+- A sub-button that shows a graph's tab, with `graph_tab`, is filled while a graph shows that tab, as under [Graph](#graph).
 - On a Climate card, the plus and minus buttons stay neutral. Buttons that set a mode or a preset are filled while that mode or preset is set.
 - A dropdown whose options are entity IDs, such as an `input_select` that picks a speaker, is a chip in the active color with the chosen entity's name and the helper's icon, which `show_icon: false` hides. Its menu lists each entity's name and icon, and Base's `words` option renames them, with the entity ID or the name as the key.
 
@@ -1037,7 +1038,7 @@ The Header module turns a separator card into a section header, with the card's 
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `value_style` | `text` | `text`, `chip` or `switch`, which joins the values into one small switch. With `chip`, a sub-button with `show_background: false` stays plain. |
+| `value_style` | `text` | `text`, `chip`, `switch`, which joins the values into one small switch, or `tabs`, which joins them into one quiet track as tall as a chip, where the chosen value is bold. With `chip`, a sub-button with `show_background: false` stays plain. |
 | `weight` | `bold` | The values' font weight: `bold`, `medium` or `regular`. With the Origami theme, `medium` looks like `regular`. |
 | `icon_color` | | The icon color of plain values: a color, Jinja or JavaScript in `${ }`. |
 | `icon_size` | `var(--icon-size-xs)` | The icon size of plain values. Chips use `--icon-size-2xs`. For a small dot, use `var(--dot-size)`. |
@@ -1087,7 +1088,7 @@ sub_button:
         action: toggle
 ```
 
-On a switch and on chips, a value is filled with `fill-active` while its entity has the value its tap sets, unless its own `on` key decides. In a switch, it also has the chip shadow, as described under Depth in [How the modules work together](#how-the-modules-work-together). In a scrolling row, the chosen chip scrolls into view. This switch chooses what the lamp list shows:
+On a switch and on chips, a value is filled with `fill-active` while its entity has the value its tap sets, unless its own `on` key decides, and in tabs it is bold instead. A value that shows a graph's tab is chosen while the graph shows it. In a switch, it also has the chip shadow, as described under Depth in [How the modules work together](#how-the-modules-work-together). In a scrolling row, the chosen chip scrolls into view. This switch chooses what the lamp list shows:
 
 ```yaml
 type: custom:bubble-card
@@ -1390,7 +1391,7 @@ To leave a column empty, give the cells after the gap the `css_class` of their c
 
 A cell whose entity is on shows its icon in the state color on a tint, such as a heating thermostat. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed. A cell without a tap action opens its entity's more-info dialog, and `action: more-info` with an `entity` opens another one, such as the room's thermostat.
 
-A table wider than its card scrolls sideways, and its first column stays in place. While more columns follow, the table fades out at its end.
+A table wider than its card scrolls sideways, and its first column stays in place as a card, with the card background and the card's shadow, so the columns pass under it. While more columns follow, the table fades out at its end.
 
 ```yaml
 type: custom:bubble-card
@@ -1448,7 +1449,7 @@ The Graph module draws the history of one or more entities on a button card: num
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `type`, `attribute` and `color`. Numbers draw a line and everything else its states, such as on and off, unless `type` is `line`, `bars` or `states`. A thermostat shows when it heated or cooled, and as a line its temperature. |
+| `entities` | The card's entity | The entities to draw. Each one is an entity ID, or a map with `entity` and any of `type`, `attribute`, `state`, `name` and `color`. Numbers draw a line and everything else its states, such as on and off, unless `type` is `line`, `bars` or `states`. A thermostat shows what it did, as in Home Assistant's history, and as a line its temperature. |
 | `hours_to_show` | `24` | How many hours the graph shows, up to 168. |
 | `position` | `bottom` | `bottom` puts the graph in a strip below the content. `background` puts it behind the content as a soft area in the card's own fill. |
 | `color` | Gray | The graph's color: a theme color by its name, such as `orange`, `blue` or `primary`, `temperature` for the temperature colors of the room cards by value, or any CSS color. The fill under the line takes it too. |
@@ -1466,6 +1467,11 @@ The Graph module draws the history of one or more entities on a button card: num
 | `animate` | `false` | Draws the graph in from the left when it appears. |
 | `legend` | `false` | Each main sub-button that shows a drawn entity gets a short sample of its line, and the entity's value in bold after the sub-button's name. Behind the content, these values stand on top of each other at the end, in the order of their lines, on the card's background with the chip shadow, like a card. |
 | `tabs` | | Tabs in a bar below the graph. Each tab has a `name`, an `icon` and any of the options above, such as other `entities` or another `band`, which take the place of the card's own while it shows. Only below the content. |
+| `tab_bar` | `true` | With `false`, the graph has no bar of its own, and keys elsewhere show its tabs, such as in a header. |
+
+`entity` can also list several entities, which add up: numbers add, and a state counts one while it's on, so bars of thermostats show how many of them heated. `state` sets the states that count as on, such as `heating`, in place of on, heating, open and the like. A thermostat that reports no action, such as heating, stands for its mode, as in Home Assistant's history. An entry's `name` stands in a legend above the graph, after a sample of its line, its bars or its blocks.
+
+A key anywhere on the page with `tap_action: {action: fire-dom-event, graph_tab: <name>}` shows the tab of that name, such as a header with `value_style: tabs` over a graph with `tab_bar: false`. The tab lives in the browser, so no helper is needed, and each graph starts with its first tab.
 
 Bars show the share of each time step that the entity was on, or its mean value, each as tall as its value against the highest bar. Bars of a meter that counts up, such as energy in kWh, show how much it counted, and over three days or more each bar is a day, from midnight to midnight. Lines with the same unit share a scale, and a second and a third line are dashed and dotted. A card without an icon, a name and sub-buttons is only as tall as its graph, such as a graph under a heading.
 
@@ -1524,6 +1530,67 @@ origami_graph:
       band:
         from: 40
         to: 60
+```
+
+A heading that switches the graph below it, with a legend, and bars of how many thermostats heated:
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: separator
+    name: History
+    modules:
+      - origami_header
+    origami_header:
+      value_style: tabs
+    sub_button:
+      main:
+        - name: Temperature
+          show_name: true
+          show_icon: false
+          tap_action:
+            action: fire-dom-event
+            graph_tab: Temperature
+        - name: Humidity
+          show_name: true
+          show_icon: false
+          tap_action:
+            action: fire-dom-event
+            graph_tab: Humidity
+  - type: custom:bubble-card
+    card_type: button
+    button_type: name
+    show_icon: false
+    show_name: false
+    modules:
+      - origami_base
+      - origami_graph
+    origami_base:
+      frameless: true
+    origami_graph:
+      fill: none
+      values: true
+      tab_bar: false
+      tabs:
+        - name: Temperature
+          entities:
+            - entity: sensor.living_room_temperature
+              name: Inside
+            - entity: sensor.outdoor_temperature
+              name: Outside
+            - entity:
+                - climate.living_room
+                - climate.bedroom
+              name: Heating
+              state: heating
+              type: bars
+        - name: Humidity
+          entities:
+            - entity: sensor.living_room_humidity
+              name: Inside
+            - entity: sensor.outdoor_humidity
+              name: Outside
 ```
 
 The load of the server's last day behind a card, with processor and memory as its legend:

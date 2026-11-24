@@ -1,9 +1,9 @@
 origami_header:
   name: "Origami • Header"
-  version: "3.8.0"
+  version: "3.9.0"
   supported:
     - separator
-  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, as chips or as one switch, and they can scroll sideways. Each value can have its own name, icon, colors and background."
+  description: "Header turns a separator card into a section header. The card's name is the title, and the sub-buttons are values beside it or above it, as text, chips, one switch or quiet tabs, and they can scroll sideways. Each value can have its own name, icon, colors and background."
   editor:
     - name: value_style
       label: "Value style"
@@ -17,6 +17,8 @@ origami_header:
               value: chip
             - label: Switch
               value: switch
+            - label: Tabs
+              value: tabs
       default: text
     - name: weight
       label: "Value weight"
@@ -114,6 +116,8 @@ origami_header:
         chip: cfg.value_style === "chip",
         // A switch joins the values into one track. On a switch and on chips, the value whose tap sets what its entity shows now, or whose on key is true, stands out.
         switch: cfg.value_style === "switch",
+        // Tabs join the values into one quiet track, where the chosen value is only bolder and at full strength, as Graph's tabs are
+        tabs: cfg.value_style === "tabs",
         picked: [],
         // With scroll, the values start next to the title and scroll sideways up to the pop-up's edge, such as a row of chips that chooses a room
         scroll: !!cfg.scroll,
@@ -125,7 +129,8 @@ origami_header:
       const list = org.subs(env, this.config, "origami_header");
       // A chip that has nothing to show but its icon, with no name, no state and no name key, is a square with a larger icon
       card._orgH.bare = card._orgH.chip ? list.filter(({ item, opt }) => item.show_background !== false && !(opt && "name" in opt) && !org.shows(item)).map(({ n }) => at(n)) : [];
-      if (card._orgH.switch || card._orgH.chip) card._orgH.picked = list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => at(n));
+      // A value also stands out while Base marks it pressed, such as a key that shows the tab a graph shows
+      if (card._orgH.switch || card._orgH.chip || card._orgH.tabs) card._orgH.picked = [...list.filter(({ item, opt }) => org.why(hass, item, item.entity ?? entity, opt) === "set").map(({ n }) => at(n)), ...(card._orgTabs ? [scope + ' .bubble-sub-button[aria-pressed="true"]'] : [])];
       // In a row that scrolls, a newly chosen value scrolls into view, such as the chip of the room a pop-up opens on
       const pick = card._orgH.scroll ? card._orgH.picked[0] ?? "" : "";
       if (pick && pick !== card._orgHPick) org.later("pick", () => {
@@ -318,6 +323,44 @@ origami_header:
       transform: scale(var(--press-scale));
     }
     ${card._org.fill(card._orgH.picked)}` : ""}
+    ${card._orgH.tabs ? `
+    /* Tabs are one track as tall as a chip, with the values as plain words in it. The chosen one is bold and at full strength, and the others are muted. The track reaches a little above and below the title's line, so the header keeps the height and the spacing of a title alone. */
+    ha-card .bubble-sub-button-container {
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      margin-block: calc(-1 * var(--ha-space-1)) !important;
+      margin-inline-start: auto !important;
+      padding: 0 !important;
+      border-radius: var(--radius-small) !important;
+      background-color: var(--fill-subtle) !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button {
+      box-sizing: border-box;
+      justify-content: center !important;
+      height: var(--control-height-mini) !important;
+      padding: 0 var(--ha-space-3) !important;
+      border-radius: var(--radius-small) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--primary-text-color) !important;
+      font-weight: var(--ha-font-weight-medium) !important;
+      opacity: var(--opacity-muted);
+      transition: var(--transition-interactive);
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-name-container {
+      font-weight: inherit !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button .bubble-sub-button-icon:not(.hidden) {
+      margin: 0 !important;
+      color: inherit !important;
+    }
+    ha-card .bubble-sub-button-container .bubble-sub-button.bubble-action-enabled:active {
+      transform: scale(var(--press-scale));
+    }
+    ${card._org.each(card._orgH.picked, "")} {
+      opacity: 1;
+      font-weight: var(--ha-font-weight-bold) !important;
+    }` : ""}
     ${card._orgH.above ? `
     /* The values stand above the title. The header fills the height of its place, such as a cell in a grid next to a taller card, and centers its two lines in it. */
     :host {

@@ -1,9 +1,9 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.1.0"
+  version: "1.2.0"
   supported:
     - sub-buttons
-  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls sideways."
+  description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls under its first column."
   editor:
     - name: columns
       label: "Columns"
@@ -176,6 +176,10 @@ origami_table:
           const wide = box.scrollWidth > box.clientWidth + 1;
           card.toggleAttribute("data-org-wide", wide);
           card.toggleAttribute("data-org-end", !wide || Math.abs(box.scrollLeft) + box.clientWidth >= box.scrollWidth - 1);
+          // The card behind the first column is as tall as the rows that show
+          const rows = wide ? box.querySelectorAll(":scope > .bubble-sub-button-group:not(.hidden)") : [];
+          const h = rows.length ? rows[rows.length - 1].offsetTop + rows[rows.length - 1].offsetHeight - rows[0].offsetTop + "px" : "";
+          if (card.style.getPropertyValue("--org-table-h") !== h) card.style.setProperty("--org-table-h", h);
         });
         if (!box._orgWatch) {
           box._orgWatch = true;
@@ -218,18 +222,44 @@ origami_table:
     ha-card[data-org-wide]:not([data-org-end]):dir(rtl) .bubble-sub-button-bottom-container {
       mask-image: linear-gradient(to left, black calc(100% - var(--ha-space-8, 32px)), transparent 100%);
     }
-    /* While the table scrolls, the first column stays at the start. Its cells cover their row's height and padding in the row's color on the color behind the table, the pop-up's or the page's, so the columns that pass under them stay hidden. */
-    ${card._orgT.firsts.length ? card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] " + s.replace(/^ha-card /, "")), "") + ` {
+    /* While the table scrolls, its first column stays at the start as a card, an anchor for the columns that pass under it: the card background with the card's shadow and round corners, as the cards around it have. The first row's cell draws the card behind the whole column, as tall as the rows, so it is one card with one shadow. The table keeps room below it for that shadow, and its first and last rows take its round corners. */
+    ${card._orgT.firsts.length ? `ha-card[data-org-wide] .bubble-sub-button-bottom-container {
+      padding: 0 0 var(--ha-space-4) 0 !important;
+      margin-bottom: calc(-1 * var(--ha-space-4)) !important;
+      border-radius: 0;
+    }
+    ha-card[data-org-wide] .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(1 of :not(.hidden)) {
+      border-start-start-radius: var(--ha-card-border-radius);
+      border-start-end-radius: var(--ha-card-border-radius);
+    }
+    ha-card[data-org-wide] .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-last-child(1 of :not(.hidden)) {
+      border-end-start-radius: var(--ha-card-border-radius);
+      border-end-end-radius: var(--ha-card-border-radius);
+    }
+    ` + card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] " + s.replace(/^ha-card /, "")), "") + ` {
       position: sticky !important;
       inset-inline-start: 0;
       z-index: 1;
       align-self: stretch;
       height: auto !important;
       margin-inline-start: calc(-1 * var(--ha-space-2)) !important;
-      padding-inline-start: calc(var(--ha-space-2) + 6px) !important;
+      padding: 0 calc(var(--ha-space-2) + 6px) 0 calc(var(--ha-space-2) + 6px) !important;
       border-radius: 0 !important;
-      /* The cover is drawn as an image, so it is no fill of its own: it continues the row and its gray, and casts no shadow */
-      background: linear-gradient(var(--org-row-bg, transparent), var(--org-row-bg, transparent)), linear-gradient(var(--org-page, var(--primary-background-color)), var(--org-page, var(--primary-background-color))) !important;
+      background: none !important;
+      overflow: visible !important;
+    }
+    ` + card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::before") + ` {
+      content: "";
+      position: absolute;
+      top: 0;
+      inset-inline: 0;
+      z-index: -1;
+      height: var(--org-table-h, 100%);
+      border-radius: var(--ha-card-border-radius);
+      /* The card is drawn as an image, so it is a surface and no control's fill */
+      background-image: linear-gradient(var(--ha-card-background), var(--ha-card-background));
+      box-shadow: var(--ha-card-box-shadow);
+      pointer-events: none;
     }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
       display: contents !important;
