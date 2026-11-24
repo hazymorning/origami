@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.2.1"
+  version: "1.3.0"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls under its first column."
@@ -104,6 +104,11 @@ origami_table:
       selector:
         boolean: {}
       default: true
+    - name: anchor
+      label: "The first column as a card, also while the table fits its card"
+      selector:
+        boolean: {}
+      default: false
   code: |
     ${(() => {
       const org = card._org;
@@ -177,7 +182,7 @@ origami_table:
           card.toggleAttribute("data-org-wide", wide);
           card.toggleAttribute("data-org-end", !wide || Math.abs(box.scrollLeft) + box.clientWidth >= box.scrollWidth - 1);
           // The card behind the first column is as tall as the rows that show
-          const rows = wide ? box.querySelectorAll(":scope > .bubble-sub-button-group:not(.hidden)") : [];
+          const rows = wide || cfg.anchor === true ? box.querySelectorAll(":scope > .bubble-sub-button-group:not(.hidden)") : [];
           const h = rows.length ? rows[rows.length - 1].offsetTop + rows[rows.length - 1].offsetHeight - rows[0].offsetTop + "px" : "";
           if (card.style.getPropertyValue("--org-table-h") !== h) card.style.setProperty("--org-table-h", h);
         });
@@ -193,6 +198,8 @@ origami_table:
       card._orgT = {
         template: [...cols.map((c) => c.width), ...Array(count - cols.length).fill("auto")].join(" "),
         stripes: cfg.stripes ?? true,
+        // The first column stands as a card while the table scrolls, and with anchor also while it fits
+        anchor: cfg.anchor === true ? "ha-card" : "ha-card[data-org-wide]",
         firsts,
         rules: rules.join("\n    ")
       };
@@ -223,20 +230,20 @@ origami_table:
       mask-image: linear-gradient(to left, black calc(100% - var(--ha-space-8, 32px)), transparent 100%);
     }
     /* While the table scrolls, its first column stays at the start as a card, an anchor for the columns that pass under it: the card background with the card's shadow and round corners, as the cards around it have. The first row's cell draws the card behind the whole column, as tall as the rows, so it is one card with one shadow. The card keeps 8 px more room before the next column, and the table keeps room below it for its shadow. Its first and last rows take the table's round corners. */
-    ${card._orgT.firsts.length ? `ha-card[data-org-wide] .bubble-sub-button-bottom-container {
+    ${card._orgT.firsts.length ? `${card._orgT.anchor} .bubble-sub-button-bottom-container {
       padding: 0 0 var(--ha-space-4) 0 !important;
       margin-bottom: calc(-1 * var(--ha-space-4)) !important;
       border-radius: 0;
     }
-    ha-card[data-org-wide] .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(1 of :not(.hidden)) {
+    ${card._orgT.anchor} .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(1 of :not(.hidden)) {
       border-start-start-radius: var(--ha-card-border-radius);
       border-start-end-radius: var(--ha-card-border-radius);
     }
-    ha-card[data-org-wide] .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-last-child(1 of :not(.hidden)) {
+    ${card._orgT.anchor} .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-last-child(1 of :not(.hidden)) {
       border-end-start-radius: var(--ha-card-border-radius);
       border-end-end-radius: var(--ha-card-border-radius);
     }
-    ` + card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] " + s.replace(/^ha-card /, "")), "") + ` {
+    ` + card._org.each(card._orgT.firsts.map((s) => card._orgT.anchor + " " + s.replace(/^ha-card /, "")), "") + ` {
       position: sticky !important;
       inset-inline-start: 0;
       z-index: 1;
@@ -248,7 +255,7 @@ origami_table:
       background: none !important;
       overflow: visible !important;
     }
-    ` + card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::before") + ` {
+    ` + card._org.each(card._orgT.firsts.map((s) => card._orgT.anchor + " .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::before") + ` {
       content: "";
       position: absolute;
       top: 0;
@@ -261,7 +268,7 @@ origami_table:
       box-shadow: var(--ha-card-box-shadow);
       pointer-events: none;
     }
-    ` + card._org.each(card._orgT.firsts.map((s) => "ha-card[data-org-wide] .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::after") + ` {
+    ` + card._org.each(card._orgT.firsts.map((s) => card._orgT.anchor + " .bubble-sub-button-group:nth-child(1 of :not(.hidden)) " + s.replace(/^ha-card .bubble-sub-button-bottom-container /, "")), "::after") + ` {
       content: "";
       position: absolute;
       top: 0;

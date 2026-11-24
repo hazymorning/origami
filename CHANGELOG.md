@@ -17,7 +17,7 @@
 - Chips in a row of buttons are as tall as the chips in a header and have the same room around their icon, so a row with larger icons no longer looks squeezed.
 - A small switch in a row of buttons, such as the vacuum's suction, has as much room around its segments as the keys in a tray, so the chosen one no longer looks squeezed.
 - With Popup's `gap`, a heading keeps the space above and below it that it has in the room pop-ups, so the server and vacuum pop-ups have a little more room under their headings.
-- A table wider than its card scrolls sideways, and its first column stays in place as a card with its shadow, so the other columns pass under it.
+- A table wider than its card scrolls sideways, and its first column stays in place as a card with its shadow, so the other columns pass under it. With `anchor`, it stays a card while the table fits.
 - A cell that stands out on a gray row of a table has the card background and the chip shadow, as a key in a tray.
 - Several entities in one Graph entry add up, such as how many thermostats heated, and `state` says which states count. A thermostat that reports no action shows its mode, as in Home Assistant's history.
 - An entry's `name` puts it in a legend below the graph, and keys anywhere on the page can show a graph's tabs, such as in a header with Header's new `value_style: tabs`.

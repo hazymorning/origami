@@ -1372,6 +1372,7 @@ The Table module turns a sub-buttons card into a table. Each group of sub-button
 | --- | --- | --- |
 | `columns` | | The columns, first to last. Without it, the table has as many columns as its longest row has cells, each as wide as its widest cell. |
 | `stripes` | `true` | Every second visible row has a gray fill. |
+| `anchor` | `false` | The first column stands as a card also while the table fits its card, so the table looks the same whether it scrolls or not. |
 
 `icon`, `text`, `color` and `on` are values for the cells, shown under Cells in the card editor.
 
@@ -1391,7 +1392,7 @@ To leave a column empty, give the cells after the gap the `css_class` of their c
 
 A cell whose entity is on shows its icon in the state color on a tint, such as a heating thermostat. An icon next to a value is muted, unless its cell stands out or has a `color`. A cell whose entity is unavailable is dimmed. A cell without a tap action opens its entity's more-info dialog, and `action: more-info` with an `entity` opens another one, such as the room's thermostat.
 
-A table wider than its card scrolls sideways, and its first column stays in place as a card, with the card background and the card's shadow, so the columns pass under it. While more columns follow, the table fades out at its end.
+A table wider than its card scrolls sideways, and its first column stays in place as a card, with the card background and the card's shadow, so the columns pass under it. With `anchor`, the first column is a card also while the table fits. While more columns follow, the table fades out at its end.
 
 ```yaml
 type: custom:bubble-card
