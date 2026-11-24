@@ -1,6 +1,6 @@
 origami_table:
   name: "Origami • Table"
-  version: "1.4.1"
+  version: "1.4.2"
   supported:
     - sub-buttons
   description: "Table turns a sub-buttons card into a table. Each group of sub-buttons is a row, and each sub-button is a cell. The cells fill the columns in order, and each column can set its width, its alignment and what its cells show. A wide table scrolls under its first column."
@@ -162,9 +162,9 @@ origami_table:
         const self = "justify-self: " + ({ start: "start", end: "end" }[side] ?? "center");
         if (!text) own.push("width: var(--org-cell) !important", "min-width: 0 !important", "padding: 0 !important", "gap: 0 !important", "justify-content: center !important", self);
         else if (!first) own.push(self);
-        // A cell that stands out is a flat fill on the card or the page, and on a gray row it has the card background and the chip shadow, as a key in a tray
-        if (on) own.push("--org-cell-bg: var(--org-row-key, var(--fill-subtle))", "--org-cell-shadow: var(--org-row-shadow, none)");
-        if (lit) own.push("--org-cell-ink: " + look.color, "--org-cell-bg: color-mix(in srgb, " + look.color + " var(--tint-strength), var(--ha-card-background))", "--org-cell-shadow: var(--org-row-shadow, none)");
+        // A cell that stands out is a flat fill on every row. The stripes only lead the eye along a row, so a column looks the same on all of them.
+        if (on) own.push("--org-cell-bg: var(--fill-subtle)");
+        if (lit) own.push("--org-cell-ink: " + look.color, "--org-cell-bg: color-mix(in srgb, " + look.color + " var(--tint-strength), var(--ha-card-background))");
         // The icon next to a value is muted, unless the cell stands out or has a color of its own
         if (text && !on && !lit && !org.has(opt.color)) own.push("--org-cell-icon: var(--opacity-muted)");
         const obj = hass.states[s.entity];
@@ -304,9 +304,6 @@ origami_table:
       padding: 0 var(--ha-space-2);
     }
     ${card._orgT.stripes ? `ha-card .bubble-sub-button-bottom-container .bubble-sub-button-group:nth-child(even of :not(.hidden)) {
-      --org-row-bg: var(--fill-subtle);
-      --org-row-key: var(--ha-card-background);
-      --org-row-shadow: var(--tile-chip-shadow);
       background-color: var(--fill-subtle);
     }` : ""}
     ha-card .bubble-sub-button-bottom-container .bubble-sub-button {
@@ -319,7 +316,7 @@ origami_table:
       padding: 0 6px !important;
       border-radius: calc(var(--org-cell) * var(--radius-ratio)) !important;
       background: var(--org-value-chip, var(--org-cell-bg, transparent)) !important;
-      box-shadow: var(--org-cell-shadow, none) !important;
+      box-shadow: none !important;
       color: var(--secondary-text-color) !important;
       font-size: var(--ha-font-size-s) !important;
       font-weight: var(--ha-font-weight-bold) !important;

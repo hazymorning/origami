@@ -112,7 +112,7 @@ window.__check = async () => {
         if (shadow !== chip) fails.push(`${name} lies on a gray fill, so it needs the chip shadow, and it has ${shadow || 'none'}`);
       } else {
         flat++;
-        if (shadow) fails.push(`${name} lies on ${where === 'page' ? 'the page' : 'the card background'}, so it is a flat fill, and it casts ${shadow}`);
+        if (shadow) fails.push(`${name} lies on ${where === 'page' ? 'the page' : where === 'row' ? 'a row of a table' : 'the card background'}, so it is a flat fill, and it casts ${shadow}`);
       }
     };
     for (const el of document.querySelectorAll('.shot bubble-card')) {
@@ -120,10 +120,12 @@ window.__check = async () => {
       const haCard = el.shadowRoot?.querySelector('ha-card');
       if (!haCard) continue;
       const card = el.config.entity ?? el.config.name ?? el.config.card_type;
+      // A table's stripes only lead the eye along a row, so its cells are flat on every row
+      const table = (el.config?.modules || []).includes('origami_table');
       // The Graph module's tabs are a segmented bar of their own
       for (const c of haCard.querySelectorAll('.bubble-icon-container, .bubble-sub-button-container, .bubble-sub-button-group, .bubble-sub-button, .bubble-sub-button-icon, [class*="bubble-sub-button-slider-"], .org-graph-tabs, .org-graph-tab')) {
         if (!visible(c)) continue;
-        judge(c, getComputedStyle(c), place(c, haCard), `${card} ${label(c)}`);
+        judge(c, getComputedStyle(c), table && c.matches('.bubble-sub-button-group .bubble-sub-button') ? 'row' : place(c, haCard), `${card} ${label(c)}`);
         // A segmented bar draws its active part on the segment's ::before, which lies on the segment's own fill. A line drawn there, such as a list's divider, is no control.
         const before = getComputedStyle(c, '::before');
         if (c.matches('.bubble-sub-button') && before.content !== 'none' && Math.min(parseFloat(before.width), parseFloat(before.height)) >= 8) {
